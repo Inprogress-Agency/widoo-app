@@ -38,32 +38,69 @@ jobs:
         with:
           persist-credentials: false
 
+      # Le check « Lint, types, tests » est requis pour merger. Il reste vert, en le
+      # disant, tant que le socle n'existe pas (pas de package.json) ou quand la PR ne
+      # touche que la documentation et le process : évite de contourner le ruleset.
+      - name: Detect code to verify
+        id: detect
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if [ ! -f package.json ]; then
+            echo "has_code=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Pas de package.json à la racine : rien à vérifier tant que le socle (#16) n'est pas livré."
+            exit 0
+          fi
+          if [ "$EVENT" = "pull_request" ]; then
+            git fetch --no-tags --depth=1 origin "$BASE" "$HEAD"
+            code=$(git diff --name-only "$BASE" "$HEAD" \
+              | grep -vE '(^|/)[^/]+\.md$|^docs/|^\.claude/|^\.github/|^scripts/[^/]+\.sh$' || true)
+            if [ -z "$code" ]; then
+              echo "has_code=false" >> "$GITHUB_OUTPUT"
+              echo "::notice::PR de documentation ou de process uniquement : lint, types et tests non exécutés."
+              exit 0
+            fi
+          fi
+          echo "has_code=true" >> "$GITHUB_OUTPUT"
+
       - uses: pnpm/action-setup@v4
+        if: steps.detect.outputs.has_code == 'true'
 
       - uses: actions/setup-node@v4
+        if: steps.detect.outputs.has_code == 'true'
         with:
           node-version: 22
           cache: pnpm
 
       - name: Install
+        if: steps.detect.outputs.has_code == 'true'
         run: pnpm install --frozen-lockfile
 
       - name: Lint
+        if: steps.detect.outputs.has_code == 'true'
         run: pnpm lint
 
       - name: Typecheck
+        if: steps.detect.outputs.has_code == 'true'
         run: pnpm typecheck
 
       - name: Migrate test database
+        if: steps.detect.outputs.has_code == 'true'
         run: pnpm --filter api db:migrate
 
       - name: Test
+        if: steps.detect.outputs.has_code == 'true'
         run: pnpm test -- --coverage
 
       - name: Build API and admin
+        if: steps.detect.outputs.has_code == 'true'
         run: pnpm --filter api --filter admin build
 
       - name: Audit dependencies
+        if: steps.detect.outputs.has_code == 'true'
         run: pnpm audit --audit-level=high
 
   diff-size:
