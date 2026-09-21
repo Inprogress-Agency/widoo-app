@@ -6,7 +6,7 @@ Objectif sous 400 lignes utiles, plafond 500 justifié. Aucun secret ni donnée 
 
 <!-- Le problème concret, le résultat obtenu, les limites restantes. -->
 
-Fixes #<!-- numéro -->
+Fixes #<!-- numéro ; ou « Refs #N » pour une PR de process sans ticket à fermer, N = Inbox -->
 Écrans : <!-- E-xx / A-xx concernés, ou « aucun » -->
 Dépendance : <!-- PR empilée ou « aucune » -->
 

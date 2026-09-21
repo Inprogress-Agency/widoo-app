@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Une fois : crée le label type:design, les tickets design du MVP, et déclare
 # les tickets dev concernés bloqués par eux (needs-design posé, status:ready retiré).
-# Idempotent sur les titres. Usage : scripts/bootstrap-design-issues.sh [--dry-run]
+# Idempotent sur les titres et sur les dépendances : relançable sans doublon.
+# Usage : scripts/bootstrap-design-issues.sh [--dry-run]
 set -euo pipefail
 REPO="${REPO:-Inprogress-Agency/widoo-app}"; DRY="${1:-}"
 W="https://github.com/Inprogress-Agency/widoo-app/wiki"
@@ -10,8 +11,27 @@ run() { if [ "$DRY" = "--dry-run" ]; then echo "+ $*"; else "$@"; fi; }
 gh label list -R "$REPO" --limit 200 --json name --jq '.[].name' | grep -qx type:design \
   || run gh label create type:design -R "$REPO" --color "D876E3" --description "Planche Claude Design à produire et valider"
 
-num_of() { gh issue list -R "$REPO" --state all --limit 500 --search "\"$1\" in:title" --json number,title --jq ".[] | select(.title == \"$1\") | .number" | head -1; }
+# Les numéros viennent de la liste des issues (pas de la recherche, dont l'index
+# a plusieurs secondes de retard) ou de l'URL renvoyée à la création.
+ISSUES=$(gh issue list -R "$REPO" --state all --limit 500 --json number,title)
+num_of() { jq -r --arg t "$1" '.[] | select(.title == $t) | .number' <<<"$ISSUES" | head -1; }
 id_of()  { gh api "repos/$REPO/issues/$1" --jq .id; }
+
+# Déclare $1 bloqué par le ticket design $2 (id base $3). Repli en ligne texte
+# uniquement si l'API de dépendances n'est pas disponible sur ce dépôt.
+block() {
+  local n=$1 dn=$2 did=$3 existing
+  if ! existing=$(gh api "repos/$REPO/issues/$n/dependencies/blocked_by" --jq '[.[].number] | join(" ")' 2>/dev/null); then
+    echo "  #$n : API de dépendances indisponible, ligne texte « Bloqué par #$dn »"
+    local cur; cur=$(gh issue view "$n" -R "$REPO" --json body --jq .body)
+    printf '%s' "$cur" | grep -q "^Bloqué par #$dn " \
+      || run gh issue edit "$n" -R "$REPO" --body "$(printf 'Bloqué par #%s (maquette)\n\n%s' "$dn" "$cur")" >/dev/null
+    return
+  fi
+  if printf ' %s ' "$existing" | grep -q " $dn "; then echo "  #$n : déjà bloqué par #$dn"; return; fi
+  run gh api -X POST "repos/$REPO/issues/$n/dependencies/blocked_by" -F issue_id="$did" >/dev/null
+  echo "  #$n : bloqué par #$dn"
+}
 
 # key|milestone|title|écrans|titres exacts des tickets dev débloqués (séparés par ;;)
 DESIGN=(
@@ -29,7 +49,7 @@ DESIGN=(
 
 for row in "${DESIGN[@]}"; do
   IFS='|' read -r key ms title screens devs <<<"$row"
-  dev_nums=(); IFS=';;' read -ra titles <<<"$devs"
+  dev_nums=(); IFS=';' read -ra titles <<<"$devs"
   for dt in "${titles[@]}"; do [ -z "$dt" ] && continue; n=$(num_of "$dt"); [ -n "$n" ] && dev_nums+=("$n") || echo "  avertissement : ticket dev introuvable « $dt »"; done
   refs=$(printf '#%s ' "${dev_nums[@]}")
   body="## Contexte
@@ -48,17 +68,16 @@ Lien de la planche Claude Design : …
 Validée par Ilan le : …"
   dn=$(num_of "$title")
   if [ -z "$dn" ]; then
-    run gh issue create -R "$REPO" --title "$title" --label "type:design,area:mobile" --milestone "$ms" --body "$body" >/dev/null
-    echo "  créé : $title"; [ "$DRY" = "--dry-run" ] && continue; dn=$(num_of "$title")
+    if [ "$DRY" = "--dry-run" ]; then
+      echo "  à créer : $title ($ms) — bloquerait ${refs% }"; continue
+    fi
+    url=$(gh issue create -R "$REPO" --title "$title" --label "type:design,area:mobile" --milestone "$ms" --body "$body")
+    dn=${url##*/}; echo "  créé : $title (#$dn)"
   else echo "  existe : $title (#$dn)"; fi
   did=$(id_of "$dn")
   for n in "${dev_nums[@]}"; do
-    run gh issue edit "$n" -R "$REPO" --add-label needs-design --remove-label status:ready >/dev/null 2>&1 || true
-    if ! gh api -X POST "repos/$REPO/issues/$n/dependencies/blocked_by" -F issue_id="$did" >/dev/null 2>&1; then
-      echo "  #$n : dépendance API indisponible, ligne texte ajoutée"
-      cur=$(gh issue view "$n" -R "$REPO" --json body --jq .body)
-      printf '%s' "$cur" | grep -q "Bloqué par #$dn" || run gh issue edit "$n" -R "$REPO" --body "$(printf 'Bloqué par #%s (maquette)\n\n%s' "$dn" "$cur")" >/dev/null
-    fi
+    run gh issue edit "$n" -R "$REPO" --add-label needs-design --remove-label status:ready >/dev/null
+    block "$n" "$dn" "$did"
   done
 done
 echo "Terminé. Les tickets dev à écran sont needs-design jusqu'à fermeture de leur ticket design."

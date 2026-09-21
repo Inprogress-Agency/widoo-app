@@ -157,7 +157,7 @@ Spécification concrète et mesurable.
 
 **Maquettes et tickets dev** : un ticket dev qui touche un écran porte `needs-design` tant que son ticket design n'est pas fermé, et est déclaré bloqué par lui (`gh api -X POST repos/{owner}/{repo}/issues/{n}/dependencies/blocked_by -F issue_id=<id>`). Quand le ticket design est fermé, MANAGER retire `needs-design`, pose `status:ready` et ajoute au contexte du ticket dev la ligne `Maquette : <lien wiki Ecrans#E-xx> · validée le <date>`. Contrôle en début de session : `scripts/check-design-links.sh` liste les tickets `status:ready` à écran sans ligne Maquette ou avec un ticket design encore ouvert ; corriger avant toute autre action.
 
-**GitHub Project « Widoo — MVP »** : la seule vue d'avancement. Champs : Status (Todo / In progress / Done, géré par les workflows intégrés et par CODE), Epic (liste, obligatoire), Milestone. En début de session MANAGER : tout ticket `status:ready` est dans le projet avec un Epic ; tout item « In progress » a une PR ouverte ; sinon corriger. Aucun autre champ, colonne ou vue sans décision d'Ilan.
+**GitHub Project « Widoo — MVP »** : la seule vue d'avancement. Champs : Status, Epic (liste, obligatoire), Milestone, Début et Fin (sur les epics, pour la Roadmap). Statuts : **Cadrage** (à spécifier, maquetter ou découper ; visible dans Backlog seulement), **Prêts** (= `status:ready`, posé par MANAGER), **En cours** (CODE, à l'ouverture de la branche), **À review** (CODE, à l'ouverture de la PR), **À déployer** (workflow intégré, à la fermeture de l'issue par le merge), **Terminés** (après déploiement vérifié en staging, par Ilan ou Paul). Vues : Board (Prêts → Terminés), Roadmap (epics), Backlog (tout, groupé par Epic). En début de session MANAGER : tout ticket `status:ready` est en Prêts avec un Epic, tout ticket `needs-design` est en Cadrage ; tout item En cours ou À review a une branche ou une PR ouverte ; sinon corriger. Aucun autre champ, colonne ou vue sans décision d'Ilan.
 
 **Interdits** : wiki, codebase, branches et PR de CODE.
 
@@ -165,13 +165,13 @@ Spécification concrète et mesurable.
 
 ## Mode CODE — codebase + commentaires
 
-**Démarrage** : `git pull` ; ticket désigné, sinon `gh issue list --label status:ready --state open` → P0 > P1 > P2 > P3, milestone en cours, puis le plus ancien ; annoncer le ticket, commenter `🔨 Démarrage — plan : …`, et passer son Status à « In progress » dans le projet (`gh project item-edit`). Le passage à « Done » est automatique à la fermeture de l'issue.
+**Démarrage** : `git pull` ; ticket désigné, sinon `gh issue list --label status:ready --state open` → P0 > P1 > P2 > P3, milestone en cours, puis le plus ancien ; annoncer le ticket, commenter `🔨 Démarrage — plan : …`, et passer son Status à « En cours » dans le projet (`gh project item-edit`), puis à « À review » à l'ouverture de la PR. Le passage à « À déployer » est automatique à la fermeture de l'issue par le merge ; « Terminés » se pose après vérification en staging.
 
 **Git**
 
 - Toujours une branche `issue/N-slug` et une PR ; jamais de commit direct sur `main`.
 - Commits : `feat|fix|chore|polish|test|docs(scope): description` en anglais.
-- PR : titre `<type>(<scope>): <action en français>` sous 72 caractères, corps selon `.github/pull_request_template.md`, `Fixes #N`.
+- PR : titre `<type>(<scope>): <action en français>` sous 72 caractères, corps selon `.github/pull_request_template.md`, `Fixes #N` (ou `Refs #N` pour une PR de process sans ticket à fermer).
 - **Plafond de diff** : viser moins de 400 lignes utiles, 500 maximum justifié dans la PR ; au-delà, redécouper. Formatage mécanique et fichiers générés identifiés à part. Aucune compression du code pour tenir le seuil.
 - Avant publication : `pnpm lint && pnpm typecheck && pnpm test` verts en local ; la CI est bloquante.
 - Niveau de risque de la PR selon `SECURITY.md` ; niveau 2 et 3 signalés à Ilan.
