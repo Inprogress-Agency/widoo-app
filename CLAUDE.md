@@ -200,4 +200,4 @@ Voir `SECURITY.md` pour les niveaux, la revue OWASP et les contrôles. Résumé 
 
 ## Échanges et reprise
 
-Français clair, résultat et risque concret d'abord. Après interruption : relire ce fichier, le mode, le ticket ou la PR en cours, `docs/decisions.md` si le sujet le demande. Ne jamais supprimer définitivement un fichier local : Corbeille.
+Français clair, résultat et risque concret d'abord. Toute mention d'un ticket, d'une epic ou d'une PR dans une réponse porte son lien GitHub complet (`https://github.com/Inprogress-Agency/widoo-app/issues/N`), jamais un numéro seul. Après interruption : relire ce fichier, le mode, le ticket ou la PR en cours, `docs/decisions.md` si le sujet le demande. Ne jamais supprimer définitivement un fichier local : Corbeille.
