@@ -1,0 +1,42 @@
+name: PR policy
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  policy:
+    name: Title, body, issue link
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Validate title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          set -euo pipefail
+          if ! printf '%s' "$TITLE" | grep -qE '^(feat|fix|chore|polish|test|docs)\((mobile|api|admin|orchestration|shared|infra|process)\): .{3,}$'; then
+            echo "::error::Titre attendu : <type>(<scope>): <action>. Types : feat fix chore polish test docs. Scopes : mobile api admin orchestration shared infra process."
+            exit 1
+          fi
+          if [ "${#TITLE}" -gt 72 ]; then
+            echo "::error::Titre de ${#TITLE} caractères, maximum 72."
+            exit 1
+          fi
+
+      - name: Validate body
+        env:
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          set -euo pipefail
+          fail=0
+          for section in '## Résultat et problème' '## Comment vérifier' '## Risque' '## Retour arrière'; do
+            printf '%s' "$BODY" | grep -qF "$section" || { echo "::error::Section manquante : $section"; fail=1; }
+          done
+          printf '%s' "$BODY" | grep -qE '(Fixes|Closes) #[0-9]+' || { echo "::error::Lien d'issue manquant (Fixes #N)."; fail=1; }
+          printf '%s' "$BODY" | grep -qE '^Niveau *: *[123]' || { echo "::error::Niveau de risque manquant (Niveau : 1, 2 ou 3)."; fail=1; }
+          printf '%s' "$BODY" | grep -qE '^Formatage mécanique *: *(oui|non)' || { echo "::error::Ligne « Formatage mécanique : oui|non » manquante."; fail=1; }
+          exit $fail

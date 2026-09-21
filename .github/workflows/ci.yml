@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Lint, types, tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: widoo
+          POSTGRES_PASSWORD: widoo
+          POSTGRES_DB: widoo_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U widoo"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://widoo:widoo@localhost:5432/widoo_test
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Migrate test database
+        run: pnpm --filter api db:migrate
+
+      - name: Test
+        run: pnpm test -- --coverage
+
+      - name: Build API and admin
+        run: pnpm --filter api --filter admin build
+
+      - name: Audit dependencies
+        run: pnpm audit --audit-level=high
+
+  diff-size:
+    name: Diff size
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Measure useful diff
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          set -euo pipefail
+          lines=$(git diff --numstat "$BASE" "$HEAD" -- . \
+            ':!pnpm-lock.yaml' ':!**/*.snap' ':!**/generated/**' ':!**/*.svg' ':!**/*.png' \
+            | awk '{ a += $1; d += $2 } END { print a + d }')
+          echo "Useful diff: $lines lines"
+          if [ "$lines" -gt 500 ]; then
+            echo "::error::Diff de $lines lignes utiles, plafond 500. Redécouper la PR."
+            exit 1
+          fi
+          if [ "$lines" -gt 400 ] && ! printf '%s' "$BODY" | grep -qE '^Taille *:.*[A-Za-z]'; then
+            echo "::error::Diff de $lines lignes (> 400) sans justification dans la section Taille du corps de PR."
+            exit 1
+          fi
