@@ -82,6 +82,7 @@ flowchart LR
 [ -d ../widoo-app.wiki ] && git -C ../widoo-app.wiki pull \
   || git clone https://github.com/Inprogress-Agency/widoo-app.wiki.git ../widoo-app.wiki
 gh issue list --label needs-design --state open
+gh issue list --label type:design --state open
 gh issue list --state closed --limit 15
 ```
 
@@ -95,7 +96,34 @@ gh issue list --state closed --limit 15
 - Une décision durable (architecture, périmètre, règle métier) est aussi inscrite dans `docs/decisions.md` du dépôt par une PR `type:chore`.
 - Commits du wiki : préfixe `design:`, en français, push direct.
 
-**Interdits** : issues, codebase. **Fin de session** : push, résumé (pages, entrées `D-xxx`, questions ouvertes).
+**Suivi des maquettes**
+
+- Chaque planche Claude Design a un ticket `type:design` (« Design — E-01 accueil carte et liste »), dans le milestone des tickets dev qu'elle débloque, avec la checklist du modèle ci-dessous. Les tickets dev concernés sont déclarés bloqués par lui (dépendance GitHub « blocked by »). DESIGN ne crée pas ces tickets : MANAGER le fait ; DESIGN y commente l'avancement et le lien de la planche.
+- Une maquette est validée quand Ilan le dit dans la session. DESIGN exporte alors la planche (PNG, et le bundle HTML si Claude Design le fournit) dans le wiki sous `design/<E-xx>/`, met à jour la section de `Ecrans` (image, lien Claude Design, date), passe la section en 🟢, et ferme le ticket design avec le lien de la planche en commentaire.
+- Une maquette validée qui change ensuite crée une entrée `D-xxx` et rouvre le ticket design ; les tickets dev liés repassent `needs-design` s'ils ne sont pas commencés.
+
+**Modèle de ticket design**
+
+```markdown
+Titre : Design — E-xx <nom de l'écran>
+
+## Contexte
+Lien wiki Ecrans#E-xx · références du design system · tickets dev débloqués : #N #M
+
+## À produire
+- [ ] composants et variantes
+- [ ] états : vide, chargement, erreur, sans réseau, géolocalisation refusée si carte
+- [ ] texte système à 150 % sans troncature des textes essentiels
+- [ ] contrastes vérifiés (AA texte, 3:1 composants)
+- [ ] libellés lecteur d'écran des contrôles
+- [ ] planche nommée avec l'identifiant d'écran
+
+## Validation
+Lien de la planche Claude Design : …
+Validée par Ilan le : …
+```
+
+**Interdits** : issues (sauf commentaires sur les tickets design), codebase. **Fin de session** : push, résumé (pages, entrées `D-xxx`, questions ouvertes).
 
 ---
 
@@ -123,9 +151,11 @@ Spécification concrète et mesurable.
 
 1 ticket = 1 unité livrable en une session de code, sous le plafond de diff. Une feature sans section wiki 🟢 n'est pas ticketable → `needs-design`.
 
-**Labels** : `type:feature` · `type:bug` · `type:chore` · `type:polish` ; `prio:P0` à `prio:P3` ; `status:ready` · `status:blocked` · `needs-design` ; `area:mobile` · `area:api` · `area:admin` · `area:orchestration` · `area:infra` · `area:process` ; `level:2` · `level:3` (posés sur les PR selon SECURITY.md).
+**Labels** : `type:feature` · `type:bug` · `type:chore` · `type:polish` · `type:design` ; `prio:P0` à `prio:P3` ; `status:ready` · `status:blocked` · `needs-design` ; `area:mobile` · `area:api` · `area:admin` · `area:orchestration` · `area:infra` · `area:process` ; `level:2` · `level:3` (posés sur les PR selon SECURITY.md).
 
 **Milestones** = jalons de la page wiki `Roadmap` (`v0.1` … `v1.0`).
+
+**Maquettes et tickets dev** : un ticket dev qui touche un écran porte `needs-design` tant que son ticket design n'est pas fermé, et est déclaré bloqué par lui (`gh api -X POST repos/{owner}/{repo}/issues/{n}/dependencies/blocked_by -F issue_id=<id>`). Quand le ticket design est fermé, MANAGER retire `needs-design`, pose `status:ready` et ajoute au contexte du ticket dev la ligne `Maquette : <lien wiki Ecrans#E-xx> · validée le <date>`. Contrôle en début de session : `scripts/check-design-links.sh` liste les tickets `status:ready` à écran sans ligne Maquette ou avec un ticket design encore ouvert ; corriger avant toute autre action.
 
 **GitHub Project « Widoo — MVP »** : la seule vue d'avancement. Champs : Status (Todo / In progress / Done, géré par les workflows intégrés et par CODE), Epic (liste, obligatoire), Milestone. En début de session MANAGER : tout ticket `status:ready` est dans le projet avec un Epic ; tout item « In progress » a une PR ouverte ; sinon corriger. Aucun autre champ, colonne ou vue sans décision d'Ilan.
 
