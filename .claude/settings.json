@@ -1,0 +1,9 @@
+{
+  "extraKnownMarketplaces": {
+    "gh-harness": {
+      "source": { "source": "github", "repo": "PaulThiberville/gh-harness" },
+      "autoUpdate": true
+    }
+  },
+  "enabledPlugins": { "gh-harness@gh-harness": true }
+}
