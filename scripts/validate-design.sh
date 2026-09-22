@@ -47,8 +47,18 @@ if [ -d "$WIKI/.git" ] && [ "$(git -C "$WIKI" rev-list --count '@{u}..HEAD' 2>/d
   echo "  wiki : $(git -C "$WIKI" rev-list --count '@{u}..HEAD') commit(s) à pousser depuis $WIKI"
   run git -C "$WIKI" push -q && sleep 3
 fi
-# chaque écran doit avoir 🟢 sur la première ligne sous son titre dans Ecrans
-page=$(curl -fsSL "$RAW/Ecrans.md") || { echo "page wiki Ecrans illisible ($RAW/Ecrans.md)" >&2; exit 1; }
+# chaque écran doit avoir 🟢 sur la première ligne sous son titre dans Ecrans.
+# La page est lue dans le clone quand il est présent, propre et à jour avec origin
+# (raw.githubusercontent.com met plusieurs minutes à refléter un push) ; sinon à distance.
+page=""
+if [ -d "$WIKI/.git" ] && [ -f "$WIKI/Ecrans.md" ]; then
+  git -C "$WIKI" fetch -q 2>/dev/null || true
+  if [ -z "$(git -C "$WIKI" status --porcelain -- Ecrans.md)" ] \
+     && [ "$(git -C "$WIKI" rev-parse HEAD)" = "$(git -C "$WIKI" rev-parse '@{u}' 2>/dev/null)" ]; then
+    page=$(cat "$WIKI/Ecrans.md"); echo "  Ecrans : lu dans le clone, à jour avec origin"
+  fi
+fi
+[ -n "$page" ] || page=$(curl -fsSL "$RAW/Ecrans.md") || { echo "page wiki Ecrans illisible ($RAW/Ecrans.md)" >&2; exit 1; }
 heading() { awk -v s="$1" 'index($0, "### " s " ") == 1 { sub(/^### /, ""); print; exit }' <<<"$page"; }
 anchor()  { heading "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^[:alnum:] _-]//g; s/ /-/g'; }
 ok=1
