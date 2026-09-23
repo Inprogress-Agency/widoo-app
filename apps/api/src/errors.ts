@@ -11,7 +11,7 @@ const codeByStatus: Partial<Record<number, ApiErrorCode>> = {
 };
 
 /**
- * Every error leaves the API as an `ApiError`. Client errors keep their message; anything
+ * Registered after the rate limit plugin. Every error leaves the API as an `ApiError`. Client errors keep their message; anything
  * else becomes a generic 500 whose cause is only logged, never sent.
  */
 export function registerErrorHandling(app: FastifyInstance): void {
@@ -47,7 +47,8 @@ export function registerErrorHandling(app: FastifyInstance): void {
     return reply.status(500).send(body);
   });
 
-  app.setNotFoundHandler((_request, reply) => {
+  // Rate limited like any route, so that probing for URLs is throttled too.
+  app.setNotFoundHandler({ preHandler: app.rateLimit() }, (_request, reply) => {
     const body: ApiError = { code: 'not_found', message: 'Route not found' };
     return reply.status(404).send(body);
   });
