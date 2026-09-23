@@ -50,7 +50,9 @@ describe('/v1/health with an unreachable database', () => {
 
 describe('/docs in production', () => {
   it('is not served', async () => {
-    const app = await buildApp(testConfig({ NODE_ENV: 'production' }));
+    const app = await buildApp(
+      testConfig({ NODE_ENV: 'production', FIREBASE_PROJECT_ID: 'widoo-prod-check' }),
+    );
     const response = await app.inject({ url: '/docs/json' });
     await app.close();
     expect(response.statusCode).toBe(404);

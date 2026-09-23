@@ -32,9 +32,40 @@ const Env = z.object({
     .transform((proxies) => proxies.filter(Boolean))
     .pipe(z.array(Proxy)),
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(1000),
+  /**
+   * Required by the server (`buildApp`), not by the database scripts. Google Cloud project ID
+   * rules: 6 to 30 lowercase letters, digits and hyphens.
+   */
+  FIREBASE_PROJECT_ID: z
+    .string()
+    .regex(/^[a-z][a-z0-9-]{4,28}[a-z0-9]$/, 'Expected a Firebase project ID')
+    .optional(),
+  /** Read by firebase-admin itself, declared here to be refused in production. */
+  FIREBASE_AUTH_EMULATOR_HOST: z.string().optional(),
 });
 
-export const Config = Env.transform((env) => ({
+/** Guards against a local setting that would disable token verification in production. */
+const ProductionEnv = Env.superRefine((env, context) => {
+  if (env.NODE_ENV !== 'production') {
+    return;
+  }
+  if (env.FIREBASE_AUTH_EMULATOR_HOST !== undefined) {
+    context.addIssue({
+      code: 'custom',
+      path: ['FIREBASE_AUTH_EMULATOR_HOST'],
+      message: 'Refused in production: the Auth emulator accepts unsigned tokens',
+    });
+  }
+  if (env.FIREBASE_PROJECT_ID?.startsWith('demo-')) {
+    context.addIssue({
+      code: 'custom',
+      path: ['FIREBASE_PROJECT_ID'],
+      message: 'Refused in production: demo- projects only exist in the emulator',
+    });
+  }
+});
+
+export const Config = ProductionEnv.transform((env) => ({
   isProduction: env.NODE_ENV === 'production',
   host: env.HOST,
   port: env.PORT,
@@ -44,6 +75,7 @@ export const Config = Env.transform((env) => ({
   corsOrigins: env.CORS_ORIGINS,
   trustedProxies: env.TRUST_PROXY,
   rateLimitMax: env.RATE_LIMIT_MAX,
+  firebaseProjectId: env.FIREBASE_PROJECT_ID,
 }));
 export type Config = z.output<typeof Config>;
 

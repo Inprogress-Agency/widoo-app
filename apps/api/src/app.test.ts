@@ -1,4 +1,5 @@
 import { ApiError } from '@widoo/shared';
+import { sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import { buildApp, type BuildAppOptions } from './app';
@@ -21,6 +22,10 @@ async function buildTestApp(env: Record<string, string> = {}, options: BuildAppO
   }));
   app.get('/v1/test/crash', async () => {
     throw new Error('fictitious internal detail');
+  });
+  // The driver quotes the value in its message, Drizzle lists it in its own.
+  app.get('/v1/test/query-crash', async () => {
+    await app.db.execute(sql`select ${'leak.test@example.com'}::int`);
   });
   await app.ready();
   return app;
@@ -93,6 +98,23 @@ describe('request logs', () => {
     for (const leak of ['fictitious-token', 'session=fictitious', '48.8566', 'remoteAddress']) {
       expect(logs).not.toContain(leak);
     }
+  });
+
+  it('carry the SQL of a failed query but none of its values', async () => {
+    const lines: string[] = [];
+    const app = await buildTestApp(
+      { LOG_LEVEL: 'info' },
+      { logStream: { write: (line) => lines.push(line) } },
+    );
+    const response = await app.inject({ url: '/v1/test/query-crash' });
+    await app.close();
+
+    expect(response.statusCode).toBe(500);
+    const logs = lines.join('');
+    expect(logs).toContain('Failed query: select $1::int');
+    expect(logs).toContain('"code":"22P02"');
+    expect(logs).toContain('app.test.ts');
+    expect(logs).not.toContain('leak.test@example.com');
   });
 
   it('replace a malformed request id', async () => {
