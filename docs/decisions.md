@@ -53,3 +53,16 @@ Page légère (avatar, prénom, parcours publiés, note moyenne), désactivable 
 ## D-013 — Accessibilité mobile : texte dynamique, contrastes, lecteur d'écran (2026-09-23)
 
 Décision d'Ilan à la validation de la planche « Contrôle accessibilité » (ticket #79). Le texte suit le réglage système partout sans hauteur fixe ; les composants denses sont plafonnés à 1,3 dans le design system ; seuls la tooltip de la carte et le résumé de parcours changent de mise en page à partir de `fontScale >= 1.3` ; objectif de recette 150 % sans troncature d'un texte essentiel. Contrastes 4,5:1 texte et 3:1 composants, aucune information portée par la couleur seule. Chaque contrôle est libellé et son état annoncé. Règles détaillées : wiki Direction-Artistique, section Accessibilité ; rappel dans CLAUDE.md, mode CODE.
+
+## D-014 — Une PR par ticket, fusion en rebase and merge, plafond par commit (2026-09-23)
+
+Décision de Paul, pour l'équipe ; elle précise le plafond de diff de D-008. Pendant l'epic Socle technique ([#13](https://github.com/Inprogress-Agency/widoo-app/issues/13)), les agents ont lu « au-delà, redécouper » (`CLAUDE.md`, mode CODE) comme « faire plusieurs PR » et ont livré 9 tickets en 24 PR empilées. Les corps de ces PR supposaient une fusion en squash, qui n'était écrite nulle part.
+
+- **Une PR par ticket**, qui peut contenir plusieurs commits. On ne découpe plus un ticket en plusieurs PR empilées. Des tickets dépendants peuvent toujours avoir des PR empilées, à raison d'une PR par ticket.
+- **Fusion toujours en « rebase and merge »**, jamais en squash, par Ilan ou Paul : chaque commit arrive tel quel sur `main`, et l'historique reste inspectable commit par commit. Chaque commit doit donc être autonome et cohérent, avec un message conventionnel en anglais.
+- **Plafond de diff par commit** : viser moins de 400 lignes utiles par commit, 500 au maximum si c'est justifié dans la PR (ligne `Taille :`). La PR affiche son total, sans plafond. Formatage mécanique et fichiers générés restent identifiés à part, et on ne compresse jamais le code pour tenir le seuil. Un ticket reste une unité livrable en une session de code.
+- La pile [#86](https://github.com/Inprogress-Agency/widoo-app/pull/86) → [#112](https://github.com/Inprogress-Agency/widoo-app/pull/112) reste telle quelle : elle est fusionnée dans l'ordre, en rebase and merge.
+
+Tension consignée, non tranchée : le skill gh-harness interdit le `push --force` aux agents. Un agent ne peut donc pas réécrire l'historique d'une PR (fixup, puis rebase) : il faut des commits propres dès le départ. Un commit correctif reste possible, et il apparaîtra dans l'historique. Faire évoluer le skill revient à Paul.
+
+Mise en œuvre : `CLAUDE.md` et modèle de PR par [#115](https://github.com/Inprogress-Agency/widoo-app/issues/115) ; job `Diff size` et README par la PR [#105](https://github.com/Inprogress-Agency/widoo-app/pull/105) du ticket [#23](https://github.com/Inprogress-Agency/widoo-app/issues/23). Réglage du dépôt, par Ilan ou Paul : n'autoriser que le rebase and merge sur `main`.
