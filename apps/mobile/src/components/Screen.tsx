@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors, spacing, typography } from '../theme';
 
 interface ScreenProps {
   /** First heading read by the screen reader. */
@@ -25,13 +26,14 @@ export function Screen({ title, children }: ScreenProps) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    backgroundColor: colors.background,
   },
   content: {
-    gap: 16,
-    padding: 16,
+    gap: spacing.lg,
+    padding: spacing.lg,
   },
   title: {
-    fontSize: 26,
-    fontWeight: '800',
+    ...typography.display,
+    color: colors.text,
   },
 });
