@@ -16,7 +16,26 @@ describe('loadConfig', () => {
       trustedProxies: [],
       rateLimitMax: 1000,
       firebaseProjectId: undefined,
+      sentryDsn: undefined,
+      sentryEnvironment: 'development',
     });
+  });
+
+  it('reads the Sentry DSN and environment, an empty DSN meaning none', () => {
+    const load = (env: Record<string, string>) => loadConfig({ DATABASE_URL: databaseUrl, ...env });
+    const dsn = 'https://public@o0.ingest.de.sentry.io/0';
+    expect(load({ SENTRY_DSN: dsn, SENTRY_ENVIRONMENT: 'staging' })).toMatchObject({
+      sentryDsn: dsn,
+      sentryEnvironment: 'staging',
+    });
+    expect(load({ SENTRY_DSN: '', NODE_ENV: 'test' })).toMatchObject({
+      sentryDsn: undefined,
+      sentryEnvironment: 'test',
+    });
+    expect(() => load({ SENTRY_DSN: 'not a url' })).toThrow(/SENTRY_DSN/);
+    const plain = 'http://public@localhost:9000/1';
+    expect(load({ SENTRY_DSN: plain }).sentryDsn).toBe(plain);
+    expect(() => load({ SENTRY_DSN: plain, NODE_ENV: 'production' })).toThrow(/HTTPS/);
   });
 
   it('names an invalid variable without echoing its value', () => {

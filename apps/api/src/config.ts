@@ -42,9 +42,20 @@ const Env = z.object({
     .optional(),
   /** Read by firebase-admin itself, declared here to be refused in production. */
   FIREBASE_AUTH_EMULATOR_HOST: z.string().optional(),
+  /** Sentry project of the API; empty or absent, no error report is sent. */
+  SENTRY_DSN: z
+    .string()
+    .optional()
+    .transform((value) => value || undefined)
+    .pipe(z.url({ protocol: /^https?$/ }).optional()),
+  /** `staging` or `production` on Cloud Run, where NODE_ENV is `production` for both. */
+  SENTRY_ENVIRONMENT: z
+    .string()
+    .regex(/^[a-z][a-z0-9-]{0,63}$/)
+    .optional(),
 });
 
-/** Guards against a local setting that would disable token verification in production. */
+/** Guards against local settings that would weaken production: token checks, report transport. */
 const ProductionEnv = Env.superRefine((env, context) => {
   if (env.NODE_ENV !== 'production') {
     return;
@@ -63,6 +74,13 @@ const ProductionEnv = Env.superRefine((env, context) => {
       message: 'Refused in production: demo- projects only exist in the emulator',
     });
   }
+  if (env.SENTRY_DSN?.startsWith('http://')) {
+    context.addIssue({
+      code: 'custom',
+      path: ['SENTRY_DSN'],
+      message: 'Refused in production: error reports must travel over HTTPS',
+    });
+  }
 });
 
 export const Config = ProductionEnv.transform((env) => ({
@@ -76,6 +94,8 @@ export const Config = ProductionEnv.transform((env) => ({
   trustedProxies: env.TRUST_PROXY,
   rateLimitMax: env.RATE_LIMIT_MAX,
   firebaseProjectId: env.FIREBASE_PROJECT_ID,
+  sentryDsn: env.SENTRY_DSN,
+  sentryEnvironment: env.SENTRY_ENVIRONMENT ?? env.NODE_ENV,
 }));
 export type Config = z.output<typeof Config>;
 
