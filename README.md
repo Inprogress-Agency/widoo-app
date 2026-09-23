@@ -28,6 +28,7 @@ nvm use && corepack enable
 pnpm install
 docker compose up -d                  # Postgres 16 + PostGIS sur localhost:5432
 cp apps/api/.env.example apps/api/.env
+pnpm --filter api db:migrate          # schéma de la base, requis par les tests de l'API
 pnpm lint && pnpm typecheck && pnpm test
 pnpm build
 ```
@@ -43,7 +44,7 @@ Port 5432 déjà pris : copier `.env.example` en `.env` à la racine, changer `P
 | `pnpm format` | Prettier en écriture |
 | `pnpm dev` | serveurs de développement (API et admin, à mesure qu'ils arrivent) |
 
-La configuration TypeScript, ESLint, Prettier et Vitest vit à la racine et chaque workspace en hérite. L'app Expo (`pnpm --filter mobile start`) et les scripts de base (`db:migrate`, `db:seed`) arrivent avec leurs tickets.
+La configuration TypeScript, ESLint, Prettier et Vitest vit à la racine et chaque workspace en hérite. L'app Expo (`pnpm --filter mobile start`) et le script `db:seed` arrivent avec leurs tickets.
 
 Langues : code et commits en anglais ; wiki, issues et interface en français.
 
@@ -59,3 +60,14 @@ docker run --rm -p 8080:8080 -e DATABASE_URL=postgres://widoo:widoo@host.docker.
 ```
 
 Cloud Run tourne en `linux/amd64` : ajouter `--platform linux/amd64` au build sur Apple Silicon.
+
+### Base de données
+
+Schéma unique : `apps/api/src/db/schema.ts` (Drizzle ORM). Migrations versionnées sous `apps/api/src/db/generated/migrations`, écrites par `db:generate` et relues avant commit.
+
+| Commande (`pnpm --filter api …`) | Effet |
+|---|---|
+| `db:generate --name=add_x` | écrit la migration du dernier changement de `schema.ts` ; `--custom --name=x` crée un fichier SQL à écrire à la main |
+| `db:migrate` | applique les migrations en attente, sans effet si la base est à jour (la CI migre la base de test avant les tests) |
+
+Dans l'image, `docker run --rm -e DATABASE_URL=… widoo-api node dist/migrate.js` applique les migrations avant un déploiement.

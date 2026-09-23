@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { cp, readFile } from 'node:fs/promises';
 import { build } from 'esbuild';
 
 // Workspace packages ship TypeScript source, which Node cannot load: bundle them into the
@@ -7,8 +7,9 @@ import { build } from 'esbuild';
 const { dependencies } = JSON.parse(await readFile('package.json', 'utf8'));
 
 await build({
-  entryPoints: ['src/server.ts'],
-  outfile: 'dist/server.js',
+  // dist/migrate.js applies the migrations before a deployment (`node dist/migrate.js`).
+  entryPoints: { server: 'src/server.ts', migrate: 'src/migrate.ts' },
+  outdir: 'dist',
   bundle: true,
   platform: 'node',
   format: 'esm',
@@ -16,3 +17,6 @@ await build({
   sourcemap: true,
   external: Object.keys(dependencies).filter((name) => !name.startsWith('@widoo/')),
 });
+
+// Same path relative to dist/migrate.js as to src/migrate.ts.
+await cp('src/db/generated/migrations', 'dist/db/generated/migrations', { recursive: true });
