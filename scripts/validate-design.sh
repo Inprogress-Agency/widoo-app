@@ -31,6 +31,21 @@ edit_body() { # $1 = n°, $2 = nouveau corps (non affiché en dry-run)
   if [ -n "$DRY" ]; then echo "+ gh issue edit $1 --body (corps mis à jour)"; else gh issue edit "$1" -R "$REPO" --body "$2" >/dev/null; fi
 }
 
+# Status du Project « Widoo — MVP » : Prêts pour un ticket dev libéré, Terminés pour le ticket design fermé
+OWNER="${REPO%%/*}"; PROJECT_TITLE="${PROJECT_TITLE:-Widoo — MVP}"
+PNUM=$(gh project list --owner "$OWNER" --format json --jq ".projects[] | select(.title == \"$PROJECT_TITLE\") | .number" | head -1)
+PID=$(gh project view "$PNUM" --owner "$OWNER" --format json --jq '.id')
+PFIELDS=$(gh project field-list "$PNUM" --owner "$OWNER" --format json)
+PSTATUS=$(jq -r '.fields[] | select(.name == "Status") | .id' <<<"$PFIELDS")
+project_status() { # $1 = n° issue, $2 = nom du statut
+  local oid item
+  oid=$(jq -r --arg n "$2" '.fields[] | select(.name == "Status") | .options[] | select(.name == $n) | .id' <<<"$PFIELDS")
+  item=$(gh project item-list "$PNUM" --owner "$OWNER" --limit 500 --format json --jq ".items[] | select(.content.number == $1) | .id" | head -1)
+  [ -n "$oid" ] && [ -n "$item" ] || { echo "  #$1 : Project non mis à jour (statut « $2 » ou item introuvable)"; return 0; }
+  run gh project item-edit --project-id "$PID" --id "$item" --field-id "$PSTATUS" --single-select-option-id "$oid" >/dev/null
+  echo "  #$1 : Project → $2"
+}
+
 # 1. Ticket design et écrans qu'il couvre (ligne « écrans E-01, E-04 » du contexte)
 design=$(gh issue view "$DN" -R "$REPO" --json number,title,state,body,labels)
 jq -e '.labels[] | select(.name == "type:design")' <<<"$design" >/dev/null \
@@ -80,6 +95,7 @@ if [ "$(jq -r .state <<<"$design")" = "OPEN" ]; then
   run gh issue close "$DN" -R "$REPO" --comment "Planche validée par Ilan le $DATE — $LINK · miroir wiki : $W/Ecrans" >/dev/null
   echo "  #$DN : fermé"
 else echo "  #$DN : déjà fermé"; fi
+project_status "$DN" "Terminés"
 
 # 4. Tickets dev bloqués par le ticket design : ligne Maquette, needs-design → status:ready
 devs=$(gh api "repos/$REPO/issues/$DN/dependencies/blocking" --jq '.[] | select(.state == "open") | .number' || true)
@@ -100,9 +116,10 @@ for n in $devs; do
   fi
   run gh issue edit "$n" -R "$REPO" --remove-label needs-design --add-label status:ready >/dev/null
   echo "  #$n : status:ready — $title"
+  project_status "$n" "Prêts"
 done
 
-# 5. Contrôle et suite manuelle
+# 5. Contrôle et synchronisation complète du Project
 echo
 if "$(dirname "$0")/check-design-links.sh"; then echo "check-design-links : rien à corriger"; else echo "check-design-links : à corriger (ci-dessus)"; fi
-echo "Reste à la main : passer ces tickets en « Prêts » dans le Project « Widoo — MVP »."
+"$(dirname "$0")/sync-project.sh" ${DRY:+--dry-run}
