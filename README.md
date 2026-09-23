@@ -47,6 +47,27 @@ La configuration TypeScript, ESLint, Prettier et Vitest vit à la racine et chaq
 
 Langues : code et commits en anglais ; wiki, issues et interface en français.
 
+## Qualité et CI
+
+Tout changement passe par une PR remplie selon `.github/pull_request_template.md` (règles : [CLAUDE.md](CLAUDE.md), mode CODE). Le ruleset de `main` exige une PR et ces trois checks, et y interdit suppression et force-push :
+
+| Check | Workflow | Vérifie |
+|---|---|---|
+| `Lint, types, tests` | `ci.yml` | install figé, lint, types, migration de la base de test (PostGIS), tests avec couverture, build API et admin, `pnpm audit` (élevé et critique). Vert sans rien lancer si la PR ne touche que `*.md`, `docs/`, `.claude/`, `.github/` ou `scripts/*.sh` |
+| `Title, body, issue link` | `pr-policy.yml` | titre `<type>(<scope>): <action>` de 72 caractères au plus ; sections du modèle, `Fixes #N` (ou `Refs #N`), `Niveau :` et `Formatage mécanique :`, hors commentaires HTML |
+| `Diff size` | `pr-policy.yml` | affiche `Useful diff: N lines` (hors lockfile, snapshots, fichiers générés, SVG et PNG) ; refus au-delà de 500 lignes, et au-delà de 400 sans ligne `Taille :` renseignée |
+
+`ci.yml` tourne à chaque push. `pr-policy.yml` tourne aussi quand le titre, le corps ou la base de la PR changent : corriger le corps suffit à relancer ses checks. « Re-run » sur un ancien run relit le corps de l'époque, pas le nouveau.
+
+**PR empilées.** Seule `main` est protégée : une PR dont la base est une branche `issue/...` affiche ses checks sans les exiger, et `Fixes #N` ne ferme le ticket qu'à la fusion dans `main`. On ne fusionne donc jamais une PR dans sa base de pile. On fusionne en squash la PR du bas de la pile dans `main`, puis on rebase la suivante sur `main`, on la recible et on attend ses trois checks verts avant de la fusionner à son tour :
+
+```bash
+git fetch origin
+git rebase --onto origin/main origin/<branche fusionnée> <branche suivante>
+git push --force-with-lease
+gh pr edit <n° de la PR suivante> --base main
+```
+
 ## API
 
 Variables d'environnement décrites et validées au démarrage : `apps/api/.env.example`.
