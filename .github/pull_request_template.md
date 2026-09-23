@@ -1,6 +1,6 @@
 <!-- Titre : <type>(<scope>): <action en français>, moins de 72 caractères.
 Types : feat, fix, chore, polish, test, docs. Scopes : mobile, api, admin, orchestration, shared, infra, process.
-Objectif sous 400 lignes utiles, plafond 500 justifié. Aucun secret ni donnée personnelle réelle dans le diff ou les preuves. -->
+Une PR par ticket. Par commit : objectif sous 400 lignes utiles, plafond 500 justifié ; la PR n'a pas de plafond. Aucun secret ni donnée personnelle réelle dans le diff ou les preuves. -->
 
 ## Résultat et problème
 
@@ -23,7 +23,7 @@ Formatage mécanique : non
 
 Niveau : <!-- 1, 2 ou 3 selon SECURITY.md, avec justification en une ligne. -->
 
-Taille : <!-- À renseigner à partir de 400 lignes utiles. -->
+Taille : <!-- À renseigner dès qu'un commit dépasse 400 lignes utiles : le commit et la justification. -->
 
 <!-- Revue OWASP en quelques lignes si le diff la déclenche. Nouvelle dépendance : nom, raison, alternative écartée. -->
 
