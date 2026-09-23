@@ -188,6 +188,8 @@ docker compose up -d     # postgres + postgis local
 
 **Maintenabilité** : petits modules par domaine ; types, erreurs, accès aux données et règles métier centralisés (`packages/shared`, `packages/orchestration`) ; un libellé visible n'est jamais une clé technique ni une valeur persistée ; toute logique métier nouvelle est testée ; nouvelle dépendance évaluée et mentionnée dans la PR.
 
+**Accessibilité** : toute PR mobile qui touche un écran respecte les règles du wiki [Direction-Artistique › Accessibilité](https://github.com/Inprogress-Agency/widoo-app/wiki/Direction-Artistique#accessibilit%C3%A9--r%C3%A8gles-pour-le-code) : aucune hauteur fixe sur un composant qui contient du texte ; `maxFontSizeMultiplier={1.3}` sur les composants denses, posé dans les composants de base du design system (chips, barre d'onglets, étiquettes de marqueurs, compteur, pilule de tri, pastilles) ; deux reflows seulement à `fontScale >= 1.3` (tooltip réduite, résumé de parcours avec le bouton sous le titre) ; contrastes 4,5:1 texte et 3:1 composants (bleu encre `#3A4FA8` pour un lien sur gris chaud) ; `accessibilityLabel`, `accessibilityRole` et `accessibilityState` sur chaque contrôle, card en un seul élément avec `accessibilityActions` ; zones tactiles 44 px. Test à 150 % de texte système avant d'ouvrir la PR, mentionné dans sa description.
+
 **Commentaires** : démarrage avec plan ; `⛔ Bloqué : <raison>` (et sur l'Inbox si c'est une question de design) ; découvertes hors périmètre sur `📥 Inbox — Triage`, jamais dans le diff.
 
 **Interdits** : wiki, création ou fermeture manuelle d'issues, labels, milestones ; settings, secrets, déploiements en production.

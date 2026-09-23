@@ -49,3 +49,7 @@ Note sur 5 obligatoire en fin de parcours réalisé, commentaire facultatif, une
 ## D-012 — Profil public de créateur dans le MVP, communauté après (2026-09-21)
 
 Page légère (avatar, prénom, parcours publiés, note moyenne), désactivable par l'utilisateur. Badges, abonnements et fil d'activité sont hors MVP mais prévus dans le modèle.
+
+## D-013 — Accessibilité mobile : texte dynamique, contrastes, lecteur d'écran (2026-09-23)
+
+Décision d'Ilan à la validation de la planche « Contrôle accessibilité » (ticket #79). Le texte suit le réglage système partout sans hauteur fixe ; les composants denses sont plafonnés à 1,3 dans le design system ; seuls la tooltip de la carte et le résumé de parcours changent de mise en page à partir de `fontScale >= 1.3` ; objectif de recette 150 % sans troncature d'un texte essentiel. Contrastes 4,5:1 texte et 3:1 composants, aucune information portée par la couleur seule. Chaque contrôle est libellé et son état annoncé. Règles détaillées : wiki Direction-Artistique, section Accessibilité ; rappel dans CLAUDE.md, mode CODE.
