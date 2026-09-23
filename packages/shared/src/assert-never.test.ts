@@ -3,6 +3,6 @@ import { assertNever } from './assert-never';
 
 describe('assertNever', () => {
   it('throws with the unexpected value', () => {
-    expect(() => assertNever('unknown' as never)).toThrow('Unexpected value: unknown');
+    expect(() => assertNever('unknown' as never)).toThrow('Deliberately broken expectation');
   });
 });
