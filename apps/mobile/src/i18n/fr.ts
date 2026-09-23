@@ -7,6 +7,21 @@ export const fr = {
   },
   home: {
     title: 'Accueil',
+    config: {
+      heading: 'Configuration du service',
+      minAppVersion: "Version minimale de l'app : {{version}}",
+      taxonomies_one: '{{count}} taxonomie',
+      taxonomies_other: '{{count}} taxonomies',
+      moods: 'Ambiances : {{labels}}',
+      apiUrl: 'Service : {{url}}',
+      loading: 'Chargement de la configuration…',
+      errorTitle: 'Impossible de charger la configuration',
+      connectionBody: 'Vérifiez votre connexion puis réessayez.',
+      serviceBody: 'Le service ne répond pas correctement. Réessayez dans un instant.',
+      offlineTitle: 'Pas de connexion',
+      offlineBody: 'La configuration se chargera au retour du réseau.',
+      retry: 'Réessayer',
+    },
   },
   routes: {
     title: 'Mes parcours',
