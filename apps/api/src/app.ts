@@ -5,8 +5,12 @@ import {
   type ZodTypeProvider,
 } from 'fastify-type-provider-zod';
 import type { Config } from './config';
+import { createSql } from './db/client';
+import { registerDocs } from './docs';
 import { registerErrorHandling } from './errors';
 import { loggerOptions, requestIdOf, type LogStream } from './logger';
+import { configRoutes } from './routes/config';
+import { healthRoutes } from './routes/health';
 
 export type BuildAppOptions = { logStream?: LogStream };
 
@@ -24,6 +28,18 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   app.addHook('onRequest', async (request, reply) => {
     reply.header('x-request-id', request.id);
   });
+
+  const sql = createSql(config.databaseUrl);
+  app.decorate('sql', sql);
+  app.addHook('onClose', async () => {
+    await sql.end({ timeout: 5 });
+  });
+
+  if (!config.isProduction) {
+    await registerDocs(app);
+  }
+  await app.register(healthRoutes, { prefix: '/v1' });
+  await app.register(configRoutes, { prefix: '/v1', minAppVersion: config.minAppVersion });
 
   return app;
 }
