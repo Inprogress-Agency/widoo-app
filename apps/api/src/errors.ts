@@ -2,6 +2,7 @@ import type { ApiError, ApiErrorCode, ValidationIssue } from '@widoo/shared';
 import { DrizzleQueryError } from 'drizzle-orm';
 import type { FastifyError, FastifyInstance } from 'fastify';
 import { hasZodFastifySchemaValidationErrors } from 'fastify-type-provider-zod';
+import { reportError } from './monitoring';
 
 const codeByStatus: Partial<Record<number, ApiErrorCode>> = {
   401: 'unauthorized',
@@ -39,7 +40,7 @@ export function loggableError(error: Error): Error {
 
 /**
  * Registered after the rate limit plugin. Every error leaves the API as an `ApiError`. Client errors keep their message; anything
- * else becomes a generic 500 whose cause is only logged, never sent.
+ * else becomes a generic 500 whose cleaned cause is logged and reported to Sentry, never sent.
  */
 export function registerErrorHandling(app: FastifyInstance): void {
   app.setErrorHandler<FastifyError>((error, request, reply) => {
@@ -69,7 +70,9 @@ export function registerErrorHandling(app: FastifyInstance): void {
       return reply.status(status).send(body);
     }
 
-    request.log.error({ err: loggableError(error) }, 'unhandled error');
+    const loggable = loggableError(error);
+    request.log.error({ err: loggable }, 'unhandled error');
+    reportError(loggable, request);
     const body: ApiError = { code: 'internal_error', message: 'Internal server error' };
     return reply.status(500).send(body);
   });

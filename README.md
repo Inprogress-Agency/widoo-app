@@ -73,6 +73,8 @@ gh pr edit <n° de la PR suivante> --base main
 
 Variables d'environnement décrites et validées au démarrage : `apps/api/.env.example`.
 
+Erreurs 500 : journalisées puis envoyées à Sentry (`src/monitoring.ts`) si `SENTRY_DSN` est posé, après nettoyage par `loggableError` et le filtrage partagé (`packages/shared/src/monitoring.ts`). L'utilisateur y est réduit à `users.id` ; aucun en-tête `Authorization` ni cookie, aucune query string.
+
 ```bash
 pnpm --filter api dev                 # http://localhost:8080/v1/health, OpenAPI sur /docs (hors production)
 pnpm --filter api build && pnpm --filter api start
