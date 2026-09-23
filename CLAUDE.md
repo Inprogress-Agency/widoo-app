@@ -1,6 +1,6 @@
 # Widoo — Règles de travail des agents
 
-Application mobile de parcours urbains clé en main. Dépôt privé [Inprogress-Agency/widoo-app](https://github.com/Inprogress-Agency/widoo-app). Ilan pilote le produit et valide ; Paul développe. Toute la gestion de projet vit sur GitHub :
+Application mobile de parcours urbains clé en main. Dépôt [Inprogress-Agency/widoo-app](https://github.com/Inprogress-Agency/widoo-app). Ilan pilote le produit et valide ; Paul développe. Toute la gestion de projet vit sur GitHub :
 
 - le **wiki** est le cahier des charges (spécification produit et technique),
 - les **issues** sont le gestionnaire de tickets,
@@ -12,7 +12,9 @@ Le CLI `gh` est authentifié ; git passe par HTTPS.
 
 ## Règle fondamentale : les modes
 
-En début de session, le mode de travail est déclaré : **DESIGN**, **MANAGER**, **CODE**, **ORCHESTRATOR**, **LIBRE** ou **ITERATION**. La formulation est libre (« mode design », « on code », « libre », « on itère ») ; en cas d'ambiguïté, demander confirmation.
+En début de session, le mode de travail est déclaré : **INITIALISATION**, **DESIGN**, **MANAGER**, **CODE**, **ORCHESTRATOR**, **LIBRE** ou **ITERATION**. La formulation est libre (« mode design », « on code », « libre », « on itère ») ; en cas d'ambiguïté, demander confirmation.
+
+Déclarer un mode charge le skill du plugin [gh-harness](https://github.com/PaulThiberville/gh-harness), **qui fait autorité sur la procédure** : démarrage de session, conventions, format des tickets, git, interdits, fin de session. Ce fichier ne porte que le contrat commun et ce qui est propre à Widoo. En cas de divergence entre les deux, le skill l'emporte sur la procédure, ce fichier l'emporte sur les faits du projet (labels, jalons, scripts, chemins), et la divergence se corrige au plus vite dans l'un ou dans l'autre.
 
 - **Aucun mode déclaré = lecture seule.** Demander le mode avant toute écriture.
 - Annoncer le mode actif dans la première réponse (« Mode actif : CODE »).
@@ -27,20 +29,20 @@ En début de session, le mode de travail est déclaré : **DESIGN**, **MANAGER**
 
 ### Matrice des permissions
 
-| Surface | DESIGN | MANAGER | CODE | ORCHESTRATOR |
-|---|:-:|:-:|:-:|:-:|
-| Wiki — pages, sidebar | ✍️ | 👁 | 👁 | 👁 |
-| Issues — création, édition, open/close, labels, milestones, pin | 👁 | ✍️ | 👁 | 👁 |
-| GitHub Project — Status d'un item | 👁 | ✍️ | ✍️ sur son ticket | 👁 |
-| GitHub Project — champs, vues, workflows | 👁 | 👁 | 👁 | 👁 |
-| Commentaires d'issues et de PR | 👁 | ✍️ | ✍️ | 👁 |
-| Codebase — fichiers, branches, commits, push, PR | 👁 | 👁 | ✍️ | 👁 |
-| `docs/decisions.md` (journal des décisions durables) | ✍️ | ✍️ | 👁 | 👁 |
-| CLAUDE.md, SECURITY.md, `.github/` | 👁 | 👁 | ✍️ par PR `type:chore` labellisée `area:process` | 👁 |
-| Settings du dépôt, secrets, protections de branche, GCP, EAS, stores | ❌ | ❌ | ❌ | ❌ |
-| Déléguer à un sous-agent | — | — | — | ✍️ |
+| Surface | INITIALISATION | DESIGN | MANAGER | CODE | ORCHESTRATOR |
+|---|:-:|:-:|:-:|:-:|:-:|
+| Wiki — pages, sidebar | 👁 (délègue) | ✍️ | 👁 | 👁 | 👁 |
+| Issues — création, édition, open/close, labels, milestones, pin | 👁 (délègue) | 👁 | ✍️ | 👁 | 👁 |
+| GitHub Project — Status d'un item | 👁 (délègue) | 👁 | ✍️ | ✍️ sur son ticket | 👁 |
+| GitHub Project — champs, vues, workflows | 👁 | 👁 | 👁 | 👁 | 👁 |
+| Commentaires d'issues et de PR | 👁 (délègue) | ✍️ tickets `type:design` | ✍️ | ✍️ | 👁 |
+| Codebase — fichiers, branches, commits, push, PR | 👁 (délègue) | 👁 | 👁 | ✍️ | 👁 |
+| `docs/decisions.md` (journal des décisions durables) | ✍️ | ✍️ | ✍️ | 👁 | 👁 |
+| CLAUDE.md, SECURITY.md, `.github/` | ✍️ | 👁 | 👁 | ✍️ par PR `type:chore` labellisée `area:process` | 👁 |
+| Settings du dépôt, secrets, protections de branche, GCP, EAS, stores | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Déléguer à un sous-agent | ✍️ | — | — | — | ✍️ |
 
-👁 lecture libre. ✍️ écriture autorisée. ❌ interdit dans tous les modes : demander à Ilan. LIBRE et ITERATION : ✍️ sur wiki, issues, commentaires et codebase, ❌ sur les settings.
+👁 lecture libre. ✍️ écriture autorisée. — hors process pour ce mode : demander à Ilan. ❌ interdit dans tous les modes : demander à Ilan. LIBRE et ITERATION : ✍️ sur wiki, issues, commentaires et codebase, ❌ sur les settings. INITIALISATION et ORCHESTRATOR n'écrivent pas eux-mêmes sur les surfaces du projet : tout passe par un sous-agent, sous les règles de son mode. Le bootstrap de Widoo est fait, INITIALISATION ne sert plus.
 
 **Langues** : wiki, issues, commentaires et libellés utilisateur en **français** ; code, identifiants, noms de fichiers et messages de commit en **anglais**.
 
@@ -74,109 +76,37 @@ flowchart LR
 
 ---
 
-## Mode DESIGN — le wiki est le cahier des charges
+## Spécificités Widoo, par mode
 
-**Démarrage de session**
+Le reste de la procédure est dans le skill du mode.
 
-```bash
-[ -d ../widoo-app.wiki ] && git -C ../widoo-app.wiki pull \
-  || git clone https://github.com/Inprogress-Agency/widoo-app.wiki.git ../widoo-app.wiki
-gh issue list --label needs-design --state open
-gh issue list --label type:design --state open
-gh issue list --state closed --limit 15
-```
+**DESIGN** — le wiki est le cahier des charges.
 
-**Conventions**
+- Les écrans portent des identifiants stables `E-xx` (mobile) et `A-xx` (admin) ; un nouvel écran est ajouté à la page `Ecrans` avant d'être ticketé. Les maquettes vivent dans Claude Design, `Ecrans` en est le miroir.
+- Chaque planche a un ticket `type:design` créé par MANAGER. DESIGN y commente l'avancement, les questions ouvertes et le lien de la planche ; il ne le crée pas, ne le ferme pas et ne le labellise pas.
+- Une planche validée par Ilan est exportée dans le wiki sous `design/<E-xx>/` (PNG, et le bundle HTML si Claude Design le fournit), la section de `Ecrans` reçoit l'image, le lien et la date, et passe en 🟢. La fermeture du ticket design et la libération des tickets dev reviennent à MANAGER, par `scripts/validate-design.sh`.
+- Une planche validée qui change ensuite crée une entrée `D-xxx` et rouvre le ticket design ; les tickets dev liés repassent `needs-design` s'ils ne sont pas commencés.
+- Ajouter au démarrage `gh issue list --label type:design --state open`.
+- Une décision durable (architecture, périmètre, règle métier) est aussi inscrite dans `docs/decisions.md` du dépôt, par une PR `type:chore`.
 
-- Pages en `Kebab-Case` sans accents, contenu en français. Bloc de statut en tête : `**Statut :** 🟡 Brouillon · **Màj :** AAAA-MM-JJ · **Tickets :** #12 #14`.
-- 🟡 → 🟢 uniquement sur accord explicite d'Ilan dans la session. 🔵 en constatant les tickets fermés.
-- `_Sidebar.md` tenu à jour.
-- Toute évolution notable = entrée `D-xxx` dans `Design-Changelog`. Annoter les entrées déjà traitées (`→ #N`).
-- Les écrans portent des identifiants stables `E-xx` / `A-xx` ; un nouvel écran est ajouté à `Ecrans` avant d'être ticketé.
-- Une décision durable (architecture, périmètre, règle métier) est aussi inscrite dans `docs/decisions.md` du dépôt par une PR `type:chore`.
-- Commits du wiki : préfixe `design:`, en français, push direct.
+**MANAGER** — les issues sont les tickets.
 
-**Suivi des maquettes**
+- Le contexte d'un ticket porte en plus le ou les écrans et le D-ID : `[Ecrans](https://github.com/Inprogress-Agency/widoo-app/wiki/Ecrans#e-01--accueil-carte) · E-01 · D-001`. Un ticket tient sous le plafond de diff.
+- **Labels** : `type:feature` · `type:bug` · `type:chore` · `type:polish` · `type:design` ; `prio:P0` à `prio:P3` ; `status:ready` · `status:blocked` · `needs-design` ; `area:mobile` · `area:api` · `area:admin` · `area:orchestration` · `area:infra` · `area:process` ; `level:2` · `level:3` (posés sur les PR selon `SECURITY.md`).
+- **Milestones** = jalons de la page wiki `Roadmap` (`v0.1` … `v1.0`).
+- **Maquettes et tickets dev** : un ticket dev qui touche un écran porte `needs-design` tant que son ticket design n'est pas fermé, et est déclaré bloqué par lui (`gh api -X POST repos/{owner}/{repo}/issues/{n}/dependencies/blocked_by -F issue_id=<id>`). La validation d'une planche se fait par `scripts/validate-design.sh <n° ticket design> --date AAAA-MM-JJ --link <url Claude Design>` (`--dry-run` d'abord) : pousse le wiki, vérifie le 🟢 sous chaque écran dans `Ecrans`, ferme le ticket design avec le lien en commentaire et libère les tickets dev qu'il bloque (ligne `Maquette : <lien wiki> · validée le <date>`, `needs-design` → `status:ready`, Status Prêts ; le ticket design passe Terminés), puis lance `scripts/sync-project.sh`.
+- **Contrôles de début de session**, après la revue du skill : `scripts/check-design-links.sh` liste les tickets `status:ready` à écran sans ligne `Maquette :`, ceux encore bloqués par un ticket ouvert, et ceux restés `needs-design` alors que leur ticket design est fermé ; corriger avant toute autre action. Puis `scripts/sync-project.sh` aligne le Status du Project sur les labels.
+- **Fermeture** : un ticket dev se ferme par le merge d'une PR `Fixes #N`, jamais à la main. Un ticket design se ferme par `scripts/validate-design.sh`.
+- **GitHub Project « Widoo — MVP »** : la seule vue d'avancement. Champs : Status, Epic (liste, obligatoire), Milestone, Début et Fin (sur les epics, pour la Roadmap). Statuts : **Cadrage** (à spécifier, maquetter ou découper ; hors Board), **Prêts** (= `status:ready`), **En cours** (CODE, à l'ouverture de la branche), **À review** (CODE, à l'ouverture de la PR), **À déployer** (workflow intégré, à la fermeture de l'issue par le merge), **Terminés** (après déploiement vérifié en staging, par Ilan ou Paul). Vues : Board (Prêts → Terminés), Roadmap (epics), Backlog (tout, groupé par Epic). Vérifier que chaque ticket a un Epic et que tout item En cours ou À review a une branche ou une PR ouverte. Aucun autre champ, colonne ou vue sans décision d'Ilan.
 
-- Chaque planche Claude Design a un ticket `type:design` (« Design — E-01 accueil carte et liste »), dans le milestone des tickets dev qu'elle débloque, avec la checklist du modèle ci-dessous. Les tickets dev concernés sont déclarés bloqués par lui (dépendance GitHub « blocked by »). DESIGN ne crée pas ces tickets : MANAGER le fait ; DESIGN y commente l'avancement et le lien de la planche.
-- Une maquette est validée quand Ilan le dit dans la session. DESIGN exporte alors la planche (PNG, et le bundle HTML si Claude Design le fournit) dans le wiki sous `design/<E-xx>/`, met à jour la section de `Ecrans` (image, lien Claude Design, date), passe la section en 🟢, et ferme le ticket design avec le lien de la planche en commentaire.
-- Une maquette validée qui change ensuite crée une entrée `D-xxx` et rouvre le ticket design ; les tickets dev liés repassent `needs-design` s'ils ne sont pas commencés.
+**CODE** — la codebase et les commentaires.
 
-**Modèle de ticket design**
-
-```markdown
-Titre : Design — E-xx <nom de l'écran>
-
-## Contexte
-Lien wiki Ecrans#E-xx · références du design system · tickets dev débloqués : #N #M
-
-## À produire
-- [ ] composants et variantes
-- [ ] états : vide, chargement, erreur, sans réseau, géolocalisation refusée si carte
-- [ ] texte système à 150 % sans troncature des textes essentiels
-- [ ] contrastes vérifiés (AA texte, 3:1 composants)
-- [ ] libellés lecteur d'écran des contrôles
-- [ ] planche nommée avec l'identifiant d'écran
-
-## Validation
-Lien de la planche Claude Design : …
-Validée par Ilan le : …
-```
-
-**Interdits** : issues (sauf commentaires sur les tickets design), codebase. **Fin de session** : push, résumé (pages, entrées `D-xxx`, questions ouvertes).
-
----
-
-## Mode MANAGER — les issues sont les tickets
-
-**Démarrage de session**, dans l'ordre : `Design-Changelog` sans ticket ; commentaires sur `📥 Inbox — Triage` ; PR ouvertes (`gh pr list`) ; tickets ⛔ bloqués ; backlog (priorités, milestones, tickets périmés).
-
-**Format d'un ticket**
-
-```markdown
-Titre : impératif court (« Afficher les marqueurs de parcours sur la carte »)
-
-## Contexte
-Pourquoi + lien wiki (obligatoire pour type:feature) + écran(s) + D-ID.
-Ex. : [Ecrans](https://github.com/Inprogress-Agency/widoo-app/wiki/Ecrans#e-01--accueil-carte) · E-01 · D-001
-
-## Comportement attendu
-Spécification concrète et mesurable.
-
-## Critères d'acceptation
-- [ ] critère vérifiable
-
-## Notes techniques (facultatif)
-```
-
-1 ticket = 1 unité livrable en une session de code, sous le plafond de diff. Une feature sans section wiki 🟢 n'est pas ticketable → `needs-design`.
-
-**Labels** : `type:feature` · `type:bug` · `type:chore` · `type:polish` · `type:design` ; `prio:P0` à `prio:P3` ; `status:ready` · `status:blocked` · `needs-design` ; `area:mobile` · `area:api` · `area:admin` · `area:orchestration` · `area:infra` · `area:process` ; `level:2` · `level:3` (posés sur les PR selon SECURITY.md).
-
-**Milestones** = jalons de la page wiki `Roadmap` (`v0.1` … `v1.0`).
-
-**Maquettes et tickets dev** : un ticket dev qui touche un écran porte `needs-design` tant que son ticket design n'est pas fermé, et est déclaré bloqué par lui (`gh api -X POST repos/{owner}/{repo}/issues/{n}/dependencies/blocked_by -F issue_id=<id>`). Quand le ticket design est fermé, MANAGER retire `needs-design`, pose `status:ready` et ajoute au contexte du ticket dev la ligne `Maquette : <lien wiki Ecrans#E-xx> · validée le <date>`. Contrôle en début de session : `scripts/check-design-links.sh` liste les tickets `status:ready` à écran sans ligne Maquette ou avec un ticket design encore ouvert ; corriger avant toute autre action, puis `scripts/sync-project.sh` aligne le Status du Project sur les labels (`status:ready` → Prêts, `needs-design` → Cadrage, ticket design fermé → Terminés). La validation d'une planche se fait par `scripts/validate-design.sh <n° ticket design> --date AAAA-MM-JJ --link <url Claude Design>` (`--dry-run` d'abord) : pousse le wiki, vérifie le 🟢 sous chaque écran dans `Ecrans`, ferme le ticket design avec le lien en commentaire et libère les tickets dev qu'il bloque (ligne `Maquette :`, `needs-design` → `status:ready`, Status Prêts dans le Project ; le ticket design passe Terminés), puis lance `scripts/sync-project.sh`.
-
-**GitHub Project « Widoo — MVP »** : la seule vue d'avancement. Champs : Status, Epic (liste, obligatoire), Milestone, Début et Fin (sur les epics, pour la Roadmap). Statuts : **Cadrage** (à spécifier, maquetter ou découper ; visible dans Backlog seulement), **Prêts** (= `status:ready`, posé par MANAGER), **En cours** (CODE, à l'ouverture de la branche), **À review** (CODE, à l'ouverture de la PR), **À déployer** (workflow intégré, à la fermeture de l'issue par le merge), **Terminés** (après déploiement vérifié en staging, par Ilan ou Paul). Vues : Board (Prêts → Terminés), Roadmap (epics), Backlog (tout, groupé par Epic). En début de session MANAGER : `scripts/sync-project.sh` (tout ticket `status:ready` en Prêts, tout `needs-design` en Cadrage, tout ticket design fermé en Terminés) ; vérifier ensuite que chaque ticket a un Epic et que tout item En cours ou À review a une branche ou une PR ouverte ; sinon corriger. Aucun autre champ, colonne ou vue sans décision d'Ilan.
-
-**Interdits** : wiki, codebase, branches et PR de CODE.
-
----
-
-## Mode CODE — codebase + commentaires
-
-**Démarrage** : `git pull` ; ticket désigné, sinon `gh issue list --label status:ready --state open` → P0 > P1 > P2 > P3, milestone en cours, puis le plus ancien ; annoncer le ticket, commenter `🔨 Démarrage — plan : …`, et passer son Status à « En cours » dans le projet (`gh project item-edit`), puis à « À review » à l'ouverture de la PR. Le passage à « À déployer » est automatique à la fermeture de l'issue par le merge ; « Terminés » se pose après vérification en staging.
-
-**Git**
-
-- Toujours une branche `issue/N-slug` et une PR ; jamais de commit direct sur `main`.
+- Au démarrage, passer le Status du ticket à « En cours », puis à « À review » à l'ouverture de la PR (`gh project item-edit`). « À déployer » est automatique au merge ; « Terminés » se pose après vérification en staging.
+- Branche `issue/N-slug` ; une PR de process sans ticket à fermer utilise `chore/<sujet>` et `Refs #N`.
 - Commits : `feat|fix|chore|polish|test|docs(scope): description` en anglais.
-- PR : titre `<type>(<scope>): <action en français>` sous 72 caractères, corps selon `.github/pull_request_template.md`, `Fixes #N` (ou `Refs #N` pour une PR de process sans ticket à fermer).
+- PR : titre `<type>(<scope>): <action en français>` sous 72 caractères, corps selon `.github/pull_request_template.md`, `Fixes #N` (ou `Refs #N`).
 - **Plafond de diff** : viser moins de 400 lignes utiles, 500 maximum justifié dans la PR ; au-delà, redécouper. Formatage mécanique et fichiers générés identifiés à part. Aucune compression du code pour tenir le seuil.
-- Avant publication : `pnpm lint && pnpm typecheck && pnpm test` verts en local ; la CI est bloquante.
-- Niveau de risque de la PR selon `SECURITY.md` ; niveau 2 et 3 signalés à Ilan.
-
-**Commandes utiles**
+- Avant publication : `pnpm lint && pnpm typecheck && pnpm test` verts en local ; la CI est bloquante. Niveau de risque selon `SECURITY.md` ; niveaux 2 et 3 signalés à Ilan.
 
 ```bash
 pnpm install
@@ -186,13 +116,9 @@ pnpm --filter api db:migrate && pnpm --filter api db:seed
 docker compose up -d     # postgres + postgis local
 ```
 
-**Maintenabilité** : petits modules par domaine ; types, erreurs, accès aux données et règles métier centralisés (`packages/shared`, `packages/orchestration`) ; un libellé visible n'est jamais une clé technique ni une valeur persistée ; toute logique métier nouvelle est testée ; nouvelle dépendance évaluée et mentionnée dans la PR.
-
-**Accessibilité** : toute PR mobile qui touche un écran respecte les règles du wiki [Direction-Artistique › Accessibilité](https://github.com/Inprogress-Agency/widoo-app/wiki/Direction-Artistique#accessibilit%C3%A9--r%C3%A8gles-pour-le-code) : aucune hauteur fixe sur un composant qui contient du texte ; `maxFontSizeMultiplier={1.3}` sur les composants denses, posé dans les composants de base du design system (chips, barre d'onglets, étiquettes de marqueurs, compteur, pilule de tri, pastilles) ; deux reflows seulement à `fontScale >= 1.3` (tooltip réduite, résumé de parcours avec le bouton sous le titre) ; contrastes 4,5:1 texte et 3:1 composants (bleu encre `#3A4FA8` pour un lien sur gris chaud) ; `accessibilityLabel`, `accessibilityRole` et `accessibilityState` sur chaque contrôle, card en un seul élément avec `accessibilityActions` ; zones tactiles 44 px. Test à 150 % de texte système avant d'ouvrir la PR, mentionné dans sa description.
-
-**Commentaires** : démarrage avec plan ; `⛔ Bloqué : <raison>` (et sur l'Inbox si c'est une question de design) ; découvertes hors périmètre sur `📥 Inbox — Triage`, jamais dans le diff.
-
-**Interdits** : wiki, création ou fermeture manuelle d'issues, labels, milestones ; settings, secrets, déploiements en production.
+- Une découverte hors périmètre va en commentaire sur `📥 Inbox — Triage`, jamais dans le diff : ni `TODO`, ni `FIXME`, ni code mort laissé en place.
+- **Maintenabilité** : petits modules par domaine ; types, erreurs, accès aux données et règles métier centralisés (`packages/shared`, `packages/orchestration`) ; un libellé visible n'est jamais une clé technique ni une valeur persistée ; toute logique métier nouvelle est testée ; nouvelle dépendance évaluée et mentionnée dans la PR.
+- **Accessibilité** : toute PR mobile qui touche un écran respecte les règles du wiki [Direction-Artistique › Accessibilité](https://github.com/Inprogress-Agency/widoo-app/wiki/Direction-Artistique#accessibilit%C3%A9--r%C3%A8gles-pour-le-code) : aucune hauteur fixe sur un composant qui contient du texte ; `maxFontSizeMultiplier={1.3}` sur les composants denses, posé dans les composants de base du design system (chips, barre d'onglets, étiquettes de marqueurs, compteur, pilule de tri, pastilles) ; deux reflows seulement à `fontScale >= 1.3` (tooltip réduite, résumé de parcours avec le bouton sous le titre) ; contrastes 4,5:1 texte et 3:1 composants (bleu encre `#3A4FA8` pour un lien sur gris chaud) ; `accessibilityLabel`, `accessibilityRole` et `accessibilityState` sur chaque contrôle, card en un seul élément avec `accessibilityActions` ; zones tactiles 44 px. Test à 150 % de texte système avant d'ouvrir la PR, mentionné dans sa description.
 
 ---
 
