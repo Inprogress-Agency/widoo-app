@@ -31,17 +31,25 @@ edit_body() { # $1 = n°, $2 = nouveau corps (non affiché en dry-run)
   if [ -n "$DRY" ]; then echo "+ gh issue edit $1 --body (corps mis à jour)"; else gh issue edit "$1" -R "$REPO" --body "$2" >/dev/null; fi
 }
 
-# Status du Project « Widoo — MVP » : Prêts pour un ticket dev libéré, Terminés pour le ticket design fermé
+# Status du Project « Widoo — MVP » : Prêts pour un ticket dev libéré, Terminés pour le ticket design fermé.
+# Même garde que sync-project.sh (status_decision) : un ticket parti en développement garde son statut.
+# shellcheck source-path=SCRIPTDIR
+source "$(dirname "$0")/sync-project.sh"
 OWNER="${REPO%%/*}"; PROJECT_TITLE="${PROJECT_TITLE:-Widoo — MVP}"
 PNUM=$(gh project list --owner "$OWNER" --format json --jq ".projects[] | select(.title == \"$PROJECT_TITLE\") | .number" | head -1)
 PID=$(gh project view "$PNUM" --owner "$OWNER" --format json --jq '.id')
 PFIELDS=$(gh project field-list "$PNUM" --owner "$OWNER" --format json)
 PSTATUS=$(jq -r '.fields[] | select(.name == "Status") | .id' <<<"$PFIELDS")
 project_status() { # $1 = n° issue, $2 = nom du statut
-  local oid item
+  local oid row item cur
   oid=$(jq -r --arg n "$2" '.fields[] | select(.name == "Status") | .options[] | select(.name == $n) | .id' <<<"$PFIELDS")
-  item=$(gh project item-list "$PNUM" --owner "$OWNER" --limit 500 --format json --jq ".items[] | select(.content.number == $1) | .id" | head -1)
+  row=$(gh project item-list "$PNUM" --owner "$OWNER" --limit 500 --format json --jq '.items[] | select(.content.number == '"$1"') | [.id, (.status // "-")] | @tsv' | head -1)
+  item=${row%%$'\t'*}; cur=${row#*$'\t'}
   [ -n "$oid" ] && [ -n "$item" ] || { echo "  #$1 : Project non mis à jour (statut « $2 » ou item introuvable)"; return 0; }
+  case $(status_decision "$cur" "$2") in
+    same) echo "  #$1 : Project déjà $2"; return 0 ;;
+    keep) echo "  #$1 : Project $cur conservé, $2 non posé (ticket parti en développement)"; return 0 ;;
+  esac
   run gh project item-edit --project-id "$PID" --id "$item" --field-id "$PSTATUS" --single-select-option-id "$oid" >/dev/null
   echo "  #$1 : Project → $2"
 }
