@@ -1,0 +1,12 @@
+[
+  {
+    "name": "delete-after-30-days",
+    "action": { "type": "Delete" },
+    "condition": { "tagState": "any", "olderThan": "30d" }
+  },
+  {
+    "name": "keep-10-most-recent",
+    "action": { "type": "Keep" },
+    "mostRecentVersions": { "keepCount": 10 }
+  }
+]
