@@ -21,7 +21,7 @@ Formatage mécanique : non
 
 ## Risque
 
-Niveau : <!-- 1, 2 ou 3 selon SECURITY.md, avec justification en une ligne. -->
+Niveau : <!-- 1, 2 ou 3 selon CLAUDE.md › Sécurité et données, avec justification en une ligne. -->
 
 Taille : <!-- À renseigner dès qu'un commit dépasse 400 lignes utiles : le commit et la justification. -->
 
