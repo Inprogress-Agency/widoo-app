@@ -10,6 +10,7 @@ API de staging sur Google Cloud ([#24](https://github.com/Inprogress-Agency/wido
 | `gcp/2-database.sh` | réseau, Cloud SQL, base, utilisateur, secrets |
 | `gcp/3-run.sh` | service Cloud Run `widoo-api` et job de migration `widoo-api-migrate` |
 | `gcp/artifact-cleanup.json` | nettoyage des images : les 10 plus récentes gardées, les autres supprimées après 30 jours |
+| `../.github/workflows/deploy-staging.yml` | build, migration et déploiement à chaque push sur `main` |
 
 ## Pourquoi des scripts `gcloud` plutôt que Terraform
 
@@ -40,6 +41,13 @@ read -rs dsn && printf '%s' "$dsn" | gcloud secrets versions add sentry-dsn --da
 Sans valeur dans `sentry-dsn`, le service démarre sans envoyer de rapports d'erreur. Relancer `3-run.sh` une fois le DSN ajouté.
 
 Si une commande échoue juste après une création, c'est la propagation IAM (jusqu'à une minute) : relancer le même script.
+
+Côté GitHub, une fois (Settings › Environments) :
+
+1. créer l'environnement `staging`, avec **Deployment branches** limité à `main` ;
+2. y poser les quatre variables affichées à la fin de `1-foundation.sh` (`GCP_PROJECT_ID`, `GCP_REGION`, `GCP_WIF_PROVIDER`, `GCP_DEPLOYER_SA`). Ce sont des identifiants, pas des secrets : aucun secret GitHub n'est nécessaire.
+
+Tant que ces variables manquent, le workflow échoue dès sa première étape, avec le nom de la variable absente.
 
 ## Base de données
 
@@ -106,3 +114,57 @@ Ordre de grandeur mensuel en `europe-west9`, à confirmer dans le simulateur de 
 | Artifact Registry (10 images au plus, 2 Go environ) | moins de 0,50 € |
 | Secret Manager, fédération d'identité, réseau VPC | 0 € environ |
 | **Total** | **13 à 16 € environ** |
+
+## Déploiement
+
+`deploy-staging.yml` tourne à chaque push sur `main`, ou à la main depuis `main` (Actions › Deploy staging › Run workflow). Il ne tourne jamais sur une PR. Un seul déploiement à la fois, jamais annulé en cours.
+
+1. Build de l'image, avant toute authentification : aucun fichier d'identifiants Google ne peut entrer dans l'image.
+2. Workload Identity Federation : le jeton OIDC du run est échangé contre des identifiants Google d'une heure.
+3. Push dans Artifact Registry, étiquette = SHA du commit. La suite utilise le digest.
+4. Job `widoo-api-migrate` sur la nouvelle image : migrations en attente, chacune dans une transaction. Un échec arrête le workflow avant de toucher au service.
+5. Nouvelle révision déployée **sans trafic**, étiquetée `candidate`.
+6. `/v1/health` de cette révision doit répondre 200 (`database: up`). Sinon le workflow échoue et le trafic reste sur la révision précédente.
+7. Trafic basculé sur la nouvelle révision, puis `/v1/health` de l'URL publique.
+
+Durée attendue : 5 à 7 minutes, dont 2 à 3 de build. Les logs ne montrent que l'image, les noms de révision, les URL et la réponse de `/v1/health` : les valeurs des secrets ne passent jamais par GitHub.
+
+## Vérifier les critères de #24
+
+```bash
+URL=$(gcloud run services describe widoo-api --region=europe-west9 --project=widoo-staging --format='value(status.url)')
+curl -s "$URL/v1/health"    # {"status":"ok","database":"up"}
+```
+
+- **Moins de 10 minutes** : durée du run dans l'onglet Actions, après une fusion dans `main` ou un « Run workflow ».
+- **Aucun secret** : relire les logs du run ; `git grep -nE 'postgres://[^:]+:[^@]+@'` ne trouve que les valeurs locales de développement.
+- **Retour arrière** : l'exercer une fois (section suivante), puis revenir avec `--to-latest`.
+- **`TRUST_PROXY`** : lancer trois fois `curl -s -D - -o /dev/null "$URL/v1/health" | grep -i x-ratelimit-remaining` depuis le poste, puis une fois depuis Cloud Shell. Cloud Shell a une autre adresse IP : si son compteur repart de 999, chaque client a bien sa propre limite. S'il prolonge le décompte du poste, le pair direct n'est pas en `linklocal`. Dans ce cas, poser la bonne plage (`TRUST_PROXY=<plage> ./3-run.sh`) et la reporter dans le script par une PR. Le compteur est tenu en mémoire, par instance : faire le test hors trafic.
+
+## Retour arrière
+
+**Application** : revenir à la révision précédente, en quelques secondes et sans rebuild.
+
+```bash
+gcloud run revisions list --service=widoo-api --region=europe-west9 --project=widoo-staging
+gcloud run services update-traffic widoo-api --region=europe-west9 --project=widoo-staging \
+  --to-revisions=<révision précédente>=100
+```
+
+- Cible : service `widoo-api` de staging. Effet : tout le trafic sur l'ancienne image. Retour : `--to-latest`.
+- Puis revert du commit fautif par PR. Son déploiement remet le trafic sur la dernière révision. En attendant, un autre push sur `main` redéploierait le commit fautif : suspendre le workflow avec `gh workflow disable deploy-staging.yml`, puis `gh workflow enable deploy-staging.yml`.
+
+**Schéma** : les migrations sont additives (SECURITY.md). L'ancienne révision fonctionne donc sur le nouveau schéma, et il n'y a pas de retour arrière de schéma. Une migration en échec est annulée par sa transaction et bloque le déploiement.
+
+**Données** : un retour arrière applicatif ne restaure aucune donnée. Pour restaurer : cloner l'instance à un instant donné, par exemple `gcloud sql instances clone widoo-db widoo-db-restore --point-in-time=2026-09-23T10:00:00Z`, vérifier le clone, puis pointer `database-url` dessus. C'est une action manuelle, à annoncer.
+
+**Accès de GitHub** : coupé immédiatement par `gcloud iam workload-identity-pools providers disable widoo-app --location=global --workload-identity-pool=github --project=widoo-staging`.
+
+**Infrastructure** : tout vit dans le projet dédié `widoo-staging`. Supprimer une ressource par la commande `delete` correspondante (l'instance Cloud SQL demande d'abord `--no-deletion-protection`), ou le projet entier, récupérable 30 jours.
+
+## Dépannage
+
+- **`PERMISSION_DENIED` au premier déploiement** : le message nomme la permission manquante. Le déployeur n'a de droits que sur le dépôt d'images, le service, le job et les deux comptes d'exécution. Ajouter la permission sur la ressource concernée plutôt que sur le projet.
+- **Authentification refusée par la condition** : le run ne vient pas de `main`, de l'environnement `staging` ou du fichier `deploy-staging.yml`. Un renommage du workflow impose de relancer `1-foundation.sh` avec la nouvelle valeur de `GITHUB_WORKFLOW_REF`.
+- **`allUsers` refusé par `3-run.sh`** : une règle d'organisation restreint les membres IAM à un domaine. Ajouter une exception pour `widoo-staging`, ou désactiver le contrôle IAM de l'appelant : `gcloud run services update widoo-api --region=europe-west9 --no-invoker-iam-check`.
+- **Migration en échec** : `gcloud run jobs executions list --job=widoo-api-migrate --region=europe-west9`, puis les logs de l'exécution dans Cloud Logging.

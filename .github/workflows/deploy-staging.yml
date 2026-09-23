@@ -1,0 +1,124 @@
+name: Deploy staging
+
+# The staging API follows main (SECURITY.md); production is never deployed from here.
+# Setup, verification and rollback: infra/README.md.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deployment at a time. A running one is never cancelled: its migration may be under way.
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build, migrate, deploy
+    if: github.repository == 'Inprogress-Agency/widoo-app'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: staging
+      url: ${{ steps.deploy.outputs.url }}
+    permissions:
+      contents: read
+      # OIDC token exchanged for short-lived Google credentials: no service account key.
+      id-token: write
+    # Identifiers, not secrets: variables of the GitHub environment staging (infra/README.md).
+    env:
+      GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      GCP_REGION: ${{ vars.GCP_REGION }}
+      GCP_WIF_PROVIDER: ${{ vars.GCP_WIF_PROVIDER }}
+      GCP_DEPLOYER_SA: ${{ vars.GCP_DEPLOYER_SA }}
+      SERVICE: widoo-api
+      JOB: widoo-api-migrate
+      IMAGE: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/widoo/api:${{ github.sha }}
+    steps:
+      - name: Check settings
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in GCP_PROJECT_ID GCP_REGION GCP_WIF_PROVIDER GCP_DEPLOYER_SA; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Variable $name absente de l'environnement staging (infra/README.md)."
+              missing=1
+            fi
+          done
+          exit "$missing"
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Built before authenticating: no Google credential file can enter the build context.
+      # A plain image manifest, without attestations, as Cloud Run expects.
+      - name: Build image
+        run: |
+          docker build --platform linux/amd64 --provenance=false -f infra/api.Dockerfile \
+            -t "$IMAGE" .
+
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOYER_SA }}
+
+      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+
+      # The job and the service run the pushed digest, not the tag.
+      - name: Push image
+        id: image
+        run: |
+          set -euo pipefail
+          gcloud auth configure-docker "$GCP_REGION-docker.pkg.dev" --quiet
+          docker push "$IMAGE"
+          digest=$(gcloud artifacts docker images describe "$IMAGE" \
+            --format='value(image_summary.fully_qualified_digest)')
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+
+      # Cloud SQL has a private IP only: migrations run in the VPC, as a Cloud Run job. A failed
+      # migration stops the workflow before the service changes.
+      - name: Migrate database
+        env:
+          DIGEST: ${{ steps.image.outputs.digest }}
+        run: |
+          set -euo pipefail
+          gcloud run jobs update "$JOB" --image "$DIGEST" --region "$GCP_REGION" --quiet
+          gcloud run jobs execute "$JOB" --region "$GCP_REGION" --wait --quiet
+
+      # The new revision gets no traffic until its own URL answers /v1/health with the database up.
+      - name: Deploy revision without traffic
+        id: deploy
+        env:
+          DIGEST: ${{ steps.image.outputs.digest }}
+        run: |
+          set -euo pipefail
+          gcloud run deploy "$SERVICE" --image "$DIGEST" --region "$GCP_REGION" \
+            --no-traffic --tag candidate --quiet
+          gcloud run services describe "$SERVICE" --region "$GCP_REGION" --format json \
+            > "$RUNNER_TEMP/service.json"
+          echo "url=$(jq -r '.status.url' "$RUNNER_TEMP/service.json")" >> "$GITHUB_OUTPUT"
+          candidate=$(jq -r '.status.traffic[] | select(.tag == "candidate") | .url' \
+            "$RUNNER_TEMP/service.json")
+          echo "candidate=$candidate" >> "$GITHUB_OUTPUT"
+
+      - name: Check new revision health
+        env:
+          URL: ${{ steps.deploy.outputs.candidate }}
+        run: |
+          curl -fsS --retry 6 --retry-all-errors --retry-delay 5 --max-time 10 "$URL/v1/health" || {
+            echo "::error::La nouvelle révision ne répond pas : le trafic reste sur la précédente."
+            exit 1
+          }
+
+      - name: Send traffic to new revision
+        run: gcloud run services update-traffic "$SERVICE" --region "$GCP_REGION" --to-latest --quiet
+
+      - name: Check service health
+        env:
+          URL: ${{ steps.deploy.outputs.url }}
+        run: curl -fsS --retry 3 --retry-all-errors --retry-delay 5 --max-time 10 "$URL/v1/health"
