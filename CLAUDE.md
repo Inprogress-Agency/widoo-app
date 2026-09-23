@@ -59,8 +59,8 @@ flowchart LR
 
 1. **DESIGN** : la feature est spécifiée dans le wiki (🟡 Brouillon), les maquettes faites dans Claude Design, la page `Ecrans` mise à jour, le tout validé par Ilan (🟢 Validé), annoncé dans `Design-Changelog`.
 2. **MANAGER** : lit le changelog, découpe en tickets (contexte = lien wiki + identifiant d'écran), priorise, labellise `status:ready`, range en milestone.
-3. **CODE** : prend le ticket `status:ready` le plus prioritaire (ou celui désigné), implémente sur `issue/N-slug`, ouvre une PR avec `Fixes #N` et le template rempli. Commente démarrage et blocage.
-4. **MANAGER** : vérifie que la PR tient les critères d'acceptation. **Ilan ou Paul merge** ; le ticket se ferme via `Fixes #N`.
+3. **CODE** : prend le ticket `status:ready` le plus prioritaire (ou celui désigné), implémente sur `issue/N-slug`, ouvre une seule PR pour le ticket, avec `Fixes #N` et le template rempli. Commente démarrage et blocage.
+4. **MANAGER** : vérifie que la PR tient les critères d'acceptation. **Ilan ou Paul fusionne en rebase and merge** ; le ticket se ferme via `Fixes #N`.
 5. **DESIGN** : passe les sections implémentées en 🔵. Le wiki reste le miroir du produit réel.
 
 ## Passerelles entre modes
@@ -91,7 +91,7 @@ Le reste de la procédure est dans le skill du mode.
 
 **MANAGER** — les issues sont les tickets.
 
-- Le contexte d'un ticket porte en plus le ou les écrans et le D-ID : `[Ecrans](https://github.com/Inprogress-Agency/widoo-app/wiki/Ecrans#e-01--accueil-carte) · E-01 · D-001`. Un ticket tient sous le plafond de diff.
+- Le contexte d'un ticket porte en plus le ou les écrans et le D-ID : `[Ecrans](https://github.com/Inprogress-Agency/widoo-app/wiki/Ecrans#e-01--accueil-carte) · E-01 · D-001`. Un ticket est livrable en une session de code et en une seule PR ; le plafond de diff porte sur chaque commit.
 - **Labels** : `type:feature` · `type:bug` · `type:chore` · `type:polish` · `type:design` ; `prio:P0` à `prio:P3` ; `status:ready` · `status:blocked` · `needs-design` ; `area:mobile` · `area:api` · `area:admin` · `area:orchestration` · `area:infra` · `area:process` ; `level:2` · `level:3` (posés sur les PR selon `SECURITY.md`).
 - **Milestones** = jalons de la page wiki `Roadmap` (`v0.1` … `v1.0`).
 - **Maquettes et tickets dev** : un ticket dev qui touche un écran porte `needs-design` tant que son ticket design n'est pas fermé, et est déclaré bloqué par lui (`gh api -X POST repos/{owner}/{repo}/issues/{n}/dependencies/blocked_by -F issue_id=<id>`). La validation d'une planche se fait par `scripts/validate-design.sh <n° ticket design> --date AAAA-MM-JJ --link <url Claude Design>` (`--dry-run` d'abord) : pousse le wiki, vérifie le 🟢 sous chaque écran dans `Ecrans`, ferme le ticket design avec le lien en commentaire et libère les tickets dev qu'il bloque (ligne `Maquette : <lien wiki> · validée le <date>`, `needs-design` → `status:ready`, Status Prêts sauf pour un ticket déjà parti en développement ; le ticket design passe Terminés), puis lance `scripts/sync-project.sh`.
@@ -102,10 +102,11 @@ Le reste de la procédure est dans le skill du mode.
 **CODE** — la codebase et les commentaires.
 
 - Au démarrage, passer le Status du ticket à « En cours », puis à « À review » à l'ouverture de la PR (`gh project item-edit`). « À déployer » est automatique au merge ; « Terminés » se pose après vérification en staging.
-- Branche `issue/N-slug` ; une PR de process sans ticket à fermer utilise `chore/<sujet>` et `Refs #N`.
-- Commits : `feat|fix|chore|polish|test|docs(scope): description` en anglais.
+- Branche `issue/N-slug` et **une seule PR par ticket** (D-014), qui peut contenir plusieurs commits ; une PR de process sans ticket à fermer utilise `chore/<sujet>` et `Refs #N`.
+- Commits : `feat|fix|chore|polish|test|docs(scope): description` en anglais. La fusion en rebase and merge amène chaque commit tel quel sur `main` : chacun est autonome et cohérent, propre dès le départ.
 - PR : titre `<type>(<scope>): <action en français>` sous 72 caractères, corps selon `.github/pull_request_template.md`, `Fixes #N` (ou `Refs #N`).
-- **Plafond de diff** : viser moins de 400 lignes utiles, 500 maximum justifié dans la PR ; au-delà, redécouper. Formatage mécanique et fichiers générés identifiés à part. Aucune compression du code pour tenir le seuil.
+- **Plafond de diff, par commit** : viser moins de 400 lignes utiles par commit, 500 maximum justifié dans la PR (ligne `Taille :`) ; au-delà, redécouper le commit, pas la PR. La PR affiche son total, sans plafond. Formatage mécanique et fichiers générés identifiés à part. Aucune compression du code pour tenir le seuil.
+- **PR empilées** : seulement entre tickets dépendants, une PR par ticket. Après la fusion de la PR du bas, sur la branche suivante : `git fetch origin && git rebase origin/main` (git saute les commits déjà fusionnés à l'identique), puis `git push --force-with-lease` par Ilan ou Paul, et `gh pr edit <n> --base main`.
 - Avant publication : `pnpm lint && pnpm typecheck && pnpm test` verts en local ; la CI est bloquante. Niveau de risque selon `SECURITY.md` ; niveaux 2 et 3 signalés à Ilan.
 
 ```bash
