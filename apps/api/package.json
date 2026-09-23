@@ -10,6 +10,8 @@
     "build": "node build.mjs",
     "db:generate": "tsx src/db/generate.ts",
     "db:migrate": "tsx --env-file-if-exists=.env src/migrate.ts",
+    "db:reset": "tsx --env-file-if-exists=.env src/db/reset.ts && pnpm db:migrate && pnpm db:seed",
+    "db:seed": "tsx --env-file-if-exists=.env src/db/seed-cli.ts",
     "dev": "tsx watch --env-file-if-exists=.env src/server.ts",
     "lint": "eslint .",
     "start": "node --enable-source-maps --env-file-if-exists=.env dist/server.js",
