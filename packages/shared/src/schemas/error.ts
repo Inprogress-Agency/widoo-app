@@ -23,3 +23,14 @@ export const ApiError = z.object({
 });
 export type ApiError = z.infer<typeof ApiError>;
 export type ApiErrorCode = ApiError['code'];
+
+/** One invalid field of a `validation_error`, listed in `details.issues`. */
+export const ValidationIssue = z.object({
+  location: z.enum(['body', 'querystring', 'params', 'headers']),
+  /** Dotted path of the field (`steps.0.placeId`), empty for the whole part. */
+  path: z.string(),
+  /** Zod issue code (`too_big`, `invalid_value`...), for a message localized by the client. */
+  code: z.string(),
+  message: z.string(),
+});
+export type ValidationIssue = z.infer<typeof ValidationIssue>;
