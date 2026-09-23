@@ -11,6 +11,11 @@ const codeByStatus: Partial<Record<number, ApiErrorCode>> = {
   429: 'rate_limited',
 };
 
+/** A client error the handler sends as is: `statusCode`, its `ApiError` code and `message`. */
+export function httpError(statusCode: 401 | 403 | 404 | 409, message: string) {
+  return Object.assign(new Error(message), { statusCode });
+}
+
 /**
  * A failed query as it may be logged. Drizzle writes the query parameters into its message and
  * stack, and the driver error may quote a value or the failing row: personal data (e-mail, first

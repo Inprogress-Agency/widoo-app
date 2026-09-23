@@ -4,6 +4,9 @@ import {
   validatorCompiler,
   type ZodTypeProvider,
 } from 'fastify-type-provider-zod';
+import { createFirebaseVerifier } from './auth/firebase-verifier';
+import { registerAuth } from './auth/plugin';
+import type { TokenVerifier } from './auth/verifier';
 import type { Config } from './config';
 import { createDb, createSql } from './db/client';
 import { registerDocs } from './docs';
@@ -13,10 +16,29 @@ import { configRoutes } from './routes/config';
 import { healthRoutes } from './routes/health';
 import { registerSecurity } from './security';
 
-export type BuildAppOptions = { logStream?: LogStream };
+export type BuildAppOptions = {
+  logStream?: LogStream;
+  /** Tests only (`TestTokenVerifier`): replaces Firebase. Refused in production. */
+  tokenVerifier?: TokenVerifier;
+};
+
+/** Firebase unless a verifier is injected; fails at startup rather than on the first request. */
+function tokenVerifierOf(config: Config, injected: TokenVerifier | undefined): TokenVerifier {
+  if (injected) {
+    if (config.isProduction) {
+      throw new Error('An injected token verifier is refused in production');
+    }
+    return injected;
+  }
+  if (!config.firebaseProjectId) {
+    throw new Error('Invalid environment: FIREBASE_PROJECT_ID is required to serve the API');
+  }
+  return createFirebaseVerifier(config.firebaseProjectId);
+}
 
 /** Builds the API without listening, so that tests drive it with `app.inject()`. */
 export async function buildApp(config: Config, options: BuildAppOptions = {}) {
+  const tokenVerifier = tokenVerifierOf(config, options.tokenVerifier);
   const app = Fastify({
     logger: loggerOptions(config.logLevel, options.logStream),
     genReqId: requestIdOf,
@@ -39,6 +61,7 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   app.addHook('onClose', async () => {
     await sql.end({ timeout: 5 });
   });
+  registerAuth(app, tokenVerifier);
 
   if (!config.isProduction) {
     await registerDocs(app);
