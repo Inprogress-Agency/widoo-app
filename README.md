@@ -44,7 +44,7 @@ Port 5432 déjà pris : copier `.env.example` en `.env` à la racine, changer `P
 | `pnpm format` | Prettier en écriture |
 | `pnpm dev` | serveurs de développement (API et admin, à mesure qu'ils arrivent) |
 
-La configuration TypeScript, ESLint, Prettier et Vitest vit à la racine et chaque workspace en hérite. L'app Expo (`pnpm --filter mobile start`) arrive avec son ticket.
+La configuration TypeScript, ESLint, Prettier et Vitest vit à la racine et chaque workspace en hérite.
 
 Langues : code et commits en anglais ; wiki, issues et interface en français.
 
@@ -73,3 +73,16 @@ Schéma unique : `apps/api/src/db/schema.ts` (Drizzle ORM). Migrations versionn�
 | `db:reset` | vide la base locale (tables, types, extensions, journal des migrations), puis `db:migrate` et `db:seed` ; refusé hors `localhost` et en production |
 
 Dans l'image, `docker run --rm -e DATABASE_URL=… widoo-api node dist/migrate.js` applique les migrations avant un déploiement.
+
+## App mobile
+
+Expo SDK 57, expo-router, `apps/mobile`. L'app appelle l'API locale : la démarrer avec `HOST=0.0.0.0 pnpm --filter api dev` pour qu'un simulateur, un émulateur ou un téléphone du réseau la joigne.
+
+```bash
+pnpm --filter mobile ios        # build de développement (Xcode), installé sur le simulateur, puis Metro
+pnpm --filter mobile android    # idem sur l'émulateur (Android SDK, JDK 17)
+pnpm --filter mobile start      # Metro seul, pour un build de développement déjà installé
+pnpm --filter mobile start --go # Expo Go, sans build : modules natifs d'Expo Go seulement
+```
+
+En développement, l'URL de l'API est l'adresse de la machine qui sert Metro, port 8080 (`src/api/api-url.ts`) ; `EXPO_PUBLIC_API_URL` dans `apps/mobile/.env.local` la remplace. Un build EAS lit `EXPO_PUBLIC_API_URL` dans les variables de son environnement EAS (`eas.json`). Les dossiers `ios/` et `android/` sont générés (`expo prebuild`) et jamais versionnés.
