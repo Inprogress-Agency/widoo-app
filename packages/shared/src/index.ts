@@ -3,6 +3,7 @@ export { labels, type Locale, type TaxonomyLabels } from './labels';
 export * from './taxonomies';
 export * from './thresholds';
 export * from './schemas/common';
+export * from './schemas/config';
 export * from './schemas/error';
 export * from './schemas/place';
 export * from './schemas/route';

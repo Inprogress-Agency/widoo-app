@@ -2,11 +2,11 @@ import { ApiError } from '@widoo/shared';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import { buildApp, type BuildAppOptions } from './app';
-import { loadConfig } from './config';
+import { testConfig } from './test-config';
 
 /** The API with test-only routes: the error handling and logging they exercise are global. */
 async function buildTestApp(env: Record<string, string> = {}, options: BuildAppOptions = {}) {
-  const app = await buildApp(loadConfig({ LOG_LEVEL: 'silent', ...env }), options);
+  const app = await buildApp(testConfig(env), options);
   app.get(
     '/v1/test/search',
     {
