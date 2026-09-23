@@ -6,5 +6,8 @@
   "scripts": {
     "lint": "eslint .",
     "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@widoo/shared": "workspace:*"
   }
 }
