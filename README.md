@@ -21,13 +21,28 @@ docs                 décisions, plans, procédures
 
 ## Démarrer
 
+Prérequis : Node 22 (`.nvmrc`), Docker. pnpm est fourni par corepack à la version fixée dans `package.json`.
+
 ```bash
+nvm use && corepack enable
 pnpm install
-docker compose up -d
+docker compose up -d                  # Postgres 16 + PostGIS sur localhost:5432
 cp apps/api/.env.example apps/api/.env
-pnpm --filter api db:migrate && pnpm --filter api db:seed
-pnpm dev
-pnpm --filter mobile start
+pnpm lint && pnpm typecheck && pnpm test
+pnpm build
 ```
+
+Port 5432 déjà pris : copier `.env.example` en `.env` à la racine, changer `POSTGRES_PORT` et reporter le port dans `apps/api/.env`. Vérifier PostGIS : `docker compose exec db psql -U widoo -c 'select postgis_version()'`.
+
+| Commande | Effet |
+|---|---|
+| `pnpm lint` | ESLint dans chaque workspace, puis Prettier en vérification |
+| `pnpm typecheck` | TypeScript strict, sans émission |
+| `pnpm test` | Vitest (`pnpm test -- --coverage` pour la couverture, comme en CI) |
+| `pnpm build` | build des workspaces qui en ont un |
+| `pnpm format` | Prettier en écriture |
+| `pnpm dev` | serveurs de développement (API et admin, à mesure qu'ils arrivent) |
+
+La configuration TypeScript, ESLint, Prettier et Vitest vit à la racine et chaque workspace en hérite. L'app Expo (`pnpm --filter mobile start`) et les scripts de base (`db:migrate`, `db:seed`) arrivent avec leurs tickets.
 
 Langues : code et commits en anglais ; wiki, issues et interface en français.

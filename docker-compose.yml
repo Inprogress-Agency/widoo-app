@@ -1,0 +1,22 @@
+# Local development database only. The postgis image enables the extension in POSTGRES_DB.
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    # No arm64 build upstream: runs emulated on Apple Silicon.
+    platform: linux/amd64
+    environment:
+      POSTGRES_USER: widoo
+      POSTGRES_PASSWORD: widoo
+      POSTGRES_DB: widoo
+    ports:
+      - '127.0.0.1:${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U widoo -d widoo']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db-data:
