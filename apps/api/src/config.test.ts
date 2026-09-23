@@ -12,6 +12,9 @@ describe('loadConfig', () => {
       logLevel: 'info',
       databaseUrl,
       minAppVersion: '0.0.0',
+      corsOrigins: [],
+      trustedProxies: [],
+      rateLimitMax: 1000,
     });
   });
 
@@ -27,5 +30,23 @@ describe('loadConfig', () => {
     expect(() => loadConfig({ DATABASE_URL: databaseUrl, MIN_APP_VERSION: 'v1' })).toThrow(
       /MIN_APP_VERSION/,
     );
+  });
+
+  it('parses the CORS origins and trusted proxies as lists', () => {
+    const config = loadConfig({
+      DATABASE_URL: databaseUrl,
+      CORS_ORIGINS: 'https://admin.example.com, http://localhost:5173',
+      TRUST_PROXY: 'linklocal,10.0.0.0/8',
+    });
+    expect(config.corsOrigins).toEqual(['https://admin.example.com', 'http://localhost:5173']);
+    expect(config.trustedProxies).toEqual(['linklocal', '10.0.0.0/8']);
+  });
+
+  it('rejects an origin with a path and a malformed proxy', () => {
+    const load = (env: Record<string, string>) => () =>
+      loadConfig({ DATABASE_URL: databaseUrl, ...env });
+    expect(load({ CORS_ORIGINS: 'https://admin.example.com/login' })).toThrow(/CORS_ORIGINS/);
+    expect(load({ CORS_ORIGINS: 'admin.example.com' })).toThrow(/CORS_ORIGINS/);
+    expect(load({ TRUST_PROXY: 'any' })).toThrow(/TRUST_PROXY/);
   });
 });

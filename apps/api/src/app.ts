@@ -11,6 +11,7 @@ import { registerErrorHandling } from './errors';
 import { loggerOptions, requestIdOf, type LogStream } from './logger';
 import { configRoutes } from './routes/config';
 import { healthRoutes } from './routes/health';
+import { registerSecurity } from './security';
 
 export type BuildAppOptions = { logStream?: LogStream };
 
@@ -20,14 +21,17 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
     logger: loggerOptions(config.logLevel, options.logStream),
     genReqId: requestIdOf,
     logController: new LogController({ requestIdLogLabel: 'requestId' }),
+    // X-Forwarded-For is read only when the direct peer is a listed proxy.
+    trustProxy: config.trustedProxies.length > 0 ? config.trustedProxies : false,
   }).withTypeProvider<ZodTypeProvider>();
 
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
-  registerErrorHandling(app);
   app.addHook('onRequest', async (request, reply) => {
     reply.header('x-request-id', request.id);
   });
+  await registerSecurity(app, config);
+  registerErrorHandling(app);
 
   const sql = createSql(config.databaseUrl);
   app.decorate('sql', sql);
