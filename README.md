@@ -43,7 +43,7 @@ Port 5432 déjà pris : copier `.env.example` en `.env` à la racine, changer `P
 | `pnpm format` | Prettier en écriture |
 | `pnpm dev` | serveurs de développement (API et admin, à mesure qu'ils arrivent) |
 
-La configuration TypeScript, ESLint, Prettier et Vitest vit à la racine et chaque workspace en hérite. L'app Expo (`pnpm --filter mobile start`) et le script `db:seed` arrivent avec leurs tickets.
+La configuration TypeScript, ESLint, Prettier et Vitest vit à la racine et chaque workspace en hérite. L'app Expo (`pnpm --filter mobile start`) arrive avec son ticket.
 
 Langues : code et commits en anglais ; wiki, issues et interface en français.
 
@@ -68,5 +68,7 @@ Schéma unique : `apps/api/src/db/schema.ts` (Drizzle ORM). Migrations versionn�
 |---|---|
 | `db:generate --name=add_x` | écrit la migration du dernier changement de `schema.ts` ; `--custom --name=x` crée un fichier SQL à écrire à la main |
 | `db:migrate` | applique les migrations en attente, sans effet si la base est à jour (la CI migre la base de test avant les tests) |
+| `db:seed` | données fictives : Paris, quelques lieux du Marais et un parcours ; idempotent, refusé en production |
+| `db:reset` | vide la base locale (tables, types, extensions, journal des migrations), puis `db:migrate` et `db:seed` ; refusé hors `localhost` et en production |
 
 Dans l'image, `docker run --rm -e DATABASE_URL=… widoo-api node dist/migrate.js` applique les migrations avant un déploiement.
