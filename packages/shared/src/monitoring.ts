@@ -43,7 +43,10 @@ export interface ReportEvent {
   breadcrumbs?: ReportBreadcrumb[];
 }
 
-/** `beforeBreadcrumb`: console output is dropped, as it is not reviewed for personal data. */
+/**
+ * `beforeBreadcrumb`: console output is dropped, as it is not reviewed for personal data; HTTP
+ * breadcrumbs lose their query string and fragment.
+ */
 export function scrubBreadcrumb<T extends ReportBreadcrumb>(breadcrumb: T): T | null {
   if (breadcrumb.category === 'console') {
     return null;
@@ -51,8 +54,13 @@ export function scrubBreadcrumb<T extends ReportBreadcrumb>(breadcrumb: T): T | 
   if (breadcrumb.message) {
     breadcrumb.message = redactText(breadcrumb.message);
   }
-  if (typeof breadcrumb.data?.url === 'string') {
-    breadcrumb.data.url = withoutQuery(breadcrumb.data.url);
+  if (breadcrumb.data) {
+    if (typeof breadcrumb.data.url === 'string') {
+      breadcrumb.data.url = withoutQuery(breadcrumb.data.url);
+    }
+    // Where Sentry's HTTP breadcrumbs keep what `withoutQuery` removes from the URL.
+    delete breadcrumb.data['http.query'];
+    delete breadcrumb.data['http.fragment'];
   }
   return breadcrumb;
 }
