@@ -60,12 +60,13 @@ Tout changement passe par une PR remplie selon `.github/pull_request_template.md
 
 `ci.yml` tourne à chaque push. `pr-policy.yml` tourne aussi quand le titre, le corps ou la base de la PR changent : corriger le corps suffit à relancer ses checks. « Re-run » sur un ancien run relit le corps de l'époque, pas le nouveau.
 
-**PR empilées.** Seule `main` est protégée : une PR dont la base est une branche `issue/...` affiche ses checks sans les exiger, et `Fixes #N` ne ferme le ticket qu'à la fusion dans `main`. On ne fusionne donc jamais une PR dans sa base de pile. On fusionne en squash la PR du bas de la pile dans `main`, puis on rebase la suivante sur `main`, on la recible et on attend ses trois checks verts avant de la fusionner à son tour :
+**Plafond par commit** (D-014). La PR est fusionnée en rebase and merge : chaque commit arrive tel quel sur `main`, et le plafond porte sur chaque commit. Viser moins de 400 lignes utiles par commit ; jusqu'à 500 si la ligne `Taille :` du corps cite le commit, par son titre (son SHA change au rebase), et justifie sa taille ; au-delà, redécouper le commit. La PR affiche son total, sans plafond. Seuls comptent les commits propres à la PR (`base..head`), et le total part du point de divergence avec la base (`base...head`) : les commits arrivés sur la base depuis la création de la branche ne sont pas comptés.
+
+**PR empilées.** Une PR par ticket : on ne découpe pas un ticket en plusieurs PR, et une pile ne relie que des tickets dépendants. Seule `main` est protégée : une PR dont la base est une branche `issue/...` affiche ses checks sans les exiger, et `Fixes #N` ne ferme le ticket qu'à la fusion dans `main`. On ne fusionne donc jamais une PR dans sa base de pile. Ilan ou Paul fusionne la PR du bas de la pile dans `main` en rebase and merge. Sur la branche suivante, on rebase sur `main` : git saute les commits déjà fusionnés à l'identique. Ilan ou Paul pousse la branche rebasée, puis on recible la PR et on attend ses trois checks verts avant de la fusionner à son tour :
 
 ```bash
-git fetch origin
-git rebase --onto origin/main origin/<branche fusionnée> <branche suivante>
-git push --force-with-lease
+git fetch origin && git rebase origin/main    # sur la branche suivante
+git push --force-with-lease                   # Ilan ou Paul
 gh pr edit <n° de la PR suivante> --base main
 ```
 
