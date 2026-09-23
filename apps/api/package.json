@@ -1,0 +1,12 @@
+{
+  "name": "@widoo/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --noEmit false",
+    "db:migrate": "echo \"No migrations yet\"",
+    "lint": "eslint .",
+    "typecheck": "tsc"
+  }
+}
