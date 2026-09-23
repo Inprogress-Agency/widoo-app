@@ -4,7 +4,7 @@
 # update the configuration and keep the deployed image. Usage: ./3-run.sh [--dry-run] [--yes]
 set -euo pipefail
 cd "$(dirname "$0")"
-# shellcheck source=common.sh
+# shellcheck source-path=SCRIPTDIR
 source ./common.sh
 parse_args "$@"
 

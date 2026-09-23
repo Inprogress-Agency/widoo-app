@@ -3,7 +3,7 @@
 # Idempotent: creates what is missing and leaves the rest. Usage: ./2-database.sh [--dry-run] [--yes]
 set -euo pipefail
 cd "$(dirname "$0")"
-# shellcheck source=common.sh
+# shellcheck source-path=SCRIPTDIR
 source ./common.sh
 parse_args "$@"
 
