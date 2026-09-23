@@ -1,6 +1,7 @@
 export type * from './analytics';
 export { assertNever } from './assert-never';
 export { labels, type Locale, type TaxonomyLabels } from './labels';
+export * from './monitoring';
 export * from './taxonomies';
 export * from './thresholds';
 export { hasRole } from './roles';

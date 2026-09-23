@@ -5,14 +5,15 @@
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
-    "ios": "expo run:ios",
-    "android": "expo run:android",
+    "ios": "SENTRY_DISABLE_AUTO_UPLOAD=true expo run:ios",
+    "android": "SENTRY_DISABLE_AUTO_UPLOAD=true expo run:android",
     "lint": "eslint .",
     "typecheck": "tsc",
     "test": "vitest run"
   },
   "dependencies": {
     "@expo-google-fonts/plus-jakarta-sans": "^0.4.2",
+    "@sentry/react-native": "~7.11.0",
     "@tanstack/react-query": "^5.103.2",
     "@widoo/api-client": "workspace:*",
     "@widoo/shared": "workspace:*",
