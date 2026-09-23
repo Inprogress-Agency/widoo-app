@@ -4,3 +4,9 @@ packages:
 
 # Supply-chain guard: never install a version published less than a day ago (minutes).
 minimumReleaseAge: 1440
+
+# firebase-admin lists Firestore and Cloud Storage as optional: the API uses neither (auth only),
+# so they stay out of node_modules and the image, with their gRPC and protobuf dependencies.
+ignoredOptionalDependencies:
+  - '@google-cloud/firestore'
+  - '@google-cloud/storage'
