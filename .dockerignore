@@ -6,6 +6,8 @@
 **/.env
 **/.env.*
 !**/.env.example
+# Credentials written by google-github-actions/auth in the workspace.
+gha-creds-*.json
 .git
 .claude
 docs
