@@ -37,7 +37,6 @@ Déclarer un mode charge le skill du plugin [gh-harness](https://github.com/Paul
 | GitHub Project — champs, vues, workflows | 👁 | 👁 | 👁 | 👁 | 👁 |
 | Commentaires d'issues et de PR | 👁 (délègue) | ✍️ tickets `type:design` | ✍️ | ✍️ | 👁 |
 | Codebase — fichiers, branches, commits, push, PR | 👁 (délègue) | 👁 | 👁 | ✍️ | 👁 |
-| `docs/decisions.md` (journal des décisions durables) | ✍️ | ✍️ | ✍️ | 👁 | 👁 |
 | CLAUDE.md, SECURITY.md, `.github/` | ✍️ | 👁 | 👁 | ✍️ par PR `type:chore` labellisée `area:process` | 👁 |
 | Settings du dépôt, secrets, protections de branche, GCP, EAS, stores | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Déléguer à un sous-agent | ✍️ | — | — | — | ✍️ |
@@ -87,7 +86,7 @@ Le reste de la procédure est dans le skill du mode.
 - Une planche validée par Ilan est exportée dans le wiki sous `design/<E-xx>/` (PNG, et le bundle HTML si Claude Design le fournit), la section de `Ecrans` reçoit l'image, le lien et la date, et passe en 🟢. La fermeture du ticket design et la libération des tickets dev reviennent à MANAGER, par `scripts/validate-design.sh`.
 - Une planche validée qui change ensuite crée une entrée `D-xxx` et rouvre le ticket design ; les tickets dev liés repassent `needs-design` s'ils ne sont pas commencés.
 - Ajouter au démarrage `gh issue list --label type:design --state open`.
-- Une décision durable (architecture, périmètre, règle métier) est aussi inscrite dans `docs/decisions.md` du dépôt, par une PR `type:chore`.
+- Une décision durable (architecture, périmètre, règle métier) s'écrit dans la page wiki qu'elle concerne, avec sa raison et ce qu'elle écarte, et s'annonce par une entrée `D-xxx` au `Design-Changelog`, seule série `D-xxx` du projet. Une décision de méthode va dans ce fichier, par une PR `area:process`.
 
 **MANAGER** — les issues sont les tickets.
 
@@ -102,8 +101,8 @@ Le reste de la procédure est dans le skill du mode.
 **CODE** — la codebase et les commentaires.
 
 - Au démarrage, passer le Status du ticket à « En cours », puis à « À review » à l'ouverture de la PR (`gh project item-edit`). « À déployer » est automatique au merge ; « Terminés » se pose après vérification en staging.
-- Branche `issue/N-slug` et **une seule PR par ticket** (D-014), qui peut contenir plusieurs commits ; une PR de process sans ticket à fermer utilise `chore/<sujet>` et `Refs #N`.
-- Commits : `feat|fix|chore|polish|test|docs(scope): description` en anglais. La fusion en rebase and merge amène chaque commit tel quel sur `main` : chacun est autonome et cohérent, propre dès le départ.
+- Branche `issue/N-slug` et **une seule PR par ticket**, qui peut contenir plusieurs commits : un ticket ne se découpe pas en plusieurs PR ; une PR de process sans ticket à fermer utilise `chore/<sujet>` et `Refs #N`.
+- Commits : `feat|fix|chore|polish|test|docs(scope): description` en anglais. La fusion se fait en rebase and merge, jamais en squash : chaque commit arrive tel quel sur `main`, donc chacun est autonome et cohérent, propre dès le départ. Les agents ne réécrivent pas l'historique d'une PR (le skill interdit le `push --force`, donc ni fixup ni rebase une fois poussé) : une correction passe par un commit correctif, qui reste dans l'historique. Le réglage du dépôt qui n'autorise que le rebase and merge sur `main` revient à Ilan ou Paul.
 - PR : titre `<type>(<scope>): <action en français>` sous 72 caractères, corps selon `.github/pull_request_template.md`, `Fixes #N` (ou `Refs #N`).
 - **Plafond de diff, par commit** : viser moins de 400 lignes utiles par commit, 500 maximum justifié dans la PR (ligne `Taille :`) ; au-delà, redécouper le commit, pas la PR. La PR affiche son total, sans plafond. Formatage mécanique et fichiers générés identifiés à part. Aucune compression du code pour tenir le seuil.
 - **PR empilées** : seulement entre tickets dépendants, une PR par ticket. Après la fusion de la PR du bas, sur la branche suivante : `git fetch origin && git rebase origin/main` (git saute les commits déjà fusionnés à l'identique), puis `git push --force-with-lease` par Ilan ou Paul, et `gh pr edit <n> --base main`.
@@ -147,4 +146,4 @@ Aux niveaux 2 et 3, CODE pose le label `level:2` ou `level:3` sur la PR et signa
 
 ## Échanges et reprise
 
-Français clair, résultat et risque concret d'abord. Toute mention d'un ticket, d'une epic ou d'une PR dans une réponse porte son lien GitHub complet (`https://github.com/Inprogress-Agency/widoo-app/issues/N`), jamais un numéro seul. Après interruption : relire ce fichier, le mode, le ticket ou la PR en cours, `docs/decisions.md` si le sujet le demande. Ne jamais supprimer définitivement un fichier local : Corbeille.
+Français clair, résultat et risque concret d'abord. Toute mention d'un ticket, d'une epic ou d'une PR dans une réponse porte son lien GitHub complet (`https://github.com/Inprogress-Agency/widoo-app/issues/N`), jamais un numéro seul. Après interruption : relire ce fichier, le mode, le ticket ou la PR en cours, la page wiki concernée si le sujet le demande. Ne jamais supprimer définitivement un fichier local : Corbeille.
