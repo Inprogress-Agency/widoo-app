@@ -1,4 +1,5 @@
 import type { ApiError, ApiErrorCode, ValidationIssue } from '@widoo/shared';
+import { DrizzleQueryError } from 'drizzle-orm';
 import type { FastifyError, FastifyInstance } from 'fastify';
 import { hasZodFastifySchemaValidationErrors } from 'fastify-type-provider-zod';
 
@@ -9,6 +10,27 @@ const codeByStatus: Partial<Record<number, ApiErrorCode>> = {
   409: 'conflict',
   429: 'rate_limited',
 };
+
+/**
+ * A failed query as it may be logged. Drizzle writes the query parameters into its message and
+ * stack, and the driver error may quote a value or the failing row: personal data (e-mail, first
+ * name). Only the SQL text, parameterized, and the SQLSTATE code and constraint are kept.
+ */
+export function loggableError(error: Error): Error {
+  if (!(error instanceof DrizzleQueryError)) {
+    return error;
+  }
+  // Own properties of the postgres.js error: `code` (SQLSTATE), `constraint_name`.
+  const cause: Record<string, unknown> = { ...error.cause };
+  const safe = Object.assign(new Error(`Failed query: ${error.query}`), {
+    code: cause.code,
+    constraint: cause.constraint_name,
+  });
+  safe.name = 'DrizzleQueryError';
+  const frames = (error.stack ?? '').split('\n').filter((line) => /^\s+at /.test(line));
+  safe.stack = [`${safe.name}: ${safe.message}`, ...frames].join('\n');
+  return safe;
+}
 
 /**
  * Registered after the rate limit plugin. Every error leaves the API as an `ApiError`. Client errors keep their message; anything
@@ -42,7 +64,7 @@ export function registerErrorHandling(app: FastifyInstance): void {
       return reply.status(status).send(body);
     }
 
-    request.log.error({ err: error }, 'unhandled error');
+    request.log.error({ err: loggableError(error) }, 'unhandled error');
     const body: ApiError = { code: 'internal_error', message: 'Internal server error' };
     return reply.status(500).send(body);
   });

@@ -15,6 +15,7 @@ describe('loadConfig', () => {
       corsOrigins: [],
       trustedProxies: [],
       rateLimitMax: 1000,
+      firebaseProjectId: undefined,
     });
   });
 
@@ -48,5 +49,23 @@ describe('loadConfig', () => {
     expect(load({ CORS_ORIGINS: 'https://admin.example.com/login' })).toThrow(/CORS_ORIGINS/);
     expect(load({ CORS_ORIGINS: 'admin.example.com' })).toThrow(/CORS_ORIGINS/);
     expect(load({ TRUST_PROXY: 'any' })).toThrow(/TRUST_PROXY/);
+  });
+
+  it('reads the Firebase project ID and rejects a malformed one', () => {
+    const load = (projectId: string) =>
+      loadConfig({ DATABASE_URL: databaseUrl, FIREBASE_PROJECT_ID: projectId });
+    expect(load('widoo-staging').firebaseProjectId).toBe('widoo-staging');
+    expect(() => load('Widoo Staging')).toThrow(/FIREBASE_PROJECT_ID/);
+  });
+
+  it('refuses the Auth emulator and demo projects in production only', () => {
+    const load = (env: Record<string, string>) => () =>
+      loadConfig({ DATABASE_URL: databaseUrl, FIREBASE_PROJECT_ID: 'widoo-prod', ...env });
+    const emulator = { FIREBASE_AUTH_EMULATOR_HOST: '127.0.0.1:9099' };
+    const demo = { FIREBASE_PROJECT_ID: 'demo-widoo' };
+    expect(load({ NODE_ENV: 'production', ...emulator })).toThrow(/FIREBASE_AUTH_EMULATOR_HOST/);
+    expect(load({ NODE_ENV: 'production', ...demo })).toThrow(/FIREBASE_PROJECT_ID/);
+    expect(load({ NODE_ENV: 'production' })).not.toThrow();
+    expect(load({ NODE_ENV: 'development', ...emulator, ...demo })).not.toThrow();
   });
 });
