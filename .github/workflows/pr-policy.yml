@@ -46,6 +46,7 @@ jobs:
 
   # Ici plutôt que dans CI : le job se relance quand le corps (ligne « Taille : ») ou la base
   # de la PR change, pas seulement à chaque push. Relancer un run ne relit pas le corps modifié.
+  # Mesure par commit (D-014) ; le script est sous .github/ pour rester sous CODEOWNERS.
   diff-size:
     name: Diff size
     runs-on: ubuntu-latest
@@ -56,24 +57,9 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Measure useful diff
+      - name: Measure useful diff per commit
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
           HEAD: ${{ github.event.pull_request.head.sha }}
-          BODY: ${{ github.event.pull_request.body }}
-        run: |
-          set -euo pipefail
-          lines=$(git diff --numstat "$BASE" "$HEAD" -- . \
-            ':!pnpm-lock.yaml' ':!**/*.snap' ':!**/generated/**' ':!**/*.svg' ':!**/*.png' \
-            | awk '{ a += $1; d += $2 } END { print a + d }')
-          echo "Useful diff: $lines lines"
-          if [ "$lines" -gt 500 ]; then
-            echo "::error::Diff de $lines lignes utiles, plafond 500. Redécouper la PR."
-            exit 1
-          fi
-          # Le commentaire du modèle sur la ligne « Taille : » ne vaut pas justification.
-          body=$(printf '%s' "$BODY" | perl -0777 -pe 's/<!--.*?-->//gs')
-          if [ "$lines" -gt 400 ] && ! grep -qE '^Taille *:.*[A-Za-z]' <<< "$body"; then
-            echo "::error::Diff de $lines lignes (> 400) sans justification dans la section Taille du corps de PR."
-            exit 1
-          fi
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: bash .github/scripts/diff-size.sh "$BASE" "$HEAD"
