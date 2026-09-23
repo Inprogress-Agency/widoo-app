@@ -25,7 +25,12 @@ function reportEvent(): ReportEvent & Record<string, unknown> {
       { category: 'console', message: `user ${email}` },
       {
         category: 'fetch',
-        data: { url: 'https://api.example.com/v1/me?share=secret', method: 'GET' },
+        data: {
+          url: 'https://api.example.com/v1/me?share=secret',
+          method: 'GET',
+          'http.query': '?share=secret',
+          'http.fragment': '#secret',
+        },
       },
     ],
   };
