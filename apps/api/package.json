@@ -8,7 +8,8 @@
   ],
   "scripts": {
     "build": "node build.mjs",
-    "db:migrate": "echo \"No migrations yet\"",
+    "db:generate": "tsx src/db/generate.ts",
+    "db:migrate": "tsx --env-file-if-exists=.env src/migrate.ts",
     "dev": "tsx watch --env-file-if-exists=.env src/server.ts",
     "lint": "eslint .",
     "start": "node --enable-source-maps --env-file-if-exists=.env dist/server.js",
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.20.4",
+    "drizzle-kit": "^0.31.11",
     "esbuild": "^0.28.2",
     "tsx": "^4.23.15"
   }

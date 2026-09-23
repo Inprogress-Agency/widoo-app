@@ -5,7 +5,7 @@ import {
   type ZodTypeProvider,
 } from 'fastify-type-provider-zod';
 import type { Config } from './config';
-import { createSql } from './db/client';
+import { createDb, createSql } from './db/client';
 import { registerDocs } from './docs';
 import { registerErrorHandling } from './errors';
 import { loggerOptions, requestIdOf, type LogStream } from './logger';
@@ -35,6 +35,7 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
 
   const sql = createSql(config.databaseUrl);
   app.decorate('sql', sql);
+  app.decorate('db', createDb(sql));
   app.addHook('onClose', async () => {
     await sql.end({ timeout: 5 });
   });
