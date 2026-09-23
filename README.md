@@ -110,3 +110,5 @@ Expo Go ne suffit plus : MMKV (consentement) est un module natif absent d'Expo G
 En développement, l'URL de l'API est l'adresse de la machine qui sert Metro, port 8080 (`src/api/api-url.ts`) ; `EXPO_PUBLIC_API_URL` dans `apps/mobile/.env.local` la remplace. Un build EAS lit `EXPO_PUBLIC_API_URL` dans les variables de son environnement EAS (`eas.json`). Les dossiers `ios/` et `android/` sont générés (`expo prebuild`) et jamais versionnés.
 
 Analytics : PostHog Cloud UE, seulement après « Accepter » sur la bannière de consentement (`src/analytics`). Sans `EXPO_PUBLIC_POSTHOG_KEY`, rien n'est envoyé ; la bannière s'affiche quand même. Pour la revoir, désinstaller l'app.
+
+Rapports de plantage : Sentry, avec ou sans consentement mais sans donnée utilisateur (`src/monitoring`, filtrage dans `packages/shared/src/monitoring.ts`). Sans `EXPO_PUBLIC_SENTRY_DSN`, rien n'est envoyé. L'envoi des source maps et symboles est coupé (`SENTRY_DISABLE_AUTO_UPLOAD=true` dans les scripts `ios` / `android` et dans `eas.json`) tant qu'aucun jeton Sentry n'est posé en secret EAS.

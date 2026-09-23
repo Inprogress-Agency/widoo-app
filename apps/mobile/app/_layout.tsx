@@ -11,8 +11,10 @@ import { useEffect } from 'react';
 import { useAppOpenedEvent } from '../src/analytics';
 import { queryClient } from '../src/api/query-client';
 import '../src/i18n';
+import { initMonitoring } from '../src/monitoring';
 import { colors, fonts } from '../src/theme';
 
+initMonitoring();
 void SplashScreen.preventAutoHideAsync();
 
 const navigationTheme: Theme = {
