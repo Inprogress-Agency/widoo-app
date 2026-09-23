@@ -1,5 +1,5 @@
-import { FirstName } from '@widoo/shared';
-import { eq } from 'drizzle-orm';
+import { FirstName, type UpdateMe } from '@widoo/shared';
+import { and, eq, isNull, sql } from 'drizzle-orm';
 import type { VerifiedIdentity } from '../auth/verifier';
 import type { Db } from '../db/client';
 import { users } from '../db/schema';
@@ -44,4 +44,47 @@ export async function findOrCreateUser(db: Db, identity: VerifiedIdentity): Prom
     throw new Error('User neither created nor found');
   }
   return user;
+}
+
+/**
+ * Applies a profile update to an active account; notification preferences are merged into the
+ * stored ones by the database. Undefined when the account is deleted meanwhile.
+ */
+export async function updateUser(
+  db: Db,
+  userId: string,
+  update: UpdateMe,
+): Promise<User | undefined> {
+  const { notificationPrefs, ...fields } = update;
+  const [updated] = await db
+    .update(users)
+    .set({
+      ...fields,
+      ...(notificationPrefs && {
+        notificationPrefs: sql`${users.notificationPrefs} || ${JSON.stringify(notificationPrefs)}::jsonb`,
+      }),
+    })
+    .where(and(eq(users.id, userId), isNull(users.deletedAt)))
+    .returning();
+  return updated;
+}
+
+/**
+ * Account deletion (wiki Compte-et-Monetisation): `deleted_at` set, e-mail, first name, avatar,
+ * bio and preferences erased, profile no longer public, so its routes show « Membre Widoo ».
+ * The row and its `firebase_uid` stay until the purge, 30 days later (wiki Securite-et-RGPD).
+ */
+export async function softDeleteUser(db: Db, userId: string): Promise<void> {
+  await db
+    .update(users)
+    .set({
+      deletedAt: sql`now()`,
+      email: null,
+      firstName: null,
+      avatarUrl: null,
+      bio: null,
+      isPublic: false,
+      notificationPrefs: {},
+    })
+    .where(and(eq(users.id, userId), isNull(users.deletedAt)));
 }
