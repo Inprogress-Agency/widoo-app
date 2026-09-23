@@ -1,0 +1,18 @@
+{
+  "expo": {
+    "name": "Widoo",
+    "slug": "widoo",
+    "version": "0.1.0",
+    "scheme": "widoo",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "bundleIdentifier": "app.widoo",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "app.widoo"
+    },
+    "plugins": ["expo-router"]
+  }
+}

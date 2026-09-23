@@ -3,3 +3,7 @@ pnpm-lock.yaml
 *.md
 # Written by drizzle-kit (pnpm db:generate).
 **/generated/
+# Expo: generated types and native folders written by prebuild.
+.expo/
+apps/mobile/ios/
+apps/mobile/android/
