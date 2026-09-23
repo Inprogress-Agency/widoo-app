@@ -8,6 +8,7 @@ import { DefaultTheme, Stack, ThemeProvider, type Theme } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { useAppOpenedEvent } from '../src/analytics';
 import { queryClient } from '../src/api/query-client';
 import '../src/i18n';
 import { colors, fonts } from '../src/theme';
@@ -27,6 +28,7 @@ const navigationTheme: Theme = {
 };
 
 export default function RootLayout() {
+  useAppOpenedEvent();
   const [fontsLoaded, fontError] = useFonts({
     [fonts.regular]: PlusJakartaSans_400Regular,
     [fonts.medium]: PlusJakartaSans_500Medium,
