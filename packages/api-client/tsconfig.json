@@ -1,4 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
+  // `fetch`, `AbortController` and timers as React Native provides them: no Node or React types.
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM"]
+  },
   "include": ["src"]
 }
