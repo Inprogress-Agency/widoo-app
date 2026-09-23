@@ -8,5 +8,8 @@
     "db:migrate": "echo \"No migrations yet\"",
     "lint": "eslint .",
     "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@widoo/shared": "workspace:*"
   }
 }
