@@ -103,7 +103,10 @@ Expo SDK 57, expo-router, `apps/mobile`. L'app appelle l'API locale : la démarr
 pnpm --filter mobile ios        # build de développement (Xcode), installé sur le simulateur, puis Metro
 pnpm --filter mobile android    # idem sur l'émulateur (Android SDK, JDK 17)
 pnpm --filter mobile start      # Metro seul, pour un build de développement déjà installé
-pnpm --filter mobile start --go # Expo Go, sans build : modules natifs d'Expo Go seulement
 ```
 
+Expo Go ne suffit plus : MMKV (consentement) est un module natif absent d'Expo Go. Après l'ajout d'un module natif, relancer `ios` / `android` pour reconstruire.
+
 En développement, l'URL de l'API est l'adresse de la machine qui sert Metro, port 8080 (`src/api/api-url.ts`) ; `EXPO_PUBLIC_API_URL` dans `apps/mobile/.env.local` la remplace. Un build EAS lit `EXPO_PUBLIC_API_URL` dans les variables de son environnement EAS (`eas.json`). Les dossiers `ios/` et `android/` sont générés (`expo prebuild`) et jamais versionnés.
+
+Analytics : PostHog Cloud UE, seulement après « Accepter » sur la bannière de consentement (`src/analytics`). Sans `EXPO_PUBLIC_POSTHOG_KEY`, rien n'est envoyé ; la bannière s'affiche quand même. Pour la revoir, désinstaller l'app.
