@@ -56,7 +56,7 @@ Tout changement passe par une PR remplie selon `.github/pull_request_template.md
 |---|---|---|
 | `Lint, types, tests` | `ci.yml` | install figé, lint, types, migration de la base de test (PostGIS), tests avec couverture, build API et admin, `pnpm audit` (élevé et critique). Vert sans rien lancer si la PR ne touche que `*.md`, `docs/`, `.claude/`, `.github/` ou `scripts/*.sh` |
 | `Title, body, issue link` | `pr-policy.yml` | titre `<type>(<scope>): <action>` de 72 caractères au plus ; sections du modèle, `Fixes #N` (ou `Refs #N`), `Niveau :` et `Formatage mécanique :`, hors commentaires HTML |
-| `Diff size` | `pr-policy.yml` | affiche `Useful diff: N lines` (hors lockfile, snapshots, fichiers générés, SVG et PNG) ; refus au-delà de 500 lignes, et au-delà de 400 sans ligne `Taille :` renseignée |
+| `Diff size` | `pr-policy.yml` | lignes utiles de chaque commit de la PR, hors merges, lockfile, snapshots, fichiers générés, SVG et PNG, puis le total `Useful diff: N lines`, sans plafond ; refus si un commit dépasse 500 lignes, ou 400 sans ligne `Taille :` renseignée. Script : `.github/scripts/diff-size.sh <base> <head>` |
 
 `ci.yml` tourne à chaque push. `pr-policy.yml` tourne aussi quand le titre, le corps ou la base de la PR changent : corriger le corps suffit à relancer ses checks. « Re-run » sur un ancien run relit le corps de l'époque, pas le nouveau.
 
