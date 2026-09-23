@@ -56,38 +56,42 @@ describe('error reports', () => {
     await Sentry.close();
   });
 
+  /** The event envelope of one crash, and every envelope sent meanwhile. */
   async function crash(url: string, headers: Record<string, string> = {}) {
     const response = await fetch(`${origin}${url}?email=${email}`, {
       headers: { cookie: 'session=fictitious-cookie', ...headers },
     });
     expect(response.status).toBe(500);
     await Sentry.flush(2000);
-    expect(envelopes).toHaveLength(1);
-    return envelopes[0] ?? '';
+    // With a release (GITHUB_SHA in CI, K_REVISION on Cloud Run), request counts are sent too.
+    const events = envelopes.filter((envelope) => envelope.includes('"type":"event"'));
+    expect(events).toHaveLength(1);
+    return { event: events[0] ?? '', all: envelopes.join('\n') };
   }
 
   it('sends the cleaned error, without query parameters, cookie or e-mail', async () => {
-    const sent = await crash('/v1/test/query-crash');
-    expect(sent).toContain('Failed query: select $1::int');
-    expect(sent).toContain('GET /v1/test/query-crash');
+    const { event, all } = await crash('/v1/test/query-crash');
+    expect(event).toContain('Failed query: select $1::int');
+    expect(event).toContain('GET /v1/test/query-crash');
     for (const leak of [email, 'leak.sentry', 'fictitious-cookie', '?email']) {
-      expect(sent).not.toContain(leak);
+      expect(all).not.toContain(leak);
     }
-    expect(sent).not.toContain('"user"');
+    expect(event).not.toContain('"user"');
   });
 
   it('reports the caller by opaque id only, without token or Firebase uid', async () => {
     const { token, uid } = verifier.issue({ email, emailVerified: true, name: 'Camille Exemple' });
     createdUids.push(uid);
-    const sent = await crash('/v1/test/auth-crash', { authorization: `Bearer ${token}` });
+    const headers = { authorization: `Bearer ${token}` };
+    const { event, all } = await crash('/v1/test/auth-crash', headers);
     const [user] = await app.db
       .select()
       .from(users)
       .where(inArray(users.firebaseUid, [uid]));
-    expect(sent).toContain(`"user":{"id":"${user?.id}"}`);
+    expect(event).toContain(`"user":{"id":"${user?.id}"}`);
     for (const leak of [token, uid, email, 'Camille', 'fictitious-cookie']) {
-      expect(sent).not.toContain(leak);
+      expect(all).not.toContain(leak);
     }
-    expect(sent).toContain('Fictitious crash for [email]');
+    expect(event).toContain('Fictitious crash for [email]');
   });
 });
