@@ -1,3 +1,4 @@
+export type * from './analytics';
 export { assertNever } from './assert-never';
 export { labels, type Locale, type TaxonomyLabels } from './labels';
 export * from './taxonomies';
