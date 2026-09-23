@@ -45,6 +45,8 @@ export const taxonomies = {
     'rejected',
     'unpublished',
   ],
+  /** Indicative price level of a place (`places.price_range`), unlike a route's computed budget. */
+  priceRanges: ['free', 'low', 'medium', 'high'],
   verificationStatuses: ['verified', 'stale', 'flagged', 'closed'],
   signalReasons: [
     'closed_permanently',
@@ -68,6 +70,7 @@ export type Transport = TaxonomyValue<'transports'>;
 export type Mood = TaxonomyValue<'moods'>;
 export type Condition = TaxonomyValue<'conditions'>;
 export type PlaceCategory = TaxonomyValue<'placeCategories'>;
+export type PriceRange = TaxonomyValue<'priceRanges'>;
 export type RouteStatus = TaxonomyValue<'routeStatuses'>;
 export type VerificationStatus = TaxonomyValue<'verificationStatuses'>;
 export type SignalReason = TaxonomyValue<'signalReasons'>;

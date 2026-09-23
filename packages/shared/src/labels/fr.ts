@@ -65,6 +65,7 @@ export const fr = {
     rejected: 'Refusé',
     unpublished: 'Dépublié',
   },
+  priceRanges: { free: 'Gratuit', low: 'Bon marché', medium: 'Prix moyen', high: 'Haut de gamme' },
   verificationStatuses: {
     verified: 'Vérifié',
     stale: 'À vérifier',
