@@ -45,3 +45,16 @@ Port 5432 déjà pris : copier `.env.example` en `.env` à la racine, changer `P
 La configuration TypeScript, ESLint, Prettier et Vitest vit à la racine et chaque workspace en hérite. L'app Expo (`pnpm --filter mobile start`) et les scripts de base (`db:migrate`, `db:seed`) arrivent avec leurs tickets.
 
 Langues : code et commits en anglais ; wiki, issues et interface en français.
+
+## API
+
+Variables d'environnement décrites et validées au démarrage : `apps/api/.env.example`.
+
+```bash
+pnpm --filter api dev                 # http://localhost:8080/v1/health, OpenAPI sur /docs (hors production)
+pnpm --filter api build && pnpm --filter api start
+docker build -f infra/api.Dockerfile -t widoo-api .
+docker run --rm -p 8080:8080 -e DATABASE_URL=postgres://widoo:widoo@host.docker.internal:5432/widoo widoo-api
+```
+
+Cloud Run tourne en `linux/amd64` : ajouter `--platform linux/amd64` au build sur Apple Silicon.
