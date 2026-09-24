@@ -89,5 +89,38 @@ echo "sync-project.sh — argument inconnu refusé avant tout appel (PATH vide :
 code=0; PATH=/nonexistent "$BASH" ./sync-project.sh --dryrun 2>/dev/null || code=$?
 check "--dryrun (faute de frappe) → code 2" "$code" 2
 
+echo "sync-project.sh — préparation des epics"
+epic() { jq -nc --argjson n "$1" --arg s "$2" --arg b "$3" '{number: $n, state: $s, labels: [{name: "type:epic"}], body: $b}'; }
+# epic 950 : un enfant par case, un enfant coché, un numéro inconnu (#999) ignoré
+b950=$'## Tickets\n- [ ] #951\n- [ ] #952\n- [x] #953\n- [ ] #954\n- [ ] #955\n- [ ] #956\n- [ ] #957\n- [ ] #958\n- [ ] #999'
+rissues=$(jq -sc . <<EOF
+$(epic 950 OPEN "$b950")
+$(epic 960 CLOSED '- [ ] #951')
+$(epic 970 OPEN 'Pas de liste cochable')
+$(epic 980 OPEN '- [ ] #954')
+$(issue 951 OPEN status:ready)
+$(issue 952 OPEN status:ready)
+$(issue 953 CLOSED type:feature)
+$(issue 954 OPEN needs-design)
+$(issue 955 OPEN needs-design)
+$(issue 956 OPEN type:feature)
+$(issue 957 OPEN status:blocked)
+$(issue 958 OPEN status:ready)
+EOF
+)
+ritems=$(jq -sc '{items: .}' <<EOF
+{"id": "ITEM_950", "content": {"number": 950}, "préparation": "ancien texte"}
+{"id": "ITEM_970", "content": {"number": 970}, "préparation": "aucun ticket"}
+$(item 958 "En cours")
+EOF
+)
+rplan=$(printf '%s\n%s\n' "$rissues" "$ritems" | readiness_plan)
+rrow() { awk -F'\t' -v n="$1" '$2 == n { print $1 " : " $4 " → " $5 }' <<<"$rplan"; }
+check "#950 une case de chaque, ticket en cours d'après le Project" "$(rrow 950)" \
+  "set : ancien texte → 2 prêts · 1 en cours · 2 attendent une maquette · 1 à préparer · 1 bloqué · 1 fait"
+check "#960 epic fermée : ignorée" "$(rrow 960)" ""
+check "#970 sans liste, champ déjà à jour" "$(rrow 970)" "same : aucun ticket → aucun ticket"
+check "#980 singulier, epic absente du Project" "$(rrow 980)" "absent : - → 1 attend une maquette"
+
 if [ "$fail" != 0 ]; then echo "sync-project.test : échec" >&2; exit 1; fi
 echo "sync-project.test : tout est vert"
