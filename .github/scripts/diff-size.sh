@@ -7,7 +7,7 @@
 #   PR_BODY  corps de la PR, lu dans l'environnement ; une ligne « Taille : » remplie,
 #            hors commentaires HTML, justifie un commit de plus de TARGET lignes.
 #
-# D-014 : la PR est fusionnée en rebase and merge, chaque commit arrive tel quel sur main.
+# CLAUDE.md › CODE : la PR est fusionnée en rebase and merge, chaque commit arrive tel quel sur main.
 # Le plafond porte donc sur chaque commit ; le total de la PR est affiché, sans plafond.
 # Seuls les commits propres à la PR comptent (<base>..<head>, hors merges), et le total
 # part du point de divergence (<base>...<head>) : si la base a avancé depuis la création

@@ -96,7 +96,7 @@ step() {
   printf '\n== %s\n' "$*"
 }
 
-# Announces target, effect and rollback (SECURITY.md), then asks before any remote change.
+# Announces target, effect and rollback (CLAUDE.md, remote actions), then asks before any remote change.
 announce() {
   local account='(not checked in dry run)'
   if [[ $DRY_RUN == false ]]; then

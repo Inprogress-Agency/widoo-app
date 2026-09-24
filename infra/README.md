@@ -1,6 +1,6 @@
 # Infrastructure
 
-API de staging sur Google Cloud ([#24](https://github.com/Inprogress-Agency/widoo-app/issues/24)) : image Docker, scripts `gcloud`, workflow de déploiement. Staging et production sont séparés (`SECURITY.md`) : les scripts visent le projet `widoo-staging`. La production pourra les réutiliser sur un autre projet (`PROJECT_ID=… ENVIRONMENT=production`), sur décision d'Ilan.
+API de staging sur Google Cloud ([#24](https://github.com/Inprogress-Agency/widoo-app/issues/24)) : image Docker, scripts `gcloud`, workflow de déploiement. Staging et production sont séparés ([Securite-et-RGPD](https://github.com/Inprogress-Agency/widoo-app/wiki/Securite-et-RGPD#propri%C3%A9t%C3%A9s-obligatoires)) : les scripts visent le projet `widoo-staging`. La production pourra les réutiliser sur un autre projet (`PROJECT_ID=… ENVIRONMENT=production`), sur décision d'Ilan.
 
 | Fichier | Rôle |
 |---|---|
@@ -55,7 +55,7 @@ Tant que ces variables manquent, le workflow échoue dès sa première étape, a
 |---|---|---|
 | Instance | `widoo-db`, Postgres 16, édition Enterprise, `db-f1-micro`, zonale | instance minimale ; Enterprise explicite car Postgres 16 passe sinon en Enterprise Plus, sans palier partagé |
 | Réseau | IP privée seule dans `widoo-vpc` (accès privé aux services), TLS obligatoire | aucune exposition publique ; l'API s'y connecte avec `sslmode=require` |
-| Sauvegardes | quotidiennes à 01:00 UTC, 7 gardées, PITR 7 jours, protection contre la suppression | SECURITY.md ; permet de tester la restauration avant le lancement |
+| Sauvegardes | quotidiennes à 01:00 UTC, 7 gardées, PITR 7 jours, protection contre la suppression | [Securite-et-RGPD](https://github.com/Inprogress-Agency/widoo-app/wiki/Securite-et-RGPD#propri%C3%A9t%C3%A9s-obligatoires) ; permet de tester la restauration avant le lancement |
 | Utilisateur | `widoo`, membre de `cloudsqlsuperuser` | crée les extensions `postgis` et `pg_trgm` de la première migration ; `postgres` reste sans mot de passe |
 | `DATABASE_URL` | secret `database-url`, écrit par `2-database.sh` | mot de passe aléatoire, transmis par descripteur de fichier : ni affiché, ni en argument de commande |
 
@@ -154,7 +154,7 @@ gcloud run services update-traffic widoo-api --region=europe-west9 --project=wid
 - Cible : service `widoo-api` de staging. Effet : tout le trafic sur l'ancienne image. Retour : `--to-latest`.
 - Puis revert du commit fautif par PR. Son déploiement remet le trafic sur la dernière révision. En attendant, un autre push sur `main` redéploierait le commit fautif : suspendre le workflow avec `gh workflow disable deploy-staging.yml`, puis `gh workflow enable deploy-staging.yml`.
 
-**Schéma** : les migrations sont additives (SECURITY.md). L'ancienne révision fonctionne donc sur le nouveau schéma, et il n'y a pas de retour arrière de schéma. Une migration en échec est annulée par sa transaction et bloque le déploiement.
+**Schéma** : les migrations sont additives ([Securite-et-RGPD](https://github.com/Inprogress-Agency/widoo-app/wiki/Securite-et-RGPD#propri%C3%A9t%C3%A9s-obligatoires)). L'ancienne révision fonctionne donc sur le nouveau schéma, et il n'y a pas de retour arrière de schéma. Une migration en échec est annulée par sa transaction et bloque le déploiement.
 
 **Données** : un retour arrière applicatif ne restaure aucune donnée. Pour restaurer : cloner l'instance à un instant donné, par exemple `gcloud sql instances clone widoo-db widoo-db-restore --point-in-time=2026-09-23T10:00:00Z`, vérifier le clone, puis pointer `database-url` dessus. C'est une action manuelle, à annoncer.
 
