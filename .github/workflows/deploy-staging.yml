@@ -1,6 +1,6 @@
 name: Deploy staging
 
-# The staging API follows main (SECURITY.md); production is never deployed from here.
+# The staging API follows main (CLAUDE.md, Security and data); production is never deployed from here.
 # Setup, verification and rollback: infra/README.md.
 on:
   push:

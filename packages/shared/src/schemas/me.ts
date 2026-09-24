@@ -43,7 +43,7 @@ export type Me = z.infer<typeof Me>;
 /**
  * Body of `PATCH /me`: listed fields only, at least one; preferences are merged. `avatarUrl`
  * only accepts null (removal) until avatars go through the upload pipeline, which re-encodes
- * images server side (SECURITY.md).
+ * images server side (wiki Securite-et-RGPD).
  */
 export const UpdateMe = z
   .strictObject({
