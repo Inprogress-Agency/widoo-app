@@ -1,7 +1,7 @@
-// Généré depuis tokens.json (version 9), ne pas modifier : pnpm --filter @widoo/tokens generate.
+// Généré depuis tokens.json (version 10), ne pas modifier : pnpm --filter @widoo/tokens generate.
 import type { Audience, Condition, Mood, PlaceCategory, Transport } from '@widoo/shared';
 
-export const tokensVersion = 9;
+export const tokensVersion = 10;
 
 /** Light theme: the dark values are not validated and not generated. */
 export const colors = {
@@ -796,7 +796,10 @@ export const accessibility = {
     "barre collée de la fiche",
     "barre du haut des pages secondaires",
     "action du toast",
-    "bouton « Continuer avec un e-mail »"
+    "bouton « Continuer avec un e-mail »",
+    "barre du haut et en-tête compact de E-07",
+    "mini-lecteur (nom sur une ligne, nom complet dans le libellé)",
+    "tuiles et barre collée de E-15"
   ]
 } as const;
 
@@ -843,7 +846,7 @@ export const toast = {
 export const immersive = {
   "bg": "surface-strong",
   "photoHeight": 600,
-  "veil": "linear-gradient(180deg, rgba(20,23,31,.60) 0%, rgba(20,23,31,.15) 20%, rgba(20,23,31,.10) 42%, rgba(20,23,31,.90) 72%, #14171F 100%)",
+  "veil": "linear-gradient(180deg, rgba(20,23,31,.72) 0%, rgba(20,23,31,.60) 15%, rgba(20,23,31,.15) 26%, rgba(20,23,31,.10) 42%, rgba(20,23,31,.90) 72%, #14171F 100%)",
   "section": {
     "bg": "surface-strong-raised",
     "radius": "radius-section",
