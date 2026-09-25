@@ -4,7 +4,7 @@
  */
 export const taxonomies = {
   audiences: ['solo', 'couple', 'family', 'friends', 'dog_friendly', 'kids_friendly'],
-  budgets: ['free', 'low', 'medium', 'premium'],
+  budgets: ['free', 'low', 'medium', 'high'],
   durations: ['1_2h', 'half_day', 'full_day', 'weekend'],
   transports: ['walk', 'bike', 'metro', 'car'],
   moods: [

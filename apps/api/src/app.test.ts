@@ -1,4 +1,4 @@
-import { ApiError } from '@widoo/shared';
+import { ApiError, RouteSearchQuery } from '@widoo/shared';
 import { sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { z } from 'zod';
@@ -17,6 +17,9 @@ async function buildTestApp(env: Record<string, string> = {}, options: BuildAppO
     },
     async () => ({ ok: true }),
   );
+  app.get('/v1/test/routes', { schema: { querystring: RouteSearchQuery } }, async () => ({
+    ok: true,
+  }));
   app.post('/v1/test/echo', { schema: { body: z.object({ title: z.string() }) } }, async () => ({
     ok: true,
   }));
@@ -46,6 +49,19 @@ describe('error handling', () => {
     expect(error.details?.issues).toEqual([
       expect.objectContaining({ location: 'querystring', path: 'limit', code: 'too_big' }),
       expect.objectContaining({ location: 'querystring', path: 'sort', code: 'invalid_value' }),
+    ]);
+  });
+
+  it('accepts the budget key high and answers the former key premium with validation_error', async () => {
+    const bbox = '2.33,48.85,2.37,48.87';
+    const accepted = await app.inject({ url: `/v1/test/routes?bbox=${bbox}&budgets=high` });
+    expect(accepted.statusCode).toBe(200);
+    const refused = await app.inject({ url: `/v1/test/routes?bbox=${bbox}&budgets=premium` });
+    expect(refused.statusCode).toBe(400);
+    const error = ApiError.parse(refused.json());
+    expect(error.code).toBe('validation_error');
+    expect(error.details?.issues).toEqual([
+      expect.objectContaining({ location: 'querystring', path: 'budgets' }),
     ]);
   });
 

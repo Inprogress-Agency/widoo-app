@@ -25,6 +25,10 @@ describe('system routes', () => {
     expect(config.taxonomies.moods).toEqual(taxonomies.moods);
     expect(config.labels.fr.moods).toEqual(labels.fr.moods);
     expect(config.thresholds.budgetEur.low).toBe(25);
+    expect(config.taxonomies.budgets).toEqual(['free', 'low', 'medium', 'high']);
+    expect(config.labels.fr.budgets).toEqual(labels.fr.budgets);
+    expect(config.labels.fr.budgets.high).toBe('Plus de 70 €');
+    expect(config.labels.fr.durations).toEqual(labels.fr.durations);
   });
 
   it('describe both routes in the OpenAPI document outside production', async () => {
