@@ -24,6 +24,27 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      # Jeton vérifié à chaque passage, pas seulement le jour où le wiki change : expiré, révoqué, en
+      # attente d'approbation ou sans droit d'écriture, l'action le dit aussitôt. Sonde sans effet :
+      # une création incomplète répond 422 si le jeton peut écrire, 401, 403 ou 404 sinon.
+      - name: Check the token
+        env:
+          GH_TOKEN: ${{ secrets.TOKENS_SYNC_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::warning::Secret TOKENS_SYNC_TOKEN absent : l'action ne pourra pas ouvrir la PR de synchronisation."
+            exit 0
+          fi
+          for endpoint in pulls git/refs; do
+            response=$(gh api -i -X POST "repos/$GITHUB_REPOSITORY/$endpoint" -f probe=1 2>&1 || true)
+            if ! grep -q 'HTTP 422' <<< "$response"; then
+              echo "::error::Jeton TOKENS_SYNC_TOKEN refusé (expiré, révoqué, en attente d'approbation ou sans Contents et Pull requests en écriture sur widoo-app) : Ilan le recrée et relance gh secret set TOKENS_SYNC_TOKEN."
+              exit 1
+            fi
+          done
+          expiration=$(grep -i '^github-authentication-token-expiration:' <<< "$response" | cut -d' ' -f2- || true)
+          echo "Jeton TOKENS_SYNC_TOKEN valide${expiration:+, expire le $expiration}."
+
       # Aucun jeton dans le dépôt cloné : l'installation des dépendances ne peut pas le lire.
       - uses: actions/checkout@v4
         with:
