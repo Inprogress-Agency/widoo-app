@@ -142,7 +142,10 @@ describe('buildMappings', () => {
     [
       'an icon on a duration, shown as text only',
       withMappings((copy) => {
-        copy.filterIcons.duration = [{ value: 'Journée', icon: 'clock' }];
+        copy.filterIcons.duration = (copy.filterIcons.duration ?? []).map((entry) => ({
+          ...entry,
+          icon: 'clock',
+        }));
       }),
       'filterIcons.duration: an icon appeared',
     ],
@@ -153,16 +156,30 @@ describe('buildMappings', () => {
       }),
       '« Offert » is not a label of budgets',
     ],
+    [
+      'a budget label unknown to packages/shared, even without an icon',
+      withMappings((copy) => {
+        copy.filterIcons.budget = [{ value: 'Petit budget', icon: null }];
+      }),
+      '« Petit budget » is not a label of budgets',
+    ],
+    [
+      'a budget value missing',
+      withMappings((copy) => {
+        copy.filterIcons.budget = [{ value: 'Gratuit', icon: 'tag' }];
+      }),
+      'filterIcons.budget: missing low, medium, high',
+    ],
   ])('refuses %s', (_case, changed, message) => {
     expect(() => buildMappings(changed, theme)).toThrow(message);
   });
 
-  it('maps an icon on « Gratuit » alone among the budgets, the others staying text (D-053)', () => {
+  it('accepts an icon on « Gratuit » alone among the budgets, the others staying text (D-053)', () => {
     const changed = withMappings((copy) => {
-      copy.filterIcons.budget = [
-        { value: 'Gratuit', icon: 'tag' },
-        { value: 'Plus de 70 €', icon: null },
-      ];
+      copy.filterIcons.budget = (copy.filterIcons.budget ?? []).map((entry) => ({
+        ...entry,
+        icon: entry.value === 'Gratuit' ? 'tag' : null,
+      }));
     });
     const built = buildMappings(changed, theme);
     expect(built.filterIcons.budgets).toEqual({ free: 'tag' });
@@ -171,7 +188,10 @@ describe('buildMappings', () => {
 
   it('leaves the budgets out of the filter icons while none has an icon', () => {
     const changed = withMappings((copy) => {
-      copy.filterIcons.budget = [{ value: 'Gratuit', icon: null }];
+      copy.filterIcons.budget = (copy.filterIcons.budget ?? []).map((entry) => ({
+        ...entry,
+        icon: null,
+      }));
     });
     expect(buildMappings(changed, theme).filterIcons).not.toHaveProperty('budgets');
   });
