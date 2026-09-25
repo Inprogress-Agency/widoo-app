@@ -12,6 +12,7 @@ import {
   type SearchStatus,
 } from '../discovery/store';
 import { useDiscovery } from '../discovery/useRouteSearch';
+import { useZoneCount } from '../discovery/useSectionList';
 import { formatDayAndTime } from '../format/date';
 import { Button } from '../ui/Button';
 import { ResultsSheet, type ResultsSheetMethods } from './ResultsSheet';
@@ -65,6 +66,7 @@ export function DiscoverySheet({
   const clearFilters = useDiscovery((state) => state.clearFilters);
   const focus = useDiscovery((state) => state.focus);
   const selected = useDiscovery(selectedRoute);
+  const zoneCount = useZoneCount();
   const level = useRef<SheetLevel>('rest');
   /** Cards already reported as seen, for the results on screen: once each. */
   const seen = useRef(new Set<string>());
@@ -138,7 +140,8 @@ export function DiscoverySheet({
   } else if (clusters) {
     peek = message(<ZoomInMessage count={resultsCount(results)} />);
   } else {
-    const count = t('sheet.count', { count: routes.length });
+    // Over one page of results, the count of the zone; the listed routes until it comes.
+    const count = t('sheet.count', { count: zoneCount ?? routes.length });
     const zone = position ? zoneName(routes, position) : t('sheet.paris');
     peek = (
       <SheetHeader

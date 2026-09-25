@@ -1,5 +1,6 @@
 import type { LatLng, RouteCard, RouteSearchResult, RouteSort } from '@widoo/shared';
 import { distanceBetweenM, type Bbox } from '../map/geo';
+import type { SearchStatus } from './store';
 
 /**
  * Sections of the results sheet (Ecrans › E-01, E-04), each with its carousel and its « Voir
@@ -79,4 +80,43 @@ export function zoneRadiusM({ west, south, east, north }: Bbox): number {
   const halfWidth = distanceBetweenM(center, { lat: center.lat, lng: east });
   const halfHeight = distanceBetweenM(center, { lat: north, lng: center.lng });
   return Math.min(halfWidth, halfHeight);
+}
+
+/** What « Voir tout » shows (Ecrans › E-04, états). */
+export type SectionListStatus = 'loading' | 'error' | 'offline' | 'empty' | 'ready';
+
+/** Where the pages of the list stand: `pending` until the routes of the sort are all there. */
+export type PagesStatus = 'pending' | 'error' | 'offline' | 'success';
+
+interface SectionListInput {
+  /** The search of the zone, which the sheet shows. */
+  zone: SearchStatus;
+  hasZoneResults: boolean;
+  pages: PagesStatus;
+  routeCount: number;
+}
+
+/**
+ * State of « Voir tout »: the list follows the zone of the sheet, loading while a new zone is
+ * searched and failing with it; then its own pages, for a sort other than the sheet's.
+ */
+export function sectionListStatus({
+  zone,
+  hasZoneResults,
+  pages,
+  routeCount,
+}: SectionListInput): SectionListStatus {
+  if (zone === 'error') {
+    return 'error';
+  }
+  if (!hasZoneResults) {
+    return zone === 'offline' ? 'offline' : 'loading';
+  }
+  if (zone === 'loading' || zone === 'idle' || pages === 'pending') {
+    return 'loading';
+  }
+  if (pages === 'error' || pages === 'offline') {
+    return pages;
+  }
+  return routeCount === 0 ? 'empty' : 'ready';
 }
