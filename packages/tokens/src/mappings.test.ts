@@ -1,4 +1,4 @@
-import { taxonomies } from '@widoo/shared';
+import { labels, taxonomies } from '@widoo/shared';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { buildMappings, parseUiIcon } from './mappings';
@@ -49,6 +49,19 @@ describe('buildMappings', () => {
     expect(mappings.filterIcons.conditions?.outdoor).toBe('park');
     expect(mappings.filterIcons.audiences?.dog_friendly).toBe('paw-print');
   });
+
+  it.each([
+    ['budget', 'budgets'],
+    ['duration', 'durations'],
+  ] as const)(
+    'lists the %s labels of packages/shared, in the order of the taxonomy',
+    (group, taxonomy) => {
+      const expected = taxonomies[taxonomy].map(
+        (key) => (labels.fr[taxonomy] as Record<string, string>)[key],
+      );
+      expect(tokens.mappings.filterIcons[group]?.map(({ value }) => value)).toEqual(expected);
+    },
+  );
 
   it('gives every place category a family and an icon', () => {
     expect(Object.keys(mappings.placeCategories).sort()).toEqual(
