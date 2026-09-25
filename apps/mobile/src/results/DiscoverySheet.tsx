@@ -1,7 +1,8 @@
-import type { AnalyticsEvents, LatLng, RouteCard, RouteCluster } from '@widoo/shared';
+import type { LatLng, RouteCard, RouteCluster } from '@widoo/shared';
+import { size } from '@widoo/tokens';
 import { useEffect, useRef, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { analytics } from '../analytics';
 import { StatusMessage } from '../components/StatusMessage';
 import { NoRoutesMessage, ZoomInMessage } from '../components/ZoneMessage';
@@ -11,10 +12,13 @@ import {
   selectedRoute,
   type SearchStatus,
 } from '../discovery/store';
+import type { SectionId } from '../discovery/sections';
 import { useDiscovery } from '../discovery/useRouteSearch';
 import { useZoneCount } from '../discovery/useSectionList';
 import { formatDayAndTime } from '../format/date';
 import { Button } from '../ui/Button';
+import { Text } from '../ui/Text';
+import type { OpenSource } from './navigation';
 import { ResultsSheet, type ResultsSheetMethods } from './ResultsSheet';
 import { RouteCarousel, SkeletonCarousel } from './RouteCarousel';
 import { RouteSummary, RouteSummaryMore } from './RouteSummary';
@@ -22,8 +26,6 @@ import type { SheetLevel } from './sheet';
 import { SheetBanner } from './SheetBanner';
 import { SheetHeader } from './SheetHeader';
 import { zoneName } from './zone';
-
-export type OpenSource = AnalyticsEvents['route_opened']['source'];
 
 interface DiscoverySheetProps {
   /** Height of the home screen, above the tab bar. */
@@ -40,6 +42,8 @@ interface DiscoverySheetProps {
     retry: () => void;
   };
   onOpenRoute: (route: RouteCard, source: OpenSource) => void;
+  /** « Voir tout » of a section. */
+  onOpenSection: (section: SectionId) => void;
   /** The detent reached, and the height the sheet covers at the foot of the map. */
   onCoverChange?: (height: number) => void;
 }
@@ -55,6 +59,7 @@ export function DiscoverySheet({
   onEnableLocation,
   search,
   onOpenRoute,
+  onOpenSection,
   onCoverChange,
 }: DiscoverySheetProps) {
   const { t } = useTranslation();
@@ -147,6 +152,7 @@ export function DiscoverySheet({
       <SheetHeader
         title={t('sheet.nearby')}
         subtitle={zone ? t('sheet.inZone', { count, zone }) : count}
+        action={<SeeAllLink onPress={() => onOpenSection('nearby')} />}
       />
     );
     content = (
@@ -188,5 +194,26 @@ export function DiscoverySheet({
     >
       {content}
     </ResultsSheet>
+  );
+}
+
+// The link text is shorter than a finger: its hit slop brings it to 44 points.
+const linkHitSlop = size['touch-min'] / 4;
+
+/** « Voir tout » of a section header: blue on white, 4.51:1 (Direction-Artistique › Couleurs). */
+function SeeAllLink({ onPress }: { onPress: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <Pressable
+      accessibilityRole="link"
+      accessibilityLabel={t('sheet.seeAll')}
+      accessibilityHint={t('sheet.seeAllHint')}
+      hitSlop={linkHitSlop}
+      onPress={onPress}
+    >
+      <Text variant="button" color="blue">
+        {t('sheet.seeAll')}
+      </Text>
+    </Pressable>
   );
 }
