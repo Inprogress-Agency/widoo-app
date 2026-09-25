@@ -91,6 +91,11 @@ export const fr = {
   rating: {
     label: 'Note {{value}} sur 5',
   },
+  favorite: {
+    add: 'Ajouter aux favoris',
+    remove: 'Retirer des favoris',
+    comingSoon: 'Les favoris arrivent bientôt.',
+  },
   badges: {
     verified: 'Vérifié',
     signature: 'Signature',
