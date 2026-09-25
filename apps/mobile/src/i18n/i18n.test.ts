@@ -9,8 +9,8 @@ describe('i18n', () => {
   });
 
   it('follows the French plural rules: 0 and 1 are singular', () => {
-    expect(i18next.t('home.config.taxonomies', { count: 0 })).toBe('0 taxonomie');
-    expect(i18next.t('home.config.taxonomies', { count: 1 })).toBe('1 taxonomie');
-    expect(i18next.t('home.config.taxonomies', { count: 14 })).toBe('14 taxonomies');
+    expect(i18next.t('duration.spoken.hours', { count: 0 })).toBe('0 heure');
+    expect(i18next.t('duration.spoken.hours', { count: 1 })).toBe('1 heure');
+    expect(i18next.t('duration.spoken.hours', { count: 14 })).toBe('14 heures');
   });
 });
