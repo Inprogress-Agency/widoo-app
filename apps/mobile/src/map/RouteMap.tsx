@@ -1,13 +1,22 @@
 import type { MapState } from '@rnmapbox/maps';
 import type { LatLng, RouteCard } from '@widoo/shared';
 import { motion, size, spacing } from '@widoo/tokens';
-import { useCallback, useMemo, useRef, useState, type ComponentRef, type ReactNode } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentRef,
+  type ReactNode,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View, useWindowDimensions, type AccessibilityActionEvent } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 import { colors } from '@widoo/tokens';
+import type { MapView } from '../discovery/store';
 import { formatDuration } from '../format/duration';
-import { initialSpanM, toBbox, toLngLat, zoomForSpan, type Bbox, type LngLat } from './geo';
+import { bboxCenter, initialSpanM, toBbox, toLngLat, zoomForSpan, type LngLat } from './geo';
 import { Mapbox } from './mapbox';
 import { RecenterButton } from './MapControls';
 import { sharedMarkerImages, usePhotoMarkerImages } from './markerImages';
@@ -17,6 +26,15 @@ import { SelectedRoute } from './SelectedRoute';
 import { labelFont, mapStyleJson } from './style';
 import { screenXOnFit, tooltipAnchorX } from './tooltip';
 
+/**
+ * Camera moves take `map` (500 ms) with Mapbox easeTo, and jump with « Réduire les animations »
+ * (D-030).
+ */
+const cameraAnimationOf = (isReducedMotion: boolean) => ({
+  animationMode: isReducedMotion ? ('none' as const) : ('easeTo' as const),
+  animationDuration: isReducedMotion ? 0 : motion.durations.map,
+});
+
 /** Map ornaments (Mapbox logo and attribution, required) sit in the margin of the screen. */
 const ornamentMargin = { bottom: spacing['space-8'], left: spacing['space-8'] };
 
@@ -25,8 +43,13 @@ interface RouteMapProps {
   /** The user's position, or Paris: where the map opens and where « recentrer » brings it. */
   center: LatLng;
   hasPosition: boolean;
-  /** Called once, when the first view of the map settles: its zone feeds the first search. */
-  onFirstZone: (zone: Bbox) => void;
+  /**
+   * Each time the map settles, from its opening view on: its zone and zoom, and whether the user
+   * moved it (a pan or a zoom) rather than the app.
+   */
+  onViewChange: (view: MapView, isManual: boolean) => void;
+  /** A view the app asks for, such as the widened zone: the camera goes there when `id` changes. */
+  framing: { id: number; view: MapView } | null;
   selectedRoute: RouteCard | null;
   /** A Premium route is locked for a user without subscription (D-014). */
   hasPremium: boolean;
@@ -36,6 +59,8 @@ interface RouteMapProps {
   onOpenRoute: (route: RouteCard) => void;
   /** Line left of the recentre button, such as the location off banner. */
   banner?: ReactNode;
+  /** « Rechercher dans cette zone », or the pill of a search on its way, above the banner. */
+  searchControl?: ReactNode;
 }
 
 /**
@@ -48,12 +73,14 @@ export function RouteMap({
   routes,
   center,
   hasPosition,
-  onFirstZone,
+  onViewChange,
+  framing,
   selectedRoute,
   hasPremium,
   onSelect,
   onOpenRoute,
   banner,
+  searchControl,
 }: RouteMapProps) {
   const { t } = useTranslation();
   const { fontScale, width } = useWindowDimensions();
@@ -61,8 +88,9 @@ export function RouteMap({
   const [tooltipAnchor, setTooltipAnchor] = useState(0.5);
   const isReducedMotion = useReducedMotion();
   const camera = useRef<ComponentRef<typeof Mapbox.Camera>>(null);
-  const hasZone = useRef(false);
   const isHome = useRef(false);
+  /** A gesture of the user moved the map since it last settled. */
+  const isGestureMove = useRef(false);
   const label = durationLabel(fontScale);
   const sharedImages = useMemo(() => sharedMarkerImages(label.pillHeight), [label.pillHeight]);
   const photoImages = usePhotoMarkerImages(routes);
@@ -75,31 +103,47 @@ export function RouteMap({
     [routes, photoImages, t],
   );
 
+  const handleCameraChanged = useCallback((state: MapState) => {
+    if (state.gestures.isGestureActive) {
+      isGestureMove.current = true;
+    }
+  }, []);
+
   const handleMapIdle = useCallback(
     (state: MapState) => {
-      // The first zone is the one the map opens on, never the view before it.
-      if (hasZone.current || !isHome.current) {
+      // The first view is the one the map opens on, never the view before it.
+      if (!isHome.current) {
         return;
       }
-      hasZone.current = true;
-      const { ne, sw } = state.properties.bounds;
-      onFirstZone(toBbox({ ne: ne as LngLat, sw: sw as LngLat }));
+      const { bounds, zoom } = state.properties;
+      const bbox = toBbox({ ne: bounds.ne as LngLat, sw: bounds.sw as LngLat });
+      onViewChange({ bbox, zoom }, isGestureMove.current);
+      isGestureMove.current = false;
     },
-    [onFirstZone],
+    [onViewChange],
   );
 
-  // Camera moves take `map` (500 ms) with Mapbox easeTo, and jump with « Réduire les
-  // animations » (D-030).
-  const cameraAnimation = {
-    animationMode: isReducedMotion ? ('none' as const) : ('easeTo' as const),
-    animationDuration: isReducedMotion ? 0 : motion.durations.map,
-  };
+  const cameraAnimation = cameraAnimationOf(isReducedMotion);
 
   // About 3 km across the screen (Ecrans › E-01).
   const home = {
     centerCoordinate: toLngLat(center),
     zoomLevel: zoomForSpan(center, initialSpanM, width),
   };
+
+  // A framing is followed once, when it is asked for.
+  const framedId = useRef<number | null>(null);
+  useEffect(() => {
+    if (!framing || framedId.current === framing.id) {
+      return;
+    }
+    framedId.current = framing.id;
+    camera.current?.setCamera({
+      centerCoordinate: bboxCenter(framing.view.bbox),
+      zoomLevel: framing.view.zoom,
+      ...cameraAnimationOf(isReducedMotion),
+    });
+  }, [framing, isReducedMotion]);
 
   const recenter = () => {
     camera.current?.setCamera({ ...home, ...cameraAnimation });
@@ -173,6 +217,7 @@ export function RouteMap({
         rotateEnabled={false}
         logoPosition={ornamentMargin}
         attributionPosition={{ ...ornamentMargin, left: undefined, right: spacing['space-8'] }}
+        onCameraChanged={handleCameraChanged}
         onMapIdle={handleMapIdle}
         // Android drops the default camera when it loads a style given as JSON: the map is put
         // back at its opening place once loaded, on both systems.
@@ -256,7 +301,12 @@ export function RouteMap({
         className="flex-row items-end gap-8 px-16 pb-32"
         style={styles.controls}
       >
-        <View pointerEvents="box-none" className="flex-1">
+        <View pointerEvents="box-none" className="flex-1 gap-8">
+          {searchControl && (
+            <View pointerEvents="box-none" className="items-center">
+              {searchControl}
+            </View>
+          )}
           {banner}
         </View>
         {/* Hidden while a route is selected (Ecrans › E-04). */}

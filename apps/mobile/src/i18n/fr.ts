@@ -9,6 +9,8 @@ export const fr = {
     label: 'Carte, {{count}} parcours',
     marker: '{{title}}, {{duration}}',
     recenter: 'Recentrer la carte',
+    searchZone: 'Rechercher dans cette zone',
+    searching: 'Recherche…',
     locationOff: 'Position désactivée · autour de Paris',
     enable: 'Activer',
     enableLocation: 'Activer la localisation',
