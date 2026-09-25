@@ -1,10 +1,11 @@
-import type { UiIconKey } from '@widoo/tokens';
+import type { IconName, UiIconKey } from '@widoo/tokens';
 import { View } from 'react-native';
 import { Icon, uiIcon } from './Icon';
 import { Text } from './Text';
 
 interface TagProps {
-  icon: UiIconKey;
+  /** An interface icon, or the icon of a filter value such as the public (`filterIcons`). */
+  icon: UiIconKey | { filter: IconName };
   label: string;
   /** What a screen reader says, when the written form is short: « 3 heures » for « 3 h ». */
   accessibilityLabel?: string;
@@ -23,7 +24,10 @@ export function Tag({ icon, label, accessibilityLabel, surface = 'bg' }: TagProp
       accessibilityLabel={accessibilityLabel ?? label}
       className={`min-h-badge-h flex-row items-center gap-6 self-start rounded-pill px-10 py-4 ${surface === 'bg' ? 'bg-bg' : 'bg-surface'}`}
     >
-      <Icon {...uiIcon(icon)} size="space-16" />
+      <Icon
+        {...(typeof icon === 'string' ? uiIcon(icon) : { name: icon.filter })}
+        size="space-16"
+      />
       <Text variant="label-strong">{label}</Text>
     </View>
   );
