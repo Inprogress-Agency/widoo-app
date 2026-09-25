@@ -3,7 +3,8 @@ import PostHog from 'posthog-react-native';
 import { useEffect, useSyncExternalStore } from 'react';
 import { AppState, Platform } from 'react-native';
 import { createMMKV } from 'react-native-mmkv';
-import { createAnalytics } from './analytics';
+import { createAnalytics, createLogClient } from './analytics';
+import { watchAppOpened } from './discovery';
 import { createConsentStore } from './consent';
 
 /** PostHog Cloud EU (wiki Securite-et-RGPD): fixed here so that no setting sends data elsewhere. */
@@ -12,6 +13,8 @@ const POSTHOG_EU_HOST = 'https://eu.i.posthog.com';
 // `process.env.EXPO_PUBLIC_*` must be read literally for Expo to inline it in the bundle. Set per
 // EAS environment, or in `.env.local`; absent, analytics does nothing.
 const posthogKey = process.env.EXPO_PUBLIC_POSTHOG_KEY;
+/** Development only, without key: the events go to the Metro log instead of PostHog. */
+const isDebugLog = __DEV__ && process.env.EXPO_PUBLIC_ANALYTICS_DEBUG === '1';
 
 // MMKV (Architecture-Technique): read synchronously, so the first render knows the answer.
 const consentStorage = createMMKV({ id: 'consent' });
@@ -24,7 +27,9 @@ export const analytics = createAnalytics({
   consent,
   createClient:
     posthogKey === undefined || posthogKey === ''
-      ? undefined
+      ? isDebugLog
+        ? () => createLogClient((line) => console.info(line))
+        : undefined
       : () =>
           new PostHog(posthogKey, {
             host: POSTHOG_EU_HOST,
@@ -41,6 +46,12 @@ export const analytics = createAnalytics({
   clearClientStorage: () => posthogStorage.clearAll(),
   appVersion: Constants.expoConfig?.version ?? 'unknown',
   platform: Platform.OS === 'android' ? 'android' : 'ios',
+  // A refused event is a bug of the app: loud in development, dropped in a release.
+  onInvalid: (error) => {
+    if (__DEV__) {
+      console.error(error);
+    }
+  },
 });
 
 /** Answer to the consent banner, re-rendering when it changes. */
@@ -58,14 +69,6 @@ export function useAppOpenedEvent() {
     if (!isGranted) {
       return;
     }
-    analytics.track('app_opened', { cold_start: true });
-    let previous = AppState.currentState;
-    const subscription = AppState.addEventListener('change', (next) => {
-      if (previous === 'background' && next === 'active') {
-        analytics.track('app_opened', { cold_start: false });
-      }
-      previous = next;
-    });
-    return () => subscription.remove();
+    return watchAppOpened(AppState, (properties) => analytics.track('app_opened', properties));
   }, [isGranted]);
 }

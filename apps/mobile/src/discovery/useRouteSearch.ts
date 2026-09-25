@@ -10,6 +10,7 @@ import type { RouteCard } from '@widoo/shared';
 import { useCallback, useEffect, useSyncExternalStore } from 'react';
 import { useStore } from 'zustand';
 import { analytics } from '../analytics';
+import { mapSearchZoneEvent } from '../analytics/discovery';
 import { api } from '../api/client';
 import { latestCachedResults, searchQueryKey } from '../api/search-cache';
 import { createDiscoveryStore, resultsCount, type DiscoveryStore } from './store';
@@ -39,9 +40,6 @@ export function useIsOnline(): boolean {
 /** No answer at all: the request never reached the API. */
 const isUnreachable = (error: unknown) =>
   error instanceof ApiRequestError && (error.kind === 'network' || error.kind === 'timeout');
-
-/** Zoom level sent to analytics: a tenth of a level, with no position (wiki Analytics). */
-const analyticsZoom = (zoom: number) => Math.round(zoom * 10) / 10;
 
 /**
  * Runs the search the discovery store asks for, and hands its answer back to the store: the zone
@@ -85,11 +83,7 @@ export function useRouteSearch() {
       goOffline(search.id, latestCachedResults(client));
     } else if (data) {
       if (receive(search.id, data, dataUpdatedAt)) {
-        analytics.track('map_search_zone', {
-          trigger: search.trigger,
-          zoom: analyticsZoom(search.view.zoom),
-          results_count: resultsCount(data),
-        });
+        analytics.track('map_search_zone', mapSearchZoneEvent(search, resultsCount(data)));
       }
     } else if (isError) {
       fail(search.id);
