@@ -4,6 +4,7 @@ import { motion, size, spacing } from '@widoo/tokens';
 import {
   useCallback,
   useEffect,
+  useEffectEvent,
   useMemo,
   useRef,
   useState,
@@ -36,9 +37,6 @@ const cameraAnimationOf = (isReducedMotion: boolean) => ({
   animationDuration: isReducedMotion ? 0 : motion.durations.map,
 });
 
-/** Map ornaments (Mapbox logo and attribution, required) sit in the margin of the screen. */
-const ornamentMargin = { bottom: spacing['space-8'], left: spacing['space-8'] };
-
 interface RouteMapProps {
   routes: readonly RouteCard[];
   /** Routes grouped by area, for a zone too large to list them; null otherwise. */
@@ -54,15 +52,17 @@ interface RouteMapProps {
   /** A view the app asks for, such as the widened zone: the camera goes there when `id` changes. */
   framing: { id: number; view: MapView } | null;
   selectedRoute: RouteCard | null;
+  /** The card the user scrolled to in the sheet: the map comes round to its start, enlarged. */
+  focusedRoute?: RouteCard | null;
+  /** Height the results sheet covers at the foot of the map: the focused start stays above it. */
+  bottomInset?: number;
   /** A Premium route is locked for a user without subscription (D-014). */
   hasPremium: boolean;
   /** A marker, or null for a tap elsewhere on the map. */
   onSelect: (route: RouteCard | null) => void;
   /** « Voir plus » of the tooltip: the route sheet (E-05). */
   onOpenRoute: (route: RouteCard) => void;
-  /** Line left of the recentre button, such as the location off banner. */
-  banner?: ReactNode;
-  /** « Rechercher dans cette zone », or the pill of a search on its way, above the banner. */
+  /** « Rechercher dans cette zone », or the pill of a search on its way. */
   searchControl?: ReactNode;
   /** The recentre button, hidden over the message of an empty zone (Ecrans › E-01). */
   hasRecenter?: boolean;
@@ -82,10 +82,11 @@ export function RouteMap({
   onViewChange,
   framing,
   selectedRoute,
+  focusedRoute = null,
+  bottomInset = size['sheet-rest'],
   hasPremium,
   onSelect,
   onOpenRoute,
-  banner,
   searchControl,
   hasRecenter = true,
 }: RouteMapProps) {
@@ -134,6 +135,14 @@ export function RouteMap({
 
   const cameraAnimation = cameraAnimationOf(isReducedMotion);
 
+  // The controls and the map ornaments (Mapbox logo and attribution, required) sit just above
+  // the results sheet, as high as it rises up to half the map; beyond, they stay under it.
+  const isSheetLow = bottomInset <= viewport.height / 2;
+  const ornamentMargin = {
+    bottom: (isSheetLow ? bottomInset : size['sheet-rest']) + spacing['space-8'],
+    left: spacing['space-8'],
+  };
+
   // About 3 km across the screen (Ecrans › E-01).
   const home = {
     centerCoordinate: toLngLat(center),
@@ -154,6 +163,25 @@ export function RouteMap({
     });
   }, [framing, isReducedMotion]);
 
+  // The map comes round to the card the user scrolled to, gently, at the same zoom (E-04),
+  // once per card; never over a selected route, which holds the camera.
+  const focusedId = useRef<string | null>(null);
+  useEffect(() => {
+    const start = focusedRoute?.steps[0]?.location;
+    if ((focusedRoute?.id ?? null) === focusedId.current) {
+      return;
+    }
+    focusedId.current = focusedRoute?.id ?? null;
+    if (!start || selectedRoute) {
+      return;
+    }
+    camera.current?.setCamera({
+      centerCoordinate: toLngLat(start),
+      padding: { paddingTop: 0, paddingRight: 0, paddingBottom: bottomInset, paddingLeft: 0 },
+      ...cameraAnimationOf(isReducedMotion),
+    });
+  }, [focusedRoute, selectedRoute, bottomInset, isReducedMotion]);
+
   const recenter = () => {
     camera.current?.setCamera({ ...home, ...cameraAnimation });
   };
@@ -162,16 +190,16 @@ export function RouteMap({
    * The route fills the lower half of the map, its tooltip the upper half, above the room kept
    * for the results sheet; the tooltip slides sideways to stay on screen.
    */
-  const selectRoute = (route: RouteCard) => {
+  const frameRoute = (route: RouteCard, bottom: number) => {
     const frame = selectionFrame(route, isLocked(route, hasPremium));
     const start = route.steps[0];
     if (!frame || !start) {
-      return;
+      return false;
     }
     const padding = {
       top: viewport.height / 2,
       right: spacing['space-32'],
-      bottom: size['sheet-rest'],
+      bottom,
       left: spacing['space-32'],
     };
     camera.current?.setCamera({
@@ -195,8 +223,32 @@ export function RouteMap({
         margin: spacing['space-16'],
       }),
     );
-    onSelect(route);
+    return true;
   };
+
+  /** Where the route was framed last, route and sheet height: framed again only on a change. */
+  const framedFor = useRef('');
+  const selectRoute = (route: RouteCard) => {
+    if (frameRoute(route, size['sheet-rest'])) {
+      framedFor.current = `${route.id}:${size['sheet-rest']}`;
+      onSelect(route);
+    }
+  };
+
+  // The summary of the route in the sheet at rest is taller than the rest detent: once the sheet
+  // has settled around it, the route is framed again above it, never under half the map.
+  const reframe = useEffectEvent((route: RouteCard, bottom: number) => {
+    const key = `${route.id}:${bottom}`;
+    if (bottom <= viewport.height / 2 && key !== framedFor.current) {
+      framedFor.current = key;
+      frameRoute(route, bottom);
+    }
+  });
+  useEffect(() => {
+    if (selectedRoute) {
+      reframe(selectedRoute, bottomInset);
+    }
+  }, [selectedRoute, bottomInset]);
 
   const routeOf = (id: unknown) => routes.find((route) => route.id === id);
 
@@ -282,6 +334,13 @@ export function RouteMap({
             filter={['!=', ['get', 'routeId'], selectedRoute?.id ?? '']}
             style={{
               iconImage: ['get', 'image'],
+              // The marker of the focused card is drawn at its active size.
+              iconSize: [
+                'case',
+                ['==', ['get', 'routeId'], focusedRoute?.id ?? ''],
+                size['marker-active'] / size.marker,
+                1,
+              ],
               iconAnchor: 'bottom',
               iconOffset: [0, photoOffsetY(label.pillHeight)],
               iconAllowOverlap: true,
@@ -369,26 +428,23 @@ export function RouteMap({
         pointerEvents="none"
         style={StyleSheet.absoluteFill}
       />
-      <View
-        pointerEvents="box-none"
-        className="flex-row items-end gap-8 px-16 pb-32"
-        style={styles.controls}
-      >
-        <View pointerEvents="box-none" className="flex-1 gap-8">
-          {searchControl && (
-            <View pointerEvents="box-none" className="items-center">
-              {searchControl}
-            </View>
-          )}
-          {banner}
+      {isSheetLow && (
+        <View
+          pointerEvents="box-none"
+          className="flex-row items-end gap-8 px-16"
+          style={[styles.controls, { bottom: bottomInset + spacing['space-12'] }]}
+        >
+          <View pointerEvents="box-none" className="flex-1 items-center">
+            {searchControl}
+          </View>
+          {/* Hidden while a route is selected (Ecrans › E-04). */}
+          {hasRecenter && !selectedRoute && <RecenterButton onPress={recenter} />}
         </View>
-        {/* Hidden while a route is selected (Ecrans › E-04). */}
-        {hasRecenter && !selectedRoute && <RecenterButton onPress={recenter} />}
-      </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  controls: { position: 'absolute', left: 0, right: 0, bottom: 0 },
+  controls: { position: 'absolute', left: 0, right: 0 },
 });

@@ -4,6 +4,7 @@ import {
   activeFilterCount,
   canSearchZone,
   createDiscoveryStore,
+  focusedRoute,
   resultsCount,
   selectedRoute,
   type MapView,
@@ -212,5 +213,83 @@ describe('resultsCount', () => {
         ],
       }),
     ).toBe(17);
+  });
+});
+
+describe('offline', () => {
+  beforeEach(() => {
+    store = createDiscoveryStore();
+  });
+
+  const cached = { result: listed('kept'), fetchedAt: 1_000 };
+
+  it('keeps the results on screen and their time when the network is gone', () => {
+    store.getState().showView(home, false);
+    store.getState().receive(searchId(), listed('a'), 5_000);
+    store.getState().showView(moved, true);
+    store.getState().searchZone('button');
+    store.getState().goOffline(searchId(), cached);
+    const state = store.getState();
+    expect(state.status).toBe('offline');
+    expect(state.results?.items.map((item) => item.id)).toEqual(['a']);
+    expect(state.resultsAt).toBe(5_000);
+    expect(canSearchZone(state)).toBe(false);
+  });
+
+  it('shows the results kept from an earlier session without any on screen', () => {
+    store.getState().showView(home, false);
+    store.getState().goOffline(searchId(), cached);
+    expect(store.getState().results?.items.map((item) => item.id)).toEqual(['kept']);
+    expect(store.getState().resultsAt).toBe(1_000);
+  });
+
+  it('stays without results when nothing was kept', () => {
+    store.getState().showView(home, false);
+    store.getState().goOffline(searchId(), null);
+    expect(store.getState()).toMatchObject({ status: 'offline', results: null });
+  });
+
+  it('takes the answer once the network is back', () => {
+    store.getState().showView(home, false);
+    const id = searchId();
+    store.getState().goOffline(id, cached);
+    expect(store.getState().receive(id, listed('fresh'), 9_000)).toBe(true);
+    expect(store.getState()).toMatchObject({ status: 'success', resultsAt: 9_000 });
+  });
+
+  it('ignores an older search', () => {
+    store.getState().showView(home, false);
+    const older = searchId();
+    store.getState().searchZone('button');
+    store.getState().goOffline(older, cached);
+    expect(store.getState().status).toBe('loading');
+  });
+});
+
+describe('focus', () => {
+  beforeEach(() => {
+    store = createDiscoveryStore();
+  });
+
+  it('follows the card the user scrolled to, and forgets it with new results', () => {
+    openedWith('a', 'b');
+    store.getState().focus('b');
+    expect(focusedRoute(store.getState())?.id).toBe('b');
+    store.getState().searchZone('button');
+    store.getState().receive(searchId(), listed('b', 'c'));
+    expect(focusedRoute(store.getState())).toBeNull();
+  });
+});
+
+describe('offline after an answer', () => {
+  beforeEach(() => {
+    store = createDiscoveryStore();
+  });
+
+  it('dates the results of a zone already answered once the network is gone', () => {
+    openedWith('a');
+    store.getState().goOffline(searchId(), { result: listed('kept'), fetchedAt: 1 });
+    expect(store.getState().status).toBe('offline');
+    expect(store.getState().results?.items.map((item) => item.id)).toEqual(['a']);
   });
 });

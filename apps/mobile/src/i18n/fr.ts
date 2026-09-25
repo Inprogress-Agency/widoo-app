@@ -42,6 +42,36 @@ export const fr = {
       more: 'Voir plus',
     },
   },
+  sheet: {
+    label: 'Résultats',
+    nearby: 'À proximité',
+    count_one: '{{count}} parcours',
+    count_other: '{{count}} parcours',
+    inZone: '{{count}} · {{zone}}',
+    paris: 'Paris',
+    searching: 'Recherche autour de vous…',
+    offline: 'Hors connexion · résultats du {{day}} à {{time}}',
+    error: 'Impossible de charger les parcours',
+    noConnection: 'Pas de connexion',
+    errorBody: 'Vérifiez votre connexion puis réessayez.',
+    retry: 'Réessayer',
+    level: {
+      rest: 'réduits',
+      half: 'à mi-hauteur',
+      full: 'en plein écran',
+    },
+  },
+  summary: {
+    label: 'Parcours sélectionné, {{card}}',
+    open: 'Voir le parcours',
+  },
+  card: {
+    by: 'Par {{name}}',
+    byWidoo: 'Par Widoo',
+    member: 'Membre Widoo',
+    distance: 'à {{distance}}',
+    open: 'Ouvre la fiche du parcours',
+  },
   route: {
     title: 'Fiche du parcours',
     comingSoon: 'La fiche détaillée arrive bientôt.',
@@ -69,8 +99,32 @@ export const fr = {
       hoursMinutes_other: '{{count}} heures {{minutes}}',
     },
   },
+  // « ≈ 25 € par pers. », never « env. » nor a range (D-032).
+  budget: {
+    amount: '≈ {{euros}} €',
+    perPerson: 'par pers.',
+    spoken: 'environ {{euros}} euros par personne',
+    free: 'Gratuit',
+  },
+  distance: {
+    short: {
+      meters: '{{count}} m',
+      kilometers: '{{value}} km',
+    },
+    spoken: {
+      meters_one: '{{count}} mètre',
+      meters_other: '{{count}} mètres',
+      kilometers_one: '{{value}} kilomètre',
+      kilometers_other: '{{value}} kilomètres',
+    },
+  },
   rating: {
     label: 'Note {{value}} sur 5',
+  },
+  favorite: {
+    add: 'Ajouter aux favoris',
+    remove: 'Retirer des favoris',
+    comingSoon: 'Les favoris arrivent bientôt.',
   },
   badges: {
     verified: 'Vérifié',
