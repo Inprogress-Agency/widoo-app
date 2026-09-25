@@ -55,11 +55,40 @@ export const fr = {
     noConnection: 'Pas de connexion',
     errorBody: 'Vérifiez votre connexion puis réessayez.',
     retry: 'Réessayer',
+    seeAll: 'Voir tout',
+    seeAllHint: 'Ouvre la liste complète de la section',
     level: {
       rest: 'réduits',
       half: 'à mi-hauteur',
       full: 'en plein écran',
     },
+  },
+  // Titles of the sections of the sheet, and of their « Voir tout » list (E-04).
+  sections: {
+    nearby: 'À proximité',
+  },
+  list: {
+    back: 'Retour',
+    around: 'Autour de {{zone}}',
+    aroundYou: 'Autour de vous',
+    aroundParis: 'Autour de Paris',
+    radius: 'rayon {{radius}}',
+    searching: 'Recherche…',
+    loadingMore: 'Chargement…',
+    moreFailed: 'Impossible de charger la suite.',
+  },
+  sort: {
+    title: 'Trier par',
+    close: 'Fermer le tri',
+    pill: 'Trier par, {{sort}}',
+    enableLocation: 'Activez la localisation pour trier par distance',
+    recommended: {
+      label: 'Recommandé',
+      description: 'Proximité, qualité et contexte du moment',
+    },
+    distance: { label: 'Distance', description: 'Du plus proche au plus loin' },
+    duration: { label: 'Durée', description: 'Du plus court au plus long' },
+    rating: { label: 'Note', description: "Les mieux notés d'abord" },
   },
   summary: {
     label: 'Parcours sélectionné, {{card}}',

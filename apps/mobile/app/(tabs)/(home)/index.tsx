@@ -1,21 +1,13 @@
-import type { RouteCard } from '@widoo/shared';
-import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
-import { analytics } from '../../src/analytics';
-import { canSearchZone, focusedRoute, selectedRoute } from '../../src/discovery/store';
-import { useDiscovery, useRouteSearch } from '../../src/discovery/useRouteSearch';
-import { useUserLocation } from '../../src/location/useUserLocation';
-import { parisCenter } from '../../src/map/geo';
-import { SearchingPill, SearchZoneButton } from '../../src/map/MapControls';
-import { RouteMap } from '../../src/map/RouteMap';
-import { DiscoverySheet, type OpenSource } from '../../src/results/DiscoverySheet';
-
-/** The route sheet (E-05), provisional until #37; `route_opened` tells where it was opened from. */
-function openRoute(route: RouteCard, source: OpenSource) {
-  analytics.track('route_opened', { route_id: route.id, source });
-  router.push({ pathname: '/route/[id]', params: { id: route.id } });
-}
+import { canSearchZone, focusedRoute, selectedRoute } from '../../../src/discovery/store';
+import { useDiscovery, useRouteSearch } from '../../../src/discovery/useRouteSearch';
+import { useUserLocation } from '../../../src/location/useUserLocation';
+import { parisCenter } from '../../../src/map/geo';
+import { SearchingPill, SearchZoneButton } from '../../../src/map/MapControls';
+import { RouteMap } from '../../../src/map/RouteMap';
+import { DiscoverySheet } from '../../../src/results/DiscoverySheet';
+import { openRoute, openSection } from '../../../src/results/navigation';
 
 /**
  * E-01: the map of the zone shown, around the user or around Paris without position, searched
@@ -80,6 +72,7 @@ export default function HomeScreen() {
           onEnableLocation={location.status === 'denied' ? () => void enable() : null}
           search={search}
           onOpenRoute={openRoute}
+          onOpenSection={openSection}
           onCoverChange={setSheetCover}
         />
       )}

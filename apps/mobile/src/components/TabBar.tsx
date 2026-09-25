@@ -10,7 +10,7 @@ const TAB_ROLE = Platform.OS === 'ios' ? 'button' : 'tab';
 
 /** Interface icon of each tab route: regular, filled when active. */
 const icons: Record<string, UiIconKey> = {
-  index: 'tab-home',
+  '(home)': 'tab-home',
   routes: 'tab-outings',
   profile: 'tab-profile',
 };

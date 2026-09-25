@@ -1,5 +1,5 @@
-import type { LatLng, RouteCard as RouteCardData } from '@widoo/shared';
-import { colors, motion } from '@widoo/tokens';
+import { labels, type LatLng, type RouteCard as RouteCardData } from '@widoo/shared';
+import { colors, filterIcons, motion } from '@widoo/tokens';
 import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
 import {
@@ -26,26 +26,45 @@ import { cardText } from './cardText';
  */
 export const CARD_PHOTO_HEIGHT = 150;
 
+/** Height of the photo of a list card, as « Voir tout » draws it (Ecrans › E-04, planche 2). */
+export const LIST_CARD_PHOTO_HEIGHT = 190;
+
+/** 270 points in the carousel; in « Voir tout », the width of the list, 358 on a 390 screen. */
+export type RouteCardVariant = 'carousel' | 'list';
+
 interface RouteCardProps {
   route: RouteCardData;
   /** The user's position, for the distance tag; null without position: no distance. */
   position: LatLng | null;
   onPress: () => void;
+  variant?: RouteCardVariant;
   /** Height of the tallest card of the carousel, which the others take (Accessibilité). */
   minHeight?: number;
   onLayout?: (event: LayoutChangeEvent) => void;
 }
 
 /**
- * Route card of the results (Ecrans › E-01, carte de parcours), 270 points wide, for the sheet and
- * « Voir tout » (#62): the photo with the rating, Premium, the favorite, Vérifié and Signature;
- * title, mood and place, creator, budget as the key figure, duration and distance. It grows with
- * the text, never cut; one element for screen readers, with the favorite as an action.
+ * Route card of the results (Ecrans › E-01, carte de parcours), for the sheet and « Voir tout »:
+ * the photo with the rating, Premium, the favorite, Vérifié and Signature; title, mood and place,
+ * creator, budget as the key figure, duration and distance, and in a list the public of the
+ * route. It grows with the text, never cut; one element for screen readers, with the favorite as
+ * an action.
  */
-export function RouteCard({ route, position, onPress, minHeight, onLayout }: RouteCardProps) {
+export function RouteCard({
+  route,
+  position,
+  onPress,
+  variant = 'carousel',
+  minHeight,
+  onLayout,
+}: RouteCardProps) {
   const { t } = useTranslation();
   const text = cardText(t, route, position);
   const mood = route.moods[0];
+  const isList = variant === 'list';
+  // The public tag of the list: the first public the creator chose.
+  const audience = isList ? route.audiences[0] : undefined;
+  const audienceLabel = audience && labels.fr.audiences[audience];
 
   const handleAccessibilityAction = (event: AccessibilityActionEvent) => {
     if (event.nativeEvent.actionName === 'favorite') {
@@ -54,16 +73,23 @@ export function RouteCard({ route, position, onPress, minHeight, onLayout }: Rou
   };
 
   return (
-    <View onLayout={onLayout} className="w-card-w" style={{ minHeight }}>
+    <View
+      onLayout={onLayout}
+      className={isList ? 'self-stretch' : 'w-card-w'}
+      style={{ minHeight }}
+    >
       <Card
         onPress={onPress}
-        accessibilityLabel={text.label}
+        accessibilityLabel={audienceLabel ? `${text.label}, ${audienceLabel}` : text.label}
         accessibilityHint={t('card.open')}
         accessibilityActions={[{ name: 'favorite', label: t('favorite.add') }]}
         onAccessibilityAction={handleAccessibilityAction}
-        className="min-h-card-h flex-1 gap-12 p-8 pb-16"
+        className={`${isList ? 'min-h-card-list-h' : 'min-h-card-h'} flex-1 gap-12 p-8 pb-16`}
       >
-        <View className="overflow-hidden rounded-photo bg-skeleton" style={styles.photo}>
+        <View
+          className="overflow-hidden rounded-photo bg-skeleton"
+          style={isList ? styles.listPhoto : styles.photo}
+        >
           {route.coverUrl ? (
             <Image
               source={{ uri: route.coverUrl }}
@@ -121,6 +147,9 @@ export function RouteCard({ route, position, onPress, minHeight, onLayout }: Rou
           <View className="flex-row flex-wrap gap-8">
             <Tag icon="duration" label={text.duration.short} />
             {text.distance && <Tag icon="distance" label={text.distance.short} />}
+            {audience && audienceLabel && (
+              <Tag icon={{ filter: filterIcons.audiences[audience] }} label={audienceLabel} />
+            )}
           </View>
         </View>
       </Card>
@@ -130,4 +159,5 @@ export function RouteCard({ route, position, onPress, minHeight, onLayout }: Rou
 
 const styles = StyleSheet.create({
   photo: { height: CARD_PHOTO_HEIGHT, backgroundColor: colors.skeleton },
+  listPhoto: { height: LIST_CARD_PHOTO_HEIGHT, backgroundColor: colors.skeleton },
 });
