@@ -1,6 +1,9 @@
+import { size } from '@widoo/tokens';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { Button } from '../ui/Button';
+import { Text } from '../ui/Text';
 import { StatusMessage } from './StatusMessage';
 
 /**
@@ -20,6 +23,49 @@ export function ZoomInMessage({ count }: { count: number }) {
         icon="map"
         title={t('map.zoomIn.title')}
         body={t('map.zoomIn.body', { count })}
+      />
+    </ZonePanel>
+  );
+}
+
+interface NoRoutesMessageProps {
+  /** Active filters: the title names them, and a link removes them. */
+  filterCount: number;
+  onWiden: () => void;
+  onClearFilters: () => void;
+}
+
+/**
+ * No route in the zone (Ecrans › E-01, aucun résultat): « Élargir la zone », and « Retirer les N
+ * filtres » when filters are active.
+ */
+export function NoRoutesMessage({ filterCount, onWiden, onClearFilters }: NoRoutesMessageProps) {
+  const { t } = useTranslation();
+  const hasFilters = filterCount > 0;
+  return (
+    <ZonePanel>
+      <StatusMessage
+        icon="empty"
+        title={hasFilters ? t('map.noRoutes.titleFiltered') : t('map.noRoutes.title')}
+        body={hasFilters ? t('map.noRoutes.bodyFiltered') : t('map.noRoutes.body')}
+        action={
+          <View className="items-center gap-4">
+            <Button label={t('map.noRoutes.widen')} onPress={onWiden} />
+            {hasFilters && (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('map.noRoutes.clearFilters', { count: filterCount })}
+                onPress={onClearFilters}
+                className="justify-center px-16"
+                style={{ minHeight: size['touch-min'] }}
+              >
+                <Text variant="button" color="blue-ink" className="text-center">
+                  {t('map.noRoutes.clearFilters', { count: filterCount })}
+                </Text>
+              </Pressable>
+            )}
+          </View>
+        }
       />
     </ZonePanel>
   );

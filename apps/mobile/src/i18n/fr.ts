@@ -14,6 +14,15 @@ export const fr = {
     recenter: 'Recentrer la carte',
     searchZone: 'Rechercher dans cette zone',
     searching: 'Recherche…',
+    noRoutes: {
+      title: 'Aucun parcours par ici',
+      titleFiltered: 'Aucun parcours par ici avec ces filtres',
+      body: 'Élargissez la zone pour voir plus de parcours.',
+      bodyFiltered: 'Élargissez la zone ou retirez des filtres pour voir plus de parcours.',
+      widen: 'Élargir la zone',
+      clearFilters_one: 'Retirer le filtre',
+      clearFilters_other: 'Retirer les {{count}} filtres',
+    },
     zoomIn: {
       title: 'Zoomez pour voir les parcours',
       body_one: '{{count}} parcours dans cette zone.',
