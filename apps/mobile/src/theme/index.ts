@@ -1,3 +1,4 @@
+import { fontFamilies } from '@widoo/tokens';
 import type { TextStyle } from 'react-native';
 
 /**
@@ -59,9 +60,9 @@ export const colors = {
 
 /** Plus Jakarta Sans only (D-003): 800 for titles and figures, 500 and 400 for text. */
 export const fonts = {
-  regular: 'PlusJakartaSans_400Regular',
-  medium: 'PlusJakartaSans_500Medium',
-  extraBold: 'PlusJakartaSans_800ExtraBold',
+  regular: fontFamilies['400'],
+  medium: fontFamilies['500'],
+  extraBold: fontFamilies['800'],
 } as const;
 
 // One font file per weight: no `fontWeight`, which Android would apply on top of the file. No

@@ -1,18 +1,16 @@
-// One import per weight: the package root would bundle all 14 font files.
-import { PlusJakartaSans_400Regular } from '@expo-google-fonts/plus-jakarta-sans/400Regular';
-import { PlusJakartaSans_500Medium } from '@expo-google-fonts/plus-jakarta-sans/500Medium';
-import { PlusJakartaSans_800ExtraBold } from '@expo-google-fonts/plus-jakarta-sans/800ExtraBold';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { DefaultTheme, Stack, ThemeProvider, type Theme } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import '../global.css';
 import { useAppOpenedEvent } from '../src/analytics';
 import { queryClient } from '../src/api/query-client';
 import '../src/i18n';
 import { initMonitoring } from '../src/monitoring';
-import { colors, fonts } from '../src/theme';
+import { colors } from '../src/theme';
+import { fonts } from '../src/ui/fonts';
 
 initMonitoring();
 void SplashScreen.preventAutoHideAsync();
@@ -31,11 +29,7 @@ const navigationTheme: Theme = {
 
 export default function RootLayout() {
   useAppOpenedEvent();
-  const [fontsLoaded, fontError] = useFonts({
-    [fonts.regular]: PlusJakartaSans_400Regular,
-    [fonts.medium]: PlusJakartaSans_500Medium,
-    [fonts.extraBold]: PlusJakartaSans_800ExtraBold,
-  });
+  const [fontsLoaded, fontError] = useFonts(fonts);
   // A font that fails to load falls back to the system font rather than blocking the app.
   const isReady = fontsLoaded || fontError !== null;
 
