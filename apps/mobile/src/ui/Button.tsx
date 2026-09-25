@@ -18,13 +18,15 @@ interface ButtonProps {
   label: string;
   onPress: () => void;
   variant?: Variant;
+  /** A dense button, such as « Continuer avec un e-mail » (D-028): text capped at 1.3 times. */
+  isDense?: boolean;
 }
 
 /**
  * Pill button of 48 points at least: its height follows the label, which can wrap at large text
  * sizes. Pressed, an ink veil fades in (D-030); a fade, so it stays with « Réduire les animations ».
  */
-export function Button({ label, onPress, variant = 'primary' }: ButtonProps) {
+export function Button({ label, onPress, variant = 'primary', isDense = false }: ButtonProps) {
   const pressed = useSharedValue(0);
   const veil = useAnimatedStyle(() => ({
     opacity: pressed.get() * motion.press.filledVeil.opacity,
@@ -47,7 +49,12 @@ export function Button({ label, onPress, variant = 'primary' }: ButtonProps) {
         pointerEvents="none"
         style={[StyleSheet.absoluteFill, { backgroundColor: colors.ink }, veil]}
       />
-      <Text variant="button" color={variants[variant].label} className="text-center">
+      <Text
+        variant="button"
+        color={variants[variant].label}
+        isDense={isDense}
+        className="text-center"
+      >
         {label}
       </Text>
     </Pressable>
