@@ -2,6 +2,7 @@ import { checkAnalyticsEvent } from '@widoo/shared';
 import { describe, expect, it, vi } from 'vitest';
 import {
   analyticsZoom,
+  createCardViewTracker,
   mapSearchZoneEvent,
   newCardViews,
   routeOpenedEvent,
@@ -49,6 +50,19 @@ describe('newCardViews', () => {
     for (const view of [...first, ...next]) {
       expectInCatalog('result_card_viewed', view);
     }
+  });
+});
+
+describe('createCardViewTracker', () => {
+  it('reports again a card seen in the previous results', () => {
+    const track = createCardViewTracker();
+    const first = { items: ['a', 'b'] };
+    const next = { items: ['b'] };
+    expect(track(first, [{ route: { id: 'b' }, index: 1 }], 'rest')).toHaveLength(1);
+    expect(track(first, [{ route: { id: 'b' }, index: 1 }], 'half')).toEqual([]);
+    expect(track(next, [{ route: { id: 'b' }, index: 0 }], 'rest')).toEqual([
+      { route_id: 'b', position: 0, sheet_level: 'rest' },
+    ]);
   });
 });
 

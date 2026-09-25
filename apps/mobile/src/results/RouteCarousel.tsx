@@ -1,4 +1,4 @@
-import { FlashList, type ViewToken } from '@shopify/flash-list';
+import { FlashList, type FlashListRef, type ViewToken } from '@shopify/flash-list';
 import type { LatLng, RouteCard as RouteCardData } from '@widoo/shared';
 import { size, spacing } from '@widoo/tokens';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -40,9 +40,13 @@ export function RouteCarousel({
   /** Only a scroll of the user moves the map, never the first cards of new results. */
   const isUserScroll = useRef(false);
   const leadingId = useRef<string | null>(null);
+  const list = useRef<FlashListRef<RouteCardData>>(null);
   useEffect(() => {
     isUserScroll.current = false;
     leadingId.current = null;
+    // FlashList tells viewability by index: new results on the same indices as the old ones
+    // would never be reported as seen without a scroll.
+    list.current?.recomputeViewableItems();
   }, [routes]);
 
   const handleViewableItemsChanged = useCallback(
@@ -64,6 +68,7 @@ export function RouteCarousel({
 
   return (
     <FlashList
+      ref={list}
       horizontal
       data={routes}
       keyExtractor={(route) => route.id}
