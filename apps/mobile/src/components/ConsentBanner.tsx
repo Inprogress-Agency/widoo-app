@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { consent, useConsent } from '../analytics';
 import { colors, radii, spacing, typography } from '../theme';
-import { Button } from './Button';
+import { Button } from '../ui/Button';
 
 /**
  * Consent to product analytics, asked at first launch (wiki Securite-et-RGPD). Above the tab

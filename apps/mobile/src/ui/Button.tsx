@@ -1,0 +1,55 @@
+import { colors, motion, type ColorToken } from '@widoo/tokens';
+import { Pressable, StyleSheet } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { timing } from './motion';
+import { Text } from './Text';
+
+type Variant = 'primary' | 'secondary' | 'premium';
+
+// Literal classes, so that Tailwind finds them. Premium is the ink button « Débloquer avec
+// Premium » (D-014), secondary the warm grey « Programmer ».
+const variants = {
+  primary: { className: 'bg-blue', label: 'on-blue' },
+  secondary: { className: 'bg-surface', label: 'ink' },
+  premium: { className: 'bg-surface-strong', label: 'on-strong' },
+} as const satisfies Record<Variant, { className: string; label: ColorToken }>;
+
+interface ButtonProps {
+  label: string;
+  onPress: () => void;
+  variant?: Variant;
+}
+
+/**
+ * Pill button of 48 points at least: its height follows the label, which can wrap at large text
+ * sizes. Pressed, an ink veil fades in (D-030); a fade, so it stays with « Réduire les animations ».
+ */
+export function Button({ label, onPress, variant = 'primary' }: ButtonProps) {
+  const pressed = useSharedValue(0);
+  const veil = useAnimatedStyle(() => ({
+    opacity: pressed.value * motion.press.filledVeil.opacity,
+  }));
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      onPressIn={() => {
+        pressed.value = withTiming(1, timing('press', 'fade'));
+      }}
+      onPressOut={() => {
+        pressed.value = withTiming(0, timing('pressRelease', 'fade'));
+      }}
+      className={`min-h-button-h justify-center self-center overflow-hidden rounded-pill px-24 py-12 ${variants[variant].className}`}
+    >
+      {/* Animated style: out of NativeWind's reach, values from the generated theme. */}
+      <Animated.View
+        pointerEvents="none"
+        style={[StyleSheet.absoluteFill, { backgroundColor: colors.ink }, veil]}
+      />
+      <Text variant="button" color={variants[variant].label} className="text-center">
+        {label}
+      </Text>
+    </Pressable>
+  );
+}

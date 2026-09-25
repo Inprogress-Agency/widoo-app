@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import { apiUrl } from '../../src/api/client';
 import { useAppConfig } from '../../src/api/queries';
-import { Button } from '../../src/components/Button';
+import { Button } from '../../src/ui/Button';
 import { Screen } from '../../src/components/Screen';
 import { StatusMessage } from '../../src/components/StatusMessage';
 import { colors, radii, spacing, typography } from '../../src/theme';
