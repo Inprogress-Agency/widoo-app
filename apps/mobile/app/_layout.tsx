@@ -1,3 +1,4 @@
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { useFonts } from 'expo-font';
 import { DefaultTheme, Stack, ThemeProvider, type Theme } from 'expo-router';
@@ -50,13 +51,16 @@ export default function RootLayout() {
       <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
         <ThemeProvider value={navigationTheme}>
           <StatusBar style="dark" />
-          <Stack screenOptions={{ headerShown: false }}>
-            {/* The route sheet rises from the bottom (M-02). */}
-            <Stack.Screen
-              name="route/[id]"
-              options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
-            />
-          </Stack>
+          {/* Modal sheets, such as « Trier par », rise over the tab bar. */}
+          <BottomSheetModalProvider>
+            <Stack screenOptions={{ headerShown: false }}>
+              {/* The route sheet rises from the bottom (M-02). */}
+              <Stack.Screen
+                name="route/[id]"
+                options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+              />
+            </Stack>
+          </BottomSheetModalProvider>
         </ThemeProvider>
       </PersistQueryClientProvider>
     </GestureHandlerRootView>
