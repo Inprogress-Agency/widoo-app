@@ -1,4 +1,5 @@
 import type { RouteCard } from '@widoo/shared';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useRouteSearch } from '../../src/api/queries';
@@ -11,14 +12,16 @@ import { RouteMap } from '../../src/map/RouteMap';
 const noRoutes: RouteCard[] = [];
 
 /**
- * E-01, the map part: the routes around the user, or around Paris without position. The search
- * bar, the chips and the results sheet come with #27 and #28.
+ * E-01, the map part: the routes around the user, or around Paris without position, and the
+ * selection of a route (E-04). The search bar, the chips and the results sheet come with #27 and
+ * #28.
  */
 export default function HomeScreen() {
   const { location, enable } = useUserLocation();
   // The home is ready once its map shows, at its centre (E-18: the launch screen until then).
   useReleaseSplash(location.status !== 'pending');
   const [zone, setZone] = useState<Bbox | null>(null);
+  const [selectedRoute, setSelectedRoute] = useState<RouteCard | null>(null);
   const { data } = useRouteSearch(zone);
   // Clusters (a zone too large to list) are drawn with « Rechercher dans cette zone » (#27).
   const routes = data?.items ?? noRoutes;
@@ -35,7 +38,11 @@ export default function HomeScreen() {
       center={position ?? parisCenter}
       hasPosition={position !== null}
       onFirstZone={setZone}
-      onRoutePress={() => undefined}
+      selectedRoute={selectedRoute}
+      // No account in the app until E-10: nobody is Premium yet.
+      hasPremium={false}
+      onSelect={setSelectedRoute}
+      onOpenRoute={(route) => router.push({ pathname: '/route/[id]', params: { id: route.id } })}
       banner={location.status === 'denied' && <LocationOffBanner onEnable={() => void enable()} />}
     />
   );
