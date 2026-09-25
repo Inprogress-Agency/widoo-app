@@ -1,6 +1,8 @@
-import { size } from '@widoo/tokens';
+import { colors, motion, size } from '@widoo/tokens';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, View } from 'react-native';
+import { AccessibilityInfo, ActivityIndicator, Platform, Pressable, View } from 'react-native';
+import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
 import { Icon, uiIcon } from '../ui/Icon';
 import { Text } from '../ui/Text';
 
@@ -19,6 +21,83 @@ export function RecenterButton({ onPress }: { onPress: () => void }) {
     >
       <Icon {...uiIcon('recenter')} />
     </Pressable>
+  );
+}
+
+/** The pills come in with a fade, kept with « Réduire les animations » (D-030). */
+const pillFade = FadeIn.duration(motion.durations.fade).reduceMotion(ReduceMotion.Never);
+
+/**
+ * White pill « Rechercher dans cette zone », after a move of the map: the search runs only when
+ * it is pressed (Filtres-et-Recherche › Recherche par zone). Its label wraps at large text.
+ */
+export function SearchZoneButton({ onPress }: { onPress: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <Animated.View entering={pillFade}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('map.searchZone')}
+        onPress={onPress}
+        className="min-h-disc flex-row items-center gap-8 rounded-pill bg-bg px-16 py-10"
+      >
+        <Icon {...uiIcon('refresh')} color="blue" />
+        <Text variant="body-medium" className="shrink">
+          {t('map.searchZone')}
+        </Text>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+/** True once `isOn` has lasted `delayMs`: a short wait shows nothing (Mouvement, `shimmer`). */
+function useIsLasting(isOn: boolean, delayMs: number): boolean {
+  const [isLasting, setIsLasting] = useState(false);
+  useEffect(() => {
+    if (!isOn) {
+      return;
+    }
+    const timer = setTimeout(() => setIsLasting(true), delayMs);
+    return () => {
+      clearTimeout(timer);
+      setIsLasting(false);
+    };
+  }, [isOn, delayMs]);
+  return isOn && isLasting;
+}
+
+/**
+ * The pill of a search on its way, in place of the button: a ring and « Recherche… », after
+ * 300 ms only, read out by screen readers.
+ */
+export function SearchingPill({ isSearching }: { isSearching: boolean }) {
+  const { t } = useTranslation();
+  const isShown = useIsLasting(isSearching, motion.durations.loadingDelay);
+  const label = t('map.searching');
+
+  useEffect(() => {
+    if (isShown && Platform.OS === 'ios') {
+      AccessibilityInfo.announceForAccessibility(label);
+    }
+  }, [isShown, label]);
+
+  if (!isShown) {
+    return null;
+  }
+  return (
+    <Animated.View
+      entering={pillFade}
+      accessible
+      accessibilityLabel={label}
+      accessibilityLiveRegion="polite"
+      accessibilityState={{ busy: true }}
+      className="min-h-disc flex-row items-center gap-8 rounded-pill bg-bg px-16 py-10"
+    >
+      <ActivityIndicator color={colors.blue} />
+      <Text variant="body-medium" color="muted" className="shrink">
+        {label}
+      </Text>
+    </Animated.View>
   );
 }
 
