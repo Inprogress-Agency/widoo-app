@@ -202,6 +202,10 @@ importers:
         version: 4.6.5
 
   packages/tokens:
+    dependencies:
+      '@widoo/shared':
+        specifier: workspace:*
+        version: link:../shared
     devDependencies:
       '@types/node':
         specifier: ^22.20.4

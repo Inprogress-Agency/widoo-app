@@ -1,4 +1,6 @@
 // Généré depuis tokens.json (version 8), ne pas modifier : pnpm --filter @widoo/tokens generate.
+import type { Audience, Condition, Mood, PlaceCategory, Transport } from '@widoo/shared';
+
 export const tokensVersion = 8;
 
 /** Light theme: the dark values are not validated and not generated. */
@@ -249,3 +251,200 @@ export const shadow = {
   "shadow-tabbar": "0 8px 24px rgba(20, 23, 31, 0.10)"
 } as const;
 export type ShadowToken = keyof typeof shadow;
+
+/** Every Phosphor icon the mappings name: an icon outside this list does not exist. */
+export const iconNames = [
+  "armchair",
+  "balloon",
+  "bank",
+  "barbell",
+  "bicycle",
+  "bread",
+  "calendar-slash",
+  "camera",
+  "car",
+  "castle-turret",
+  "cloud-rain",
+  "coffee",
+  "flower-tulip",
+  "fork-knife",
+  "frame-corners",
+  "heart",
+  "house",
+  "lightning",
+  "map-pin",
+  "mountains",
+  "park",
+  "paw-print",
+  "person-simple-walk",
+  "shopping-bag",
+  "sparkle",
+  "subway",
+  "sun",
+  "ticket",
+  "tree",
+  "user",
+  "users",
+  "users-three",
+  "wheelchair",
+  "wine"
+] as const;
+
+/** Activity families: color, chip colors, mood dot. */
+export const activityFamilies = {
+  "food": {
+    "color": "family-food",
+    "chip": {
+      "bg": "coral-soft",
+      "ink": "coral-ink"
+    },
+    "moodDot": "coral"
+  },
+  "culture": {
+    "color": "family-culture",
+    "chip": {
+      "bg": "plum-soft",
+      "ink": "plum-ink"
+    },
+    "moodDot": "plum-ink"
+  },
+  "nature": {
+    "color": "family-nature",
+    "chip": {
+      "bg": "green-soft",
+      "ink": "green-ink"
+    },
+    "moodDot": "family-nature"
+  },
+  "shop": {
+    "color": "family-shop",
+    "chip": {
+      "bg": "violet-soft",
+      "ink": "violet-ink"
+    },
+    "moodDot": "violet-ink"
+  },
+  "leisure": {
+    "color": "family-leisure",
+    "chip": null,
+    "moodDot": null
+  },
+  "other": {
+    "color": "family-other",
+    "chip": null,
+    "moodDot": null
+  }
+} as const satisfies Record<string, { color: ColorToken; chip: { bg: ColorToken; ink: ColorToken } | null; moodDot: ColorToken | null }>;
+export type ActivityFamily = keyof typeof activityFamilies;
+
+/** Family and icon of each place category. */
+export const placeCategories = {
+  "restaurant": {
+    "family": "food",
+    "icon": "fork-knife"
+  },
+  "cafe": {
+    "family": "food",
+    "icon": "coffee"
+  },
+  "bar": {
+    "family": "food",
+    "icon": "wine"
+  },
+  "bakery": {
+    "family": "food",
+    "icon": "bread"
+  },
+  "museum": {
+    "family": "culture",
+    "icon": "bank"
+  },
+  "gallery": {
+    "family": "culture",
+    "icon": "frame-corners"
+  },
+  "monument": {
+    "family": "culture",
+    "icon": "castle-turret"
+  },
+  "park": {
+    "family": "nature",
+    "icon": "tree"
+  },
+  "viewpoint": {
+    "family": "nature",
+    "icon": "mountains"
+  },
+  "walk": {
+    "family": "nature",
+    "icon": "person-simple-walk"
+  },
+  "shop": {
+    "family": "shop",
+    "icon": "shopping-bag"
+  },
+  "activity": {
+    "family": "leisure",
+    "icon": "lightning"
+  },
+  "event_venue": {
+    "family": "leisure",
+    "icon": "ticket"
+  },
+  "other": {
+    "family": "other",
+    "icon": "map-pin"
+  }
+} as const satisfies Record<PlaceCategory, { family: ActivityFamily; icon: IconName }>;
+
+/** Icon of each filter value; budget and duration are text only. */
+export const filterIcons = {
+  "audiences": {
+    "solo": "user",
+    "couple": "heart",
+    "family": "users",
+    "friends": "users-three",
+    "dog_friendly": "paw-print",
+    "kids_friendly": "balloon"
+  },
+  "transports": {
+    "walk": "person-simple-walk",
+    "bike": "bicycle",
+    "metro": "subway",
+    "car": "car"
+  },
+  "moods": {
+    "culture": "bank",
+    "nature": "tree",
+    "shopping": "shopping-bag",
+    "food": "fork-knife",
+    "romantic": "flower-tulip",
+    "unusual": "sparkle",
+    "instagrammable": "camera",
+    "relax": "armchair",
+    "sport": "barbell"
+  },
+  "conditions": {
+    "no_booking": "calendar-slash",
+    "wheelchair": "wheelchair",
+    "indoor": "house",
+    "outdoor": "park",
+    "sunny": "sun",
+    "rainy": "cloud-rain"
+  }
+} as const satisfies { audiences: Record<Audience, IconName>; transports: Record<Transport, IconName>; moods: Record<Mood, IconName>; conditions: Record<Condition, IconName> };
+
+/** Color of the dot of each mood. */
+export const moodDots = {
+  "culture": "plum-ink",
+  "nature": "family-nature",
+  "shopping": "violet-ink",
+  "food": "coral",
+  "romantic": "mood-romantic",
+  "unusual": "mood-unusual",
+  "instagrammable": "mood-instagrammable",
+  "relax": "mood-relax",
+  "sport": "mood-sport"
+} as const satisfies Record<Mood, ColorToken>;
+
+export type IconName = (typeof iconNames)[number];

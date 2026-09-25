@@ -18,6 +18,15 @@ const textStyle = z.object({
 
 const namedPx = z.array(z.object({ name: z.string(), value: px }));
 
+const family = z.object({
+  key: z.string(),
+  color: z.string(),
+  chip: z.object({ bg: z.string(), ink: z.string() }).nullable(),
+  moodDot: z.string().nullable(),
+});
+
+const filterGroup = z.array(z.object({ value: z.string(), icon: z.string().nullable() }));
+
 export const tokensSchema = z.object({
   version: z.number().int(),
   color: z.object({
@@ -32,6 +41,14 @@ export const tokensSchema = z.object({
   size: z.object({ tokens: namedPx }),
   shadow: z.object({
     tokens: z.array(z.object({ name: z.string(), value: z.object({ light: z.string() }) })),
+  }),
+  mappings: z.object({
+    activityFamilies: z.array(family),
+    placeCategories: z.array(
+      z.object({ category: z.string(), family: z.string(), icon: z.string() }),
+    ),
+    filterIcons: z.record(z.string(), filterGroup),
+    moodDots: z.array(z.object({ mood: z.string(), dot: z.string() })),
   }),
 });
 

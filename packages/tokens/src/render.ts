@@ -1,3 +1,4 @@
+import { buildMappings } from './mappings';
 import type { Tokens } from './schema';
 import { buildTheme, type Theme } from './theme';
 
@@ -71,10 +72,12 @@ type Declaration = {
   value: unknown;
   comment: string;
   type?: string;
+  satisfies?: string;
 };
 
-/** Typed module of the theme, for components and the rare StyleSheet. */
+/** Typed module of the theme and the mappings, for components and the rare StyleSheet. */
 export function renderThemeModule(tokens: Tokens, theme: Theme = buildTheme(tokens)): string {
+  const mappings = buildMappings(tokens.mappings, theme);
   const declarations: Declaration[] = [
     {
       name: 'colors',
@@ -103,16 +106,52 @@ export function renderThemeModule(tokens: Tokens, theme: Theme = buildTheme(toke
       comment: 'The only shadow, for the native `boxShadow` style.',
       type: 'ShadowToken',
     },
+    {
+      name: 'iconNames',
+      value: mappings.iconNames,
+      comment: 'Every Phosphor icon the mappings name: an icon outside this list does not exist.',
+    },
+    {
+      name: 'activityFamilies',
+      value: mappings.activityFamilies,
+      comment: 'Activity families: color, chip colors, mood dot.',
+      type: 'ActivityFamily',
+      satisfies:
+        'Record<string, { color: ColorToken; chip: { bg: ColorToken; ink: ColorToken } | null; moodDot: ColorToken | null }>',
+    },
+    {
+      name: 'placeCategories',
+      value: mappings.placeCategories,
+      comment: 'Family and icon of each place category.',
+      satisfies: 'Record<PlaceCategory, { family: ActivityFamily; icon: IconName }>',
+    },
+    {
+      name: 'filterIcons',
+      value: mappings.filterIcons,
+      comment: 'Icon of each filter value; budget and duration are text only.',
+      satisfies:
+        '{ audiences: Record<Audience, IconName>; transports: Record<Transport, IconName>; moods: Record<Mood, IconName>; conditions: Record<Condition, IconName> }',
+    },
+    {
+      name: 'moodDots',
+      value: mappings.moodDots,
+      comment: 'Color of the dot of each mood.',
+      satisfies: 'Record<Mood, ColorToken>',
+    },
   ];
 
-  const body = declarations.map(({ name, value, comment, type }) => {
-    const constant = `/** ${comment} */\nexport const ${name} = ${json(value)} as const;`;
+  const body = declarations.map(({ name, value, comment, type, satisfies }) => {
+    const constant = `/** ${comment} */\nexport const ${name} = ${json(value)} as const${satisfies ? ` satisfies ${satisfies}` : ''};`;
     return type ? `${constant}\nexport type ${type} = keyof typeof ${name};` : constant;
   });
 
   return `${header(tokens.version)}
+import type { Audience, Condition, Mood, PlaceCategory, Transport } from '@widoo/shared';
+
 export const tokensVersion = ${tokens.version};
 
 ${body.join('\n\n')}
+
+export type IconName = (typeof iconNames)[number];
 `;
 }
