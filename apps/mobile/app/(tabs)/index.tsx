@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { analytics } from '../../src/analytics';
-import { canSearchZone, selectedRoute } from '../../src/discovery/store';
+import { canSearchZone, focusedRoute, selectedRoute } from '../../src/discovery/store';
 import { useDiscovery, useRouteSearch } from '../../src/discovery/useRouteSearch';
 import { useUserLocation } from '../../src/location/useUserLocation';
 import { parisCenter } from '../../src/map/geo';
@@ -29,6 +29,7 @@ export default function HomeScreen() {
   const [height, setHeight] = useState(0);
   const [sheetCover, setSheetCover] = useState<number | undefined>(undefined);
   const route = useDiscovery(selectedRoute);
+  const focused = useDiscovery(focusedRoute);
   const isSearchable = useDiscovery(canSearchZone);
   const framing = useDiscovery((state) => state.framing);
   const showView = useDiscovery((state) => state.showView);
@@ -55,6 +56,7 @@ export default function HomeScreen() {
         onViewChange={showView}
         framing={framing}
         selectedRoute={route}
+        focusedRoute={focused}
         bottomInset={sheetCover}
         // No account in the app until E-10: nobody is Premium yet.
         hasPremium={false}

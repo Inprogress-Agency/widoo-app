@@ -4,6 +4,7 @@ import {
   activeFilterCount,
   canSearchZone,
   createDiscoveryStore,
+  focusedRoute,
   resultsCount,
   selectedRoute,
   type MapView,
@@ -262,6 +263,21 @@ describe('offline', () => {
     store.getState().searchZone('button');
     store.getState().goOffline(older, cached);
     expect(store.getState().status).toBe('loading');
+  });
+});
+
+describe('focus', () => {
+  beforeEach(() => {
+    store = createDiscoveryStore();
+  });
+
+  it('follows the card the user scrolled to, and forgets it with new results', () => {
+    openedWith('a', 'b');
+    store.getState().focus('b');
+    expect(focusedRoute(store.getState())?.id).toBe('b');
+    store.getState().searchZone('button');
+    store.getState().receive(searchId(), listed('b', 'c'));
+    expect(focusedRoute(store.getState())).toBeNull();
   });
 });
 

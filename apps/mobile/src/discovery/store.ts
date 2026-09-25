@@ -52,6 +52,8 @@ export interface DiscoveryState {
   resultsAt: number | null;
   filters: SearchFilters;
   selectedRouteId: string | null;
+  /** The card the user scrolled to in the sheet: the map comes round to its start (E-04). */
+  focusedRouteId: string | null;
   /** A view the app asks the map to show, such as the widened zone; `id` changes each time. */
   framing: { id: number; view: MapView } | null;
 }
@@ -75,6 +77,8 @@ export interface DiscoveryActions {
   goOffline: (id: number, cached: CachedResults | null) => void;
   /** A marker, or null for a tap elsewhere on the map. */
   select: (routeId: string | null) => void;
+  /** The leading card of the carousel after a scroll of the user. */
+  focus: (routeId: string) => void;
 }
 
 export type DiscoveryStore = DiscoveryState & DiscoveryActions;
@@ -88,6 +92,7 @@ export const initialDiscoveryState: DiscoveryState = {
   resultsAt: null,
   filters: {},
   selectedRouteId: null,
+  focusedRouteId: null,
   framing: null,
 };
 
@@ -101,6 +106,11 @@ export function resultsCount(result: RouteSearchResult): number {
   return result.clusters
     ? result.clusters.reduce((count, cluster) => count + cluster.count, 0)
     : result.items.length;
+}
+
+/** The route of the card the user scrolled to, among the results. */
+export function focusedRoute(state: DiscoveryState): RouteCard | null {
+  return state.results?.items.find((route) => route.id === state.focusedRouteId) ?? null;
 }
 
 /** The selected route among the results, if it is still one of them. */
@@ -179,6 +189,8 @@ export function createDiscoveryStore() {
           resultsAt: fetchedAt,
           status: 'success',
           selectedRouteId: isStillListed ? selectedRouteId : null,
+          // New results start the carousel over, with no card to come round to.
+          focusedRouteId: null,
         });
         return true;
       },
@@ -199,6 +211,7 @@ export function createDiscoveryStore() {
         );
       },
       select: (routeId) => set({ selectedRouteId: routeId }),
+      focus: (routeId) => set({ focusedRouteId: routeId }),
     };
   });
 }

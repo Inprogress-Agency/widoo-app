@@ -61,6 +61,10 @@ export const fr = {
       full: 'en plein écran',
     },
   },
+  summary: {
+    label: 'Parcours sélectionné, {{card}}',
+    open: 'Voir le parcours',
+  },
   card: {
     by: 'Par {{name}}',
     byWidoo: 'Par Widoo',
