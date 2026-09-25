@@ -63,15 +63,15 @@ interface RouteMapProps {
   /** A view the app asks for, such as the widened zone: the camera goes there when `id` changes. */
   framing: { id: number; view: MapView } | null;
   selectedRoute: RouteCard | null;
+  /** Height the results sheet covers at the foot of the map: the controls stay above it. */
+  bottomInset?: number;
   /** A Premium route is locked for a user without subscription (D-014). */
   hasPremium: boolean;
   /** A marker, or null for a tap elsewhere on the map. */
   onSelect: (route: RouteCard | null) => void;
   /** « Voir plus » of the tooltip: the route sheet (E-05). */
   onOpenRoute: (route: RouteCard) => void;
-  /** Line left of the recentre button, such as the location off banner. */
-  banner?: ReactNode;
-  /** « Rechercher dans cette zone », or the pill of a search on its way, above the banner. */
+  /** « Rechercher dans cette zone », or the pill of a search on its way. */
   searchControl?: ReactNode;
   /** The recentre button, hidden over the message of an empty zone (Ecrans › E-01). */
   hasRecenter?: boolean;
@@ -92,10 +92,10 @@ export function RouteMap({
   onViewChange,
   framing,
   selectedRoute,
+  bottomInset = size['sheet-rest'],
   hasPremium,
   onSelect,
   onOpenRoute,
-  banner,
   searchControl,
   hasRecenter = true,
 }: RouteMapProps) {
@@ -109,9 +109,6 @@ export function RouteMap({
   // Mapbox lays its ornaments out in the safe area on iOS, from the edge of the view on Android.
   const insets = useSafeAreaInsets();
   const safeBottom = Platform.OS === 'ios' ? insets.bottom : 0;
-  const ornamentBottom = tabBarHeight + ornamentMargin - safeBottom;
-  // The controls clear the attribution button, a touch target in the corner below them.
-  const controlsBottom = tabBarHeight + ornamentMargin + size['touch-min'] + spacing['space-8'];
   const camera = useRef<ComponentRef<typeof Mapbox.Camera>>(null);
   const isHome = useRef(false);
   /** A gesture of the user moved the map since it last settled. */
@@ -151,6 +148,14 @@ export function RouteMap({
   );
 
   const cameraAnimation = cameraAnimationOf(isReducedMotion);
+
+  // The controls and the map ornaments (Mapbox logo and attribution, required) sit just above
+  // the results sheet, as high as it rises up to half the map; beyond, they stay under it.
+  const isSheetLow = bottomInset <= viewport.height / 2;
+  const sheetTop = isSheetLow ? bottomInset : size['sheet-rest'];
+  const ornamentBottom = sheetTop + ornamentMargin - safeBottom;
+  // The controls clear the attribution button, a touch target in the corner below them.
+  const controlsBottom = sheetTop + ornamentMargin + size['touch-min'] + spacing['space-8'];
 
   // About 3 km across the screen (Ecrans › E-01).
   const home = {
@@ -387,23 +392,20 @@ export function RouteMap({
         pointerEvents="none"
         style={StyleSheet.absoluteFill}
       />
-      <View
-        pointerEvents="box-none"
-        className="flex-row items-end gap-8 px-16"
-        // Tab bar height measured at runtime.
-        style={[styles.controls, { bottom: controlsBottom }]}
-      >
-        <View pointerEvents="box-none" className="flex-1 gap-8">
-          {searchControl && (
-            <View pointerEvents="box-none" className="items-center">
-              {searchControl}
-            </View>
-          )}
-          {banner}
+      {isSheetLow && (
+        <View
+          pointerEvents="box-none"
+          className="flex-row items-end gap-8 px-16"
+          // Height of the sheet measured at runtime.
+          style={[styles.controls, { bottom: controlsBottom }]}
+        >
+          <View pointerEvents="box-none" className="flex-1 items-center">
+            {searchControl}
+          </View>
+          {/* Hidden while a route is selected (Ecrans › E-04). */}
+          {hasRecenter && !selectedRoute && <RecenterButton onPress={recenter} />}
         </View>
-        {/* Hidden while a route is selected (Ecrans › E-04). */}
-        {hasRecenter && !selectedRoute && <RecenterButton onPress={recenter} />}
-      </View>
+      )}
     </View>
   );
 }
