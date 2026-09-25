@@ -68,12 +68,17 @@ describe('buildMappings', () => {
   it('keys the filter icons by technical key, Extérieur on a bench', () => {
     expect(Object.keys(mappings.filterIcons)).toEqual([
       'audiences',
+      'budgets',
       'transports',
       'moods',
       'conditions',
     ]);
     expect(mappings.filterIcons.conditions?.outdoor).toBe('park');
     expect(mappings.filterIcons.audiences?.dog_friendly).toBe('paw-print');
+  });
+
+  it('gives the chip « Gratuit » its tag, and no other budget an icon (D-053)', () => {
+    expect(mappings.filterIcons.budgets).toEqual({ free: 'tag' });
   });
 
   it.each([
