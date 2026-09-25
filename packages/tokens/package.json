@@ -11,6 +11,8 @@
     "sync": "tsx src/sync.ts",
     "generate": "tsx src/generate.ts",
     "check": "tsx src/sync.ts --check && tsx src/generate.ts --check",
+    "check:wiki": "tsx src/sync.ts --check",
+    "check:generated": "tsx src/generate.ts --check",
     "lint": "eslint .",
     "typecheck": "tsc",
     "test": "vitest run"
