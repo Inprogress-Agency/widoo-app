@@ -1,8 +1,13 @@
 import js from '@eslint/js';
 import prettier from 'eslint-config-prettier/flat';
+import betterTailwindcss from 'eslint-plugin-better-tailwindcss';
 import reactHooks from 'eslint-plugin-react-hooks';
 import { defineConfig, globalIgnores } from 'eslint/config';
+import { fileURLToPath } from 'node:url';
 import tseslint from 'typescript-eslint';
+
+// A color written by hand: hexadecimal, rgb() or rgba().
+const handWrittenColor = '/#[0-9A-Fa-f]{3,8}\\b|rgba?\\(/';
 
 // Shared by every workspace: `eslint .` in a package resolves this file from the root.
 export default defineConfig(
@@ -24,6 +29,52 @@ export default defineConfig(
     extends: [reactHooks.configs.flat.recommended],
     rules: {
       'react-hooks/exhaustive-deps': 'error',
+    },
+  },
+  {
+    // Styles of the app come from tokens.json only (#125): a class outside the generated preset,
+    // an arbitrary value (`text-[15px]`) or a color written by hand fails the lint.
+    files: ['apps/mobile/**/*.{ts,tsx}'],
+    plugins: { 'better-tailwindcss': betterTailwindcss },
+    settings: {
+      'better-tailwindcss': {
+        tailwindConfig: fileURLToPath(new URL('apps/mobile/tailwind.config.js', import.meta.url)),
+        selectors: [
+          {
+            kind: 'attribute',
+            name: '^(?:className|\\w+ClassName)$',
+            match: [{ type: 'strings' }],
+          },
+          // Variant tables of the base components: `{ primary: { className: 'bg-blue' } }`.
+          {
+            kind: 'variable',
+            name: '^variants$',
+            match: [{ type: 'objectValues', path: '^.*className$' }],
+          },
+        ],
+      },
+    },
+    rules: {
+      'better-tailwindcss/no-unknown-classes': 'error',
+      'better-tailwindcss/no-restricted-classes': [
+        'error',
+        {
+          restrict: [
+            { pattern: '\\[.*\\]', message: 'Arbitrary value: use a token of tokens.json.' },
+          ],
+        },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: `Literal[value=${handWrittenColor}]`,
+          message: 'Color written by hand: use a color token of @widoo/tokens.',
+        },
+        {
+          selector: `TemplateElement[value.raw=${handWrittenColor}]`,
+          message: 'Color written by hand: use a color token of @widoo/tokens.',
+        },
+      ],
     },
   },
   {
