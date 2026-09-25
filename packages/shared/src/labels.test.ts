@@ -18,3 +18,20 @@ describe('labels.fr', () => {
     for (const value of values) expect(group[value]).toMatch(/\S/);
   });
 });
+
+describe('labels.fr of budget and duration', () => {
+  it('show amounts and hours, word for word as Filtres-et-Recherche › Taxonomie (D-010)', () => {
+    expect(labels.fr.budgets).toEqual({
+      free: 'Gratuit',
+      low: "Jusqu'à 25 €",
+      medium: '25 à 70 €',
+      premium: 'Plus de 70 €',
+    });
+    expect(labels.fr.durations).toEqual({
+      '1_2h': "Jusqu'à 2 h 30",
+      half_day: '2 h 30 à 5 h',
+      full_day: '5 à 12 h',
+      weekend: 'Plus de 12 h',
+    });
+  });
+});
