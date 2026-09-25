@@ -1,16 +1,18 @@
 import type { PlaceCategory, RouteCard } from '@widoo/shared';
 import type { Feature, FeatureCollection, LineString, Point as GeoPoint } from 'geojson';
 import { boundsOf, toLngLat, type Bounds, type LngLat } from './geo';
+import { emptyMarkerImage } from './markerShape';
 
 /**
- * What the map draws: one point per route at its start for the photo markers, drawn by a layer
- * from images named here; the path and the step dots of the selected route.
+ * What the map draws: one point per route at its start for the photo markers, drawn by layers
+ * from images named here and a duration text; the path and the step dots of the selected route.
  */
 
-/** Route and image of a point: the layers read the image, a tap reads the route. */
+/** Route, image and duration of a point: the layers read the image and the text, a tap the route. */
 export interface PointProperties {
   routeId: string;
   image: string;
+  duration: string;
 }
 
 export const markerImage = (routeId: string) => `route-${routeId}`;
@@ -20,9 +22,16 @@ export function isLocked(route: Pick<RouteCard, 'access'>, hasPremium: boolean):
   return route.access === 'premium' && !hasPremium;
 }
 
-/** One photo marker per route, at its start; a route without step has no place on the map. */
+/**
+ * One photo marker per route, at its start; a route without step has no place on the map. The
+ * photo box stays empty until the image of the route is drawn.
+ */
 export function routeMarkers(
   routes: readonly RouteCard[],
+  {
+    isDrawn,
+    durationOf,
+  }: { isDrawn: (image: string) => boolean; durationOf: (route: RouteCard) => string },
 ): FeatureCollection<GeoPoint, PointProperties> {
   return {
     type: 'FeatureCollection',
@@ -34,7 +43,11 @@ export function routeMarkers(
               type: 'Feature' as const,
               id: route.id,
               geometry: { type: 'Point' as const, coordinates: toLngLat(start.location) },
-              properties: { routeId: route.id, image: markerImage(route.id) },
+              properties: {
+                routeId: route.id,
+                image: isDrawn(markerImage(route.id)) ? markerImage(route.id) : emptyMarkerImage,
+                duration: durationOf(route),
+              },
             },
           ]
         : [];

@@ -7,7 +7,7 @@ import { colors, textStyles } from '@widoo/tokens';
  */
 
 // Mapbox serves its own fonts only: Plus Jakarta Sans would have to be uploaded to the account.
-const labelFont = ['DIN Pro Bold', 'Arial Unicode MS Bold'];
+export const labelFont = ['DIN Pro Bold', 'Arial Unicode MS Bold'];
 
 const label = textStyles['map-label'];
 

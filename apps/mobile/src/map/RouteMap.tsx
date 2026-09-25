@@ -1,19 +1,20 @@
 import type { MapState } from '@rnmapbox/maps';
 import type { LatLng, RouteCard } from '@widoo/shared';
 import { motion, size, spacing } from '@widoo/tokens';
-import { useCallback, useRef, useState, type ComponentRef, type ReactNode } from 'react';
+import { useCallback, useMemo, useRef, useState, type ComponentRef, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View, useWindowDimensions, type AccessibilityActionEvent } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
+import { colors } from '@widoo/tokens';
 import { formatDuration } from '../format/duration';
-import { MapMarker } from '../ui/MapMarker';
 import { initialSpanM, toBbox, toLngLat, zoomForSpan, type Bbox, type LngLat } from './geo';
 import { Mapbox } from './mapbox';
-import { MapImage } from './MapImage';
 import { RecenterButton } from './MapControls';
-import { isLocked, markerImage, routeMarkers, selectionFrame } from './markers';
+import { sharedMarkerImages, usePhotoMarkerImages } from './markerImages';
+import { isLocked, routeMarkers, selectionFrame } from './markers';
+import { durationLabel, labelPillImage, photoOffsetY } from './markerShape';
 import { SelectedRoute } from './SelectedRoute';
-import { mapStyleJson } from './style';
+import { labelFont, mapStyleJson } from './style';
 import { screenXOnFit, tooltipAnchorX } from './tooltip';
 
 /** Map ornaments (Mapbox logo and attribution, required) sit in the margin of the screen. */
@@ -38,8 +39,9 @@ interface RouteMapProps {
 }
 
 /**
- * Map of E-01: Widoo style, one photo marker per route drawn by a symbol layer from images made
- * once per route, the user's position as the Mapbox puck. The position never leaves the device:
+ * Map of E-01: Widoo style, one photo marker per route drawn by symbol layers, the photo from an
+ * image the app draws once per photo, the duration as a text of the map on a white pill; the
+ * user's position as the Mapbox puck. The position never leaves the device:
  * only the zone of the map goes to the search.
  */
 export function RouteMap({
@@ -61,6 +63,17 @@ export function RouteMap({
   const camera = useRef<ComponentRef<typeof Mapbox.Camera>>(null);
   const hasZone = useRef(false);
   const isHome = useRef(false);
+  const label = durationLabel(fontScale);
+  const sharedImages = useMemo(() => sharedMarkerImages(label.pillHeight), [label.pillHeight]);
+  const photoImages = usePhotoMarkerImages(routes);
+  const markers = useMemo(
+    () =>
+      routeMarkers(routes, {
+        isDrawn: (image) => image in photoImages,
+        durationOf: (route) => formatDuration(t, route.durationMin, 'short'),
+      }),
+    [routes, photoImages, t],
+  );
 
   const handleMapIdle = useCallback(
     (state: MapState) => {
@@ -171,18 +184,10 @@ export function RouteMap({
       >
         <Mapbox.Camera ref={camera} defaultSettings={home} />
         {hasPosition && <Mapbox.LocationPuck visible />}
-        {/*
-          @rnmapbox/maps links an image to the style only when its Images joins the map: a new
-          set of routes, or a new text size that redraws the labels, mounts a new Images.
-        */}
-        <Mapbox.Images key={`${fontScale}:${routes.map((route) => route.id).join()}`}>
-          {routes.map((route) => (
-            <MarkerImage key={route.id} route={route} />
-          ))}
-        </Mapbox.Images>
+        <Mapbox.Images images={{ ...sharedImages, ...photoImages }} />
         <Mapbox.ShapeSource
           id="route-markers"
-          shape={routeMarkers(routes)}
+          shape={markers}
           onPress={(event) => {
             const route = routeOf(event.features[0]?.properties?.routeId);
             if (route) {
@@ -190,16 +195,41 @@ export function RouteMap({
             }
           }}
         >
+          {/* The selected route gives way to its tooltip and its steps. */}
           <Mapbox.SymbolLayer
-            id="route-markers"
+            id="route-marker-photos"
+            filter={['!=', ['get', 'routeId'], selectedRoute?.id ?? '']}
             style={{
               iconImage: ['get', 'image'],
               iconAnchor: 'bottom',
+              iconOffset: [0, photoOffsetY(label.pillHeight)],
               iconAllowOverlap: true,
               symbolZOrder: 'viewport-y',
             }}
-            // The selected route gives way to its tooltip and its steps.
+          />
+          {/*
+            The duration, over the photos: number-s times the system text setting capped at 1.3,
+            as maxFontSizeMultiplier does not reach a text of the map. The map serves its own
+            fonts: Plus Jakarta Sans would have to be uploaded to the Mapbox account.
+          */}
+          <Mapbox.SymbolLayer
+            id="route-marker-durations"
             filter={['!=', ['get', 'routeId'], selectedRoute?.id ?? '']}
+            style={{
+              textField: ['get', 'duration'],
+              textFont: labelFont,
+              textSize: label.textSize,
+              textColor: colors.ink,
+              textAnchor: 'center',
+              textOffset: [0, label.textOffsetY],
+              textAllowOverlap: true,
+              iconImage: labelPillImage,
+              iconAnchor: 'bottom',
+              iconTextFit: 'width',
+              iconTextFitPadding: [0, label.paddingX, 0, label.paddingX],
+              iconAllowOverlap: true,
+              symbolZOrder: 'viewport-y',
+            }}
           />
         </Mapbox.ShapeSource>
         {selectedRoute && (
@@ -233,21 +263,6 @@ export function RouteMap({
         {!selectedRoute && <RecenterButton onPress={recenter} />}
       </View>
     </View>
-  );
-}
-
-/** Image of a route marker, made again once its photo has loaded. */
-function MarkerImage({ route }: { route: RouteCard }) {
-  const { t } = useTranslation();
-  const [photoVersion, setPhotoVersion] = useState(0);
-  return (
-    <MapImage name={markerImage(route.id)} version={photoVersion}>
-      <MapMarker
-        photoUrl={route.coverUrl}
-        durationLabel={formatDuration(t, route.durationMin, 'short')}
-        onPhotoSettled={() => setPhotoVersion((version) => version + 1)}
-      />
-    </MapImage>
   );
 }
 
