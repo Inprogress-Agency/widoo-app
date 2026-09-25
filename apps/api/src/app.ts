@@ -16,6 +16,7 @@ import { parseQueryString } from './query-string';
 import { configRoutes } from './routes/config';
 import { healthRoutes } from './routes/health';
 import { meRoutes } from './routes/me';
+import { searchRoutesPlugin } from './routes/search';
 import { registerSecurity } from './security';
 
 export type BuildAppOptions = {
@@ -72,6 +73,7 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   await app.register(healthRoutes, { prefix: '/v1' });
   await app.register(configRoutes, { prefix: '/v1', minAppVersion: config.minAppVersion });
   await app.register(meRoutes, { prefix: '/v1' });
+  await app.register(searchRoutesPlugin, { prefix: '/v1' });
 
   return app;
 }
