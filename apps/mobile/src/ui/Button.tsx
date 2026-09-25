@@ -27,7 +27,7 @@ interface ButtonProps {
 export function Button({ label, onPress, variant = 'primary' }: ButtonProps) {
   const pressed = useSharedValue(0);
   const veil = useAnimatedStyle(() => ({
-    opacity: pressed.value * motion.press.filledVeil.opacity,
+    opacity: pressed.get() * motion.press.filledVeil.opacity,
   }));
   return (
     <Pressable
@@ -35,10 +35,10 @@ export function Button({ label, onPress, variant = 'primary' }: ButtonProps) {
       accessibilityLabel={label}
       onPress={onPress}
       onPressIn={() => {
-        pressed.value = withTiming(1, timing('press', 'fade'));
+        pressed.set(withTiming(1, timing('press', 'fade')));
       }}
       onPressOut={() => {
-        pressed.value = withTiming(0, timing('pressRelease', 'fade'));
+        pressed.set(withTiming(0, timing('pressRelease', 'fade')));
       }}
       className={`min-h-button-h justify-center self-center overflow-hidden rounded-pill px-24 py-12 ${variants[variant].className}`}
     >
