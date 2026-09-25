@@ -64,6 +64,8 @@ interface RouteMapProps {
   banner?: ReactNode;
   /** « Rechercher dans cette zone », or the pill of a search on its way, above the banner. */
   searchControl?: ReactNode;
+  /** The recentre button, hidden over the message of an empty zone (Ecrans › E-01). */
+  hasRecenter?: boolean;
 }
 
 /**
@@ -85,6 +87,7 @@ export function RouteMap({
   onOpenRoute,
   banner,
   searchControl,
+  hasRecenter = true,
 }: RouteMapProps) {
   const { t } = useTranslation();
   const { fontScale, width } = useWindowDimensions();
@@ -380,7 +383,7 @@ export function RouteMap({
           {banner}
         </View>
         {/* Hidden while a route is selected (Ecrans › E-04). */}
-        {!selectedRoute && <RecenterButton onPress={recenter} />}
+        {hasRecenter && !selectedRoute && <RecenterButton onPress={recenter} />}
       </View>
     </View>
   );
