@@ -29,7 +29,14 @@ export interface ZoneSearch {
   trigger: SearchTrigger;
 }
 
-export type SearchStatus = 'idle' | 'loading' | 'success' | 'error';
+/** `offline`: the search waits for the network; the last results known stay on screen. */
+export type SearchStatus = 'idle' | 'loading' | 'success' | 'error' | 'offline';
+
+/** Results kept from an earlier session, with the time they were fetched. */
+export interface CachedResults {
+  result: RouteSearchResult;
+  fetchedAt: number;
+}
 
 export interface DiscoveryState {
   /** Where the map has settled; null until its first view. */
@@ -41,6 +48,8 @@ export interface DiscoveryState {
   status: SearchStatus;
   /** The last answer received: it stays on screen while the next search loads or fails. */
   results: RouteSearchResult | null;
+  /** When the results on screen were fetched: « résultats du 22 sept. à 14:02 » offline. */
+  resultsAt: number | null;
   filters: SearchFilters;
   selectedRouteId: string | null;
   /** A view the app asks the map to show, such as the widened zone; `id` changes each time. */
@@ -57,8 +66,13 @@ export interface DiscoveryActions {
   /** « Retirer les N filtres », then searches the same zone again. */
   clearFilters: () => void;
   /** The answer of search `id`; false when a newer search replaced it, or it already came. */
-  receive: (id: number, result: RouteSearchResult) => boolean;
+  receive: (id: number, result: RouteSearchResult, fetchedAt?: number) => boolean;
   fail: (id: number) => void;
+  /**
+   * Search `id` cannot reach the API: the results on screen stay, or else the results kept from
+   * an earlier session, if any (Ecrans › E-01, hors connexion).
+   */
+  goOffline: (id: number, cached: CachedResults | null) => void;
   /** A marker, or null for a tap elsewhere on the map. */
   select: (routeId: string | null) => void;
 }
@@ -71,6 +85,7 @@ export const initialDiscoveryState: DiscoveryState = {
   search: null,
   status: 'idle',
   results: null,
+  resultsAt: null,
   filters: {},
   selectedRouteId: null,
   framing: null,
@@ -95,11 +110,16 @@ export function selectedRoute(state: DiscoveryState): RouteCard | null {
 
 /**
  * « Rechercher dans cette zone »: after a manual move, or after a failed search so that the zone
- * can be searched again; never over a selected route (E-04).
+ * can be searched again; never over a selected route (E-04), nor offline (E-01).
  */
 export function canSearchZone(state: DiscoveryState): boolean {
   const isOffered = state.hasMoved || state.status === 'error';
-  return isOffered && state.search !== null && state.selectedRouteId === null;
+  return (
+    isOffered &&
+    state.search !== null &&
+    state.selectedRouteId === null &&
+    state.status !== 'offline'
+  );
 }
 
 /**
@@ -147,14 +167,16 @@ export function createDiscoveryStore() {
         set({ filters: {} });
         get().searchZone('button');
       },
-      receive: (id, result) => {
+      receive: (id, result, fetchedAt = Date.now()) => {
         const { search, status, selectedRouteId } = get();
-        if (search?.id !== id || status !== 'loading') {
+        // A search offline is answered once the network is back.
+        if (search?.id !== id || (status !== 'loading' && status !== 'offline')) {
           return false;
         }
         const isStillListed = result.items.some((route) => route.id === selectedRouteId);
         set({
           results: result,
+          resultsAt: fetchedAt,
           status: 'success',
           selectedRouteId: isStillListed ? selectedRouteId : null,
         });
@@ -164,6 +186,17 @@ export function createDiscoveryStore() {
         if (get().search?.id === id && get().status === 'loading') {
           set({ status: 'error' });
         }
+      },
+      goOffline: (id, cached) => {
+        const { search, status, results } = get();
+        if (search?.id !== id || status === 'offline' || status === 'idle') {
+          return;
+        }
+        set(
+          results === null && cached
+            ? { status: 'offline', results: cached.result, resultsAt: cached.fetchedAt }
+            : { status: 'offline' },
+        );
       },
       select: (routeId) => set({ selectedRouteId: routeId }),
     };
