@@ -106,6 +106,40 @@ describe('buildMappings', () => {
     expect(new Set(mappings.iconNames).size).toBe(mappings.iconNames.length);
   });
 
+  it('lists every icon named in the mappings, one-letter names included (#134)', () => {
+    // Read in the raw file, sections the schema does not declare included: every value under an
+    // `icon` key, in an `icons` group or in `uiIcons` that reads « name » or « name (notes) ». Prose
+    // notes (« warning plein ») and color tokens are not icon names; `x` is one, however short.
+    const referenced = new Set<string>();
+    const visit = (value: unknown, keys: string[]): void => {
+      if (typeof value === 'string') {
+        const isIconField =
+          keys.at(-1) === 'icon' || keys.includes('icons') || keys[0] === 'uiIcons';
+        const name = /^([a-z0-9-]+)(?: \(.+\))?$/.exec(value)?.[1];
+        if (isIconField && name !== undefined && !(name in theme.colors)) {
+          referenced.add(name);
+        }
+      } else if (Array.isArray(value)) {
+        value.forEach((item) => visit(item, keys));
+      } else if (value !== null && typeof value === 'object') {
+        for (const [key, item] of Object.entries(value)) {
+          visit(item, [...keys, key]);
+        }
+      }
+    };
+    visit(JSON.parse(readFileSync(tokensPath, 'utf8')).mappings, []);
+    expect(referenced).toContain('x');
+    expect([...referenced].filter((name) => !mappings.iconNames.includes(name))).toEqual([]);
+  });
+
+  it('calls the chevrons and the cross of D-053 by their mapping', () => {
+    expect(mappings.uiIcons['open-row']).toEqual({ name: 'caret-right' });
+    expect(mappings.uiIcons['collapse-step']).toEqual({ name: 'caret-up' });
+    expect(mappings.uiIcons['expand-step']).toEqual({ name: 'caret-down' });
+    expect(mappings.uiIcons.remove).toEqual({ name: 'x', weight: 'bold' });
+    expect(mappings.uiIcons.close).toEqual({ name: 'x', weight: 'bold' });
+  });
+
   it('reads the press feedback and the haptics of D-030', () => {
     expect(mappings.motion.press).toEqual({
       filledVeil: { color: 'ink', opacity: 0.08 },
