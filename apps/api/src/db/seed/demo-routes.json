@@ -153,6 +153,168 @@
       "isIndoor": true,
       "priceRange": "medium",
       "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "12:00", "closes": "22:30" }]
+    },
+    {
+      "key": "du-pain-et-des-idees",
+      "name": "Du Pain et des Idées",
+      "category": "bakery",
+      "location": { "lat": 48.87125, "lng": 2.3629 },
+      "address": "34 rue Yves-Toudic, 75010 Paris",
+      "addressComponents": {
+        "postcode": "75010",
+        "arrondissement": "10e",
+        "neighborhood": "Canal Saint-Martin"
+      },
+      "isIndoor": true,
+      "priceRange": "low",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4], "opens": "07:15", "closes": "19:30" }]
+    },
+    {
+      "key": "ecluse-des-recollets",
+      "name": "Écluse des Récollets",
+      "category": "walk",
+      "location": { "lat": 48.87372, "lng": 2.36345 },
+      "address": "quai de Jemmapes, 75010 Paris",
+      "addressComponents": {
+        "postcode": "75010",
+        "arrondissement": "10e",
+        "neighborhood": "Canal Saint-Martin"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "jardin-villemin",
+      "name": "Jardin Villemin",
+      "category": "park",
+      "location": { "lat": 48.87515, "lng": 2.36185 },
+      "address": "14 rue des Récollets, 75010 Paris",
+      "addressComponents": {
+        "postcode": "75010",
+        "arrondissement": "10e",
+        "neighborhood": "Canal Saint-Martin"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": [
+        { "weekdays": [0, 1, 2, 3, 4], "opens": "08:00", "closes": "20:00" },
+        { "weekdays": [5, 6], "opens": "09:00", "closes": "20:00" }
+      ]
+    },
+    {
+      "key": "pavillon-des-canaux",
+      "name": "Pavillon des Canaux",
+      "category": "cafe",
+      "location": { "lat": 48.88743, "lng": 2.37869 },
+      "address": "39 quai de la Loire, 75019 Paris",
+      "addressComponents": {
+        "postcode": "75019",
+        "arrondissement": "19e",
+        "neighborhood": "Bassin de la Villette"
+      },
+      "isIndoor": true,
+      "priceRange": "low",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "10:00", "closes": "23:00" }]
+    },
+    {
+      "key": "parc-de-la-villette",
+      "name": "Parc de la Villette",
+      "category": "park",
+      "location": { "lat": 48.89489, "lng": 2.38844 },
+      "address": "211 avenue Jean-Jaurès, 75019 Paris",
+      "addressComponents": {
+        "postcode": "75019",
+        "arrondissement": "19e",
+        "neighborhood": "La Villette"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "petite-alsace",
+      "name": "La Petite Alsace",
+      "category": "walk",
+      "location": { "lat": 48.82781, "lng": 2.34602 },
+      "address": "10 rue Daviel, 75013 Paris",
+      "addressComponents": {
+        "postcode": "75013",
+        "arrondissement": "13e",
+        "neighborhood": "Butte-aux-Cailles"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "cite-florale",
+      "name": "Cité florale",
+      "category": "walk",
+      "location": { "lat": 48.8227, "lng": 2.34482 },
+      "address": "rue des Glycines, 75013 Paris",
+      "addressComponents": {
+        "postcode": "75013",
+        "arrondissement": "13e",
+        "neighborhood": "Butte-aux-Cailles"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "piscine-butte-aux-cailles",
+      "name": "Piscine de la Butte-aux-Cailles",
+      "category": "activity",
+      "location": { "lat": 48.8271, "lng": 2.35243 },
+      "address": "5 place Paul-Verlaine, 75013 Paris",
+      "addressComponents": {
+        "postcode": "75013",
+        "arrondissement": "13e",
+        "neighborhood": "Butte-aux-Cailles"
+      },
+      "isIndoor": true,
+      "priceRange": "low",
+      "hours": [
+        { "weekdays": [1, 3], "opens": "07:00", "closes": "08:30" },
+        { "weekdays": [1, 3], "opens": "11:30", "closes": "13:30" },
+        { "weekdays": [2, 4], "opens": "11:30", "closes": "13:30" },
+        { "weekdays": [5], "opens": "07:00", "closes": "18:00" },
+        { "weekdays": [6], "opens": "08:00", "closes": "18:00" }
+      ]
+    },
+    {
+      "key": "rue-butte-aux-cailles",
+      "name": "Rue de la Butte-aux-Cailles",
+      "category": "walk",
+      "location": { "lat": 48.82779, "lng": 2.35043 },
+      "address": "rue de la Butte-aux-Cailles, 75013 Paris",
+      "addressComponents": {
+        "postcode": "75013",
+        "arrondissement": "13e",
+        "neighborhood": "Butte-aux-Cailles"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "chez-gladines",
+      "name": "Chez Gladines",
+      "category": "restaurant",
+      "location": { "lat": 48.82881, "lng": 2.35064 },
+      "address": "30 rue des Cinq-Diamants, 75013 Paris",
+      "addressComponents": {
+        "postcode": "75013",
+        "arrondissement": "13e",
+        "neighborhood": "Butte-aux-Cailles"
+      },
+      "isIndoor": true,
+      "priceRange": "low",
+      "hours": [
+        { "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "12:00", "closes": "15:00" },
+        { "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "19:00", "closes": "23:30" }
+      ]
     }
   ],
   "routes": [
@@ -277,6 +439,133 @@
           "costPerPerson": 35,
           "bookingRequired": true,
           "bookingProvider": "restaurant"
+        }
+      ]
+    },
+    {
+      "key": "canal-saint-martin-a-velo",
+      "title": "Le canal Saint-Martin à vélo jusqu’à la Villette",
+      "description": "Une balade en Vélib le long de l’eau : viennoiserie d’une boulangerie culte, écluses et passerelles, pause au bord du bassin de la Villette, puis les pelouses du parc.",
+      "author": "camille",
+      "moods": ["relax", "sport", "instagrammable"],
+      "audiences": ["friends", "solo"],
+      "conditions": ["no_booking", "outdoor", "sunny"],
+      "transport": "bike",
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1642766603265-e33f8a27fb31?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1548123833-0d46ee1d7400?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        }
+      ],
+      "computed": {
+        "duration_min": 215,
+        "budget_per_person_eur": { "min": 11, "max": 17 },
+        "distance_m": 4430,
+        "walking_m": 0,
+        "effort": "easy",
+        "warnings": [],
+        "computed_at": "2026-09-25T08:00:00.000Z"
+      },
+      "steps": [
+        {
+          "place": "du-pain-et-des-idees",
+          "description": "Le « pain des amis » et l’escargot pistache-chocolat. Fermé le week-end.",
+          "durationMin": 20,
+          "costPerPerson": 6
+        },
+        {
+          "place": "ecluse-des-recollets",
+          "description": "Regarder une péniche passer l’écluse depuis la passerelle, à côté de l’Hôtel du Nord.",
+          "durationMin": 20,
+          "costPerPerson": 0
+        },
+        {
+          "place": "jardin-villemin",
+          "description": "Un jardin partagé caché derrière le canal, pour une première pause.",
+          "durationMin": 30,
+          "costPerPerson": 0,
+          "transitionNote": "Reprendre le quai de Valmy vers le nord, piste cyclable sur la gauche."
+        },
+        {
+          "place": "pavillon-des-canaux",
+          "description": "Un café dans une maison au bord de l’eau : on s’installe dans la baignoire ou sur la terrasse.",
+          "durationMin": 60,
+          "costPerPerson": 8
+        },
+        {
+          "place": "parc-de-la-villette",
+          "description": "Les grandes pelouses et le canal de l’Ourcq. Déposer le vélo à la station de la Grande Halle.",
+          "durationMin": 60,
+          "costPerPerson": 0
+        }
+      ]
+    },
+    {
+      "key": "butte-aux-cailles-village",
+      "title": "La Butte-aux-Cailles, un village dans Paris",
+      "description": "Maisons à colombages, impasses fleuries, baignade dans une piscine Art nouveau alimentée par un puits artésien, puis un dîner basque aux grandes tablées.",
+      "author": "yanis",
+      "moods": ["unusual", "food"],
+      "audiences": ["friends"],
+      "conditions": ["no_booking", "outdoor", "sunny"],
+      "transport": "walk",
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1594676632059-b0707a8cca55?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1683020369711-fa6e11acaccd?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        }
+      ],
+      "computed": {
+        "duration_min": 225,
+        "budget_per_person_eur": { "min": 17, "max": 27 },
+        "distance_m": 2070,
+        "walking_m": 2070,
+        "effort": "easy",
+        "warnings": [],
+        "computed_at": "2026-09-25T08:00:00.000Z"
+      },
+      "steps": [
+        {
+          "place": "petite-alsace",
+          "description": "Des maisons ouvrières à colombages autour d’une cour, bâties en 1912.",
+          "durationMin": 15,
+          "costPerPerson": 0
+        },
+        {
+          "place": "cite-florale",
+          "description": "Rues des Glycines, des Iris, des Orchidées : des maisons de ville couvertes de lierre.",
+          "durationMin": 20,
+          "costPerPerson": 0
+        },
+        {
+          "place": "piscine-butte-aux-cailles",
+          "description": "Bassin Art nouveau sous verrière, eau venue d’un puits à 580 m. Prendre un bonnet.",
+          "durationMin": 60,
+          "costPerPerson": 4
+        },
+        {
+          "place": "rue-butte-aux-cailles",
+          "description": "Pochoirs et collages sur les façades, entre la rue des Cinq-Diamants et la place de la Commune.",
+          "durationMin": 25,
+          "costPerPerson": 0
+        },
+        {
+          "place": "chez-gladines",
+          "description": "Salade géante et piperade, aux tables partagées. Sans réservation : venir tôt.",
+          "durationMin": 75,
+          "costPerPerson": 18
         }
       ]
     }
