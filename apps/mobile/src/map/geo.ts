@@ -40,6 +40,27 @@ export function toBbox({ ne, sw }: Bounds): Bbox {
   return { west: sw[0], south: sw[1], east: ne[0], north: ne[1] };
 }
 
+/** Centre of a zone. */
+export function bboxCenter({ west, south, east, north }: Bbox): LngLat {
+  return [(west + east) / 2, (south + north) / 2];
+}
+
+/**
+ * The zone around the same centre, `factor` times as wide and as tall, within the limits of the
+ * search: « Élargir la zone » doubles it (Ecrans › E-01, aucun résultat).
+ */
+export function scaleBbox(bbox: Bbox, factor: number): Bbox {
+  const [lng, lat] = bboxCenter(bbox);
+  const halfWidth = ((bbox.east - bbox.west) * factor) / 2;
+  const halfHeight = ((bbox.north - bbox.south) * factor) / 2;
+  return {
+    west: Math.max(-180, lng - halfWidth),
+    south: Math.max(-90, lat - halfHeight),
+    east: Math.min(180, lng + halfWidth),
+    north: Math.min(90, lat + halfHeight),
+  };
+}
+
 /** Earth circumference at the equator, in meters, and the Mapbox tile size, in points. */
 const earthCircumferenceM = 40_075_016.686;
 const tileSize = 512;
