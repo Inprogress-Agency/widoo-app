@@ -4,6 +4,7 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { analytics } from '../analytics';
+import { newCardViews } from '../analytics/discovery';
 import { StatusMessage } from '../components/StatusMessage';
 import { NoRoutesMessage, ZoomInMessage } from '../components/ZoneMessage';
 import {
@@ -162,15 +163,8 @@ export function DiscoverySheet({
         onOpen={(route) => onOpenRoute(route, 'card')}
         onFocus={(route) => focus(route.id)}
         onVisible={(visible) => {
-          for (const { route, index } of visible) {
-            if (!seen.current.has(route.id)) {
-              seen.current.add(route.id);
-              analytics.track('result_card_viewed', {
-                route_id: route.id,
-                position: index,
-                sheet_level: level.current,
-              });
-            }
+          for (const view of newCardViews(visible, seen.current, level.current)) {
+            analytics.track('result_card_viewed', view);
           }
         }}
       />
