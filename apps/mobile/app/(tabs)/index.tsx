@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { View } from 'react-native';
-import { canSearchZone, selectedRoute } from '../../src/discovery/store';
+import { ZoomInMessage } from '../../src/components/ZoneMessage';
+import { canSearchZone, resultsCount, selectedRoute } from '../../src/discovery/store';
 import { useDiscovery, useRouteSearch } from '../../src/discovery/useRouteSearch';
 import { useReleaseSplash } from '../../src/launch/splash';
 import { useUserLocation } from '../../src/location/useUserLocation';
@@ -17,7 +18,8 @@ export default function HomeScreen() {
   const { location, enable } = useUserLocation();
   // The home is ready once its map shows, at its centre (E-18: the launch screen until then).
   useReleaseSplash(location.status !== 'pending');
-  const { routes, status } = useRouteSearch();
+  const { routes, clusters, status } = useRouteSearch();
+  const results = useDiscovery((state) => state.results);
   const route = useDiscovery(selectedRoute);
   const isSearchable = useDiscovery(canSearchZone);
   const framing = useDiscovery((state) => state.framing);
@@ -32,25 +34,31 @@ export default function HomeScreen() {
   }
   const position = location.status === 'granted' ? location.position : null;
   return (
-    <RouteMap
-      routes={routes}
-      center={position ?? parisCenter}
-      hasPosition={position !== null}
-      onViewChange={showView}
-      framing={framing}
-      selectedRoute={route}
-      // No account in the app until E-10: nobody is Premium yet.
-      hasPremium={false}
-      onSelect={(next) => select(next?.id ?? null)}
-      onOpenRoute={(next) => router.push({ pathname: '/route/[id]', params: { id: next.id } })}
-      banner={location.status === 'denied' && <LocationOffBanner onEnable={() => void enable()} />}
-      searchControl={
-        isSearchable ? (
-          <SearchZoneButton onPress={() => searchZone('button')} />
-        ) : (
-          <SearchingPill isSearching={status === 'loading' && route === null} />
-        )
-      }
-    />
+    <View className="flex-1 bg-surface">
+      <RouteMap
+        routes={routes}
+        clusters={clusters}
+        center={position ?? parisCenter}
+        hasPosition={position !== null}
+        onViewChange={showView}
+        framing={framing}
+        selectedRoute={route}
+        // No account in the app until E-10: nobody is Premium yet.
+        hasPremium={false}
+        onSelect={(next) => select(next?.id ?? null)}
+        onOpenRoute={(next) => router.push({ pathname: '/route/[id]', params: { id: next.id } })}
+        banner={
+          location.status === 'denied' && <LocationOffBanner onEnable={() => void enable()} />
+        }
+        searchControl={
+          isSearchable ? (
+            <SearchZoneButton onPress={() => searchZone('button')} />
+          ) : (
+            <SearchingPill isSearching={status === 'loading' && route === null} />
+          )
+        }
+      />
+      {clusters && results && <ZoomInMessage count={resultsCount(results)} />}
+    </View>
   );
 }
