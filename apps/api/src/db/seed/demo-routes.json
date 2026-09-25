@@ -1,0 +1,1339 @@
+{
+  "datasetDate": "2026-09-25T08:00:00.000Z",
+  "authors": [
+    {
+      "key": "camille",
+      "firstName": "Camille",
+      "bio": "À vélo dès qu’il fait beau, un carnet de croquis dans la sacoche."
+    },
+    {
+      "key": "yanis",
+      "firstName": "Yanis",
+      "bio": "Toujours une adresse pour dîner en bande, de préférence sans réserver."
+    }
+  ],
+  "places": [
+    {
+      "key": "maison-victor-hugo",
+      "name": "Maison de Victor Hugo",
+      "category": "museum",
+      "location": { "lat": 48.8548, "lng": 2.36614 },
+      "address": "6 place des Vosges, 75004 Paris",
+      "addressComponents": {
+        "postcode": "75004",
+        "arrondissement": "4e",
+        "neighborhood": "Le Marais"
+      },
+      "isIndoor": true,
+      "priceRange": "free",
+      "hours": [{ "weekdays": [1, 2, 3, 4, 5, 6], "opens": "10:00", "closes": "18:00" }]
+    },
+    {
+      "key": "musee-carnavalet",
+      "name": "Musée Carnavalet",
+      "category": "museum",
+      "location": { "lat": 48.85732, "lng": 2.36247 },
+      "address": "23 rue de Sévigné, 75003 Paris",
+      "addressComponents": {
+        "postcode": "75003",
+        "arrondissement": "3e",
+        "neighborhood": "Le Marais"
+      },
+      "isIndoor": true,
+      "priceRange": "free",
+      "hours": [{ "weekdays": [1, 2, 3, 4, 5, 6], "opens": "10:00", "closes": "18:00" }]
+    },
+    {
+      "key": "musee-cognacq-jay",
+      "name": "Musée Cognacq-Jay",
+      "category": "museum",
+      "location": { "lat": 48.85812, "lng": 2.36168 },
+      "address": "8 rue Elzévir, 75003 Paris",
+      "addressComponents": {
+        "postcode": "75003",
+        "arrondissement": "3e",
+        "neighborhood": "Le Marais"
+      },
+      "isIndoor": true,
+      "priceRange": "free",
+      "hours": [{ "weekdays": [1, 2, 3, 4, 5, 6], "opens": "10:00", "closes": "18:00" }]
+    },
+    {
+      "key": "marche-enfants-rouges",
+      "name": "Marché des Enfants Rouges",
+      "category": "restaurant",
+      "location": { "lat": 48.8628, "lng": 2.36197 },
+      "address": "39 rue de Bretagne, 75003 Paris",
+      "addressComponents": {
+        "postcode": "75003",
+        "arrondissement": "3e",
+        "neighborhood": "Le Marais"
+      },
+      "isIndoor": true,
+      "priceRange": "low",
+      "hours": [
+        { "weekdays": [1, 2, 3, 4, 5], "opens": "08:30", "closes": "20:30" },
+        { "weekdays": [6], "opens": "08:30", "closes": "17:00" }
+      ]
+    },
+    {
+      "key": "mur-des-je-t-aime",
+      "name": "Le Mur des je t’aime",
+      "category": "other",
+      "location": { "lat": 48.88481, "lng": 2.33852 },
+      "address": "square Jehan-Rictus, place des Abbesses, 75018 Paris",
+      "addressComponents": {
+        "postcode": "75018",
+        "arrondissement": "18e",
+        "neighborhood": "Montmartre"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": [
+        { "weekdays": [0, 1, 2, 3, 4], "opens": "08:00", "closes": "20:30" },
+        { "weekdays": [5, 6], "opens": "09:00", "closes": "20:30" }
+      ]
+    },
+    {
+      "key": "parvis-sacre-coeur",
+      "name": "Parvis du Sacré-Cœur",
+      "category": "viewpoint",
+      "location": { "lat": 48.88625, "lng": 2.34303 },
+      "address": "35 rue du Chevalier-de-la-Barre, 75018 Paris",
+      "addressComponents": {
+        "postcode": "75018",
+        "arrondissement": "18e",
+        "neighborhood": "Montmartre"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "place-du-tertre",
+      "name": "Place du Tertre",
+      "category": "walk",
+      "location": { "lat": 48.88653, "lng": 2.3408 },
+      "address": "place du Tertre, 75018 Paris",
+      "addressComponents": {
+        "postcode": "75018",
+        "arrondissement": "18e",
+        "neighborhood": "Montmartre"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "musee-de-montmartre",
+      "name": "Musée de Montmartre",
+      "category": "museum",
+      "location": { "lat": 48.88805, "lng": 2.34063 },
+      "address": "12 rue Cortot, 75018 Paris",
+      "addressComponents": {
+        "postcode": "75018",
+        "arrondissement": "18e",
+        "neighborhood": "Montmartre"
+      },
+      "isIndoor": true,
+      "priceRange": "medium",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "10:00", "closes": "19:00" }]
+    },
+    {
+      "key": "la-maison-rose",
+      "name": "La Maison Rose",
+      "category": "restaurant",
+      "location": { "lat": 48.88799, "lng": 2.33965 },
+      "address": "2 rue de l’Abreuvoir, 75018 Paris",
+      "addressComponents": {
+        "postcode": "75018",
+        "arrondissement": "18e",
+        "neighborhood": "Montmartre"
+      },
+      "isIndoor": true,
+      "priceRange": "medium",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "12:00", "closes": "22:30" }]
+    },
+    {
+      "key": "du-pain-et-des-idees",
+      "name": "Du Pain et des Idées",
+      "category": "bakery",
+      "location": { "lat": 48.87125, "lng": 2.3629 },
+      "address": "34 rue Yves-Toudic, 75010 Paris",
+      "addressComponents": {
+        "postcode": "75010",
+        "arrondissement": "10e",
+        "neighborhood": "Canal Saint-Martin"
+      },
+      "isIndoor": true,
+      "priceRange": "low",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4], "opens": "07:15", "closes": "19:30" }]
+    },
+    {
+      "key": "ecluse-des-recollets",
+      "name": "Écluse des Récollets",
+      "category": "walk",
+      "location": { "lat": 48.87372, "lng": 2.36345 },
+      "address": "quai de Jemmapes, 75010 Paris",
+      "addressComponents": {
+        "postcode": "75010",
+        "arrondissement": "10e",
+        "neighborhood": "Canal Saint-Martin"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "jardin-villemin",
+      "name": "Jardin Villemin",
+      "category": "park",
+      "location": { "lat": 48.87515, "lng": 2.36185 },
+      "address": "14 rue des Récollets, 75010 Paris",
+      "addressComponents": {
+        "postcode": "75010",
+        "arrondissement": "10e",
+        "neighborhood": "Canal Saint-Martin"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": [
+        { "weekdays": [0, 1, 2, 3, 4], "opens": "08:00", "closes": "20:00" },
+        { "weekdays": [5, 6], "opens": "09:00", "closes": "20:00" }
+      ]
+    },
+    {
+      "key": "pavillon-des-canaux",
+      "name": "Pavillon des Canaux",
+      "category": "cafe",
+      "location": { "lat": 48.88743, "lng": 2.37869 },
+      "address": "39 quai de la Loire, 75019 Paris",
+      "addressComponents": {
+        "postcode": "75019",
+        "arrondissement": "19e",
+        "neighborhood": "Bassin de la Villette"
+      },
+      "isIndoor": true,
+      "priceRange": "low",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "10:00", "closes": "23:00" }]
+    },
+    {
+      "key": "parc-de-la-villette",
+      "name": "Parc de la Villette",
+      "category": "park",
+      "location": { "lat": 48.89489, "lng": 2.38844 },
+      "address": "211 avenue Jean-Jaurès, 75019 Paris",
+      "addressComponents": {
+        "postcode": "75019",
+        "arrondissement": "19e",
+        "neighborhood": "La Villette"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "petite-alsace",
+      "name": "La Petite Alsace",
+      "category": "walk",
+      "location": { "lat": 48.82781, "lng": 2.34602 },
+      "address": "10 rue Daviel, 75013 Paris",
+      "addressComponents": {
+        "postcode": "75013",
+        "arrondissement": "13e",
+        "neighborhood": "Butte-aux-Cailles"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "cite-florale",
+      "name": "Cité florale",
+      "category": "walk",
+      "location": { "lat": 48.8227, "lng": 2.34482 },
+      "address": "rue des Glycines, 75013 Paris",
+      "addressComponents": {
+        "postcode": "75013",
+        "arrondissement": "13e",
+        "neighborhood": "Butte-aux-Cailles"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "piscine-butte-aux-cailles",
+      "name": "Piscine de la Butte-aux-Cailles",
+      "category": "activity",
+      "location": { "lat": 48.8271, "lng": 2.35243 },
+      "address": "5 place Paul-Verlaine, 75013 Paris",
+      "addressComponents": {
+        "postcode": "75013",
+        "arrondissement": "13e",
+        "neighborhood": "Butte-aux-Cailles"
+      },
+      "isIndoor": true,
+      "priceRange": "low",
+      "hours": [
+        { "weekdays": [1, 3], "opens": "07:00", "closes": "08:30" },
+        { "weekdays": [1, 3], "opens": "11:30", "closes": "13:30" },
+        { "weekdays": [2, 4], "opens": "11:30", "closes": "13:30" },
+        { "weekdays": [5], "opens": "07:00", "closes": "18:00" },
+        { "weekdays": [6], "opens": "08:00", "closes": "18:00" }
+      ]
+    },
+    {
+      "key": "rue-butte-aux-cailles",
+      "name": "Rue de la Butte-aux-Cailles",
+      "category": "walk",
+      "location": { "lat": 48.82779, "lng": 2.35043 },
+      "address": "rue de la Butte-aux-Cailles, 75013 Paris",
+      "addressComponents": {
+        "postcode": "75013",
+        "arrondissement": "13e",
+        "neighborhood": "Butte-aux-Cailles"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "chez-gladines",
+      "name": "Chez Gladines",
+      "category": "restaurant",
+      "location": { "lat": 48.82881, "lng": 2.35064 },
+      "address": "30 rue des Cinq-Diamants, 75013 Paris",
+      "addressComponents": {
+        "postcode": "75013",
+        "arrondissement": "13e",
+        "neighborhood": "Butte-aux-Cailles"
+      },
+      "isIndoor": true,
+      "priceRange": "low",
+      "hours": [
+        { "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "12:00", "closes": "15:00" },
+        { "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "19:00", "closes": "23:30" }
+      ]
+    },
+    {
+      "key": "rue-denoyez",
+      "name": "Rue Dénoyez",
+      "category": "walk",
+      "location": { "lat": 48.87165, "lng": 2.37852 },
+      "address": "rue Dénoyez, 75020 Paris",
+      "addressComponents": {
+        "postcode": "75020",
+        "arrondissement": "20e",
+        "neighborhood": "Belleville"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "place-frehel",
+      "name": "Place Fréhel",
+      "category": "other",
+      "location": { "lat": 48.87308, "lng": 2.38174 },
+      "address": "place Fréhel, 75020 Paris",
+      "addressComponents": {
+        "postcode": "75020",
+        "arrondissement": "20e",
+        "neighborhood": "Belleville"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "belvedere-de-belleville",
+      "name": "Belvédère de Belleville",
+      "category": "viewpoint",
+      "location": { "lat": 48.87158, "lng": 2.38532 },
+      "address": "27 rue Piat, 75020 Paris",
+      "addressComponents": {
+        "postcode": "75020",
+        "arrondissement": "20e",
+        "neighborhood": "Belleville"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": [
+        { "weekdays": [0, 1, 2, 3, 4], "opens": "08:00", "closes": "20:30" },
+        { "weekdays": [5, 6], "opens": "09:00", "closes": "20:30" }
+      ]
+    },
+    {
+      "key": "regard-saint-martin",
+      "name": "Regard Saint-Martin",
+      "category": "monument",
+      "location": { "lat": 48.87147, "lng": 2.39148 },
+      "address": "42 rue des Cascades, 75020 Paris",
+      "addressComponents": {
+        "postcode": "75020",
+        "arrondissement": "20e",
+        "neighborhood": "Belleville"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "arenes-de-lutece",
+      "name": "Arènes de Lutèce",
+      "category": "monument",
+      "location": { "lat": 48.8446, "lng": 2.35322 },
+      "address": "49 rue Monge, 75005 Paris",
+      "addressComponents": {
+        "postcode": "75005",
+        "arrondissement": "5e",
+        "neighborhood": "Quartier latin"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": [
+        { "weekdays": [0, 1, 2, 3, 4], "opens": "08:00", "closes": "20:30" },
+        { "weekdays": [5, 6], "opens": "09:00", "closes": "20:30" }
+      ]
+    },
+    {
+      "key": "menagerie-jardin-des-plantes",
+      "name": "Ménagerie du Jardin des Plantes",
+      "category": "activity",
+      "location": { "lat": 48.84553, "lng": 2.36059 },
+      "address": "57 rue Cuvier, 75005 Paris",
+      "addressComponents": {
+        "postcode": "75005",
+        "arrondissement": "5e",
+        "neighborhood": "Jardin des Plantes"
+      },
+      "isIndoor": false,
+      "priceRange": "medium",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "09:00", "closes": "18:00" }]
+    },
+    {
+      "key": "mosquee-de-paris-salon-de-the",
+      "name": "Salon de thé de la Grande Mosquée",
+      "category": "cafe",
+      "location": { "lat": 48.84207, "lng": 2.3551 },
+      "address": "39 rue Geoffroy-Saint-Hilaire, 75005 Paris",
+      "addressComponents": {
+        "postcode": "75005",
+        "arrondissement": "5e",
+        "neighborhood": "Jardin des Plantes"
+      },
+      "isIndoor": true,
+      "priceRange": "low",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "09:00", "closes": "23:30" }]
+    },
+    {
+      "key": "grande-galerie-evolution",
+      "name": "Grande Galerie de l’Évolution",
+      "category": "museum",
+      "location": { "lat": 48.84211, "lng": 2.35624 },
+      "address": "36 rue Geoffroy-Saint-Hilaire, 75005 Paris",
+      "addressComponents": {
+        "postcode": "75005",
+        "arrondissement": "5e",
+        "neighborhood": "Jardin des Plantes"
+      },
+      "isIndoor": true,
+      "priceRange": "medium",
+      "hours": [{ "weekdays": [0, 2, 3, 4, 5, 6], "opens": "10:00", "closes": "18:00" }]
+    },
+    {
+      "key": "jardin-des-plantes",
+      "name": "Jardin des Plantes",
+      "category": "park",
+      "location": { "lat": 48.84404, "lng": 2.35973 },
+      "address": "57 rue Cuvier, 75005 Paris",
+      "addressComponents": {
+        "postcode": "75005",
+        "arrondissement": "5e",
+        "neighborhood": "Jardin des Plantes"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "07:30", "closes": "20:00" }]
+    },
+    {
+      "key": "sainte-chapelle",
+      "name": "Sainte-Chapelle",
+      "category": "monument",
+      "location": { "lat": 48.85539, "lng": 2.34499 },
+      "address": "10 boulevard du Palais, 75001 Paris",
+      "addressComponents": {
+        "postcode": "75001",
+        "arrondissement": "1er",
+        "neighborhood": "Île de la Cité"
+      },
+      "isIndoor": true,
+      "priceRange": "medium",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "09:00", "closes": "19:00" }]
+    },
+    {
+      "key": "shakespeare-and-company",
+      "name": "Shakespeare and Company",
+      "category": "shop",
+      "location": { "lat": 48.85257, "lng": 2.34711 },
+      "address": "37 rue de la Bûcherie, 75005 Paris",
+      "addressComponents": {
+        "postcode": "75005",
+        "arrondissement": "5e",
+        "neighborhood": "Quartier latin"
+      },
+      "isIndoor": true,
+      "priceRange": "free",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "10:00", "closes": "20:00" }]
+    },
+    {
+      "key": "musee-de-cluny",
+      "name": "Musée de Cluny",
+      "category": "museum",
+      "location": { "lat": 48.85065, "lng": 2.34356 },
+      "address": "28 rue du Sommerard, 75005 Paris",
+      "addressComponents": {
+        "postcode": "75005",
+        "arrondissement": "5e",
+        "neighborhood": "Quartier latin"
+      },
+      "isIndoor": true,
+      "priceRange": "medium",
+      "hours": [{ "weekdays": [1, 2, 3, 4, 5, 6], "opens": "09:30", "closes": "18:15" }]
+    },
+    {
+      "key": "bouillon-chartier-montparnasse",
+      "name": "Bouillon Chartier Montparnasse",
+      "category": "restaurant",
+      "location": { "lat": 48.84432, "lng": 2.32327 },
+      "address": "59 boulevard du Montparnasse, 75006 Paris",
+      "addressComponents": {
+        "postcode": "75006",
+        "arrondissement": "6e",
+        "neighborhood": "Montparnasse"
+      },
+      "isIndoor": true,
+      "priceRange": "low",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "11:30", "closes": "23:59" }]
+    },
+    {
+      "key": "tour-montparnasse-56",
+      "name": "Observatoire de la tour Montparnasse",
+      "category": "viewpoint",
+      "location": { "lat": 48.84211, "lng": 2.32197 },
+      "address": "33 avenue du Maine, 75015 Paris",
+      "addressComponents": {
+        "postcode": "75015",
+        "arrondissement": "15e",
+        "neighborhood": "Montparnasse"
+      },
+      "isIndoor": true,
+      "priceRange": "medium",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "09:30", "closes": "23:00" }]
+    },
+    {
+      "key": "theatre-guignol-buttes-chaumont",
+      "name": "Théâtre Guignol Anatole",
+      "category": "activity",
+      "location": { "lat": 48.88213, "lng": 2.3829 },
+      "address": "avenue de la Grotte, parc des Buttes-Chaumont, 75019 Paris",
+      "addressComponents": {
+        "postcode": "75019",
+        "arrondissement": "19e",
+        "neighborhood": "Buttes-Chaumont"
+      },
+      "isIndoor": true,
+      "priceRange": "low",
+      "hours": [{ "weekdays": [2, 5, 6], "opens": "15:00", "closes": "17:00" }]
+    },
+    {
+      "key": "grotte-buttes-chaumont",
+      "name": "Grotte des Buttes-Chaumont",
+      "category": "park",
+      "location": { "lat": 48.87976, "lng": 2.38366 },
+      "address": "parc des Buttes-Chaumont, 75019 Paris",
+      "addressComponents": {
+        "postcode": "75019",
+        "arrondissement": "19e",
+        "neighborhood": "Buttes-Chaumont"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "07:00", "closes": "21:00" }]
+    },
+    {
+      "key": "belvedere-de-la-sibylle",
+      "name": "Belvédère de la Sibylle",
+      "category": "viewpoint",
+      "location": { "lat": 48.88109, "lng": 2.38307 },
+      "address": "parc des Buttes-Chaumont, 75019 Paris",
+      "addressComponents": {
+        "postcode": "75019",
+        "arrondissement": "19e",
+        "neighborhood": "Buttes-Chaumont"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "07:00", "closes": "21:00" }]
+    },
+    {
+      "key": "rosa-bonheur",
+      "name": "Rosa Bonheur",
+      "category": "bar",
+      "location": { "lat": 48.87998, "lng": 2.38623 },
+      "address": "2 avenue de la Cascade, 75019 Paris",
+      "addressComponents": {
+        "postcode": "75019",
+        "arrondissement": "19e",
+        "neighborhood": "Buttes-Chaumont"
+      },
+      "isIndoor": false,
+      "priceRange": "low",
+      "hours": [{ "weekdays": [2, 3, 4, 5, 6], "opens": "12:00", "closes": "23:00" }]
+    },
+    {
+      "key": "merci",
+      "name": "Merci",
+      "category": "shop",
+      "location": { "lat": 48.86077, "lng": 2.36693 },
+      "address": "111 boulevard Beaumarchais, 75003 Paris",
+      "addressComponents": {
+        "postcode": "75003",
+        "arrondissement": "3e",
+        "neighborhood": "Le Marais"
+      },
+      "isIndoor": true,
+      "priceRange": "medium",
+      "hours": [
+        { "weekdays": [0, 1, 2, 3, 4, 5], "opens": "10:30", "closes": "19:30" },
+        { "weekdays": [6], "opens": "11:00", "closes": "19:00" }
+      ]
+    },
+    {
+      "key": "as-du-fallafel",
+      "name": "L’As du Fallafel",
+      "category": "restaurant",
+      "location": { "lat": 48.85742, "lng": 2.35907 },
+      "address": "34 rue des Rosiers, 75004 Paris",
+      "addressComponents": {
+        "postcode": "75004",
+        "arrondissement": "4e",
+        "neighborhood": "Le Marais"
+      },
+      "isIndoor": true,
+      "priceRange": "low",
+      "hours": [
+        { "weekdays": [0, 1, 2, 3, 6], "opens": "11:00", "closes": "23:00" },
+        { "weekdays": [4], "opens": "11:00", "closes": "15:00" }
+      ]
+    },
+    {
+      "key": "village-saint-paul",
+      "name": "Village Saint-Paul",
+      "category": "shop",
+      "location": { "lat": 48.85271, "lng": 2.36088 },
+      "address": "23 rue Saint-Paul, 75004 Paris",
+      "addressComponents": {
+        "postcode": "75004",
+        "arrondissement": "4e",
+        "neighborhood": "Le Marais"
+      },
+      "isIndoor": false,
+      "priceRange": "medium",
+      "hours": [{ "weekdays": [0, 3, 4, 5, 6], "opens": "11:00", "closes": "19:00" }]
+    },
+    {
+      "key": "berthillon",
+      "name": "Berthillon",
+      "category": "shop",
+      "location": { "lat": 48.85171, "lng": 2.35672 },
+      "address": "29-31 rue Saint-Louis-en-l’Île, 75004 Paris",
+      "addressComponents": {
+        "postcode": "75004",
+        "arrondissement": "4e",
+        "neighborhood": "Île Saint-Louis"
+      },
+      "isIndoor": true,
+      "priceRange": "low",
+      "hours": [{ "weekdays": [2, 3, 4, 5, 6], "opens": "10:00", "closes": "20:00" }]
+    },
+    {
+      "key": "viaduc-des-arts",
+      "name": "Viaduc des Arts",
+      "category": "walk",
+      "location": { "lat": 48.84635, "lng": 2.3778 },
+      "address": "avenue Daumesnil, 75012 Paris",
+      "addressComponents": {
+        "postcode": "75012",
+        "arrondissement": "12e",
+        "neighborhood": "Bastille"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "jardin-de-reuilly",
+      "name": "Jardin de Reuilly",
+      "category": "park",
+      "location": { "lat": 48.84219, "lng": 2.38753 },
+      "address": "rue Albinoni, 75012 Paris",
+      "addressComponents": {
+        "postcode": "75012",
+        "arrondissement": "12e",
+        "neighborhood": "Reuilly"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": [
+        { "weekdays": [0, 1, 2, 3, 4], "opens": "08:00", "closes": "20:30" },
+        { "weekdays": [5, 6], "opens": "09:00", "closes": "20:30" }
+      ]
+    },
+    {
+      "key": "lac-daumesnil",
+      "name": "Lac Daumesnil",
+      "category": "park",
+      "location": { "lat": 48.83076, "lng": 2.41541 },
+      "address": "route de Ceinture du Lac Daumesnil, 75012 Paris",
+      "addressComponents": {
+        "postcode": "75012",
+        "arrondissement": "12e",
+        "neighborhood": "Bois de Vincennes"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "parc-floral",
+      "name": "Parc floral de Paris",
+      "category": "park",
+      "location": { "lat": 48.83732, "lng": 2.44556 },
+      "address": "route de la Pyramide, 75012 Paris",
+      "addressComponents": {
+        "postcode": "75012",
+        "arrondissement": "12e",
+        "neighborhood": "Bois de Vincennes"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "09:30", "closes": "20:00" }]
+    }
+  ],
+  "routes": [
+    {
+      "key": "marais-a-l-abri",
+      "title": "Le Marais à l’abri de la pluie",
+      "description": "Trois musées gratuits dans des hôtels particuliers du Marais, sans jamais rester longtemps dehors, puis un goûter sous la halle du plus vieux marché couvert de Paris.",
+      "author": null,
+      "moods": ["culture", "romantic"],
+      "audiences": ["couple", "friends", "solo"],
+      "conditions": ["no_booking", "wheelchair", "indoor", "rainy"],
+      "transport": "walk",
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1775210676191-f450802fa51e?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1691472898646-7011d4d0ad55?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        }
+      ],
+      "computed": {
+        "duration_min": 245,
+        "budget_per_person_eur": { "min": 12, "max": 20 },
+        "distance_m": 1320,
+        "walking_m": 1320,
+        "effort": "easy",
+        "warnings": [],
+        "computed_at": "2026-09-25T08:00:00.000Z"
+      },
+      "steps": [
+        {
+          "place": "maison-victor-hugo",
+          "description": "L’appartement de l’écrivain, sur la place des Vosges. Collections permanentes gratuites.",
+          "durationMin": 45,
+          "costPerPerson": 0
+        },
+        {
+          "place": "musee-carnavalet",
+          "description": "Le musée de l’histoire de Paris : enseignes anciennes, salons reconstitués, chambre de Proust.",
+          "durationMin": 75,
+          "costPerPerson": 0,
+          "transitionNote": "Passer sous les arcades de la place, puis rue des Francs-Bourgeois."
+        },
+        {
+          "place": "musee-cognacq-jay",
+          "description": "Un petit musée du XVIIIᵉ siècle, calme, idéal pour ralentir.",
+          "durationMin": 45,
+          "costPerPerson": 0
+        },
+        {
+          "place": "marche-enfants-rouges",
+          "description": "Goûter ou dîner tôt sous la halle : cuisine marocaine, japonaise ou libanaise au comptoir.",
+          "durationMin": 60,
+          "costPerPerson": 16
+        }
+      ]
+    },
+    {
+      "key": "montmartre-a-deux",
+      "title": "Montmartre à deux, des Abbesses au coucher du soleil",
+      "description": "Une montée douce vers la Butte : le mur des je t’aime, la vue depuis le parvis du Sacré-Cœur, les peintres de la place du Tertre, puis le musée et un dîner à la Maison Rose.",
+      "author": null,
+      "moods": ["romantic", "instagrammable", "culture"],
+      "audiences": ["couple"],
+      "conditions": ["outdoor", "sunny"],
+      "transport": "walk",
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1561370665-7e266065fce1?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1623009070764-45002990256e?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        }
+      ],
+      "computed": {
+        "duration_min": 230,
+        "budget_per_person_eur": { "min": 40, "max": 60 },
+        "distance_m": 1010,
+        "walking_m": 1010,
+        "effort": "easy",
+        "warnings": [],
+        "computed_at": "2026-09-25T08:00:00.000Z"
+      },
+      "steps": [
+        {
+          "place": "mur-des-je-t-aime",
+          "description": "« Je t’aime » écrit dans plus de 250 langues, dans un petit square des Abbesses.",
+          "durationMin": 15,
+          "costPerPerson": 0,
+          "transitionNote": "Monter par la rue Yvonne-Le-Tac puis les escaliers du square Louise-Michel."
+        },
+        {
+          "place": "parvis-sacre-coeur",
+          "description": "La vue sur tout Paris depuis les marches. Plus calme en fin d’après-midi en semaine.",
+          "durationMin": 30,
+          "costPerPerson": 0
+        },
+        {
+          "place": "place-du-tertre",
+          "description": "Les portraitistes et les terrasses du vieux village.",
+          "durationMin": 20,
+          "costPerPerson": 0
+        },
+        {
+          "place": "musee-de-montmartre",
+          "description": "Les jardins Renoir et l’atelier de Suzanne Valadon.",
+          "durationMin": 60,
+          "costPerPerson": 15
+        },
+        {
+          "place": "la-maison-rose",
+          "description": "Dîner dans la maison peinte par Utrillo. Réserver, la salle est petite.",
+          "durationMin": 90,
+          "costPerPerson": 35,
+          "bookingRequired": true,
+          "bookingProvider": "restaurant"
+        }
+      ]
+    },
+    {
+      "key": "canal-saint-martin-a-velo",
+      "title": "Le canal Saint-Martin à vélo jusqu’à la Villette",
+      "description": "Une balade en Vélib le long de l’eau : viennoiserie d’une boulangerie culte, écluses et passerelles, pause au bord du bassin de la Villette, puis les pelouses du parc.",
+      "author": "camille",
+      "moods": ["relax", "sport", "instagrammable"],
+      "audiences": ["friends", "solo"],
+      "conditions": ["no_booking", "outdoor", "sunny"],
+      "transport": "bike",
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1642766603265-e33f8a27fb31?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1548123833-0d46ee1d7400?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        }
+      ],
+      "computed": {
+        "duration_min": 215,
+        "budget_per_person_eur": { "min": 11, "max": 17 },
+        "distance_m": 4430,
+        "walking_m": 0,
+        "effort": "easy",
+        "warnings": [],
+        "computed_at": "2026-09-25T08:00:00.000Z"
+      },
+      "steps": [
+        {
+          "place": "du-pain-et-des-idees",
+          "description": "Le « pain des amis » et l’escargot pistache-chocolat. Fermé le week-end.",
+          "durationMin": 20,
+          "costPerPerson": 6
+        },
+        {
+          "place": "ecluse-des-recollets",
+          "description": "Regarder une péniche passer l’écluse depuis la passerelle, à côté de l’Hôtel du Nord.",
+          "durationMin": 20,
+          "costPerPerson": 0
+        },
+        {
+          "place": "jardin-villemin",
+          "description": "Un jardin partagé caché derrière le canal, pour une première pause.",
+          "durationMin": 30,
+          "costPerPerson": 0,
+          "transitionNote": "Reprendre le quai de Valmy vers le nord, piste cyclable sur la gauche."
+        },
+        {
+          "place": "pavillon-des-canaux",
+          "description": "Un café dans une maison au bord de l’eau : on s’installe dans la baignoire ou sur la terrasse.",
+          "durationMin": 60,
+          "costPerPerson": 8
+        },
+        {
+          "place": "parc-de-la-villette",
+          "description": "Les grandes pelouses et le canal de l’Ourcq. Déposer le vélo à la station de la Grande Halle.",
+          "durationMin": 60,
+          "costPerPerson": 0
+        }
+      ]
+    },
+    {
+      "key": "butte-aux-cailles-village",
+      "title": "La Butte-aux-Cailles, un village dans Paris",
+      "description": "Maisons à colombages, impasses fleuries, baignade dans une piscine Art nouveau alimentée par un puits artésien, puis un dîner basque aux grandes tablées.",
+      "author": "yanis",
+      "moods": ["unusual", "food"],
+      "audiences": ["friends"],
+      "conditions": ["no_booking", "outdoor", "sunny"],
+      "transport": "walk",
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1594676632059-b0707a8cca55?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1683020369711-fa6e11acaccd?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        }
+      ],
+      "computed": {
+        "duration_min": 225,
+        "budget_per_person_eur": { "min": 17, "max": 27 },
+        "distance_m": 2070,
+        "walking_m": 2070,
+        "effort": "easy",
+        "warnings": [],
+        "computed_at": "2026-09-25T08:00:00.000Z"
+      },
+      "steps": [
+        {
+          "place": "petite-alsace",
+          "description": "Des maisons ouvrières à colombages autour d’une cour, bâties en 1912.",
+          "durationMin": 15,
+          "costPerPerson": 0
+        },
+        {
+          "place": "cite-florale",
+          "description": "Rues des Glycines, des Iris, des Orchidées : des maisons de ville couvertes de lierre.",
+          "durationMin": 20,
+          "costPerPerson": 0
+        },
+        {
+          "place": "piscine-butte-aux-cailles",
+          "description": "Bassin Art nouveau sous verrière, eau venue d’un puits à 580 m. Prendre un bonnet.",
+          "durationMin": 60,
+          "costPerPerson": 4
+        },
+        {
+          "place": "rue-butte-aux-cailles",
+          "description": "Pochoirs et collages sur les façades, entre la rue des Cinq-Diamants et la place de la Commune.",
+          "durationMin": 25,
+          "costPerPerson": 0
+        },
+        {
+          "place": "chez-gladines",
+          "description": "Salade géante et piperade, aux tables partagées. Sans réservation : venir tôt.",
+          "durationMin": 75,
+          "costPerPerson": 18
+        }
+      ]
+    },
+    {
+      "key": "belleville-street-art",
+      "title": "Belleville, street art et vue sur Paris",
+      "description": "Une boucle courte et gratuite : les murs repeints de la rue Dénoyez, le belvédère du parc de Belleville au coucher du soleil, puis les escaliers de la rue des Cascades.",
+      "author": "camille",
+      "moods": ["unusual", "instagrammable"],
+      "audiences": ["couple", "friends", "solo", "dog_friendly"],
+      "conditions": ["no_booking", "outdoor", "sunny"],
+      "transport": "walk",
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1682939033295-031f290adbd2?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1682939036672-cf58620cf3e8?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        }
+      ],
+      "computed": {
+        "duration_min": 100,
+        "budget_per_person_eur": { "min": 0, "max": 0 },
+        "distance_m": 1360,
+        "walking_m": 1360,
+        "effort": "easy",
+        "warnings": [],
+        "computed_at": "2026-09-25T08:00:00.000Z"
+      },
+      "steps": [
+        {
+          "place": "rue-denoyez",
+          "description": "Une rue entière de graffitis, repeinte presque chaque semaine.",
+          "durationMin": 20,
+          "costPerPerson": 0
+        },
+        {
+          "place": "place-frehel",
+          "description": "La fresque « Il faut se méfier des mots » de Ben, au-dessus d’une petite place.",
+          "durationMin": 15,
+          "costPerPerson": 0
+        },
+        {
+          "place": "belvedere-de-belleville",
+          "description": "La plus belle vue gratuite sur Paris, la tour Eiffel en face.",
+          "durationMin": 30,
+          "costPerPerson": 0,
+          "transitionNote": "Descendre par les jardins en terrasses du parc."
+        },
+        {
+          "place": "regard-saint-martin",
+          "description": "Un petit édifice de pierre qui surveillait les sources de Belleville.",
+          "durationMin": 15,
+          "costPerPerson": 0
+        }
+      ]
+    },
+    {
+      "key": "jardin-des-plantes-en-famille",
+      "title": "Une journée au Jardin des Plantes en famille",
+      "description": "Les arènes romaines, la ménagerie et ses pandas roux, un thé à la menthe à la Grande Mosquée, puis les squelettes et les animaux naturalisés de la Grande Galerie de l’Évolution.",
+      "author": null,
+      "moods": ["nature", "culture"],
+      "audiences": ["family", "kids_friendly"],
+      "conditions": ["no_booking", "wheelchair", "outdoor", "sunny"],
+      "transport": "walk",
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1578838389363-a62d9069d2c6?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1654103399842-98a63767b6bc?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        }
+      ],
+      "computed": {
+        "duration_min": 355,
+        "budget_per_person_eur": { "min": 27, "max": 41 },
+        "distance_m": 1980,
+        "walking_m": 1980,
+        "effort": "easy",
+        "warnings": [],
+        "computed_at": "2026-09-25T08:00:00.000Z"
+      },
+      "steps": [
+        {
+          "place": "arenes-de-lutece",
+          "description": "Un amphithéâtre gallo-romain où les enfants jouent au ballon. Entrée accessible par la rue de Navarre.",
+          "durationMin": 30,
+          "costPerPerson": 0
+        },
+        {
+          "place": "menagerie-jardin-des-plantes",
+          "description": "L’un des plus vieux zoos du monde : pandas roux, orangs-outans, tortues géantes. Gratuit pour les moins de 3 ans.",
+          "durationMin": 90,
+          "costPerPerson": 13
+        },
+        {
+          "place": "mosquee-de-paris-salon-de-the",
+          "description": "Thé à la menthe et cornes de gazelle sous les figuiers du patio.",
+          "durationMin": 45,
+          "costPerPerson": 8
+        },
+        {
+          "place": "grande-galerie-evolution",
+          "description": "La caravane des animaux sous la verrière. Fermée le mardi.",
+          "durationMin": 120,
+          "costPerPerson": 13
+        },
+        {
+          "place": "jardin-des-plantes",
+          "description": "Les parterres et le labyrinthe, pour finir en courant.",
+          "durationMin": 45,
+          "costPerPerson": 0
+        }
+      ]
+    },
+    {
+      "key": "de-la-cite-a-montparnasse",
+      "title": "De la Cité à Montparnasse, une journée en solo",
+      "description": "Une journée au sec, reliée par la ligne 4 : les vitraux de la Sainte-Chapelle, une librairie mythique, le Moyen Âge à Cluny, un bouillon parisien et Paris vu d’en haut.",
+      "author": null,
+      "moods": ["culture", "shopping"],
+      "audiences": ["solo"],
+      "conditions": ["indoor", "rainy"],
+      "transport": "metro",
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1571860424830-0271e6c9d9b2?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1546444809-d64eccd9fb88?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        }
+      ],
+      "computed": {
+        "duration_min": 345,
+        "budget_per_person_eur": { "min": 52, "max": 78 },
+        "distance_m": 3370,
+        "walking_m": 1630,
+        "effort": "easy",
+        "warnings": [],
+        "computed_at": "2026-09-25T08:00:00.000Z"
+      },
+      "steps": [
+        {
+          "place": "sainte-chapelle",
+          "description": "Les vitraux sont plus beaux le matin, avec le soleil de l’est. Créneau horaire obligatoire.",
+          "durationMin": 60,
+          "costPerPerson": 13,
+          "bookingRequired": true,
+          "bookingUrl": "https://www.sainte-chapelle.fr/",
+          "bookingProvider": "ticketing"
+        },
+        {
+          "place": "shakespeare-and-company",
+          "description": "Librairie anglophone face à Notre-Dame. Monter à l’étage lire au calme.",
+          "durationMin": 30,
+          "costPerPerson": 0
+        },
+        {
+          "place": "musee-de-cluny",
+          "description": "Les tapisseries de la Dame à la licorne et les thermes romains.",
+          "durationMin": 90,
+          "costPerPerson": 12,
+          "transitionNote": "Prendre la ligne 4 à Saint-Michel jusqu’à Vavin."
+        },
+        {
+          "place": "bouillon-chartier-montparnasse",
+          "description": "Grande salle Art nouveau, carte courte à prix doux.",
+          "durationMin": 75,
+          "costPerPerson": 20
+        },
+        {
+          "place": "tour-montparnasse-56",
+          "description": "La vue à 360° depuis le 56ᵉ étage, par temps couvert comme par beau temps.",
+          "durationMin": 60,
+          "costPerPerson": 20
+        }
+      ]
+    },
+    {
+      "key": "buttes-chaumont-guignol",
+      "title": "Guignol et goûter aux Buttes-Chaumont",
+      "description": "Un après-midi pour les enfants : le spectacle de Guignol, la grotte et sa cascade, la montée au belvédère de la Sibylle, puis un goûter en terrasse chez Rosa Bonheur.",
+      "author": null,
+      "moods": ["nature", "relax"],
+      "audiences": ["family", "kids_friendly"],
+      "conditions": ["no_booking", "outdoor", "sunny"],
+      "transport": "walk",
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1731666593725-197dc759038d?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1731666595277-2082e64c8936?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        }
+      ],
+      "computed": {
+        "duration_min": 165,
+        "budget_per_person_eur": { "min": 11, "max": 17 },
+        "distance_m": 890,
+        "walking_m": 890,
+        "effort": "easy",
+        "warnings": [],
+        "computed_at": "2026-09-25T08:00:00.000Z"
+      },
+      "steps": [
+        {
+          "place": "theatre-guignol-buttes-chaumont",
+          "description": "Spectacle de marionnettes le mercredi, le samedi et le dimanche après-midi.",
+          "durationMin": 45,
+          "costPerPerson": 6
+        },
+        {
+          "place": "grotte-buttes-chaumont",
+          "description": "Une ancienne carrière de gypse transformée en grotte, avec une cascade de 20 mètres.",
+          "durationMin": 20,
+          "costPerPerson": 0
+        },
+        {
+          "place": "belvedere-de-la-sibylle",
+          "description": "Le petit temple en haut du rocher, par la passerelle suspendue.",
+          "durationMin": 30,
+          "costPerPerson": 0
+        },
+        {
+          "place": "rosa-bonheur",
+          "description": "Guinguette dans le parc : crêpes et jus de pomme sur la terrasse.",
+          "durationMin": 60,
+          "costPerPerson": 8
+        }
+      ]
+    },
+    {
+      "key": "marais-gourmand",
+      "title": "Le Marais gourmand en deux heures",
+      "description": "Un café dans un concept-store, le falafel de la rue des Rosiers, les cours d’antiquaires du village Saint-Paul et une glace Berthillon sur l’île Saint-Louis.",
+      "author": null,
+      "moods": ["food", "shopping"],
+      "audiences": ["couple", "friends"],
+      "conditions": ["no_booking", "indoor"],
+      "transport": "walk",
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1788101841904-669e8b5924b4?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1563896171319-a5534fcf465f?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        }
+      ],
+      "computed": {
+        "duration_min": 135,
+        "budget_per_person_eur": { "min": 20, "max": 32 },
+        "distance_m": 2010,
+        "walking_m": 2010,
+        "effort": "easy",
+        "warnings": [],
+        "computed_at": "2026-09-25T08:00:00.000Z"
+      },
+      "steps": [
+        {
+          "place": "merci",
+          "description": "Café au Used Book Café, au milieu des livres d’occasion.",
+          "durationMin": 30,
+          "costPerPerson": 8
+        },
+        {
+          "place": "as-du-fallafel",
+          "description": "Le sandwich falafel à emporter. Fermé le samedi.",
+          "durationMin": 30,
+          "costPerPerson": 12,
+          "transitionNote": "Rejoindre la rue des Rosiers par la rue du Pas-de-la-Mule."
+        },
+        {
+          "place": "village-saint-paul",
+          "description": "Des cours intérieures pleines d’antiquaires et de brocanteurs.",
+          "durationMin": 30,
+          "costPerPerson": 0
+        },
+        {
+          "place": "berthillon",
+          "description": "Glace au caramel au beurre salé, à déguster sur le quai d’Orléans.",
+          "durationMin": 20,
+          "costPerPerson": 6
+        }
+      ]
+    },
+    {
+      "key": "coulee-verte-bois-de-vincennes",
+      "title": "De Bastille au bois de Vincennes par la Coulée verte",
+      "description": "Plus de sept kilomètres de marche sur l’ancienne voie ferrée de la Bastille, des jardins suspendus jusqu’au lac Daumesnil et au Parc floral. Prévoir de bonnes chaussures et un pique-nique.",
+      "author": null,
+      "moods": ["sport", "nature"],
+      "audiences": ["couple", "friends", "solo"],
+      "conditions": ["no_booking", "outdoor", "sunny"],
+      "transport": "walk",
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1663511870425-5dd7edf1c071?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1663511433047-c0f9317e046a?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        }
+      ],
+      "computed": {
+        "duration_min": 335,
+        "budget_per_person_eur": { "min": 0, "max": 0 },
+        "distance_m": 7250,
+        "walking_m": 7250,
+        "effort": "intense",
+        "warnings": [],
+        "computed_at": "2026-09-25T08:00:00.000Z"
+      },
+      "steps": [
+        {
+          "place": "viaduc-des-arts",
+          "description": "Monter sur la Coulée verte par l’escalier de l’avenue Daumesnil.",
+          "durationMin": 30,
+          "costPerPerson": 0
+        },
+        {
+          "place": "jardin-de-reuilly",
+          "description": "Pelouse et passerelle au-dessus du jardin, pause pique-nique.",
+          "durationMin": 45,
+          "costPerPerson": 0,
+          "transitionNote": "Suivre la Coulée verte jusqu’à la porte de Montempoivre."
+        },
+        {
+          "place": "lac-daumesnil",
+          "description": "Le tour du lac et de ses deux îles, par le pont suspendu.",
+          "durationMin": 75,
+          "costPerPerson": 0
+        },
+        {
+          "place": "parc-floral",
+          "description": "Les collections de plantes, la forêt de bambous et les grandes pelouses.",
+          "durationMin": 90,
+          "costPerPerson": 0
+        }
+      ]
+    }
+  ]
+}

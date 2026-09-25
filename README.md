@@ -92,7 +92,7 @@ Schéma unique : `apps/api/src/db/schema.ts` (Drizzle ORM). Migrations versionn�
 |---|---|
 | `db:generate --name=add_x` | écrit la migration du dernier changement de `schema.ts` ; `--custom --name=x` crée un fichier SQL à écrire à la main |
 | `db:migrate` | applique les migrations en attente, sans effet si la base est à jour (la CI migre la base de test avant les tests) |
-| `db:seed` | données fictives : Paris, quelques lieux du Marais et un parcours ; idempotent, refusé en production |
+| `db:seed` | jeu de démonstration (`apps/api/src/db/seed/demo-routes.json`) : Paris, 10 parcours sur des lieux réels, auteurs fictifs, photos Unsplash ; idempotent (une deuxième exécution ne change rien, un JSON modifié est appliqué), refusé en production |
 | `db:reset` | vide la base locale (tables, types, extensions, journal des migrations), puis `db:migrate` et `db:seed` ; refusé hors `localhost` et en production |
 
 Dans l'image, `docker run --rm -e DATABASE_URL=… widoo-api node dist/migrate.js` applique les migrations avant un déploiement.
