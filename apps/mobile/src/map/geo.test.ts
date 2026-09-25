@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { bboxCenter, boundsOf, parisCenter, scaleBbox, toBbox, zoomForSpan } from './geo';
+import {
+  bboxCenter,
+  boundsOf,
+  distanceBetweenM,
+  parisCenter,
+  scaleBbox,
+  toBbox,
+  zoomForSpan,
+} from './geo';
 
 describe('boundsOf', () => {
   it('holds every point, and nothing without point', () => {
@@ -61,5 +69,17 @@ describe('scaleBbox', () => {
       east: 180,
       north: 90,
     });
+  });
+});
+
+describe('distanceBetweenM', () => {
+  it('measures a straight line on the Earth, zero from a point to itself', () => {
+    const republique = { lat: 48.8674, lng: 2.3636 };
+    const bastille = { lat: 48.8532, lng: 2.3692 };
+    expect(distanceBetweenM(republique, republique)).toBe(0);
+    expect(distanceBetweenM(republique, bastille)).toBeCloseTo(1633, -1);
+    expect(distanceBetweenM(bastille, republique)).toBeCloseTo(
+      distanceBetweenM(republique, bastille),
+    );
   });
 });
