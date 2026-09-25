@@ -22,13 +22,13 @@ async function sync(isCheck: boolean): Promise<void> {
   }
   if (isCheck) {
     console.error(
-      'tokens.json differs from the wiki: run `pnpm --filter @widoo/tokens sync` and commit the copy.',
+      'tokens.json differs from the wiki: run `pnpm --filter @widoo/tokens sync`, then `generate`, and commit both.',
     );
     process.exitCode = 1;
     return;
   }
   await writeFile(tokensPath, wiki);
-  console.log('tokens.json: copied from the wiki');
+  console.log('tokens.json: copied from the wiki, run `pnpm --filter @widoo/tokens generate`');
 }
 
 await sync(process.argv.includes('--check'));
