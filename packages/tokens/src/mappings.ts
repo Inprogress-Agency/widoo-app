@@ -5,6 +5,17 @@ import type { Theme } from './theme';
 // `mappings` of tokens.json checked against the theme and packages/shared, then keyed by the
 // technical keys the app uses: a label, a family or a token that does not match fails loudly.
 
+export type IconWeight = 'fill' | 'bold';
+
+export type UiIcon = {
+  name: string;
+  /** Weight of the icon in every state. */
+  weight?: IconWeight;
+  /** Weight when the control is active (tab, favorite); regular otherwise. */
+  activeWeight?: 'fill';
+  color?: string;
+};
+
 type Mappings = Tokens['mappings'];
 
 function check(condition: boolean, message: string): asserts condition {
@@ -114,11 +125,143 @@ function buildCatalog(mappings: Mappings, token: TokenCheck) {
   };
 }
 
+/** « heart (fill quand actif, coral) » → name, weight or weight when active, color token. */
+export function parseUiIcon(value: string, colors: Theme['colors']): UiIcon {
+  const match = /^([a-z0-9-]+)(?: \((.+)\))?$/.exec(value);
+  check(match?.[1] !== undefined, `ui icon « ${value} »: expected « name » or « name (notes) »`);
+  const icon: UiIcon = { name: match[1] };
+  for (const note of match[2]?.split(', ') ?? []) {
+    if (note === 'fill' || note === 'bold') {
+      icon.weight = note;
+    } else if (note === 'fill quand actif') {
+      icon.activeWeight = 'fill';
+    } else {
+      check(note in colors, `ui icon « ${value} »: unknown note « ${note} »`);
+      icon.color = note;
+    }
+  }
+  return icon;
+}
+
+/** Press feedback and haptics are written as text in tokens.json: read, or fail loudly. */
+function buildMotion({
+  durationsMs,
+  easings,
+  springGesture,
+  press,
+  scroll,
+  haptics,
+}: Mappings['motion']) {
+  const veil = /^voile ([a-z-]+) à (\d+) %$/.exec(press.filled);
+  const scale = /^échelle (\d+,\d+)$/.exec(press.cardsAndDiscs);
+  const opacity = /^opacité (\d+,\d+)$/.exec(press.linksAndIcons);
+  check(
+    veil?.[1] !== undefined && veil[2] !== undefined,
+    `motion.press.filled: « ${press.filled} »`,
+  );
+  check(scale?.[1] !== undefined, `motion.press.cardsAndDiscs: « ${press.cardsAndDiscs} »`);
+  check(opacity?.[1] !== undefined, `motion.press.linksAndIcons: « ${press.linksAndIcons} »`);
+  const decimal = (value: string) => Number(value.replace(',', '.'));
+
+  const feedback: Record<string, { ios: { method: string; style?: string }; android: string }> = {};
+  for (const [name, haptic] of Object.entries(haptics)) {
+    if (typeof haptic === 'boolean') {
+      continue; // « nothingElse »: a rule, not a feedback
+    }
+    const call = /^(\w+)\((\w*)\)$/.exec(haptic.ios);
+    check(call?.[1] !== undefined, `motion.haptics.${name}.ios: « ${haptic.ios} »`);
+    feedback[name] = {
+      ios: { method: call[1], ...(call[2] && { style: call[2] }) },
+      android: haptic.android,
+    };
+  }
+
+  return {
+    durations: durationsMs,
+    easings,
+    springGesture,
+    press: {
+      filledVeil: { color: veil[1], opacity: Number(veil[2]) / 100 },
+      scale: decimal(scale[1]),
+      opacity: decimal(opacity[1]),
+    },
+    scroll,
+    haptics: feedback,
+  };
+}
+
+/** Interface icons, badges, toast, immersive page, accessibility and motion. */
+function buildInterface(mappings: Mappings, theme: Theme, token: TokenCheck) {
+  const uiIcons = Object.fromEntries(
+    Object.entries(mappings.uiIcons).map(([key, value]) => [key, parseUiIcon(value, theme.colors)]),
+  );
+
+  const badges = Object.fromEntries(
+    Object.entries(mappings.badges).map(([kind, badge]) => {
+      const where = `badges.${kind}`;
+      return [
+        kind,
+        {
+          bg: badge.bg && token('colors', badge.bg, where),
+          ink: token('colors', badge.ink, where),
+          icon: badge.icon,
+          ...(badge.iconColor && { iconColor: token('colors', badge.iconColor, where) }),
+          ...(badge.iconStyle && { iconWeight: badge.iconStyle }),
+        },
+      ];
+    }),
+  );
+
+  const { toast, immersive } = mappings;
+  const { section, miniPlayer } = immersive;
+  for (const color of [
+    toast.bg,
+    toast.title,
+    toast.subtitle,
+    toast.disc,
+    ...Object.values(toast.action),
+  ]) {
+    token('colors', color, 'toast');
+  }
+  for (const state of Object.values(toast.states)) {
+    token('colors', state.color, 'toast.states');
+  }
+  for (const color of [
+    immersive.bg,
+    section.bg,
+    section.icon,
+    section.link,
+    section.ok,
+    miniPlayer.bg,
+  ]) {
+    token('colors', color, 'immersive');
+  }
+  token('radius', section.radius, 'immersive.section');
+  token('radius', miniPlayer.radius, 'immersive.miniPlayer');
+  token('shadow', miniPlayer.shadow, 'immersive.miniPlayer');
+  token('shadow', toast.shadow, 'toast');
+
+  return {
+    uiIcons,
+    badges,
+    darkSurfaces: mappings.darkSurfaces,
+    accessibility: mappings.accessibility,
+    toast,
+    immersive,
+    motion: buildMotion(mappings.motion),
+  };
+}
+
 export function buildMappings(mappings: Mappings, theme: Theme) {
-  const catalog = buildCatalog(mappings, tokenCheck(theme));
+  const token = tokenCheck(theme);
+  const catalog = buildCatalog(mappings, token);
+  const ui = buildInterface(mappings, theme, token);
   const icons = [
     ...Object.values(catalog.placeCategories).map((category) => category.icon),
     ...Object.values(catalog.filterIcons).flatMap(Object.values),
+    ...Object.values(ui.uiIcons).map((icon) => icon.name),
+    ...Object.values(ui.badges).flatMap((badge) => badge.icon ?? []),
+    ...Object.values(ui.toast.states).map((state) => state.icon),
   ];
-  return { iconNames: [...new Set(icons)].sort(), ...catalog };
+  return { iconNames: [...new Set(icons)].sort(), ...catalog, ...ui };
 }

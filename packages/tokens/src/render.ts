@@ -138,6 +138,44 @@ export function renderThemeModule(tokens: Tokens, theme: Theme = buildTheme(toke
       comment: 'Color of the dot of each mood.',
       satisfies: 'Record<Mood, ColorToken>',
     },
+    {
+      name: 'uiIcons',
+      value: mappings.uiIcons,
+      comment: 'Interface icons: name, weight (always or when active), color.',
+      type: 'UiIconKey',
+      satisfies:
+        "Record<string, { name: IconName; weight?: 'fill' | 'bold'; activeWeight?: 'fill'; color?: ColorToken }>",
+    },
+    {
+      name: 'badges',
+      value: mappings.badges,
+      comment: 'Badges on photos and on the creator line.',
+      type: 'BadgeKind',
+      satisfies:
+        "Record<string, { bg: ColorToken | null; ink: ColorToken; icon: IconName | null; iconColor?: ColorToken; iconWeight?: 'fill' }>",
+    },
+    {
+      name: 'darkSurfaces',
+      value: mappings.darkSurfaces,
+      comment: 'The only places where `surface-strong` is allowed.',
+    },
+    {
+      name: 'accessibility',
+      value: mappings.accessibility,
+      comment: 'Accessibility thresholds (Direction-Artistique › Accessibilité).',
+    },
+    { name: 'toast', value: mappings.toast, comment: 'Toast colors and states (D-025).' },
+    {
+      name: 'immersive',
+      value: mappings.immersive,
+      comment: 'Immersive page of the route in progress and mini player (E-07, D-029).',
+    },
+    {
+      name: 'motion',
+      value: mappings.motion,
+      comment:
+        'Durations (ms), cubic-bezier curves, gesture spring, press feedback and haptics (D-030).',
+    },
   ];
 
   const body = declarations.map(({ name, value, comment, type, satisfies }) => {

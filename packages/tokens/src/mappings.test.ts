@@ -1,7 +1,7 @@
 import { taxonomies } from '@widoo/shared';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { buildMappings } from './mappings';
+import { buildMappings, parseUiIcon } from './mappings';
 import { tokensPath } from './paths';
 import { tokensSchema, type Tokens } from './schema';
 import { buildTheme } from './theme';
@@ -16,6 +16,22 @@ function withMappings(change: (copy: Tokens['mappings']) => void): Tokens['mappi
   change(copy);
   return copy;
 }
+
+describe('parseUiIcon', () => {
+  it('reads the weight, the weight when active and the color', () => {
+    expect(parseUiIcon('magnifying-glass', theme.colors)).toEqual({ name: 'magnifying-glass' });
+    expect(parseUiIcon('plus (bold)', theme.colors)).toEqual({ name: 'plus', weight: 'bold' });
+    expect(parseUiIcon('heart (fill quand actif, coral)', theme.colors)).toEqual({
+      name: 'heart',
+      activeWeight: 'fill',
+      color: 'coral',
+    });
+  });
+
+  it('refuses a note it does not know', () => {
+    expect(() => parseUiIcon('heart (fill, pink)', theme.colors)).toThrow('pink');
+  });
+});
 
 describe('buildMappings', () => {
   it('keys the mood dots by the moods of packages/shared, Nature on its family green (D-016)', () => {
@@ -42,8 +58,21 @@ describe('buildMappings', () => {
   });
 
   it('lists every icon once', () => {
-    expect(mappings.iconNames).toContain('fork-knife');
+    expect(mappings.iconNames).toContain('crown-simple');
     expect(new Set(mappings.iconNames).size).toBe(mappings.iconNames.length);
+  });
+
+  it('reads the press feedback and the haptics of D-030', () => {
+    expect(mappings.motion.press).toEqual({
+      filledVeil: { color: 'ink', opacity: 0.08 },
+      scale: 0.97,
+      opacity: 0.6,
+    });
+    expect(mappings.motion.haptics.favoriteOn).toEqual({
+      ios: { method: 'impactAsync', style: 'Light' },
+      android: 'Toggle_On',
+    });
+    expect(mappings.motion.haptics.ratingStar?.ios).toEqual({ method: 'selectionAsync' });
   });
 
   it.each([
