@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { BudgetBucket, DurationBucket } from './taxonomies';
 
 const bound = z.number().nonnegative();
 
@@ -23,3 +24,25 @@ export const defaultBucketThresholds: BucketThresholds = {
   budgetEur: { free: 0, low: 25, medium: 70 },
   durationMin: { '1_2h': 150, half_day: 300, full_day: 720 },
 };
+
+/** Bucket of a total duration in minutes: the first bucket whose inclusive bound holds it. */
+export function durationBucketOf(
+  durationMin: number,
+  { durationMin: bounds }: BucketThresholds = defaultBucketThresholds,
+): DurationBucket {
+  if (durationMin <= bounds['1_2h']) return '1_2h';
+  if (durationMin <= bounds.half_day) return 'half_day';
+  if (durationMin <= bounds.full_day) return 'full_day';
+  return 'weekend';
+}
+
+/** Bucket of a budget per person in euros: `free` only at the free bound, 0 € by default. */
+export function budgetBucketOf(
+  budgetEur: number,
+  { budgetEur: bounds }: BucketThresholds = defaultBucketThresholds,
+): BudgetBucket {
+  if (budgetEur <= bounds.free) return 'free';
+  if (budgetEur <= bounds.low) return 'low';
+  if (budgetEur <= bounds.medium) return 'medium';
+  return 'high';
+}
