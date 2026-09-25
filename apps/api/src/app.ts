@@ -12,6 +12,7 @@ import { createDb, createSql } from './db/client';
 import { registerDocs } from './docs';
 import { registerErrorHandling } from './errors';
 import { loggerOptions, requestIdOf, type LogStream } from './logger';
+import { parseQueryString } from './query-string';
 import { configRoutes } from './routes/config';
 import { healthRoutes } from './routes/health';
 import { meRoutes } from './routes/me';
@@ -46,6 +47,7 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
     logController: new LogController({ requestIdLogLabel: 'requestId' }),
     // X-Forwarded-For is read only when the direct peer is a listed proxy.
     trustProxy: config.trustedProxies.length > 0 ? config.trustedProxies : false,
+    routerOptions: { querystringParser: parseQueryString },
   }).withTypeProvider<ZodTypeProvider>();
 
   app.setValidatorCompiler(validatorCompiler);
