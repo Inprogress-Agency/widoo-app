@@ -1,17 +1,9 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  AccessibilityInfo,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { AccessibilityInfo, Platform, ScrollView, useWindowDimensions, View } from 'react-native';
 import { consent, useConsent } from '../analytics';
-import { colors, radii, spacing, typography } from '../theme';
 import { Button } from '../ui/Button';
+import { Text } from '../ui/Text';
 
 /**
  * Consent to product analytics, asked at first launch (wiki Securite-et-RGPD). Above the tab
@@ -43,49 +35,20 @@ function ConsentPrompt() {
   return (
     <View
       accessibilityLiveRegion="polite"
-      style={[styles.banner, { maxHeight: height * MAX_HEIGHT_RATIO }]}
+      className="mx-16 mt-8 gap-12 rounded-card bg-surface p-16"
+      // Height of the window, known at runtime.
+      style={{ maxHeight: height * MAX_HEIGHT_RATIO }}
     >
-      <ScrollView style={styles.text} contentContainerStyle={styles.textContent}>
-        <Text accessibilityRole="header" style={styles.title}>
+      <ScrollView className="grow-0" contentContainerClassName="gap-12">
+        <Text variant="title-s" accessibilityRole="header">
           {title}
         </Text>
-        <Text style={styles.body}>{body}</Text>
+        <Text variant="body">{body}</Text>
       </ScrollView>
-      <View style={styles.actions}>
+      <View className="flex-row flex-wrap justify-center gap-12">
         <Button label={t('consent.refuse')} onPress={() => consent.set('denied')} />
         <Button label={t('consent.accept')} onPress={() => consent.set('granted')} />
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  banner: {
-    gap: spacing.md,
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.sm,
-    padding: spacing.lg,
-    borderRadius: radii.card,
-    backgroundColor: colors.surface,
-  },
-  text: {
-    flexGrow: 0,
-  },
-  textContent: {
-    gap: spacing.md,
-  },
-  title: {
-    ...typography.title,
-    color: colors.text,
-  },
-  body: {
-    ...typography.body,
-    color: colors.text,
-  },
-  actions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: spacing.md,
-  },
-});
