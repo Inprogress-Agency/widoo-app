@@ -1,4 +1,5 @@
-import { AppConfig, Me, type UpdateMe } from '@widoo/shared';
+import { AppConfig, Me, RouteSearchResult, type UpdateMe } from '@widoo/shared';
+import { searchQueryString, type RouteSearchParams } from './search';
 import { createTransport, type ApiClientOptions } from './transport';
 
 /**
@@ -20,6 +21,18 @@ export function createApiClient(options: ApiClientOptions) {
     /** `PATCH /v1/me`: listed fields only; notification preferences are merged. */
     updateMe: (update: UpdateMe) =>
       request({ method: 'PATCH', path: '/v1/me', body: update, schema: Me, auth: true }),
+
+    /**
+     * `GET /v1/routes/search`: the routes of a map zone, or its clusters when the zone is too
+     * large. Public: sent without token.
+     */
+    searchRoutes: (params: RouteSearchParams, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/routes/search?${searchQueryString(params)}`,
+        schema: RouteSearchResult,
+        signal,
+      }),
 
     /** `DELETE /v1/me`: anonymizes the account; its token is refused afterwards. */
     deleteMe: () => requestEmpty({ method: 'DELETE', path: '/v1/me', auth: true }),
