@@ -1,10 +1,11 @@
-import { QueryClientProvider } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { useFonts } from 'expo-font';
 import { DefaultTheme, Stack, ThemeProvider, type Theme } from 'expo-router';
 import { colors } from '@widoo/tokens';
 import { StatusBar } from 'expo-status-bar';
 import '../global.css';
 import { useAppOpenedEvent } from '../src/analytics';
+import { persistOptions } from '../src/api/persister';
 import { queryClient } from '../src/api/query-client';
 import { holdSplash } from '../src/launch/splash';
 import '../src/i18n';
@@ -37,7 +38,8 @@ export default function RootLayout() {
     return null;
   }
   return (
-    <QueryClientProvider client={queryClient}>
+    // The last search is restored from the device, for the results offline (Ecrans › E-01).
+    <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
       <ThemeProvider value={navigationTheme}>
         <StatusBar style="dark" />
         <Stack screenOptions={{ headerShown: false }}>
@@ -48,6 +50,6 @@ export default function RootLayout() {
           />
         </Stack>
       </ThemeProvider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }
