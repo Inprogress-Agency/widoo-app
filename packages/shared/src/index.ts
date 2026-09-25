@@ -1,4 +1,4 @@
-export type * from './analytics';
+export * from './analytics';
 export { assertNever } from './assert-never';
 export { budgetSumEur, displayedBudgetEur } from './budget';
 export { labels, type Locale, type TaxonomyLabels } from './labels';
