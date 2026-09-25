@@ -10,3 +10,12 @@ minimumReleaseAge: 1440
 ignoredOptionalDependencies:
   - '@google-cloud/firestore'
   - '@google-cloud/storage'
+
+# Optional peer of @rnmapbox/maps (its web build): pnpm would install the latest react-dom,
+# ahead of the React of the app. The app is native only: no react-dom at all.
+overrides:
+  react-dom: '-'
+
+# Install scripts stay blocked but for these: Skia copies its prebuilt native libraries there.
+onlyBuiltDependencies:
+  - '@shopify/react-native-skia'

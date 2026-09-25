@@ -46,7 +46,13 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider value={navigationTheme}>
         <StatusBar style="dark" />
-        <Stack screenOptions={{ headerShown: false }} />
+        <Stack screenOptions={{ headerShown: false }}>
+          {/* The route sheet rises from the bottom (M-02). */}
+          <Stack.Screen
+            name="route/[id]"
+            options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+          />
+        </Stack>
       </ThemeProvider>
     </QueryClientProvider>
   );

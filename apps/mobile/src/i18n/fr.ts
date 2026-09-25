@@ -5,29 +5,53 @@ export const fr = {
     routes: 'Parcours',
     profile: 'Profil',
   },
-  home: {
-    title: 'Accueil',
-    config: {
-      heading: 'Configuration du service',
-      minAppVersion: "Version minimale de l'app : {{version}}",
-      taxonomies_one: '{{count}} taxonomie',
-      taxonomies_other: '{{count}} taxonomies',
-      moods: 'Ambiances : {{labels}}',
-      apiUrl: 'Service : {{url}}',
-      loading: 'Chargement de la configuration…',
-      errorTitle: 'Impossible de charger la configuration',
-      connectionBody: 'Vérifiez votre connexion puis réessayez.',
-      serviceBody: 'Le service ne répond pas correctement. Réessayez dans un instant.',
-      offlineTitle: 'Pas de connexion',
-      offlineBody: 'La configuration se chargera au retour du réseau.',
-      retry: 'Réessayer',
+  map: {
+    label: 'Carte, {{count}} parcours',
+    marker: '{{title}}, {{duration}}',
+    recenter: 'Recentrer la carte',
+    locationOff: 'Position désactivée · autour de Paris',
+    enable: 'Activer',
+    enableLocation: 'Activer la localisation',
+    tooltip: {
+      label: 'Parcours {{title}}, étape 1 sur {{total}}, {{place}}',
+      lockedLabel_one: '{{title}}, parcours Premium, {{count}} étape en {{duration}}',
+      lockedLabel_other: '{{title}}, parcours Premium, {{count}} étapes en {{duration}}',
+      premium: 'Parcours Premium',
+      steps_one: '{{count}} étape en {{duration}}',
+      steps_other: '{{count}} étapes en {{duration}}',
+      step: 'Étape 1/{{total}}',
+      more: 'Voir plus',
     },
+  },
+  route: {
+    title: 'Fiche du parcours',
+    comingSoon: 'La fiche détaillée arrive bientôt.',
+    back: 'Retour',
   },
   routes: {
     title: 'Mes parcours',
   },
   profile: {
     title: 'Profil',
+  },
+  // Unbreakable spaces in the written forms: « 7 h » never splits over two lines.
+  duration: {
+    short: {
+      minutes: '{{minutes}}\u00a0min',
+      hours: '{{hours}}\u00a0h',
+      hoursMinutes: '{{hours}}\u00a0h\u00a0{{minutes}}',
+    },
+    spoken: {
+      minutes_one: '{{count}} minute',
+      minutes_other: '{{count}} minutes',
+      hours_one: '{{count}} heure',
+      hours_other: '{{count}} heures',
+      hoursMinutes_one: '{{count}} heure {{minutes}}',
+      hoursMinutes_other: '{{count}} heures {{minutes}}',
+    },
+  },
+  rating: {
+    label: 'Note {{value}} sur 5',
   },
   badges: {
     verified: 'Vérifié',

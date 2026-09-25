@@ -1,76 +1,46 @@
-import { ApiRequestError } from '@widoo/api-client';
-import type { AppConfig } from '@widoo/shared';
-import { useTranslation } from 'react-i18next';
-import { apiUrl } from '../../src/api/client';
-import { useAppConfig } from '../../src/api/queries';
-import { Screen } from '../../src/components/Screen';
-import { StatusMessage } from '../../src/components/StatusMessage';
-import { Button } from '../../src/ui/Button';
-import { Card } from '../../src/ui/Card';
-import { Text } from '../../src/ui/Text';
+import type { RouteCard } from '@widoo/shared';
+import { router } from 'expo-router';
+import { useState } from 'react';
+import { View } from 'react-native';
+import { useRouteSearch } from '../../src/api/queries';
+import { useUserLocation } from '../../src/location/useUserLocation';
+import { parisCenter, type Bbox } from '../../src/map/geo';
+import { LocationOffBanner } from '../../src/map/MapControls';
+import { RouteMap } from '../../src/map/RouteMap';
 
-/** E-01, provisional until the map (#26): proves the app reads `/v1/config`. */
+const noRoutes: RouteCard[] = [];
+
+/**
+ * E-01, the map part: the routes around the user, or around Paris without position, and the
+ * selection of a route (E-04). The search bar, the chips and the results sheet come with #27 and
+ * #28.
+ */
 export default function HomeScreen() {
-  const { t } = useTranslation();
+  const { location, enable } = useUserLocation();
+  const [zone, setZone] = useState<Bbox | null>(null);
+  const [selectedRoute, setSelectedRoute] = useState<RouteCard | null>(null);
+  const { data } = useRouteSearch(zone);
+  // Clusters (a zone too large to list) are drawn with « Rechercher dans cette zone » (#27).
+  const routes = data?.items ?? noRoutes;
+
+  if (location.status === 'pending') {
+    // The permission dialog, or the last known position, is a moment away: the map waits for
+    // its centre rather than jumping.
+    return <View className="flex-1 bg-surface" />;
+  }
+  const position = location.status === 'granted' ? location.position : null;
   return (
-    <Screen title={t('home.title')}>
-      <ConfigContent />
-    </Screen>
-  );
-}
-
-function ConfigContent() {
-  const { t } = useTranslation();
-  const { data, error, isPaused, refetch } = useAppConfig();
-  const retry = <Button label={t('home.config.retry')} onPress={() => void refetch()} />;
-
-  if (data) {
-    return <ConfigSummary config={data} />;
-  }
-  if (isPaused) {
-    return (
-      <StatusMessage
-        title={t('home.config.offlineTitle')}
-        body={t('home.config.offlineBody')}
-        action={retry}
-      />
-    );
-  }
-  if (error) {
-    const isConnectionError =
-      error instanceof ApiRequestError && (error.kind === 'network' || error.kind === 'timeout');
-    return (
-      <StatusMessage
-        title={t('home.config.errorTitle')}
-        body={t(isConnectionError ? 'home.config.connectionBody' : 'home.config.serviceBody')}
-        action={retry}
-      />
-    );
-  }
-  return <StatusMessage title={t('home.config.loading')} isBusy />;
-}
-
-function ConfigSummary({ config }: { config: AppConfig }) {
-  const { t } = useTranslation();
-  // Labels only: a mood without French label is left out rather than shown as a key.
-  const moods = config.taxonomies.moods.flatMap((mood) => config.labels.fr.moods[mood] ?? []);
-  return (
-    <Card className="gap-8 p-16">
-      <Text variant="title-s" accessibilityRole="header">
-        {t('home.config.heading')}
-      </Text>
-      <Text variant="body">
-        {t('home.config.minAppVersion', { version: config.minAppVersion })}
-      </Text>
-      <Text variant="body">
-        {t('home.config.taxonomies', { count: Object.keys(config.taxonomies).length })}
-      </Text>
-      <Text variant="body">{t('home.config.moods', { labels: moods.join(', ') })}</Text>
-      {__DEV__ && (
-        <Text variant="label" color="muted">
-          {t('home.config.apiUrl', { url: apiUrl })}
-        </Text>
-      )}
-    </Card>
+    <RouteMap
+      routes={routes}
+      center={position ?? parisCenter}
+      hasPosition={position !== null}
+      onFirstZone={setZone}
+      selectedRoute={selectedRoute}
+      // No account in the app until E-10: nobody is Premium yet.
+      hasPremium={false}
+      onSelect={setSelectedRoute}
+      onOpenRoute={(route) => router.push({ pathname: '/route/[id]', params: { id: route.id } })}
+      banner={location.status === 'denied' && <LocationOffBanner onEnable={() => void enable()} />}
+    />
   );
 }

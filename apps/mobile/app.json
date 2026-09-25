@@ -8,11 +8,27 @@
     "userInterfaceStyle": "light",
     "ios": {
       "bundleIdentifier": "app.widoo",
-      "supportsTablet": false
+      "supportsTablet": false,
+      "infoPlist": {
+        "MGLMapboxMetricsEnabled": false
+      }
     },
     "android": {
       "package": "app.widoo"
     },
-    "plugins": ["expo-router", "@sentry/react-native"]
+    "plugins": [
+      "expo-router",
+      "@sentry/react-native",
+      "@rnmapbox/maps",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Widoo utilise votre position pour centrer la carte sur les parcours autour de vous. Elle reste sur votre téléphone.",
+          "locationAlwaysAndWhenInUsePermission": false,
+          "locationAlwaysPermission": false,
+          "motionUsagePermission": false
+        }
+      ]
+    ]
   }
 }
