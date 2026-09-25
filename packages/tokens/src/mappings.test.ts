@@ -1,6 +1,6 @@
 import { taxonomies } from '@widoo/shared';
 import { readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { buildMappings, parseUiIcon } from './mappings';
 import { tokensPath } from './paths';
 import { tokensSchema, type Tokens } from './schema';
@@ -18,6 +18,10 @@ function withMappings(change: (copy: Tokens['mappings']) => void): Tokens['mappi
 }
 
 describe('parseUiIcon', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('reads the weight, the weight when active and the color', () => {
     expect(parseUiIcon('magnifying-glass', theme.colors)).toEqual({ name: 'magnifying-glass' });
     expect(parseUiIcon('plus (bold)', theme.colors)).toEqual({ name: 'plus', weight: 'bold' });
@@ -28,8 +32,30 @@ describe('parseUiIcon', () => {
     });
   });
 
-  it('refuses a note it does not know', () => {
-    expect(() => parseUiIcon('heart (fill, pink)', theme.colors)).toThrow('pink');
+  it('reads the notes written in French, plein and gras', () => {
+    expect(parseUiIcon('door (plein)', theme.colors)).toEqual({ name: 'door', weight: 'fill' });
+    expect(parseUiIcon('minus (gras)', theme.colors)).toEqual({ name: 'minus', weight: 'bold' });
+    expect(parseUiIcon('house (plein quand actif)', theme.colors)).toEqual({
+      name: 'house',
+      activeWeight: 'fill',
+    });
+  });
+
+  it('ignores a note it does not know with a warning, and keeps the others', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    expect(parseUiIcon('calendar-check (plein sur une photo)', theme.colors)).toEqual({
+      name: 'calendar-check',
+    });
+    expect(parseUiIcon('heart (fill, pink)', theme.colors)).toEqual({
+      name: 'heart',
+      weight: 'fill',
+    });
+    expect(warn).toHaveBeenCalledTimes(2);
+    expect(warn).toHaveBeenLastCalledWith(expect.stringContaining('unknown note « pink »'));
+  });
+
+  it('still refuses a value that is not « name » or « name (notes) »', () => {
+    expect(() => parseUiIcon('Calendar Check', theme.colors)).toThrow('expected « name »');
   });
 });
 
