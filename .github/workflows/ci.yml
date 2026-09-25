@@ -63,6 +63,10 @@ jobs:
               echo "::notice::PR de documentation ou de process uniquement : lint, types et tests non exécutés."
               exit 0
             fi
+            # Thème ou tokens.json touchés : un écart avec le wiki y reste bloquant (#139).
+            if grep -qE '^packages/tokens/|^apps/mobile/(tailwind\.config\.[cm]?js|global\.css)$' <<< "$code"; then
+              echo "touches_tokens=true" >> "$GITHUB_OUTPUT"
+            fi
           fi
           echo "has_code=true" >> "$GITHUB_OUTPUT"
 
@@ -79,11 +83,24 @@ jobs:
         if: steps.detect.outputs.has_code == 'true'
         run: pnpm install --frozen-lockfile
 
-      # Copie de tokens.json identique au wiki, preset et thème régénérés à jour (#125) : un
-      # changement de tokens.json dans le wiki rend la CI rouge jusqu'à la synchronisation.
-      - name: Check design tokens
+      # Copie de tokens.json et wiki (#139) : un écart est un avertissement, que la PR ouverte par
+      # sync-tokens.yml résorbe ; il ne bloque que les PR qui touchent le thème ou tokens.json.
+      - name: Check design tokens against the wiki
         if: steps.detect.outputs.has_code == 'true'
-        run: pnpm --filter @widoo/tokens check
+        env:
+          TOUCHES_TOKENS: ${{ steps.detect.outputs.touches_tokens }}
+        run: |
+          if pnpm --filter @widoo/tokens check:wiki; then exit 0; fi
+          if [ "$TOUCHES_TOKENS" = "true" ]; then
+            echo "::error::tokens.json diffère du wiki et cette PR touche le thème : pnpm --filter @widoo/tokens sync, puis generate."
+            exit 1
+          fi
+          echo "::warning::tokens.json diffère du wiki. La PR « chore(tokens) » ouverte par sync-tokens.yml le synchronise ; cette PR n'est pas bloquée."
+
+      # Preset et thème régénérés à jour avec la copie de tokens.json (#125) : toujours bloquant.
+      - name: Check generated theme
+        if: steps.detect.outputs.has_code == 'true'
+        run: pnpm --filter @widoo/tokens check:generated
 
       - name: Lint
         if: steps.detect.outputs.has_code == 'true'
