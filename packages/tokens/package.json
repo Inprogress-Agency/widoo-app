@@ -3,13 +3,20 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "exports": {
+    "./tailwind-preset": "./generated/tailwind-preset.cjs"
+  },
   "scripts": {
     "sync": "tsx src/sync.ts",
+    "generate": "tsx src/generate.ts",
+    "check": "tsx src/sync.ts --check && tsx src/generate.ts --check",
     "lint": "eslint .",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "test": "vitest run"
   },
   "devDependencies": {
     "@types/node": "^22.20.4",
-    "tsx": "^4.23.15"
+    "tsx": "^4.23.15",
+    "zod": "^4.6.5"
   }
 }

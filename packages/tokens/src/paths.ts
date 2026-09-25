@@ -5,3 +5,7 @@ import { fileURLToPath } from 'node:url';
  * `generated/` with the files built from it: none of them is edited by hand.
  */
 export const tokensPath = fileURLToPath(new URL('../generated/tokens.json', import.meta.url));
+
+export const presetPath = fileURLToPath(
+  new URL('../generated/tailwind-preset.cjs', import.meta.url),
+);
