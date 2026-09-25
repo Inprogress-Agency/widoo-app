@@ -9,8 +9,8 @@ if (config.isProduction) {
 }
 const sql = createSql(config.databaseUrl);
 try {
-  const { routeId } = await seed(createDb(sql));
-  console.info(`Database seeded: Paris and the route ${routeId}`);
+  const { routeIds } = await seed(createDb(sql));
+  console.info(`Database seeded: Paris and ${routeIds.length} demo routes`);
 } finally {
   await sql.end({ timeout: 5 });
 }
