@@ -1,0 +1,117 @@
+name: Sync design tokens
+
+# Copie de tokens.json alignée sur le wiki (#139) : si le wiki a changé, ouvre ou met à jour la PR
+# « chore(tokens): synchroniser tokens.json vX depuis le wiki », thème et preset régénérés.
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+  # Édition du wiki, y compris par un push git (vérifié le 25 sept. 2026). Un push qui ne touche
+  # que tokens.json, sans aucune page, ne le déclenche pas : le passage horaire le rattrape.
+  gollum:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-tokens
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync tokens.json from the wiki
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # Aucun jeton dans le dépôt cloné : l'installation des dépendances ne peut pas le lire.
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Sync and regenerate
+        run: |
+          pnpm --filter @widoo/tokens sync
+          pnpm --filter @widoo/tokens generate
+
+      # Avec le secret TOKENS_SYNC_TOKEN (jeton du dépôt : Contents et Pull requests en écriture),
+      # la PR déclenche la CI. Sans lui, GITHUB_TOKEN pousse la branche mais n'ouvre la PR que si
+      # le réglage « Allow GitHub Actions to create and approve pull requests » est actif.
+      - name: Open or update the pull request
+        env:
+          GH_TOKEN: ${{ secrets.TOKENS_SYNC_TOKEN || github.token }}
+          BRANCH: chore/sync-tokens
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- packages/tokens; then
+            echo "tokens.json identique au wiki : rien à faire."
+            exit 0
+          fi
+          version=$(jq -r '.version' packages/tokens/generated/tokens.json)
+          title="chore(tokens): synchroniser tokens.json v${version} depuis le wiki"
+          gh auth setup-git
+          pr=$(gh pr list --head "$BRANCH" --base main --state open --json number --jq '.[0].number // empty')
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch --quiet -c "$BRANCH"
+          git add packages/tokens
+          git commit --quiet -m "chore(tokens): sync tokens.json v${version} from the wiki" \
+            -m "Copied from the wiki (design/design-system/tokens.json) by sync-tokens.yml; theme and Tailwind preset regenerated."
+
+          # Branche du robot, reconstruite depuis main à chaque version, comme celles de Dependabot.
+          if git fetch --quiet --depth=1 origin "$BRANCH" 2>/dev/null \
+            && git diff --quiet HEAD FETCH_HEAD -- packages/tokens; then
+            if [ -n "$pr" ]; then
+              echo "PR #$pr déjà à jour (version ${version})."
+              exit 0
+            fi
+          else
+            git push --quiet --force origin "HEAD:refs/heads/$BRANCH"
+          fi
+
+          body="$RUNNER_TEMP/pr-body.md"
+          cat > "$body" <<'EOF'
+          ## Résultat et problème
+
+          La copie de `tokens.json` du dépôt diffère du wiki ([design/design-system/tokens.json](https://github.com/Inprogress-Agency/widoo-app/wiki/Direction-Artistique), version @VERSION@). Cette PR, ouverte par l'action « sync-tokens », la remplace par celle du wiki et régénère le thème et le preset Tailwind. Fichiers générés uniquement (`packages/tokens/generated/`).
+
+          Refs #139
+          Écrans : aucun
+          Dépendance : aucune
+
+          ## Comment vérifier
+
+          - CI verte, dont « Check design tokens against the wiki » et « Check generated theme ».
+          - Le diff de `packages/tokens/generated/tokens.json` reprend les dernières entrées du [Design-Changelog](https://github.com/Inprogress-Agency/widoo-app/wiki/Design-Changelog).
+
+          Formatage mécanique : non
+
+          ## Risque
+
+          Niveau : 1 — valeurs de design copiées du wiki et validées par le schéma du générateur, sans effet sur la sécurité ni les données.
+
+          ## Retour arrière
+
+          Revert du commit. Tant que le wiki garde cette version, l'action rouvre la PR au passage suivant : corriger d'abord le wiki.
+          EOF
+          sed -i "s/@VERSION@/${version}/" "$body"
+
+          if [ -n "$pr" ]; then
+            gh pr edit "$pr" --title "$title" --body-file "$body"
+            echo "PR #$pr mise à jour (version ${version})."
+          elif ! gh pr create --base main --head "$BRANCH" --title "$title" --body-file "$body" \
+            --label type:chore --label area:mobile; then
+            echo "::error::PR non ouverte : il manque le secret TOKENS_SYNC_TOKEN (ou le réglage qui autorise GitHub Actions à ouvrir une PR). Branche poussée : https://github.com/${GITHUB_REPOSITORY}/compare/main...${BRANCH}?expand=1"
+            exit 1
+          fi
