@@ -1,13 +1,13 @@
 import { ApiRequestError } from '@widoo/api-client';
 import type { AppConfig } from '@widoo/shared';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
 import { apiUrl } from '../../src/api/client';
 import { useAppConfig } from '../../src/api/queries';
-import { Button } from '../../src/ui/Button';
 import { Screen } from '../../src/components/Screen';
 import { StatusMessage } from '../../src/components/StatusMessage';
-import { colors, radii, spacing, typography } from '../../src/theme';
+import { Button } from '../../src/ui/Button';
+import { Card } from '../../src/ui/Card';
+import { Text } from '../../src/ui/Text';
 
 /** E-01, provisional until the map (#26): proves the app reads `/v1/config`. */
 export default function HomeScreen() {
@@ -55,39 +55,22 @@ function ConfigSummary({ config }: { config: AppConfig }) {
   // Labels only: a mood without French label is left out rather than shown as a key.
   const moods = config.taxonomies.moods.flatMap((mood) => config.labels.fr.moods[mood] ?? []);
   return (
-    <View style={styles.summary}>
-      <Text accessibilityRole="header" style={styles.heading}>
+    <Card className="gap-8 p-16">
+      <Text variant="title-s" accessibilityRole="header">
         {t('home.config.heading')}
       </Text>
-      <Text style={styles.line}>
+      <Text variant="body">
         {t('home.config.minAppVersion', { version: config.minAppVersion })}
       </Text>
-      <Text style={styles.line}>
+      <Text variant="body">
         {t('home.config.taxonomies', { count: Object.keys(config.taxonomies).length })}
       </Text>
-      <Text style={styles.line}>{t('home.config.moods', { labels: moods.join(', ') })}</Text>
-      {__DEV__ && <Text style={styles.caption}>{t('home.config.apiUrl', { url: apiUrl })}</Text>}
-    </View>
+      <Text variant="body">{t('home.config.moods', { labels: moods.join(', ') })}</Text>
+      {__DEV__ && (
+        <Text variant="label" color="muted">
+          {t('home.config.apiUrl', { url: apiUrl })}
+        </Text>
+      )}
+    </Card>
   );
 }
-
-const styles = StyleSheet.create({
-  summary: {
-    gap: spacing.sm,
-    padding: spacing.lg,
-    borderRadius: radii.card,
-    backgroundColor: colors.surface,
-  },
-  heading: {
-    ...typography.title,
-    color: colors.text,
-  },
-  line: {
-    ...typography.body,
-    color: colors.text,
-  },
-  caption: {
-    ...typography.caption,
-    color: colors.textMuted,
-  },
-});

@@ -1,30 +1,41 @@
+import { shadow, spacing, type UiIconKey } from '@widoo/tokens';
 import type { BottomTabBarProps } from 'expo-router/tabs';
-import { SymbolView, type SymbolViewProps } from 'expo-symbols';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { a11y, colors, radii, spacing, tabBarShadow, typography } from '../theme';
+import { Platform, Pressable, View } from 'react-native';
+import { Icon, uiIcon } from '../ui/Icon';
+import { Text } from '../ui/Text';
 
 // As React Navigation does: VoiceOver does not announce the `tab` role, a button whose selected
 // state is read out does the job.
 const TAB_ROLE = Platform.OS === 'ios' ? 'button' : 'tab';
 
-/** Filled icon of each tab route, as on the E-01 mock-up. */
-const icons: Record<string, SymbolViewProps['name']> = {
-  index: { ios: 'house.fill', android: 'home', web: 'home' },
-  routes: { ios: 'map.fill', android: 'map', web: 'map' },
-  profile: { ios: 'person.fill', android: 'person', web: 'person' },
+/** Interface icon of each tab route: regular, filled when active. */
+const icons: Record<string, UiIconKey> = {
+  index: 'tab-home',
+  routes: 'tab-outings',
+  profile: 'tab-profile',
 };
 
 /**
- * Tab bar of E-01: a white pill; inactive tabs are warm grey discs showing their icon only, the
- * active tab an ink pill with its blue icon and its label. Labels come from each screen's
- * `title`, capped at 1.3× the font size like every dense component.
+ * Tab bar of E-01: a white pill with the only shadow of the app; inactive tabs are warm grey
+ * discs showing their icon only, the active tab an ink pill with its blue icon and its label.
+ * Labels come from each screen's `title`; the bar is a dense component, capped at 1.3 times.
  */
 export function TabBar({ state, descriptors, navigation, insets }: BottomTabBarProps) {
   return (
-    <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
-      <View accessibilityRole="tablist" style={styles.bar}>
+    <View
+      className="items-center bg-bg pt-8"
+      // Safe area measured at runtime.
+      style={{ paddingBottom: Math.max(insets.bottom, spacing['space-12']) }}
+    >
+      <View
+        accessibilityRole="tablist"
+        className="flex-row gap-8 rounded-pill bg-bg p-6"
+        // Native boxShadow: NativeWind would turn a shadow class into an Android elevation.
+        style={{ boxShadow: shadow['shadow-tabbar'] }}
+      >
         {state.routes.map((route, index) => {
           const label = descriptors[route.key]?.options.title ?? route.name;
+          const icon = icons[route.name];
           const isFocused = state.index === index;
           const handlePress = () => {
             const event = navigation.emit({
@@ -44,15 +55,21 @@ export function TabBar({ state, descriptors, navigation, insets }: BottomTabBarP
               accessibilityState={{ selected: isFocused }}
               onPress={handlePress}
               onLongPress={() => navigation.emit({ type: 'tabLongPress', target: route.key })}
-              style={[styles.tab, isFocused ? styles.tabActive : styles.tabIdle]}
+              className={
+                isFocused
+                  ? 'min-h-button-l-h min-w-button-l-h flex-row items-center justify-center gap-8 rounded-pill bg-surface-strong px-24'
+                  : 'min-h-button-l-h min-w-button-l-h items-center justify-center rounded-pill bg-surface'
+              }
             >
-              <SymbolView
-                name={icons[route.name] ?? 'questionmark'}
-                size={22}
-                tintColor={isFocused ? colors.tabIconActive : colors.text}
-              />
+              {icon && (
+                <Icon
+                  {...uiIcon(icon, isFocused)}
+                  size="space-24"
+                  color={isFocused ? 'blue-on-strong' : 'ink'}
+                />
+              )}
               {isFocused && (
-                <Text style={styles.label} maxFontSizeMultiplier={a11y.denseMaxFontSizeMultiplier}>
+                <Text variant="tab" color="on-strong" isDense>
                   {label}
                 </Text>
               )}
@@ -63,42 +80,3 @@ export function TabBar({ state, descriptors, navigation, insets }: BottomTabBarP
     </View>
   );
 }
-
-// 52 points: above the 44-point touch target. Heights are minimums so that the label can grow.
-const TAB_SIZE = 52;
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    paddingTop: spacing.sm,
-    backgroundColor: colors.background,
-  },
-  bar: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    padding: 6,
-    borderRadius: radii.pill,
-    backgroundColor: colors.background,
-    boxShadow: tabBarShadow,
-  },
-  tab: {
-    minWidth: TAB_SIZE,
-    minHeight: TAB_SIZE,
-    borderRadius: radii.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tabIdle: {
-    backgroundColor: colors.surface,
-  },
-  tabActive: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.xl,
-    backgroundColor: colors.inverse,
-  },
-  label: {
-    ...typography.label,
-    color: colors.onInverse,
-  },
-});

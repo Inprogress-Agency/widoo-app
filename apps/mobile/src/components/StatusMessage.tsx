@@ -1,13 +1,7 @@
+import { colors } from '@widoo/tokens';
 import { useEffect, type ReactNode } from 'react';
-import {
-  AccessibilityInfo,
-  ActivityIndicator,
-  Platform,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import { colors, spacing, typography } from '../theme';
+import { AccessibilityInfo, ActivityIndicator, Platform, View } from 'react-native';
+import { Text } from '../ui/Text';
 
 interface StatusMessageProps {
   title: string;
@@ -32,40 +26,25 @@ export function StatusMessage({ title, body, isBusy = false, action }: StatusMes
   }, [announcement]);
 
   return (
-    <View style={styles.container}>
+    <View className="gap-16 py-24">
       <View
         accessible
         accessibilityLabel={announcement}
         accessibilityLiveRegion="polite"
         accessibilityState={{ busy: isBusy }}
-        style={styles.message}
+        className="items-center gap-8"
       >
-        {isBusy && <ActivityIndicator color={colors.primary} />}
-        <Text style={styles.title}>{title}</Text>
-        {body && <Text style={styles.body}>{body}</Text>}
+        {isBusy && <ActivityIndicator color={colors.blue} />}
+        <Text variant="title-s" className="text-center">
+          {title}
+        </Text>
+        {body && (
+          <Text variant="body" color="muted" className="text-center">
+            {body}
+          </Text>
+        )}
       </View>
       {action}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    gap: spacing.lg,
-    paddingVertical: spacing.xl,
-  },
-  message: {
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  title: {
-    ...typography.title,
-    color: colors.text,
-    textAlign: 'center',
-  },
-  body: {
-    ...typography.body,
-    color: colors.textMuted,
-    textAlign: 'center',
-  },
-});
