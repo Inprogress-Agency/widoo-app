@@ -5,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { colors } from '@widoo/tokens';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import '../global.css';
 import { useAppOpenedEvent } from '../src/analytics';
 import { persistOptions } from '../src/api/persister';
@@ -45,17 +46,19 @@ export default function RootLayout() {
   }
   return (
     // The last search is restored from the device, for the results offline (Ecrans › E-01).
-    <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
-      <ThemeProvider value={navigationTheme}>
-        <StatusBar style="dark" />
-        <Stack screenOptions={{ headerShown: false }}>
-          {/* The route sheet rises from the bottom (M-02). */}
-          <Stack.Screen
-            name="route/[id]"
-            options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
-          />
-        </Stack>
-      </ThemeProvider>
-    </PersistQueryClientProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
+        <ThemeProvider value={navigationTheme}>
+          <StatusBar style="dark" />
+          <Stack screenOptions={{ headerShown: false }}>
+            {/* The route sheet rises from the bottom (M-02). */}
+            <Stack.Screen
+              name="route/[id]"
+              options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+            />
+          </Stack>
+        </ThemeProvider>
+      </PersistQueryClientProvider>
+    </GestureHandlerRootView>
   );
 }

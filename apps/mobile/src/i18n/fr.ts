@@ -42,6 +42,14 @@ export const fr = {
       more: 'Voir plus',
     },
   },
+  sheet: {
+    label: 'Résultats',
+    level: {
+      rest: 'réduits',
+      half: 'à mi-hauteur',
+      full: 'en plein écran',
+    },
+  },
   card: {
     by: 'Par {{name}}',
     byWidoo: 'Par Widoo',
