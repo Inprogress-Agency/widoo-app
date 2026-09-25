@@ -1,5 +1,5 @@
 import type { MapState } from '@rnmapbox/maps';
-import type { LatLng, RouteCard } from '@widoo/shared';
+import type { LatLng, RouteCard, RouteCluster } from '@widoo/shared';
 import { motion, size, spacing } from '@widoo/tokens';
 import {
   useCallback,
@@ -16,12 +16,13 @@ import { useReducedMotion } from 'react-native-reanimated';
 import { colors } from '@widoo/tokens';
 import type { MapView } from '../discovery/store';
 import { formatDuration } from '../format/duration';
+import { clusterId, clusterPoints, clusterZoomStep } from './clusters';
 import { bboxCenter, initialSpanM, toBbox, toLngLat, zoomForSpan, type LngLat } from './geo';
 import { Mapbox } from './mapbox';
 import { RecenterButton } from './MapControls';
 import { sharedMarkerImages, usePhotoMarkerImages } from './markerImages';
 import { isLocked, routeMarkers, selectionFrame } from './markers';
-import { durationLabel, labelPillImage, photoOffsetY } from './markerShape';
+import { durationLabel, labelPillImage, photoOffsetY, rimWidth } from './markerShape';
 import { SelectedRoute } from './SelectedRoute';
 import { labelFont, mapStyleJson } from './style';
 import { screenXOnFit, tooltipAnchorX } from './tooltip';
@@ -40,6 +41,8 @@ const ornamentMargin = { bottom: spacing['space-8'], left: spacing['space-8'] };
 
 interface RouteMapProps {
   routes: readonly RouteCard[];
+  /** Routes grouped by area, for a zone too large to list them; null otherwise. */
+  clusters: readonly RouteCluster[] | null;
   /** The user's position, or Paris: where the map opens and where « recentrer » brings it. */
   center: LatLng;
   hasPosition: boolean;
@@ -71,6 +74,7 @@ interface RouteMapProps {
  */
 export function RouteMap({
   routes,
+  clusters,
   center,
   hasPosition,
   onViewChange,
@@ -91,6 +95,7 @@ export function RouteMap({
   const isHome = useRef(false);
   /** A gesture of the user moved the map since it last settled. */
   const isGestureMove = useRef(false);
+  const zoom = useRef(0);
   const label = durationLabel(fontScale);
   const sharedImages = useMemo(() => sharedMarkerImages(label.pillHeight), [label.pillHeight]);
   const photoImages = usePhotoMarkerImages(routes);
@@ -115,9 +120,10 @@ export function RouteMap({
       if (!isHome.current) {
         return;
       }
-      const { bounds, zoom } = state.properties;
+      const { bounds } = state.properties;
+      zoom.current = state.properties.zoom;
       const bbox = toBbox({ ne: bounds.ne as LngLat, sw: bounds.sw as LngLat });
-      onViewChange({ bbox, zoom }, isGestureMove.current);
+      onViewChange({ bbox, zoom: zoom.current }, isGestureMove.current);
       isGestureMove.current = false;
     },
     [onViewChange],
@@ -191,20 +197,47 @@ export function RouteMap({
 
   const routeOf = (id: unknown) => routes.find((route) => route.id === id);
 
-  // Screen readers reach the markers as actions of the map, in the order of the results.
-  const markerActions = routes.map((route) => ({
-    name: route.id,
-    label: t('map.marker', {
-      title: route.title,
-      duration: formatDuration(t, route.durationMin, 'spoken'),
-    }),
-  }));
+  const clusterShape = useMemo(() => clusterPoints(clusters ?? []), [clusters]);
+  /**
+   * A tap on a cluster zooms in on it, as the user would with a gesture: « Rechercher dans cette
+   * zone » then lists its routes.
+   */
+  const zoomOnCluster = (cluster: RouteCluster) => {
+    isGestureMove.current = true;
+    camera.current?.setCamera({
+      centerCoordinate: toLngLat(cluster.center),
+      zoomLevel: zoom.current + clusterZoomStep,
+      ...cameraAnimation,
+    });
+  };
+  const clusterOf = (id: unknown) => clusters?.find((cluster) => clusterId(cluster) === id);
+
+  // Screen readers reach the markers and the clusters as actions of the map, in the order of
+  // the results.
+  const markerActions = [
+    ...routes.map((route) => ({
+      name: route.id,
+      label: t('map.marker', {
+        title: route.title,
+        duration: formatDuration(t, route.durationMin, 'spoken'),
+      }),
+    })),
+    ...(clusters ?? []).map((cluster) => ({
+      name: clusterId(cluster),
+      label: t('map.cluster', { count: cluster.count }),
+    })),
+  ];
   const handleAccessibilityAction = (event: AccessibilityActionEvent) => {
-    const route = routeOf(event.nativeEvent.actionName);
+    const { actionName } = event.nativeEvent;
+    const route = routeOf(actionName);
+    const cluster = clusterOf(actionName);
     if (route) {
       selectRoute(route);
+    } else if (cluster) {
+      zoomOnCluster(cluster);
     }
   };
+  const clusteredCount = clusters?.reduce((count, cluster) => count + cluster.count, 0);
 
   return (
     <View onLayout={(event) => setViewport(event.nativeEvent.layout)} className="flex-1 bg-surface">
@@ -277,6 +310,39 @@ export function RouteMap({
             }}
           />
         </Mapbox.ShapeSource>
+        <Mapbox.ShapeSource
+          id="route-clusters"
+          shape={clusterShape}
+          onPress={(event) => {
+            const cluster = clusterOf(event.features[0]?.properties?.clusterId);
+            if (cluster) {
+              zoomOnCluster(cluster);
+            }
+          }}
+        >
+          {/* A blue disc with a white rim, as the markers; blue is 3:1 at least on the map. */}
+          <Mapbox.CircleLayer
+            id="route-cluster-discs"
+            style={{
+              circleRadius: ['get', 'radius'],
+              circleColor: colors.blue,
+              circleStrokeColor: colors.bg,
+              circleStrokeWidth: rimWidth,
+            }}
+          />
+          {/* The count in number-s, capped at 1.3 as the duration labels. */}
+          <Mapbox.SymbolLayer
+            id="route-cluster-counts"
+            style={{
+              textField: ['get', 'label'],
+              textFont: labelFont,
+              textSize: label.textSize,
+              textColor: colors['on-blue'],
+              textAllowOverlap: true,
+              textIgnorePlacement: true,
+            }}
+          />
+        </Mapbox.ShapeSource>
         {selectedRoute && (
           <SelectedRoute
             key={selectedRoute.id}
@@ -290,7 +356,11 @@ export function RouteMap({
       </Mapbox.MapView>
       <View
         accessible
-        accessibilityLabel={t('map.label', { count: routes.length })}
+        accessibilityLabel={
+          clusteredCount === undefined
+            ? t('map.label', { count: routes.length })
+            : t('map.clustersLabel', { count: clusteredCount })
+        }
         accessibilityActions={markerActions}
         onAccessibilityAction={handleAccessibilityAction}
         pointerEvents="none"

@@ -8,9 +8,17 @@ export const fr = {
   map: {
     label: 'Carte, {{count}} parcours',
     marker: '{{title}}, {{duration}}',
+    clustersLabel_one: 'Carte, {{count}} parcours regroupé par quartier',
+    clustersLabel_other: 'Carte, {{count}} parcours regroupés par quartier',
+    cluster: 'Groupe de {{count}} parcours, zoomer',
     recenter: 'Recentrer la carte',
     searchZone: 'Rechercher dans cette zone',
     searching: 'Recherche…',
+    zoomIn: {
+      title: 'Zoomez pour voir les parcours',
+      body_one: '{{count}} parcours dans cette zone.',
+      body_other: '{{count}} parcours dans cette zone.',
+    },
     locationOff: 'Position désactivée · autour de Paris',
     enable: 'Activer',
     enableLocation: 'Activer la localisation',
