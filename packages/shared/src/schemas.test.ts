@@ -1,6 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import type { z } from 'zod';
-import { ApiError, Place, PlaceHours, RouteCard, RouteDetail, RouteSearchQuery, Step } from '.';
+import {
+  ApiError,
+  Place,
+  PlaceHours,
+  RouteCard,
+  RouteCount,
+  RouteCountQuery,
+  RouteDetail,
+  RouteSearchQuery,
+  RouteSearchResult,
+  Step,
+} from '.';
 
 // Fictitious data only.
 const id = '0192f0c4-7d3a-7b3e-9a41-3c5f2b6d8e10';
@@ -122,6 +133,10 @@ describe('RouteSearchQuery', () => {
     ]);
   });
 
+  it('drops a repeated filter value', () => {
+    expect(RouteSearchQuery.parse({ bbox, moods: ['food', 'food'] }).moods).toEqual(['food']);
+  });
+
   it.each([
     ['the former budget key premium', { bbox, budgets: 'premium' }],
     ['the former budget key premium among others', { bbox, budgets: ['low', 'premium'] }],
@@ -131,7 +146,45 @@ describe('RouteSearchQuery', () => {
     ['a bbox with a missing value', { bbox: '2.33,48.85,,48.87' }],
     ['a limit above 50', { bbox, limit: '51' }],
     ['a distance sort without position', { bbox, sort: 'distance' }],
+    ['an unknown key', { bbox, mood: 'food' }],
+    ['a bracketed key the API did not normalize', { bbox, 'budgets[]': 'high' }],
+    ['a repeated limit', { bbox, limit: ['10', '20'] }],
+    ['a count breakdown', { bbox, breakdown: 'all_but_one' }],
   ])('rejects %s', (_, query) => {
     expect(RouteSearchQuery.safeParse(query).success).toBe(false);
+  });
+});
+
+describe('RouteCountQuery', () => {
+  const bbox = '2.33,48.85,2.37,48.87';
+
+  it('takes the search query and the all_but_one breakdown', () => {
+    expect(RouteCountQuery.parse({ bbox, moods: 'food', breakdown: 'all_but_one' })).toMatchObject({
+      moods: ['food'],
+      breakdown: 'all_but_one',
+    });
+  });
+
+  it.each([
+    ['another breakdown', { bbox, breakdown: 'each_value' }],
+    ['an unknown key', { bbox, city: 'paris' }],
+  ])('rejects %s', (_, query) => {
+    expect(RouteCountQuery.safeParse(query).success).toBe(false);
+  });
+});
+
+describe('search answers', () => {
+  it('list cards or clusters, and counts by filter group only', () => {
+    const cluster = { center: { lat: 48.86, lng: 2.35 }, count: 3 };
+    expect(RouteSearchResult.parse({ items: [], nextCursor: null, clusters: [cluster] })).toEqual({
+      items: [],
+      nextCursor: null,
+      clusters: [cluster],
+    });
+    expect(RouteCount.parse({ count: 0, without: { moods: 4 } })).toEqual({
+      count: 0,
+      without: { moods: 4 },
+    });
+    expect(RouteCount.safeParse({ count: 0, without: { food: 4 } }).success).toBe(false);
   });
 });
