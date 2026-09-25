@@ -16,7 +16,8 @@
         "tinted": "./assets/icon-tinted.png"
       },
       "infoPlist": {
-        "UIStatusBarStyle": "UIStatusBarStyleLightContent"
+        "UIStatusBarStyle": "UIStatusBarStyleLightContent",
+        "MGLMapboxMetricsEnabled": false
       }
     },
     "android": {
@@ -47,6 +48,16 @@
             "backgroundColor": "#4E74C8",
             "dark": { "image": "./assets/splash-android.png", "backgroundColor": "#4E74C8" }
           }
+        }
+      ],
+      "@rnmapbox/maps",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Widoo utilise votre position pour centrer la carte sur les parcours autour de vous. Elle reste sur votre téléphone.",
+          "locationAlwaysAndWhenInUsePermission": false,
+          "locationAlwaysPermission": false,
+          "motionUsagePermission": false
         }
       ]
     ]
