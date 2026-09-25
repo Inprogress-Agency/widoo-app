@@ -6,7 +6,7 @@
  * identical, and an edited JSON is applied on the next run. Places, routes and authors are
  * upserted; the hours, steps and photos of the seed places and routes are rewritten.
  */
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import type { Db } from './client';
 import { envelopeOf } from './geography';
 import { cities, media, placeHours, places, routes, steps, users } from './schema';
@@ -29,6 +29,9 @@ export const demoRouteIds = demoDataset.routes.map((route) => seedId(`route:${ro
 
 export async function seed(db: Db): Promise<{ cityId: string; routeIds: string[] }> {
   return db.transaction(async (tx) => {
+    // Test files run in parallel on one database: two seeds wait for each other instead of
+    // deleting and inserting the same rows at once.
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext('widoo-seed'))`);
     const [city] = await tx
       .insert(cities)
       .values({ id: cityId, ...paris })

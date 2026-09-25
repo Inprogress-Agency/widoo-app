@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "build": "node build.mjs",
+    "bench:search": "tsx --env-file-if-exists=.env src/search/bench.ts",
     "db:generate": "tsx src/db/generate.ts",
     "db:migrate": "tsx --env-file-if-exists=.env src/migrate.ts",
     "db:reset": "tsx --env-file-if-exists=.env src/db/reset.ts && pnpm db:migrate && pnpm db:seed",
