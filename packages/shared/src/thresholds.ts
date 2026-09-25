@@ -3,7 +3,7 @@ import { z } from 'zod';
 const bound = z.number().nonnegative();
 
 /**
- * Inclusive upper bound of each bucket; the last bucket (`premium`, `weekend`) has none.
+ * Inclusive upper bound of each bucket; the last bucket (`high`, `weekend`) has none.
  * The API overrides the defaults from `settings` and serves the result on `/config`.
  */
 export const BucketThresholds = z.object({

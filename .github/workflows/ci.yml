@@ -63,8 +63,9 @@ jobs:
               echo "::notice::PR de documentation ou de process uniquement : lint, types et tests non exécutés."
               exit 0
             fi
-            # Thème ou tokens.json touchés : un écart avec le wiki y reste bloquant (#139).
-            if grep -qE '^packages/tokens/|^apps/mobile/(tailwind\.config\.[cm]?js|global\.css)$' <<< "$code"; then
+            # Thème généré ou tokens.json touchés : un écart avec le wiki y reste bloquant (#139).
+            # Le code du générateur (packages/tokens/src) n'en dépend pas : ses tests portent sur la copie.
+            if grep -qE '^packages/tokens/generated/|^apps/mobile/(tailwind\.config\.[cm]?js|global\.css)$' <<< "$code"; then
               echo "touches_tokens=true" >> "$GITHUB_OUTPUT"
             fi
           fi

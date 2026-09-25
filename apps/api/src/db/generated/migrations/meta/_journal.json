@@ -15,6 +15,13 @@
       "when": 1790157998638,
       "tag": "0001_init",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790332866375,
+      "tag": "0002_rename_budget_premium_to_high",
+      "breakpoints": true
     }
   ]
 }

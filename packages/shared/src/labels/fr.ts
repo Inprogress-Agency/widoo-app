@@ -12,12 +12,17 @@ export const fr = {
     dog_friendly: 'Dog friendly',
     kids_friendly: 'Kids friendly',
   },
-  budgets: { free: 'Gratuit', low: 'Petit budget', medium: 'Moyen', premium: 'Premium' },
+  budgets: {
+    free: 'Gratuit',
+    low: "Jusqu'à 25 €",
+    medium: '25 à 70 €',
+    high: 'Plus de 70 €',
+  },
   durations: {
-    '1_2h': '1 à 2 h',
-    half_day: 'Demi-journée',
-    full_day: 'Journée',
-    weekend: 'Week-end',
+    '1_2h': "Jusqu'à 2 h 30",
+    half_day: '2 h 30 à 5 h',
+    full_day: '5 à 12 h',
+    weekend: 'Plus de 12 h',
   },
   transports: { walk: 'À pied', bike: 'Vélo', metro: 'Métro', car: 'Voiture' },
   moods: {
