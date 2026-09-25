@@ -456,6 +456,141 @@
       "isIndoor": false,
       "priceRange": "free",
       "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "07:30", "closes": "20:00" }]
+    },
+    {
+      "key": "sainte-chapelle",
+      "name": "Sainte-Chapelle",
+      "category": "monument",
+      "location": { "lat": 48.85539, "lng": 2.34499 },
+      "address": "10 boulevard du Palais, 75001 Paris",
+      "addressComponents": {
+        "postcode": "75001",
+        "arrondissement": "1er",
+        "neighborhood": "Île de la Cité"
+      },
+      "isIndoor": true,
+      "priceRange": "medium",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "09:00", "closes": "19:00" }]
+    },
+    {
+      "key": "shakespeare-and-company",
+      "name": "Shakespeare and Company",
+      "category": "shop",
+      "location": { "lat": 48.85257, "lng": 2.34711 },
+      "address": "37 rue de la Bûcherie, 75005 Paris",
+      "addressComponents": {
+        "postcode": "75005",
+        "arrondissement": "5e",
+        "neighborhood": "Quartier latin"
+      },
+      "isIndoor": true,
+      "priceRange": "free",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "10:00", "closes": "20:00" }]
+    },
+    {
+      "key": "musee-de-cluny",
+      "name": "Musée de Cluny",
+      "category": "museum",
+      "location": { "lat": 48.85065, "lng": 2.34356 },
+      "address": "28 rue du Sommerard, 75005 Paris",
+      "addressComponents": {
+        "postcode": "75005",
+        "arrondissement": "5e",
+        "neighborhood": "Quartier latin"
+      },
+      "isIndoor": true,
+      "priceRange": "medium",
+      "hours": [{ "weekdays": [1, 2, 3, 4, 5, 6], "opens": "09:30", "closes": "18:15" }]
+    },
+    {
+      "key": "bouillon-chartier-montparnasse",
+      "name": "Bouillon Chartier Montparnasse",
+      "category": "restaurant",
+      "location": { "lat": 48.84432, "lng": 2.32327 },
+      "address": "59 boulevard du Montparnasse, 75006 Paris",
+      "addressComponents": {
+        "postcode": "75006",
+        "arrondissement": "6e",
+        "neighborhood": "Montparnasse"
+      },
+      "isIndoor": true,
+      "priceRange": "low",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "11:30", "closes": "23:59" }]
+    },
+    {
+      "key": "tour-montparnasse-56",
+      "name": "Observatoire de la tour Montparnasse",
+      "category": "viewpoint",
+      "location": { "lat": 48.84211, "lng": 2.32197 },
+      "address": "33 avenue du Maine, 75015 Paris",
+      "addressComponents": {
+        "postcode": "75015",
+        "arrondissement": "15e",
+        "neighborhood": "Montparnasse"
+      },
+      "isIndoor": true,
+      "priceRange": "medium",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "09:30", "closes": "23:00" }]
+    },
+    {
+      "key": "theatre-guignol-buttes-chaumont",
+      "name": "Théâtre Guignol Anatole",
+      "category": "activity",
+      "location": { "lat": 48.88213, "lng": 2.3829 },
+      "address": "avenue de la Grotte, parc des Buttes-Chaumont, 75019 Paris",
+      "addressComponents": {
+        "postcode": "75019",
+        "arrondissement": "19e",
+        "neighborhood": "Buttes-Chaumont"
+      },
+      "isIndoor": true,
+      "priceRange": "low",
+      "hours": [{ "weekdays": [2, 5, 6], "opens": "15:00", "closes": "17:00" }]
+    },
+    {
+      "key": "grotte-buttes-chaumont",
+      "name": "Grotte des Buttes-Chaumont",
+      "category": "park",
+      "location": { "lat": 48.87976, "lng": 2.38366 },
+      "address": "parc des Buttes-Chaumont, 75019 Paris",
+      "addressComponents": {
+        "postcode": "75019",
+        "arrondissement": "19e",
+        "neighborhood": "Buttes-Chaumont"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "07:00", "closes": "21:00" }]
+    },
+    {
+      "key": "belvedere-de-la-sibylle",
+      "name": "Belvédère de la Sibylle",
+      "category": "viewpoint",
+      "location": { "lat": 48.88109, "lng": 2.38307 },
+      "address": "parc des Buttes-Chaumont, 75019 Paris",
+      "addressComponents": {
+        "postcode": "75019",
+        "arrondissement": "19e",
+        "neighborhood": "Buttes-Chaumont"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "07:00", "closes": "21:00" }]
+    },
+    {
+      "key": "rosa-bonheur",
+      "name": "Rosa Bonheur",
+      "category": "bar",
+      "location": { "lat": 48.87998, "lng": 2.38623 },
+      "address": "2 avenue de la Cascade, 75019 Paris",
+      "addressComponents": {
+        "postcode": "75019",
+        "arrondissement": "19e",
+        "neighborhood": "Buttes-Chaumont"
+      },
+      "isIndoor": false,
+      "priceRange": "low",
+      "hours": [{ "weekdays": [2, 3, 4, 5, 6], "opens": "12:00", "closes": "23:00" }]
     }
   ],
   "routes": [
@@ -828,6 +963,130 @@
           "description": "Les parterres et le labyrinthe, pour finir en courant.",
           "durationMin": 45,
           "costPerPerson": 0
+        }
+      ]
+    },
+    {
+      "key": "de-la-cite-a-montparnasse",
+      "title": "De la Cité à Montparnasse, une journée en solo",
+      "description": "Une journée au sec, reliée par la ligne 4 : les vitraux de la Sainte-Chapelle, une librairie mythique, le Moyen Âge à Cluny, un bouillon parisien et Paris vu d’en haut.",
+      "author": null,
+      "moods": ["culture", "shopping"],
+      "audiences": ["solo"],
+      "conditions": ["indoor", "rainy"],
+      "transport": "metro",
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1571860424830-0271e6c9d9b2?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1546444809-d64eccd9fb88?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        }
+      ],
+      "computed": {
+        "duration_min": 345,
+        "budget_per_person_eur": { "min": 52, "max": 78 },
+        "distance_m": 3370,
+        "walking_m": 1630,
+        "effort": "easy",
+        "warnings": [],
+        "computed_at": "2026-09-25T08:00:00.000Z"
+      },
+      "steps": [
+        {
+          "place": "sainte-chapelle",
+          "description": "Les vitraux sont plus beaux le matin, avec le soleil de l’est. Créneau horaire obligatoire.",
+          "durationMin": 60,
+          "costPerPerson": 13,
+          "bookingRequired": true,
+          "bookingUrl": "https://www.sainte-chapelle.fr/",
+          "bookingProvider": "ticketing"
+        },
+        {
+          "place": "shakespeare-and-company",
+          "description": "Librairie anglophone face à Notre-Dame. Monter à l’étage lire au calme.",
+          "durationMin": 30,
+          "costPerPerson": 0
+        },
+        {
+          "place": "musee-de-cluny",
+          "description": "Les tapisseries de la Dame à la licorne et les thermes romains.",
+          "durationMin": 90,
+          "costPerPerson": 12,
+          "transitionNote": "Prendre la ligne 4 à Saint-Michel jusqu’à Vavin."
+        },
+        {
+          "place": "bouillon-chartier-montparnasse",
+          "description": "Grande salle Art nouveau, carte courte à prix doux.",
+          "durationMin": 75,
+          "costPerPerson": 20
+        },
+        {
+          "place": "tour-montparnasse-56",
+          "description": "La vue à 360° depuis le 56ᵉ étage, par temps couvert comme par beau temps.",
+          "durationMin": 60,
+          "costPerPerson": 20
+        }
+      ]
+    },
+    {
+      "key": "buttes-chaumont-guignol",
+      "title": "Guignol et goûter aux Buttes-Chaumont",
+      "description": "Un après-midi pour les enfants : le spectacle de Guignol, la grotte et sa cascade, la montée au belvédère de la Sibylle, puis un goûter en terrasse chez Rosa Bonheur.",
+      "author": null,
+      "moods": ["nature", "relax"],
+      "audiences": ["family", "kids_friendly"],
+      "conditions": ["no_booking", "outdoor", "sunny"],
+      "transport": "walk",
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1731666593725-197dc759038d?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1731666595277-2082e64c8936?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        }
+      ],
+      "computed": {
+        "duration_min": 165,
+        "budget_per_person_eur": { "min": 11, "max": 17 },
+        "distance_m": 890,
+        "walking_m": 890,
+        "effort": "easy",
+        "warnings": [],
+        "computed_at": "2026-09-25T08:00:00.000Z"
+      },
+      "steps": [
+        {
+          "place": "theatre-guignol-buttes-chaumont",
+          "description": "Spectacle de marionnettes le mercredi, le samedi et le dimanche après-midi.",
+          "durationMin": 45,
+          "costPerPerson": 6
+        },
+        {
+          "place": "grotte-buttes-chaumont",
+          "description": "Une ancienne carrière de gypse transformée en grotte, avec une cascade de 20 mètres.",
+          "durationMin": 20,
+          "costPerPerson": 0
+        },
+        {
+          "place": "belvedere-de-la-sibylle",
+          "description": "Le petit temple en haut du rocher, par la passerelle suspendue.",
+          "durationMin": 30,
+          "costPerPerson": 0
+        },
+        {
+          "place": "rosa-bonheur",
+          "description": "Guinguette dans le parc : crêpes et jus de pomme sur la terrasse.",
+          "durationMin": 60,
+          "costPerPerson": 8
         }
       ]
     }
