@@ -1,7 +1,7 @@
-// Généré depuis tokens.json (version 10), ne pas modifier : pnpm --filter @widoo/tokens generate.
+// Généré depuis tokens.json (version 14), ne pas modifier : pnpm --filter @widoo/tokens generate.
 import type { Audience, Condition, Mood, PlaceCategory, Transport } from '@widoo/shared';
 
-export const tokensVersion = 10;
+export const tokensVersion = 14;
 
 /** Light theme: the dark values are not validated and not generated. */
 export const colors = {
@@ -36,6 +36,8 @@ export const colors = {
   "amber": "#F5B301",
   "alert": "#8C5A00",
   "alert-soft": "#FFF4D6",
+  "error-ink": "#B42318",
+  "error-soft": "#FDECEA",
   "plum-soft": "#F3E4EC",
   "plum-ink": "#7A2A4A",
   "violet-soft": "#ECE7F8",
@@ -262,11 +264,15 @@ export const iconNames = [
   "balloon",
   "bank",
   "barbell",
+  "barricade",
   "bell",
   "bicycle",
   "binoculars",
   "bread",
+  "calendar-blank",
+  "calendar-check",
   "calendar-slash",
+  "calendar-x",
   "camera",
   "car",
   "caret-down",
@@ -277,11 +283,14 @@ export const iconNames = [
   "circle",
   "circle-notch",
   "clock",
+  "clock-counter-clockwise",
   "cloud-rain",
   "cloud-slash",
   "coffee",
   "crown-simple",
+  "door",
   "dots-six-vertical",
+  "dots-three",
   "envelope-simple",
   "envelope-simple-open",
   "export",
@@ -297,15 +306,18 @@ export const iconNames = [
   "gps-slash",
   "headphones",
   "heart",
+  "hourglass-medium",
   "house",
   "info",
   "key",
   "lightning",
   "link-break",
+  "list-checks",
   "lock-simple",
   "magnifying-glass",
   "map-pin",
   "map-trifold",
+  "minus",
   "mountains",
   "navigation-arrow",
   "park",
@@ -314,6 +326,7 @@ export const iconNames = [
   "person-simple-walk",
   "play",
   "plus",
+  "prohibit",
   "question",
   "quotes",
   "seal-check",
@@ -321,6 +334,7 @@ export const iconNames = [
   "shopping-bag",
   "sign-out",
   "sliders-horizontal",
+  "smiley-meh",
   "sparkle",
   "star",
   "subway",
@@ -724,6 +738,86 @@ export const uiIcons = {
   "next-step": {
     "name": "arrow-right",
     "weight": "fill"
+  },
+  "plan-date": {
+    "name": "calendar-check",
+    "weight": "fill"
+  },
+  "other-date": {
+    "name": "calendar-blank"
+  },
+  "cancel-outing": {
+    "name": "calendar-x"
+  },
+  "to-prepare": {
+    "name": "list-checks"
+  },
+  "suggested-time": {
+    "name": "clock-counter-clockwise",
+    "weight": "bold"
+  },
+  "earlier": {
+    "name": "minus",
+    "weight": "bold"
+  },
+  "later": {
+    "name": "plus",
+    "weight": "bold"
+  },
+  "signal-closed": {
+    "name": "door",
+    "weight": "fill"
+  },
+  "signal-hours": {
+    "name": "clock",
+    "weight": "fill"
+  },
+  "signal-address": {
+    "name": "map-pin",
+    "weight": "fill"
+  },
+  "signal-works": {
+    "name": "barricade",
+    "weight": "fill"
+  },
+  "signal-crowded": {
+    "name": "users-three",
+    "weight": "fill"
+  },
+  "signal-description": {
+    "name": "smiley-meh",
+    "weight": "fill"
+  },
+  "signal-other": {
+    "name": "dots-three",
+    "weight": "fill"
+  },
+  "closed-today": {
+    "name": "calendar-x",
+    "weight": "fill"
+  },
+  "closed-temporarily": {
+    "name": "hourglass-medium",
+    "weight": "fill"
+  },
+  "closed-permanently": {
+    "name": "prohibit",
+    "weight": "fill"
+  },
+  "rejected": {
+    "name": "x-circle",
+    "weight": "fill",
+    "color": "error-ink"
+  },
+  "missed": {
+    "name": "calendar-slash",
+    "weight": "fill"
+  },
+  "empty-upcoming": {
+    "name": "calendar-blank"
+  },
+  "empty-past": {
+    "name": "flag"
   }
 } as const satisfies Record<string, { name: IconName; weight?: 'fill' | 'bold'; activeWeight?: 'fill'; color?: ColorToken }>;
 export type UiIconKey = keyof typeof uiIcons;
@@ -775,7 +869,8 @@ export const darkSurfaces = [
   "pastille Fin du parcours",
   "toast",
   "page immersive E-07",
-  "mini-lecteur"
+  "mini-lecteur",
+  "segment actif (onglet Parcours)"
 ] as const;
 
 /** Accessibility thresholds (Direction-Artistique › Accessibilité). */
@@ -799,7 +894,11 @@ export const accessibility = {
     "bouton « Continuer avec un e-mail »",
     "barre du haut et en-tête compact de E-07",
     "mini-lecteur (nom sur une ligne, nom complet dans le libellé)",
-    "tuiles et barre collée de E-15"
+    "tuiles et barre collée de E-15",
+    "segments de l'onglet Parcours",
+    "pastilles de statut des lignes",
+    "petits boutons de 36 px (Noter, Relancer, Reprendre, Reprogrammer)",
+    "barres collées de la sheet Programmer et de « Votre sortie »"
   ]
 } as const;
 
