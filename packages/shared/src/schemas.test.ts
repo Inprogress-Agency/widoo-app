@@ -89,6 +89,16 @@ describe('response schemas', () => {
   });
 });
 
+describe('RouteCard budget and access', () => {
+  it('reads the highest budget bucket as high, and keeps premium for the access', () => {
+    expect(RouteCard.parse({ ...card, budgetBucket: 'high', access: 'premium' })).toMatchObject({
+      budgetBucket: 'high',
+      access: 'premium',
+    });
+    expect(RouteCard.safeParse({ ...card, budgetBucket: 'premium' }).success).toBe(false);
+  });
+});
+
 describe('RouteSearchQuery', () => {
   const bbox = '2.33,48.85,2.37,48.87';
 
@@ -104,7 +114,17 @@ describe('RouteSearchQuery', () => {
     });
   });
 
+  it('accepts the budget key high, alone or repeated (D-016)', () => {
+    expect(RouteSearchQuery.parse({ bbox, budgets: 'high' }).budgets).toEqual(['high']);
+    expect(RouteSearchQuery.parse({ bbox, budgets: ['medium', 'high'] }).budgets).toEqual([
+      'medium',
+      'high',
+    ]);
+  });
+
   it.each([
+    ['the former budget key premium', { bbox, budgets: 'premium' }],
+    ['the former budget key premium among others', { bbox, budgets: ['low', 'premium'] }],
     ['an unknown filter value', { bbox, moods: 'Culture' }],
     ['an unknown sort', { bbox, sort: 'price' }],
     ['a bbox in the wrong order', { bbox: '2.37,48.87,2.33,48.85' }],

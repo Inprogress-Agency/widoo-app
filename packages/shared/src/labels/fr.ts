@@ -16,7 +16,7 @@ export const fr = {
     free: 'Gratuit',
     low: "Jusqu'à 25 €",
     medium: '25 à 70 €',
-    premium: 'Plus de 70 €',
+    high: 'Plus de 70 €',
   },
   durations: {
     '1_2h': "Jusqu'à 2 h 30",

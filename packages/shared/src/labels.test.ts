@@ -11,6 +11,13 @@ describe('taxonomies', () => {
   });
 });
 
+describe('budget keys', () => {
+  it('name the highest bucket high, and keep premium for the subscription (D-016)', () => {
+    expect(taxonomies.budgets).toEqual(['free', 'low', 'medium', 'high']);
+    expect(taxonomies.plans).toEqual(['free', 'premium']);
+  });
+});
+
 describe('labels.fr', () => {
   it.each(groups)('%s: one non-empty label per value, and no other', (taxonomy, values) => {
     const group: Record<string, string> = labels.fr[taxonomy];
@@ -25,7 +32,7 @@ describe('labels.fr of budget and duration', () => {
       free: 'Gratuit',
       low: "Jusqu'à 25 €",
       medium: '25 à 70 €',
-      premium: 'Plus de 70 €',
+      high: 'Plus de 70 €',
     });
     expect(labels.fr.durations).toEqual({
       '1_2h': "Jusqu'à 2 h 30",
