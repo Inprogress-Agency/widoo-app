@@ -125,19 +125,43 @@ function buildCatalog(mappings: Mappings, token: TokenCheck) {
   };
 }
 
-/** « heart (fill quand actif, coral) » → name, weight or weight when active, color token. */
+// Notes of a `mappings.uiIcons` value, in English or in French as Direction-Artistique writes them.
+const weightNotes = new Map<string, IconWeight>([
+  ['fill', 'fill'],
+  ['plein', 'fill'],
+  ['bold', 'bold'],
+  ['gras', 'bold'],
+]);
+const activeWeightNotes = ['fill quand actif', 'plein quand actif'];
+
+/** Read in the run log, and as an annotation of the check when the generator runs in CI. */
+function warn(message: string): void {
+  console.warn(process.env.GITHUB_ACTIONS ? `::warning::${message}` : message);
+}
+
+/**
+ * « heart (fill quand actif, coral) » → name, weight or weight when active, color token.
+ * Grammar: `name` or `name (note, note)`, the name in kebab-case, the notes separated by `, `.
+ * A note is `fill` or `plein`, `bold` or `gras`, `fill quand actif` (or `plein quand actif`), or
+ * a color token of the theme. Any other note is ignored with a warning: one free word in the
+ * wiki must not stop the whole tokens sync (#139).
+ */
 export function parseUiIcon(value: string, colors: Theme['colors']): UiIcon {
   const match = /^([a-z0-9-]+)(?: \((.+)\))?$/.exec(value);
   check(match?.[1] !== undefined, `ui icon « ${value} »: expected « name » or « name (notes) »`);
   const icon: UiIcon = { name: match[1] };
   for (const note of match[2]?.split(', ') ?? []) {
-    if (note === 'fill' || note === 'bold') {
-      icon.weight = note;
-    } else if (note === 'fill quand actif') {
+    const weight = weightNotes.get(note);
+    if (weight !== undefined) {
+      icon.weight = weight;
+    } else if (activeWeightNotes.includes(note)) {
       icon.activeWeight = 'fill';
-    } else {
-      check(note in colors, `ui icon « ${value} »: unknown note « ${note} »`);
+    } else if (Object.hasOwn(colors, note)) {
       icon.color = note;
+    } else {
+      warn(
+        `ui icon « ${value} »: unknown note « ${note} » ignored (Direction-Artistique › Iconographie)`,
+      );
     }
   }
   return icon;
