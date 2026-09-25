@@ -1,5 +1,5 @@
 <!-- Titre : <type>(<scope>): <action en français>, moins de 72 caractères.
-Types : feat, fix, chore, polish, test, docs. Scopes : mobile, api, admin, orchestration, shared, infra, process.
+Types : feat, fix, chore, polish, test, docs. Scopes : mobile, api, admin, orchestration, shared, tokens, infra, process.
 Une PR par ticket. Par commit : objectif sous 400 lignes utiles, plafond 500 justifié ; la PR n'a pas de plafond. Aucun secret ni donnée personnelle réelle dans le diff ou les preuves. -->
 
 ## Résultat et problème

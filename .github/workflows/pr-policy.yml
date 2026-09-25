@@ -18,8 +18,8 @@ jobs:
           TITLE: ${{ github.event.pull_request.title }}
         run: |
           set -euo pipefail
-          if ! printf '%s' "$TITLE" | grep -qE '^(feat|fix|chore|polish|test|docs)\((mobile|api|admin|orchestration|shared|infra|process)\): .{3,}$'; then
-            echo "::error::Titre attendu : <type>(<scope>): <action>. Types : feat fix chore polish test docs. Scopes : mobile api admin orchestration shared infra process."
+          if ! printf '%s' "$TITLE" | grep -qE '^(feat|fix|chore|polish|test|docs)\((mobile|api|admin|orchestration|shared|tokens|infra|process)\): .{3,}$'; then
+            echo "::error::Titre attendu : <type>(<scope>): <action>. Types : feat fix chore polish test docs. Scopes : mobile api admin orchestration shared tokens infra process."
             exit 1
           fi
           if [ "${#TITLE}" -gt 72 ]; then
