@@ -20,6 +20,7 @@ interface CardProps {
   /** A card that opens something is one accessible element: its label reads the whole card. */
   onPress?: () => void;
   accessibilityLabel?: string;
+  accessibilityHint?: string;
   /** « Ajouter aux favoris », « Voir le profil du créateur »... */
   accessibilityActions?: AccessibilityActionInfo[];
   onAccessibilityAction?: (event: AccessibilityActionEvent) => void;

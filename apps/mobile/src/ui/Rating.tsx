@@ -1,15 +1,11 @@
 import type { RouteCard } from '@widoo/shared';
 import type { ColorToken } from '@widoo/tokens';
 import { useTranslation } from 'react-i18next';
+import { formatRating } from '../format/rating';
 import { View } from 'react-native';
 import { Badge } from './Badge';
 import { Icon, uiIcon } from './Icon';
 import { Text } from './Text';
-
-const ratingFormat = new Intl.NumberFormat('fr-FR', {
-  minimumFractionDigits: 1,
-  maximumFractionDigits: 1,
-});
 
 interface RatingProps {
   rating: RouteCard['rating'];
@@ -20,9 +16,6 @@ interface RatingProps {
 
 /** Without review, a route shows « Nouveau » in place of its rating (D-023). */
 const isUnrated = (rating: RouteCard['rating']) => rating.average === null || rating.count === 0;
-
-/** « 4,9 », one decimal, French comma. */
-export const formatRating = (average: number) => ratingFormat.format(average);
 
 /**
  * Average rating after a yellow star, read « Note 4,9 sur 5 »; the star is decorative, the figure

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, {
   cancelAnimation,
   useAnimatedStyle,
@@ -12,6 +12,7 @@ import { timing } from './motion';
 
 interface SkeletonProps {
   className?: string;
+  style?: StyleProp<ViewStyle>;
 }
 
 /**
@@ -19,7 +20,7 @@ interface SkeletonProps {
  * loop; with « Réduire les animations », the block stays still. Decorative: the list around it
  * is the one announced busy.
  */
-export function Skeleton({ className }: SkeletonProps) {
+export function Skeleton({ className, style }: SkeletonProps) {
   const isReducedMotion = useReducedMotion();
   const [width, setWidth] = useState(0);
   const progress = useSharedValue(0);
@@ -44,6 +45,7 @@ export function Skeleton({ className }: SkeletonProps) {
       importantForAccessibility="no-hide-descendants"
       onLayout={(event) => setWidth(event.nativeEvent.layout.width)}
       className={`overflow-hidden bg-skeleton ${className ?? ''}`}
+      style={style}
     >
       {!isReducedMotion && <Animated.View style={[styles.band, sweep]} className="bg-surface" />}
     </View>
