@@ -315,6 +315,147 @@
         { "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "12:00", "closes": "15:00" },
         { "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "19:00", "closes": "23:30" }
       ]
+    },
+    {
+      "key": "rue-denoyez",
+      "name": "Rue Dénoyez",
+      "category": "walk",
+      "location": { "lat": 48.87165, "lng": 2.37852 },
+      "address": "rue Dénoyez, 75020 Paris",
+      "addressComponents": {
+        "postcode": "75020",
+        "arrondissement": "20e",
+        "neighborhood": "Belleville"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "place-frehel",
+      "name": "Place Fréhel",
+      "category": "other",
+      "location": { "lat": 48.87308, "lng": 2.38174 },
+      "address": "place Fréhel, 75020 Paris",
+      "addressComponents": {
+        "postcode": "75020",
+        "arrondissement": "20e",
+        "neighborhood": "Belleville"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "belvedere-de-belleville",
+      "name": "Belvédère de Belleville",
+      "category": "viewpoint",
+      "location": { "lat": 48.87158, "lng": 2.38532 },
+      "address": "27 rue Piat, 75020 Paris",
+      "addressComponents": {
+        "postcode": "75020",
+        "arrondissement": "20e",
+        "neighborhood": "Belleville"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": [
+        { "weekdays": [0, 1, 2, 3, 4], "opens": "08:00", "closes": "20:30" },
+        { "weekdays": [5, 6], "opens": "09:00", "closes": "20:30" }
+      ]
+    },
+    {
+      "key": "regard-saint-martin",
+      "name": "Regard Saint-Martin",
+      "category": "monument",
+      "location": { "lat": 48.87147, "lng": 2.39148 },
+      "address": "42 rue des Cascades, 75020 Paris",
+      "addressComponents": {
+        "postcode": "75020",
+        "arrondissement": "20e",
+        "neighborhood": "Belleville"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "arenes-de-lutece",
+      "name": "Arènes de Lutèce",
+      "category": "monument",
+      "location": { "lat": 48.8446, "lng": 2.35322 },
+      "address": "49 rue Monge, 75005 Paris",
+      "addressComponents": {
+        "postcode": "75005",
+        "arrondissement": "5e",
+        "neighborhood": "Quartier latin"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": [
+        { "weekdays": [0, 1, 2, 3, 4], "opens": "08:00", "closes": "20:30" },
+        { "weekdays": [5, 6], "opens": "09:00", "closes": "20:30" }
+      ]
+    },
+    {
+      "key": "menagerie-jardin-des-plantes",
+      "name": "Ménagerie du Jardin des Plantes",
+      "category": "activity",
+      "location": { "lat": 48.84553, "lng": 2.36059 },
+      "address": "57 rue Cuvier, 75005 Paris",
+      "addressComponents": {
+        "postcode": "75005",
+        "arrondissement": "5e",
+        "neighborhood": "Jardin des Plantes"
+      },
+      "isIndoor": false,
+      "priceRange": "medium",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "09:00", "closes": "18:00" }]
+    },
+    {
+      "key": "mosquee-de-paris-salon-de-the",
+      "name": "Salon de thé de la Grande Mosquée",
+      "category": "cafe",
+      "location": { "lat": 48.84207, "lng": 2.3551 },
+      "address": "39 rue Geoffroy-Saint-Hilaire, 75005 Paris",
+      "addressComponents": {
+        "postcode": "75005",
+        "arrondissement": "5e",
+        "neighborhood": "Jardin des Plantes"
+      },
+      "isIndoor": true,
+      "priceRange": "low",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "09:00", "closes": "23:30" }]
+    },
+    {
+      "key": "grande-galerie-evolution",
+      "name": "Grande Galerie de l’Évolution",
+      "category": "museum",
+      "location": { "lat": 48.84211, "lng": 2.35624 },
+      "address": "36 rue Geoffroy-Saint-Hilaire, 75005 Paris",
+      "addressComponents": {
+        "postcode": "75005",
+        "arrondissement": "5e",
+        "neighborhood": "Jardin des Plantes"
+      },
+      "isIndoor": true,
+      "priceRange": "medium",
+      "hours": [{ "weekdays": [0, 2, 3, 4, 5, 6], "opens": "10:00", "closes": "18:00" }]
+    },
+    {
+      "key": "jardin-des-plantes",
+      "name": "Jardin des Plantes",
+      "category": "park",
+      "location": { "lat": 48.84404, "lng": 2.35973 },
+      "address": "57 rue Cuvier, 75005 Paris",
+      "addressComponents": {
+        "postcode": "75005",
+        "arrondissement": "5e",
+        "neighborhood": "Jardin des Plantes"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "07:30", "closes": "20:00" }]
     }
   ],
   "routes": [
@@ -566,6 +707,127 @@
           "description": "Salade géante et piperade, aux tables partagées. Sans réservation : venir tôt.",
           "durationMin": 75,
           "costPerPerson": 18
+        }
+      ]
+    },
+    {
+      "key": "belleville-street-art",
+      "title": "Belleville, street art et vue sur Paris",
+      "description": "Une boucle courte et gratuite : les murs repeints de la rue Dénoyez, le belvédère du parc de Belleville au coucher du soleil, puis les escaliers de la rue des Cascades.",
+      "author": "camille",
+      "moods": ["unusual", "instagrammable"],
+      "audiences": ["couple", "friends", "solo", "dog_friendly"],
+      "conditions": ["no_booking", "outdoor", "sunny"],
+      "transport": "walk",
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1682939033295-031f290adbd2?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1682939036672-cf58620cf3e8?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        }
+      ],
+      "computed": {
+        "duration_min": 100,
+        "budget_per_person_eur": { "min": 0, "max": 0 },
+        "distance_m": 1360,
+        "walking_m": 1360,
+        "effort": "easy",
+        "warnings": [],
+        "computed_at": "2026-09-25T08:00:00.000Z"
+      },
+      "steps": [
+        {
+          "place": "rue-denoyez",
+          "description": "Une rue entière de graffitis, repeinte presque chaque semaine.",
+          "durationMin": 20,
+          "costPerPerson": 0
+        },
+        {
+          "place": "place-frehel",
+          "description": "La fresque « Il faut se méfier des mots » de Ben, au-dessus d’une petite place.",
+          "durationMin": 15,
+          "costPerPerson": 0
+        },
+        {
+          "place": "belvedere-de-belleville",
+          "description": "La plus belle vue gratuite sur Paris, la tour Eiffel en face.",
+          "durationMin": 30,
+          "costPerPerson": 0,
+          "transitionNote": "Descendre par les jardins en terrasses du parc."
+        },
+        {
+          "place": "regard-saint-martin",
+          "description": "Un petit édifice de pierre qui surveillait les sources de Belleville.",
+          "durationMin": 15,
+          "costPerPerson": 0
+        }
+      ]
+    },
+    {
+      "key": "jardin-des-plantes-en-famille",
+      "title": "Une journée au Jardin des Plantes en famille",
+      "description": "Les arènes romaines, la ménagerie et ses pandas roux, un thé à la menthe à la Grande Mosquée, puis les squelettes et les animaux naturalisés de la Grande Galerie de l’Évolution.",
+      "author": null,
+      "moods": ["nature", "culture"],
+      "audiences": ["family", "kids_friendly"],
+      "conditions": ["no_booking", "wheelchair", "outdoor", "sunny"],
+      "transport": "walk",
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1578838389363-a62d9069d2c6?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1654103399842-98a63767b6bc?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        }
+      ],
+      "computed": {
+        "duration_min": 355,
+        "budget_per_person_eur": { "min": 27, "max": 41 },
+        "distance_m": 1980,
+        "walking_m": 1980,
+        "effort": "easy",
+        "warnings": [],
+        "computed_at": "2026-09-25T08:00:00.000Z"
+      },
+      "steps": [
+        {
+          "place": "arenes-de-lutece",
+          "description": "Un amphithéâtre gallo-romain où les enfants jouent au ballon. Entrée accessible par la rue de Navarre.",
+          "durationMin": 30,
+          "costPerPerson": 0
+        },
+        {
+          "place": "menagerie-jardin-des-plantes",
+          "description": "L’un des plus vieux zoos du monde : pandas roux, orangs-outans, tortues géantes. Gratuit pour les moins de 3 ans.",
+          "durationMin": 90,
+          "costPerPerson": 13
+        },
+        {
+          "place": "mosquee-de-paris-salon-de-the",
+          "description": "Thé à la menthe et cornes de gazelle sous les figuiers du patio.",
+          "durationMin": 45,
+          "costPerPerson": 8
+        },
+        {
+          "place": "grande-galerie-evolution",
+          "description": "La caravane des animaux sous la verrière. Fermée le mardi.",
+          "durationMin": 120,
+          "costPerPerson": 13
+        },
+        {
+          "place": "jardin-des-plantes",
+          "description": "Les parterres et le labyrinthe, pour finir en courant.",
+          "durationMin": 45,
+          "costPerPerson": 0
         }
       ]
     }
