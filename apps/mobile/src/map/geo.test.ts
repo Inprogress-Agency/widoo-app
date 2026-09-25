@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { boundsOf, parisCenter, toBbox, zoomForSpan } from './geo';
+import { bboxCenter, boundsOf, parisCenter, scaleBbox, toBbox, zoomForSpan } from './geo';
 
 describe('boundsOf', () => {
   it('holds every point, and nothing without point', () => {
@@ -40,5 +40,26 @@ describe('zoomForSpan', () => {
       1,
       9,
     );
+  });
+});
+
+describe('scaleBbox', () => {
+  const zone = { west: 2.33, south: 48.85, east: 2.37, north: 48.87 };
+
+  it('doubles the zone around its centre', () => {
+    const wider = scaleBbox(zone, 2);
+    expect(bboxCenter(wider)[0]).toBeCloseTo(2.35);
+    expect(bboxCenter(wider)[1]).toBeCloseTo(48.86);
+    expect(wider.east - wider.west).toBeCloseTo(0.08);
+    expect(wider.north - wider.south).toBeCloseTo(0.04);
+  });
+
+  it('stays within the coordinates the search accepts', () => {
+    expect(scaleBbox({ west: -170, south: -80, east: 170, north: 80 }, 2)).toEqual({
+      west: -180,
+      south: -90,
+      east: 180,
+      north: 90,
+    });
   });
 });
