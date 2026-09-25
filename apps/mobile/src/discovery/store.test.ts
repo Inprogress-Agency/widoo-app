@@ -293,3 +293,17 @@ describe('offline after an answer', () => {
     expect(store.getState().results?.items.map((item) => item.id)).toEqual(['a']);
   });
 });
+
+describe('sort of « Voir tout »', () => {
+  beforeEach(() => {
+    store = createDiscoveryStore();
+  });
+
+  it('starts recommended and keeps the choice across new searches of the session', () => {
+    expect(store.getState().sort).toBe('recommended');
+    store.getState().setSort('rating');
+    openedWith('a');
+    store.getState().searchZone('button');
+    expect(store.getState().sort).toBe('rating');
+  });
+});
