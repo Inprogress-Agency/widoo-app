@@ -43,6 +43,25 @@ export function newCardViews(
   return views;
 }
 
+/**
+ * `newCardViews` for the results on screen: the cards seen are forgotten as soon as other results
+ * come, in the same call. A reset after the render would come after the carousel has already
+ * reported the first cards of the new results, and a card seen in the previous zone would be lost.
+ */
+export function createCardViewTracker() {
+  let current: { results: unknown; seen: Set<string> } | null = null;
+  return (
+    results: unknown,
+    visible: readonly { route: { id: string }; index: number }[],
+    sheetLevel: CardView['sheet_level'],
+  ): CardView[] => {
+    if (!current || current.results !== results) {
+      current = { results, seen: new Set() };
+    }
+    return newCardViews(visible, current.seen, sheetLevel);
+  };
+}
+
 /** `route_opened`: the route and where it was opened from. */
 export function routeOpenedEvent(
   route: { id: string },

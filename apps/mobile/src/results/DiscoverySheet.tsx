@@ -4,7 +4,7 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { analytics } from '../analytics';
-import { newCardViews } from '../analytics/discovery';
+import { createCardViewTracker } from '../analytics/discovery';
 import { StatusMessage } from '../components/StatusMessage';
 import { NoRoutesMessage, ZoomInMessage } from '../components/ZoneMessage';
 import {
@@ -14,7 +14,7 @@ import {
   type SearchStatus,
 } from '../discovery/store';
 import type { SectionId } from '../discovery/sections';
-import { useDiscovery } from '../discovery/useRouteSearch';
+import { discoveryStore, useDiscovery } from '../discovery/useRouteSearch';
 import { useZoneCount } from '../discovery/useSectionList';
 import { formatDayAndTime } from '../format/date';
 import { Button } from '../ui/Button';
@@ -75,11 +75,7 @@ export function DiscoverySheet({
   const zoneCount = useZoneCount();
   const level = useRef<SheetLevel>('rest');
   /** Cards already reported as seen, for the results on screen: once each. */
-  const seen = useRef(new Set<string>());
-
-  useEffect(() => {
-    seen.current = new Set();
-  }, [results]);
+  const cardViews = useRef(createCardViewTracker());
 
   // A marker selected on the map brings the sheet back to rest, with the summary (E-04).
   useEffect(() => {
@@ -163,7 +159,9 @@ export function DiscoverySheet({
         onOpen={(route) => onOpenRoute(route, 'card')}
         onFocus={(route) => focus(route.id)}
         onVisible={(visible) => {
-          for (const view of newCardViews(visible, seen.current, level.current)) {
+          // The results of the store, not of this render: the carousel may call an older handler.
+          const current = discoveryStore.getState().results;
+          for (const view of cardViews.current(current, visible, level.current)) {
             analytics.track('result_card_viewed', view);
           }
         }}
