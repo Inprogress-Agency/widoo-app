@@ -1,5 +1,5 @@
-import { AppConfig, Me, RouteSearchResult, type UpdateMe } from '@widoo/shared';
-import { searchQueryString, type RouteSearchParams } from './search';
+import { AppConfig, Me, RouteCount, RouteSearchResult, type UpdateMe } from '@widoo/shared';
+import { searchQueryString, type RouteCountParams, type RouteSearchParams } from './search';
 import { createTransport, type ApiClientOptions } from './transport';
 
 /**
@@ -31,6 +31,18 @@ export function createApiClient(options: ApiClientOptions) {
         method: 'GET',
         path: `/v1/routes/search?${searchQueryString(params)}`,
         schema: RouteSearchResult,
+        signal,
+      }),
+
+    /**
+     * `GET /v1/routes/search/count`: how many routes the search holds, over all its pages.
+     * Public: sent without token.
+     */
+    countRoutes: (params: RouteCountParams, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/routes/search/count?${searchQueryString(params)}`,
+        schema: RouteCount,
         signal,
       }),
 
