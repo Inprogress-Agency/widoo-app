@@ -7,6 +7,7 @@ import type { LatLng } from '@widoo/shared';
 import type { Db } from './client';
 import { envelopeOf } from './geography';
 import { cities, placeHours, places, routes, steps } from './schema';
+import { paris } from './seed/demo-routes';
 
 type NewPlace = Omit<typeof places.$inferInsert, 'cityId' | 'verificationStatus'> & { id: string };
 type NewHours = Omit<typeof placeHours.$inferInsert, 'placeId'>;
@@ -15,15 +16,6 @@ type NewStep = Omit<typeof steps.$inferInsert, 'routeId' | 'placeId' | 'position
 /** Fixed UUID v7 of the seed rows. */
 const seedId = (n: number) => `01997a4e-8c00-7000-8000-${String(n).padStart(12, '0')}`;
 export const seedRouteId = seedId(100);
-
-const paris = {
-  slug: 'paris',
-  name: 'Paris',
-  center: { lat: 48.8566, lng: 2.3522 },
-  bounds: { west: 2.2241, south: 48.8156, east: 2.4699, north: 48.9022 },
-  timezone: 'Europe/Paris',
-  isActive: true,
-};
 
 /** Weekdays, 0 = Monday. */
 const allWeek = [0, 1, 2, 3, 4, 5, 6];
