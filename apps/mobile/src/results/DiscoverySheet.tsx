@@ -1,15 +1,23 @@
 import type { AnalyticsEvents, LatLng, RouteCard, RouteCluster } from '@widoo/shared';
-import { type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
+import { analytics } from '../analytics';
 import { StatusMessage } from '../components/StatusMessage';
 import { NoRoutesMessage, ZoomInMessage } from '../components/ZoneMessage';
-import { activeFilterCount, resultsCount, type SearchStatus } from '../discovery/store';
+import {
+  activeFilterCount,
+  resultsCount,
+  selectedRoute,
+  type SearchStatus,
+} from '../discovery/store';
 import { useDiscovery } from '../discovery/useRouteSearch';
 import { formatDayAndTime } from '../format/date';
 import { Button } from '../ui/Button';
-import { ResultsSheet } from './ResultsSheet';
+import { ResultsSheet, type ResultsSheetMethods } from './ResultsSheet';
 import { RouteCarousel, SkeletonCarousel } from './RouteCarousel';
+import { RouteSummary, RouteSummaryMore } from './RouteSummary';
+import type { SheetLevel } from './sheet';
 import { SheetBanner } from './SheetBanner';
 import { SheetHeader } from './SheetHeader';
 import { zoneName } from './zone';
@@ -49,11 +57,28 @@ export function DiscoverySheet({
   onCoverChange,
 }: DiscoverySheetProps) {
   const { t } = useTranslation();
+  const sheet = useRef<ResultsSheetMethods>(null);
   const results = useDiscovery((state) => state.results);
   const resultsAt = useDiscovery((state) => state.resultsAt);
   const filterCount = useDiscovery((state) => activeFilterCount(state.filters));
   const widenZone = useDiscovery((state) => state.widenZone);
   const clearFilters = useDiscovery((state) => state.clearFilters);
+  const focus = useDiscovery((state) => state.focus);
+  const selected = useDiscovery(selectedRoute);
+  const level = useRef<SheetLevel>('rest');
+  /** Cards already reported as seen, for the results on screen: once each. */
+  const seen = useRef(new Set<string>());
+
+  useEffect(() => {
+    seen.current = new Set();
+  }, [results]);
+
+  // A marker selected on the map brings the sheet back to rest, with the summary (E-04).
+  useEffect(() => {
+    if (selected) {
+      sheet.current?.moveTo('rest');
+    }
+  }, [selected]);
   const { status, isOnline, isEmpty, clusters, retry } = search;
   const isOffline = !isOnline || status === 'offline';
   const routes = results?.items ?? [];
@@ -80,7 +105,17 @@ export function DiscoverySheet({
 
   let peek: ReactNode;
   let content: ReactNode = null;
-  if (status === 'error' || (status === 'offline' && !results)) {
+  if (selected) {
+    peek = (
+      <RouteSummary
+        key={selected.id}
+        route={selected}
+        position={position}
+        onOpen={() => onOpenRoute(selected, 'marker')}
+      />
+    );
+    content = <RouteSummaryMore route={selected} position={position} />;
+  } else if (status === 'error' || (status === 'offline' && !results)) {
     peek = message(
       <StatusMessage
         icon={isOffline ? 'offline' : 'error'}
@@ -116,14 +151,31 @@ export function DiscoverySheet({
         routes={routes}
         position={position}
         onOpen={(route) => onOpenRoute(route, 'card')}
+        onFocus={(route) => focus(route.id)}
+        onVisible={(visible) => {
+          for (const { route, index } of visible) {
+            if (!seen.current.has(route.id)) {
+              seen.current.add(route.id);
+              analytics.track('result_card_viewed', {
+                route_id: route.id,
+                position: index,
+                sheet_level: level.current,
+              });
+            }
+          }
+        }}
       />
     );
   }
 
   return (
     <ResultsSheet
+      ref={sheet}
       containerHeight={containerHeight}
-      onLevelChange={(_, height) => onCoverChange?.(height)}
+      onLevelChange={(next, height) => {
+        level.current = next;
+        onCoverChange?.(height);
+      }}
       peek={
         <>
           {banner}
