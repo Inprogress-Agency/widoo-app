@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createAnalytics, type AnalyticsClient } from './analytics';
+import { createAnalytics, createLogClient, type AnalyticsClient } from './analytics';
 import { createConsentStore, type ConsentStatus } from './consent';
 
 function memoryStorage(initial: Record<string, string> = {}) {
@@ -22,14 +22,16 @@ function setup({ stored, hasKey = true }: { stored?: ConsentStatus; hasKey?: boo
   };
   const createClient = vi.fn(() => client);
   const clearClientStorage = vi.fn();
+  const onInvalid = vi.fn();
   const analytics = createAnalytics({
     consent,
     createClient: hasKey ? createClient : undefined,
     clearClientStorage,
     appVersion: '0.1.0',
     platform: 'ios',
+    onInvalid,
   });
-  return { storage, consent, client, createClient, clearClientStorage, analytics };
+  return { storage, consent, client, createClient, clearClientStorage, onInvalid, analytics };
 }
 
 describe('createConsentStore', () => {
@@ -116,5 +118,60 @@ describe('createAnalytics', () => {
   it('is a no-op without PostHog key, even with consent', () => {
     const { analytics } = setup({ stored: 'granted', hasKey: false });
     expect(() => analytics.track('app_opened', { cold_start: true })).not.toThrow();
+  });
+
+  it('refuses an event outside the catalog, and sends nothing', () => {
+    const { analytics, client, onInvalid } = setup({ stored: 'granted' });
+    // @ts-expect-error not in the list of the wiki
+    analytics.track('screen_viewed', { screen: 'home' });
+    expect(client.capture).not.toHaveBeenCalled();
+    expect(onInvalid).toHaveBeenCalledWith('Unknown analytics event: screen_viewed');
+  });
+
+  it('refuses a property or a value outside the schema, and sends nothing', () => {
+    const { analytics, client, onInvalid } = setup({ stored: 'granted' });
+    // @ts-expect-error unknown property
+    analytics.track('app_opened', { cold_start: true, email: 'someone@example.com' });
+    // @ts-expect-error value outside the list of the wiki
+    analytics.track('route_opened', { route_id: 'route-1', source: 'push' });
+    expect(client.capture).not.toHaveBeenCalled();
+    expect(onInvalid).toHaveBeenNthCalledWith(1, 'Invalid app_opened: unknown email');
+    expect(onInvalid).toHaveBeenCalledTimes(2);
+  });
+
+  it('checks the events even without consent', () => {
+    const { analytics, onInvalid } = setup();
+    // @ts-expect-error unknown property
+    analytics.track('create_started', { steps: 1 });
+    expect(onInvalid).toHaveBeenCalledOnce();
+  });
+
+  it('never sends a position as the zone: the map event and the city refuse it', () => {
+    const { analytics, client, onInvalid } = setup({ stored: 'granted' });
+    analytics.track('map_search_zone', {
+      zoom: 14.5,
+      results_count: 3,
+      trigger: 'initial',
+      // @ts-expect-error the zone of the map is never sent
+      bbox: [2.33, 48.85, 2.37, 48.88],
+    });
+    analytics.setCity('48.8566,2.3522');
+    analytics.track('create_started');
+    expect(onInvalid).toHaveBeenCalledTimes(2);
+    expect(client.capture).toHaveBeenCalledOnce();
+    expect(client.capture).toHaveBeenCalledWith(
+      'create_started',
+      expect.objectContaining({ city: 'paris' }),
+    );
+  });
+});
+
+describe('createLogClient', () => {
+  it('writes each event and its properties on one line', () => {
+    const log = vi.fn();
+    createLogClient(log).capture('route_opened', { route_id: 'route-1', source: 'card' });
+    expect(log).toHaveBeenCalledWith(
+      '[analytics] route_opened {"route_id":"route-1","source":"card"}',
+    );
   });
 });
