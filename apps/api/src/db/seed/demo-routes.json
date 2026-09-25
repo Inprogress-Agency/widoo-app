@@ -591,6 +591,135 @@
       "isIndoor": false,
       "priceRange": "low",
       "hours": [{ "weekdays": [2, 3, 4, 5, 6], "opens": "12:00", "closes": "23:00" }]
+    },
+    {
+      "key": "merci",
+      "name": "Merci",
+      "category": "shop",
+      "location": { "lat": 48.86077, "lng": 2.36693 },
+      "address": "111 boulevard Beaumarchais, 75003 Paris",
+      "addressComponents": {
+        "postcode": "75003",
+        "arrondissement": "3e",
+        "neighborhood": "Le Marais"
+      },
+      "isIndoor": true,
+      "priceRange": "medium",
+      "hours": [
+        { "weekdays": [0, 1, 2, 3, 4, 5], "opens": "10:30", "closes": "19:30" },
+        { "weekdays": [6], "opens": "11:00", "closes": "19:00" }
+      ]
+    },
+    {
+      "key": "as-du-fallafel",
+      "name": "L’As du Fallafel",
+      "category": "restaurant",
+      "location": { "lat": 48.85742, "lng": 2.35907 },
+      "address": "34 rue des Rosiers, 75004 Paris",
+      "addressComponents": {
+        "postcode": "75004",
+        "arrondissement": "4e",
+        "neighborhood": "Le Marais"
+      },
+      "isIndoor": true,
+      "priceRange": "low",
+      "hours": [
+        { "weekdays": [0, 1, 2, 3, 6], "opens": "11:00", "closes": "23:00" },
+        { "weekdays": [4], "opens": "11:00", "closes": "15:00" }
+      ]
+    },
+    {
+      "key": "village-saint-paul",
+      "name": "Village Saint-Paul",
+      "category": "shop",
+      "location": { "lat": 48.85271, "lng": 2.36088 },
+      "address": "23 rue Saint-Paul, 75004 Paris",
+      "addressComponents": {
+        "postcode": "75004",
+        "arrondissement": "4e",
+        "neighborhood": "Le Marais"
+      },
+      "isIndoor": false,
+      "priceRange": "medium",
+      "hours": [{ "weekdays": [0, 3, 4, 5, 6], "opens": "11:00", "closes": "19:00" }]
+    },
+    {
+      "key": "berthillon",
+      "name": "Berthillon",
+      "category": "shop",
+      "location": { "lat": 48.85171, "lng": 2.35672 },
+      "address": "29-31 rue Saint-Louis-en-l’Île, 75004 Paris",
+      "addressComponents": {
+        "postcode": "75004",
+        "arrondissement": "4e",
+        "neighborhood": "Île Saint-Louis"
+      },
+      "isIndoor": true,
+      "priceRange": "low",
+      "hours": [{ "weekdays": [2, 3, 4, 5, 6], "opens": "10:00", "closes": "20:00" }]
+    },
+    {
+      "key": "viaduc-des-arts",
+      "name": "Viaduc des Arts",
+      "category": "walk",
+      "location": { "lat": 48.84635, "lng": 2.3778 },
+      "address": "avenue Daumesnil, 75012 Paris",
+      "addressComponents": {
+        "postcode": "75012",
+        "arrondissement": "12e",
+        "neighborhood": "Bastille"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "jardin-de-reuilly",
+      "name": "Jardin de Reuilly",
+      "category": "park",
+      "location": { "lat": 48.84219, "lng": 2.38753 },
+      "address": "rue Albinoni, 75012 Paris",
+      "addressComponents": {
+        "postcode": "75012",
+        "arrondissement": "12e",
+        "neighborhood": "Reuilly"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": [
+        { "weekdays": [0, 1, 2, 3, 4], "opens": "08:00", "closes": "20:30" },
+        { "weekdays": [5, 6], "opens": "09:00", "closes": "20:30" }
+      ]
+    },
+    {
+      "key": "lac-daumesnil",
+      "name": "Lac Daumesnil",
+      "category": "park",
+      "location": { "lat": 48.83076, "lng": 2.41541 },
+      "address": "route de Ceinture du Lac Daumesnil, 75012 Paris",
+      "addressComponents": {
+        "postcode": "75012",
+        "arrondissement": "12e",
+        "neighborhood": "Bois de Vincennes"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "parc-floral",
+      "name": "Parc floral de Paris",
+      "category": "park",
+      "location": { "lat": 48.83732, "lng": 2.44556 },
+      "address": "route de la Pyramide, 75012 Paris",
+      "addressComponents": {
+        "postcode": "75012",
+        "arrondissement": "12e",
+        "neighborhood": "Bois de Vincennes"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "09:30", "closes": "20:00" }]
     }
   ],
   "routes": [
@@ -1087,6 +1216,122 @@
           "description": "Guinguette dans le parc : crêpes et jus de pomme sur la terrasse.",
           "durationMin": 60,
           "costPerPerson": 8
+        }
+      ]
+    },
+    {
+      "key": "marais-gourmand",
+      "title": "Le Marais gourmand en deux heures",
+      "description": "Un café dans un concept-store, le falafel de la rue des Rosiers, les cours d’antiquaires du village Saint-Paul et une glace Berthillon sur l’île Saint-Louis.",
+      "author": null,
+      "moods": ["food", "shopping"],
+      "audiences": ["couple", "friends"],
+      "conditions": ["no_booking", "indoor"],
+      "transport": "walk",
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1788101841904-669e8b5924b4?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1563896171319-a5534fcf465f?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        }
+      ],
+      "computed": {
+        "duration_min": 135,
+        "budget_per_person_eur": { "min": 20, "max": 32 },
+        "distance_m": 2010,
+        "walking_m": 2010,
+        "effort": "easy",
+        "warnings": [],
+        "computed_at": "2026-09-25T08:00:00.000Z"
+      },
+      "steps": [
+        {
+          "place": "merci",
+          "description": "Café au Used Book Café, au milieu des livres d’occasion.",
+          "durationMin": 30,
+          "costPerPerson": 8
+        },
+        {
+          "place": "as-du-fallafel",
+          "description": "Le sandwich falafel à emporter. Fermé le samedi.",
+          "durationMin": 30,
+          "costPerPerson": 12,
+          "transitionNote": "Rejoindre la rue des Rosiers par la rue du Pas-de-la-Mule."
+        },
+        {
+          "place": "village-saint-paul",
+          "description": "Des cours intérieures pleines d’antiquaires et de brocanteurs.",
+          "durationMin": 30,
+          "costPerPerson": 0
+        },
+        {
+          "place": "berthillon",
+          "description": "Glace au caramel au beurre salé, à déguster sur le quai d’Orléans.",
+          "durationMin": 20,
+          "costPerPerson": 6
+        }
+      ]
+    },
+    {
+      "key": "coulee-verte-bois-de-vincennes",
+      "title": "De Bastille au bois de Vincennes par la Coulée verte",
+      "description": "Plus de sept kilomètres de marche sur l’ancienne voie ferrée de la Bastille, des jardins suspendus jusqu’au lac Daumesnil et au Parc floral. Prévoir de bonnes chaussures et un pique-nique.",
+      "author": null,
+      "moods": ["sport", "nature"],
+      "audiences": ["couple", "friends", "solo"],
+      "conditions": ["no_booking", "outdoor", "sunny"],
+      "transport": "walk",
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1663511870425-5dd7edf1c071?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1663511433047-c0f9317e046a?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        }
+      ],
+      "computed": {
+        "duration_min": 335,
+        "budget_per_person_eur": { "min": 0, "max": 0 },
+        "distance_m": 7250,
+        "walking_m": 7250,
+        "effort": "intense",
+        "warnings": [],
+        "computed_at": "2026-09-25T08:00:00.000Z"
+      },
+      "steps": [
+        {
+          "place": "viaduc-des-arts",
+          "description": "Monter sur la Coulée verte par l’escalier de l’avenue Daumesnil.",
+          "durationMin": 30,
+          "costPerPerson": 0
+        },
+        {
+          "place": "jardin-de-reuilly",
+          "description": "Pelouse et passerelle au-dessus du jardin, pause pique-nique.",
+          "durationMin": 45,
+          "costPerPerson": 0,
+          "transitionNote": "Suivre la Coulée verte jusqu’à la porte de Montempoivre."
+        },
+        {
+          "place": "lac-daumesnil",
+          "description": "Le tour du lac et de ses deux îles, par le pont suspendu.",
+          "durationMin": 75,
+          "costPerPerson": 0
+        },
+        {
+          "place": "parc-floral",
+          "description": "Les collections de plantes, la forêt de bambous et les grandes pelouses.",
+          "durationMin": 90,
+          "costPerPerson": 0
         }
       ]
     }
