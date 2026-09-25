@@ -1,7 +1,7 @@
 import type { PlaceCategory } from '@widoo/shared';
 import { activityFamilies, colors, placeCategories } from '@widoo/tokens';
 import { View } from 'react-native';
-import { Icon } from './Icon';
+import { Icon, uiIcon } from './Icon';
 
 interface StepDotProps {
   category: PlaceCategory;
@@ -23,6 +23,22 @@ export function StepDot({ category, isActive = false }: StepDotProps) {
       style={{ backgroundColor: colors[activityFamilies[family].color] }}
     >
       <Icon name={icon} size={isActive ? 'space-18' : 'space-16'} color="on-strong" />
+    </View>
+  );
+}
+
+/**
+ * Start of a Premium route the user cannot open (D-014): ink dot of 34 points with the gold crown
+ * and a white rim, alone on the map. Decorative, like the step dots.
+ */
+export function LockedStartDot() {
+  return (
+    <View
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      className="size-step-dot-active items-center justify-center rounded-pill border-2 border-bg bg-surface-strong"
+    >
+      <Icon {...uiIcon('premium')} size="space-18" />
     </View>
   );
 }
