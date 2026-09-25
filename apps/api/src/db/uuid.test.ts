@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { uuidv7 } from './uuid';
+import { namedUuidv7, uuidv7 } from './uuid';
 
 describe('uuidv7', () => {
   it('is a version 7 RFC 9562 UUID', () => {
@@ -14,5 +14,20 @@ describe('uuidv7', () => {
     const id = uuidv7(now);
     expect(Number.parseInt(id.replace('-', '').slice(0, 12), 16)).toBe(now);
     expect(uuidv7(now) < uuidv7(now + 1)).toBe(true);
+  });
+});
+
+describe('namedUuidv7', () => {
+  const time = Date.UTC(2026, 8, 25, 8);
+
+  it('is a version 7 UUID, the same for the same name and time', () => {
+    const id = namedUuidv7('route:marais', time);
+    expect(z.uuid({ version: 'v7' }).safeParse(id).success).toBe(true);
+    expect(namedUuidv7('route:marais', time)).toBe(id);
+    expect(Number.parseInt(id.replace('-', '').slice(0, 12), 16)).toBe(time);
+  });
+
+  it('differs from one name to another', () => {
+    expect(namedUuidv7('route:marais', time)).not.toBe(namedUuidv7('route:belleville', time));
   });
 });
