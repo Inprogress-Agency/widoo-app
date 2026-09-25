@@ -28,7 +28,8 @@
           "locationAlwaysPermission": false,
           "motionUsagePermission": false
         }
-      ]
+      ],
+      "expo-image"
     ]
   }
 }
