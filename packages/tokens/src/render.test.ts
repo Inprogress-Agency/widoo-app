@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { presetPath, tokensPath } from './paths';
-import { renderPreset } from './render';
+import { presetPath, themePath, tokensPath } from './paths';
+import { renderPreset, renderThemeModule } from './render';
 import { tokensSchema } from './schema';
 import { buildTheme } from './theme';
 
@@ -50,13 +50,15 @@ describe('renderPreset', () => {
   });
 });
 
-describe('generated preset', () => {
-  it('is up to date with tokens.json (pnpm --filter @widoo/tokens generate)', () => {
+describe('generated files', () => {
+  it('are up to date with tokens.json (pnpm --filter @widoo/tokens generate)', () => {
     expect(readFileSync(presetPath, 'utf8')).toBe(renderPreset(tokens, theme));
+    expect(readFileSync(themePath, 'utf8')).toBe(renderThemeModule(tokens, theme));
   });
 
-  it('says where it comes from', () => {
+  it('say where they come from', () => {
     const header = '// Généré depuis tokens.json (version 8), ne pas modifier';
     expect(readFileSync(presetPath, 'utf8').startsWith(header)).toBe(true);
+    expect(readFileSync(themePath, 'utf8').startsWith(header)).toBe(true);
   });
 });

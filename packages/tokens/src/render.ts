@@ -65,3 +65,54 @@ module.exports = {
 };
 `;
 }
+
+type Declaration = {
+  name: string;
+  value: unknown;
+  comment: string;
+  type?: string;
+};
+
+/** Typed module of the theme, for components and the rare StyleSheet. */
+export function renderThemeModule(tokens: Tokens, theme: Theme = buildTheme(tokens)): string {
+  const declarations: Declaration[] = [
+    {
+      name: 'colors',
+      value: theme.colors,
+      comment: 'Light theme: the dark values are not validated and not generated.',
+      type: 'ColorToken',
+    },
+    {
+      name: 'fontFamilies',
+      value: theme.fontFamilies,
+      comment: 'Font file of each weight, loaded under this name.',
+      type: 'FontWeight',
+    },
+    {
+      name: 'textStyles',
+      value: theme.textStyles,
+      comment: 'The 20 text styles, in points.',
+      type: 'TextStyleToken',
+    },
+    { name: 'spacing', value: theme.spacing, comment: 'Spacings in points.', type: 'SpacingToken' },
+    { name: 'radius', value: theme.radius, comment: 'Radii in points.', type: 'RadiusToken' },
+    { name: 'size', value: theme.size, comment: 'Component sizes in points.', type: 'SizeToken' },
+    {
+      name: 'shadow',
+      value: theme.shadow,
+      comment: 'The only shadow, for the native `boxShadow` style.',
+      type: 'ShadowToken',
+    },
+  ];
+
+  const body = declarations.map(({ name, value, comment, type }) => {
+    const constant = `/** ${comment} */\nexport const ${name} = ${json(value)} as const;`;
+    return type ? `${constant}\nexport type ${type} = keyof typeof ${name};` : constant;
+  });
+
+  return `${header(tokens.version)}
+export const tokensVersion = ${tokens.version};
+
+${body.join('\n\n')}
+`;
+}
