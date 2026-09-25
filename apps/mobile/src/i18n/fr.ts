@@ -44,6 +44,17 @@ export const fr = {
   },
   sheet: {
     label: 'Résultats',
+    nearby: 'À proximité',
+    count_one: '{{count}} parcours',
+    count_other: '{{count}} parcours',
+    inZone: '{{count}} · {{zone}}',
+    paris: 'Paris',
+    searching: 'Recherche autour de vous…',
+    offline: 'Hors connexion · résultats du {{day}} à {{time}}',
+    error: 'Impossible de charger les parcours',
+    noConnection: 'Pas de connexion',
+    errorBody: 'Vérifiez votre connexion puis réessayez.',
+    retry: 'Réessayer',
     level: {
       rest: 'réduits',
       half: 'à mi-hauteur',
