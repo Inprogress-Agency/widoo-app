@@ -255,39 +255,89 @@ export type ShadowToken = keyof typeof shadow;
 /** Every Phosphor icon the mappings name: an icon outside this list does not exist. */
 export const iconNames = [
   "armchair",
+  "arrow-right",
+  "arrow-square-out",
+  "arrows-clockwise",
+  "arrows-down-up",
   "balloon",
   "bank",
   "barbell",
+  "bell",
   "bicycle",
+  "binoculars",
   "bread",
   "calendar-slash",
   "camera",
   "car",
+  "caret-down",
+  "caret-left",
   "castle-turret",
+  "check",
+  "check-circle",
+  "circle",
+  "circle-notch",
+  "clock",
   "cloud-rain",
+  "cloud-slash",
   "coffee",
+  "crown-simple",
+  "dots-six-vertical",
+  "envelope-simple",
+  "envelope-simple-open",
+  "export",
+  "eye",
+  "eye-slash",
+  "file-text",
+  "flag",
   "flower-tulip",
   "fork-knife",
   "frame-corners",
+  "gear-six",
+  "globe-simple",
+  "gps-slash",
+  "headphones",
   "heart",
   "house",
+  "info",
+  "key",
   "lightning",
+  "link-break",
+  "lock-simple",
+  "magnifying-glass",
   "map-pin",
+  "map-trifold",
   "mountains",
+  "navigation-arrow",
   "park",
   "paw-print",
+  "pencil-simple",
   "person-simple-walk",
+  "play",
+  "plus",
+  "question",
+  "quotes",
+  "seal-check",
+  "shield-check",
   "shopping-bag",
+  "sign-out",
+  "sliders-horizontal",
   "sparkle",
+  "star",
   "subway",
   "sun",
   "ticket",
+  "trash",
   "tree",
   "user",
   "users",
   "users-three",
+  "wallet",
+  "warning",
+  "warning-circle",
   "wheelchair",
-  "wine"
+  "wifi-slash",
+  "wine",
+  "x-circle"
 ] as const;
 
 /** Activity families: color, chip colors, mood dot. */
@@ -446,5 +496,464 @@ export const moodDots = {
   "relax": "mood-relax",
   "sport": "mood-sport"
 } as const satisfies Record<Mood, ColorToken>;
+
+/** Interface icons: name, weight (always or when active), color. */
+export const uiIcons = {
+  "search": {
+    "name": "magnifying-glass"
+  },
+  "filters": {
+    "name": "sliders-horizontal"
+  },
+  "notifications": {
+    "name": "bell"
+  },
+  "recenter": {
+    "name": "navigation-arrow"
+  },
+  "refresh": {
+    "name": "arrows-clockwise"
+  },
+  "favorite": {
+    "name": "heart",
+    "activeWeight": "fill",
+    "color": "coral"
+  },
+  "verified": {
+    "name": "seal-check"
+  },
+  "premium": {
+    "name": "crown-simple",
+    "weight": "fill",
+    "color": "amber"
+  },
+  "private": {
+    "name": "lock-simple"
+  },
+  "alert": {
+    "name": "warning"
+  },
+  "duration": {
+    "name": "clock"
+  },
+  "budget": {
+    "name": "wallet"
+  },
+  "distance": {
+    "name": "person-simple-walk"
+  },
+  "steps": {
+    "name": "flag"
+  },
+  "close-sheet": {
+    "name": "caret-down"
+  },
+  "share": {
+    "name": "export"
+  },
+  "map": {
+    "name": "map-trifold"
+  },
+  "offline": {
+    "name": "wifi-slash"
+  },
+  "error": {
+    "name": "cloud-slash"
+  },
+  "removed": {
+    "name": "eye-slash"
+  },
+  "info": {
+    "name": "info"
+  },
+  "tab-home": {
+    "name": "house",
+    "activeWeight": "fill"
+  },
+  "tab-outings": {
+    "name": "map-trifold",
+    "activeWeight": "fill"
+  },
+  "tab-profile": {
+    "name": "user",
+    "activeWeight": "fill"
+  },
+  "settings": {
+    "name": "gear-six"
+  },
+  "back": {
+    "name": "caret-left"
+  },
+  "edit": {
+    "name": "pencil-simple"
+  },
+  "camera": {
+    "name": "camera"
+  },
+  "reorder": {
+    "name": "dots-six-vertical"
+  },
+  "anecdote": {
+    "name": "quotes",
+    "weight": "fill"
+  },
+  "sort": {
+    "name": "arrows-down-up"
+  },
+  "add": {
+    "name": "plus",
+    "weight": "bold"
+  },
+  "done": {
+    "name": "check-circle",
+    "weight": "fill",
+    "color": "green-ink"
+  },
+  "todo": {
+    "name": "circle"
+  },
+  "certified": {
+    "name": "seal-check",
+    "weight": "fill",
+    "color": "blue"
+  },
+  "email": {
+    "name": "envelope-simple"
+  },
+  "sign-out": {
+    "name": "sign-out"
+  },
+  "delete": {
+    "name": "trash"
+  },
+  "legal": {
+    "name": "file-text"
+  },
+  "privacy": {
+    "name": "shield-check"
+  },
+  "help": {
+    "name": "question"
+  },
+  "clear": {
+    "name": "x-circle"
+  },
+  "empty": {
+    "name": "binoculars"
+  },
+  "loading": {
+    "name": "circle-notch"
+  },
+  "location-off": {
+    "name": "gps-slash"
+  },
+  "external": {
+    "name": "arrow-square-out"
+  },
+  "public-profile": {
+    "name": "eye"
+  },
+  "login-method": {
+    "name": "key"
+  },
+  "language": {
+    "name": "globe-simple"
+  },
+  "link-expired": {
+    "name": "link-break"
+  },
+  "email-sent": {
+    "name": "envelope-simple-open"
+  },
+  "toast-success": {
+    "name": "check-circle",
+    "weight": "fill",
+    "color": "success-on-strong"
+  },
+  "toast-info": {
+    "name": "info",
+    "weight": "fill",
+    "color": "info-on-strong"
+  },
+  "toast-warning": {
+    "name": "warning",
+    "weight": "fill",
+    "color": "amber"
+  },
+  "toast-error": {
+    "name": "warning-circle",
+    "weight": "fill",
+    "color": "error-on-strong"
+  },
+  "go-minimize": {
+    "name": "caret-down"
+  },
+  "go-map": {
+    "name": "map-trifold"
+  },
+  "go-back": {
+    "name": "caret-left"
+  },
+  "itinerary": {
+    "name": "arrow-square-out"
+  },
+  "arrived": {
+    "name": "check",
+    "weight": "bold"
+  },
+  "listen": {
+    "name": "headphones",
+    "weight": "fill"
+  },
+  "play": {
+    "name": "play",
+    "weight": "fill"
+  },
+  "practical": {
+    "name": "info",
+    "weight": "fill"
+  },
+  "must-see": {
+    "name": "star",
+    "weight": "fill"
+  },
+  "creator-word": {
+    "name": "quotes",
+    "weight": "fill"
+  },
+  "next-step": {
+    "name": "arrow-right",
+    "weight": "fill"
+  }
+} as const satisfies Record<string, { name: IconName; weight?: 'fill' | 'bold'; activeWeight?: 'fill'; color?: ColorToken }>;
+export type UiIconKey = keyof typeof uiIcons;
+
+/** Badges on photos and on the creator line. */
+export const badges = {
+  "verified": {
+    "bg": "badge-verified-bg",
+    "ink": "green-ink",
+    "icon": "seal-check"
+  },
+  "signature": {
+    "bg": "badge-signature-bg",
+    "ink": "blue-ink",
+    "icon": null
+  },
+  "premium": {
+    "bg": "badge-premium-bg",
+    "ink": "on-strong",
+    "icon": "crown-simple",
+    "iconColor": "amber"
+  },
+  "private": {
+    "bg": "bg",
+    "ink": "ink",
+    "icon": "lock-simple"
+  },
+  "new": {
+    "bg": "bg",
+    "ink": "ink",
+    "icon": null
+  },
+  "certified": {
+    "bg": null,
+    "ink": "blue-ink",
+    "icon": "seal-check",
+    "iconColor": "blue",
+    "iconWeight": "fill"
+  }
+} as const satisfies Record<string, { bg: ColorToken | null; ink: ColorToken; icon: IconName | null; iconColor?: ColorToken; iconWeight?: 'fill' }>;
+export type BadgeKind = keyof typeof badges;
+
+/** The only places where `surface-strong` is allowed. */
+export const darkSurfaces = [
+  "chip active",
+  "onglet actif",
+  "tooltip de la carte",
+  "bouton et pastille Premium",
+  "pastille Fin du parcours",
+  "toast",
+  "page immersive E-07",
+  "mini-lecteur"
+] as const;
+
+/** Accessibility thresholds (Direction-Artistique › Accessibilité). */
+export const accessibility = {
+  "textContrast": 4.5,
+  "uiContrast": 3,
+  "touchMin": 44,
+  "maxFontSizeMultiplierDense": 1.3,
+  "reflowFontScale": 1.3,
+  "denseComponents": [
+    "chips",
+    "barre d'onglets",
+    "étiquettes de marqueurs",
+    "compteur de filtres",
+    "pilule de tri",
+    "pastilles sur photo",
+    "tuiles d'infos",
+    "barre collée de la fiche",
+    "barre du haut des pages secondaires",
+    "action du toast",
+    "bouton « Continuer avec un e-mail »"
+  ]
+} as const;
+
+/** Toast colors and states (D-025). */
+export const toast = {
+  "bg": "surface-strong",
+  "title": "on-strong",
+  "subtitle": "on-strong-muted",
+  "disc": "toast-disc",
+  "action": {
+    "bg": "toast-action",
+    "ink": "on-strong"
+  },
+  "shadow": "shadow-tabbar",
+  "states": {
+    "success": {
+      "icon": "check-circle",
+      "color": "success-on-strong",
+      "role": "status",
+      "seconds": 4
+    },
+    "info": {
+      "icon": "info",
+      "color": "info-on-strong",
+      "role": "status",
+      "seconds": 4
+    },
+    "warning": {
+      "icon": "warning",
+      "color": "amber",
+      "role": "alert",
+      "seconds": 6
+    },
+    "error": {
+      "icon": "warning-circle",
+      "color": "error-on-strong",
+      "role": "alert",
+      "seconds": null
+    }
+  }
+} as const;
+
+/** Immersive page of the route in progress and mini player (E-07, D-029). */
+export const immersive = {
+  "bg": "surface-strong",
+  "photoHeight": 600,
+  "veil": "linear-gradient(180deg, rgba(20,23,31,.60) 0%, rgba(20,23,31,.15) 20%, rgba(20,23,31,.10) 42%, rgba(20,23,31,.90) 72%, #14171F 100%)",
+  "section": {
+    "bg": "surface-strong-raised",
+    "radius": "radius-section",
+    "icon": "info-on-strong",
+    "link": "info-on-strong",
+    "ok": "success-on-strong"
+  },
+  "commands": {
+    "height": 52
+  },
+  "miniPlayer": {
+    "bg": "surface-strong",
+    "radius": "radius-section",
+    "height": 64,
+    "shadow": "shadow-tabbar"
+  }
+} as const;
+
+/** Durations (ms), cubic-bezier curves, gesture spring, press feedback and haptics (D-030). */
+export const motion = {
+  "durations": {
+    "press": 100,
+    "pressRelease": 200,
+    "fade": 200,
+    "base": 300,
+    "page": 350,
+    "map": 500,
+    "shimmer": 1200,
+    "loadingDelay": 300
+  },
+  "easings": {
+    "standard": [
+      0.2,
+      0,
+      0,
+      1
+    ],
+    "exit": [
+      0.3,
+      0,
+      1,
+      1
+    ],
+    "linear": [
+      0,
+      0,
+      1,
+      1
+    ]
+  },
+  "springGesture": {
+    "damping": 500,
+    "stiffness": 1000,
+    "mass": 3,
+    "overshootClamping": true
+  },
+  "press": {
+    "filledVeil": {
+      "color": "ink",
+      "opacity": 0.08
+    },
+    "scale": 0.97,
+    "opacity": 0.6
+  },
+  "scroll": {
+    "photoParallax": 0.5,
+    "barFadeDistancePx": 48
+  },
+  "haptics": {
+    "favoriteOn": {
+      "ios": {
+        "method": "impactAsync",
+        "style": "Light"
+      },
+      "android": "Toggle_On"
+    },
+    "arrived": {
+      "ios": {
+        "method": "impactAsync",
+        "style": "Medium"
+      },
+      "android": "Confirm"
+    },
+    "ratingStar": {
+      "ios": {
+        "method": "selectionAsync"
+      },
+      "android": "Clock_Tick"
+    },
+    "sheetDetent": {
+      "ios": {
+        "method": "selectionAsync"
+      },
+      "android": "Clock_Tick"
+    },
+    "toastSuccess": {
+      "ios": {
+        "method": "notificationAsync",
+        "style": "Success"
+      },
+      "android": "Confirm"
+    },
+    "toastError": {
+      "ios": {
+        "method": "notificationAsync",
+        "style": "Error"
+      },
+      "android": "Reject"
+    }
+  }
+} as const;
 
 export type IconName = (typeof iconNames)[number];
