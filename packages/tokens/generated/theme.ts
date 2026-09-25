@@ -1,7 +1,7 @@
-// Généré depuis tokens.json (version 14), ne pas modifier : pnpm --filter @widoo/tokens generate.
+// Généré depuis tokens.json (version 21), ne pas modifier : pnpm --filter @widoo/tokens generate.
 import type { Audience, Condition, Mood, PlaceCategory, Transport } from '@widoo/shared';
 
-export const tokensVersion = 14;
+export const tokensVersion = 21;
 
 /** Light theme: the dark values are not validated and not generated. */
 export const colors = {
@@ -53,6 +53,16 @@ export const colors = {
   "mood-instagrammable": "#BC3797",
   "mood-relax": "#1F87B5",
   "mood-sport": "#5E8F12",
+  "mood-romantic-soft": "#F9E6EA",
+  "mood-romantic-ink": "#9A2F46",
+  "mood-unusual-soft": "#F2E6F7",
+  "mood-unusual-ink": "#7E349D",
+  "mood-instagrammable-soft": "#F6E5F1",
+  "mood-instagrammable-ink": "#952B77",
+  "mood-relax-soft": "#E2EFF5",
+  "mood-relax-ink": "#165E7F",
+  "mood-sport-soft": "#EAF0E0",
+  "mood-sport-ink": "#40610C",
   "success-on-strong": "#4CC38A",
   "info-on-strong": "#8EA8F0",
   "error-on-strong": "#FF6B5A",
@@ -238,7 +248,7 @@ export const size = {
   "marker": 56,
   "marker-active": 68,
   "thumb": 48,
-  "tooltip-w": 260,
+  "tooltip-min-w": 260,
   "card-w": 270,
   "card-h": 348,
   "card-list-w": 358,
@@ -351,6 +361,7 @@ export const iconNames = [
   "wheelchair",
   "wifi-slash",
   "wine",
+  "x",
   "x-circle"
 ] as const;
 
@@ -818,6 +829,13 @@ export const uiIcons = {
   },
   "empty-past": {
     "name": "flag"
+  },
+  "close": {
+    "name": "x",
+    "weight": "bold"
+  },
+  "ends": {
+    "name": "hourglass-medium"
   }
 } as const satisfies Record<string, { name: IconName; weight?: 'fill' | 'bold'; activeWeight?: 'fill'; color?: ColorToken }>;
 export type UiIconKey = keyof typeof uiIcons;
@@ -870,7 +888,8 @@ export const darkSurfaces = [
   "toast",
   "page immersive E-07",
   "mini-lecteur",
-  "segment actif (onglet Parcours)"
+  "segment actif (onglet Parcours)",
+  "bouton « Essayer gratuitement » de E-17"
 ] as const;
 
 /** Accessibility thresholds (Direction-Artistique › Accessibilité). */
@@ -890,7 +909,7 @@ export const accessibility = {
     "tuiles d'infos",
     "barre collée de la fiche",
     "barre du haut des pages secondaires",
-    "action du toast",
+    "toast entier (titre, sous-titre, action, D-046)",
     "bouton « Continuer avec un e-mail »",
     "barre du haut et en-tête compact de E-07",
     "mini-lecteur (nom sur une ligne, nom complet dans le libellé)",
@@ -898,7 +917,12 @@ export const accessibility = {
     "segments de l'onglet Parcours",
     "pastilles de statut des lignes",
     "petits boutons de 36 px (Noter, Relancer, Reprendre, Reprogrammer)",
-    "barres collées de la sheet Programmer et de « Votre sortie »"
+    "barres collées de la sheet Programmer et de « Votre sortie »",
+    "barre du haut et étapes de l'assistant de création (E-11 à E-14, D-051)",
+    "étiquettes de trajet sur la carte de l'éditeur (D-051)",
+    "pastille « Couverture » des photos du parcours (D-051)",
+    "idées à toucher de « À prévoir » (D-051)",
+    "pastille « Suggéré » de la fenêtre du trajet (D-051)"
   ]
 } as const;
 
