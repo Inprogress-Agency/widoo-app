@@ -66,3 +66,17 @@ describe('searchRoutes', () => {
     expect(getToken).not.toHaveBeenCalled();
   });
 });
+
+describe('countRoutes', () => {
+  it('counts the routes of a zone with its filters, without token', async () => {
+    const fetch = vi.fn<typeof globalThis.fetch>(async () => Response.json({ count: 124 }));
+    const getToken = vi.fn(async () => 'token-1');
+    const client = createApiClient({ baseUrl: 'http://10.0.2.2:8080', fetch, getToken });
+
+    await expect(client.countRoutes({ bbox, moods: ['nature'] })).resolves.toEqual({ count: 124 });
+    expect(fetch.mock.calls[0]?.[0]).toBe(
+      'http://10.0.2.2:8080/v1/routes/search/count?bbox=2.33%2C48.85%2C2.37%2C48.88&moods=nature',
+    );
+    expect(getToken).not.toHaveBeenCalled();
+  });
+});

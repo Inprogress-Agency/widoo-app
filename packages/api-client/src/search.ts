@@ -1,4 +1,4 @@
-import { routeFilterGroups, type RouteSearchQuery } from '@widoo/shared';
+import { routeFilterGroups, type RouteFilterGroup, type RouteSearchQuery } from '@widoo/shared';
 
 /**
  * What the app asks of `GET /v1/routes/search`: the zone, and optionally filters, sort and page.
@@ -6,6 +6,9 @@ import { routeFilterGroups, type RouteSearchQuery } from '@widoo/shared';
  */
 export type RouteSearchParams = Pick<RouteSearchQuery, 'bbox'> &
   Partial<Omit<RouteSearchQuery, 'bbox'>>;
+
+/** What the app asks of `GET /v1/routes/search/count`: the zone and the filters of a search. */
+export type RouteCountParams = Pick<RouteSearchParams, 'bbox' | RouteFilterGroup>;
 
 /**
  * Query string of the search, as the API reads it: `bbox=w,s,e,n`, `near=lat,lng`, a list filter
