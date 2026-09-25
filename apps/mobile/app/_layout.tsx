@@ -1,4 +1,4 @@
-import { QueryClientProvider } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { useFonts } from 'expo-font';
 import { DefaultTheme, Stack, ThemeProvider, type Theme } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -7,6 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import '../global.css';
 import { useAppOpenedEvent } from '../src/analytics';
+import { persistOptions } from '../src/api/persister';
 import { queryClient } from '../src/api/query-client';
 import '../src/i18n';
 import { initMonitoring } from '../src/monitoring';
@@ -43,7 +44,8 @@ export default function RootLayout() {
     return null;
   }
   return (
-    <QueryClientProvider client={queryClient}>
+    // The last search is restored from the device, for the results offline (Ecrans › E-01).
+    <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
       <ThemeProvider value={navigationTheme}>
         <StatusBar style="dark" />
         <Stack screenOptions={{ headerShown: false }}>
@@ -54,6 +56,6 @@ export default function RootLayout() {
           />
         </Stack>
       </ThemeProvider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }
