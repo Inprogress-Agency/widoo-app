@@ -31,11 +31,16 @@ describe('system routes', () => {
     expect(config.labels.fr.durations).toEqual(labels.fr.durations);
   });
 
-  it('describe both routes in the OpenAPI document outside production', async () => {
+  it('describe the public routes in the OpenAPI document outside production', async () => {
     const response = await app.inject({ url: '/docs/json' });
     expect(response.statusCode).toBe(200);
     expect(Object.keys(response.json().paths)).toEqual(
-      expect.arrayContaining(['/v1/health', '/v1/config']),
+      expect.arrayContaining([
+        '/v1/health',
+        '/v1/config',
+        '/v1/routes/search',
+        '/v1/routes/search/count',
+      ]),
     );
   });
 });
