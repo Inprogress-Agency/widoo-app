@@ -43,6 +43,13 @@ export const fr = {
       more: 'Voir plus',
     },
   },
+  card: {
+    by: 'Par {{name}}',
+    byWidoo: 'Par Widoo',
+    member: 'Membre Widoo',
+    distance: 'à {{distance}}',
+    open: 'Ouvre la fiche du parcours',
+  },
   route: {
     title: 'Fiche du parcours',
     comingSoon: 'La fiche détaillée arrive bientôt.',
