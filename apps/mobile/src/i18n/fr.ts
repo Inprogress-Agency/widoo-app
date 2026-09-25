@@ -12,6 +12,21 @@ export const fr = {
     locationOff: 'Position désactivée · autour de Paris',
     enable: 'Activer',
     enableLocation: 'Activer la localisation',
+    tooltip: {
+      label: 'Parcours {{title}}, étape 1 sur {{total}}, {{place}}',
+      lockedLabel_one: '{{title}}, parcours Premium, {{count}} étape en {{duration}}',
+      lockedLabel_other: '{{title}}, parcours Premium, {{count}} étapes en {{duration}}',
+      premium: 'Parcours Premium',
+      steps_one: '{{count}} étape en {{duration}}',
+      steps_other: '{{count}} étapes en {{duration}}',
+      step: 'Étape 1/{{total}}',
+      more: 'Voir plus',
+    },
+  },
+  route: {
+    title: 'Fiche du parcours',
+    comingSoon: 'La fiche détaillée arrive bientôt.',
+    back: 'Retour',
   },
   routes: {
     title: 'Mes parcours',

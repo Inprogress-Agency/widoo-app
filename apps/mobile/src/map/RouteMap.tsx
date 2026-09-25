@@ -1,6 +1,6 @@
 import type { MapState } from '@rnmapbox/maps';
 import type { LatLng, RouteCard } from '@widoo/shared';
-import { motion, spacing } from '@widoo/tokens';
+import { motion, size, spacing } from '@widoo/tokens';
 import { useCallback, useRef, useState, type ComponentRef, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View, useWindowDimensions, type AccessibilityActionEvent } from 'react-native';
@@ -11,8 +11,10 @@ import { initialSpanM, toBbox, toLngLat, zoomForSpan, type Bbox, type LngLat } f
 import { Mapbox } from './mapbox';
 import { MapImage } from './MapImage';
 import { RecenterButton } from './MapControls';
-import { markerImage, routeMarkers } from './markers';
+import { isLocked, markerImage, routeMarkers, selectionFrame } from './markers';
+import { SelectedRoute } from './SelectedRoute';
 import { mapStyleJson } from './style';
+import { screenXOnFit, tooltipAnchorX } from './tooltip';
 
 /** Map ornaments (Mapbox logo and attribution, required) sit in the margin of the screen. */
 const ornamentMargin = { bottom: spacing['space-8'], left: spacing['space-8'] };
@@ -24,7 +26,13 @@ interface RouteMapProps {
   hasPosition: boolean;
   /** Called once, when the first view of the map settles: its zone feeds the first search. */
   onFirstZone: (zone: Bbox) => void;
-  onRoutePress: (route: RouteCard) => void;
+  selectedRoute: RouteCard | null;
+  /** A Premium route is locked for a user without subscription (D-014). */
+  hasPremium: boolean;
+  /** A marker, or null for a tap elsewhere on the map. */
+  onSelect: (route: RouteCard | null) => void;
+  /** « Voir plus » of the tooltip: the route sheet (E-05). */
+  onOpenRoute: (route: RouteCard) => void;
   /** Line left of the recentre button, such as the location off banner. */
   banner?: ReactNode;
 }
@@ -39,11 +47,16 @@ export function RouteMap({
   center,
   hasPosition,
   onFirstZone,
-  onRoutePress,
+  selectedRoute,
+  hasPremium,
+  onSelect,
+  onOpenRoute,
   banner,
 }: RouteMapProps) {
   const { t } = useTranslation();
   const { fontScale, width } = useWindowDimensions();
+  const [viewport, setViewport] = useState({ width: 0, height: 0 });
+  const [tooltipAnchor, setTooltipAnchor] = useState(0.5);
   const isReducedMotion = useReducedMotion();
   const camera = useRef<ComponentRef<typeof Mapbox.Camera>>(null);
   const hasZone = useRef(false);
@@ -79,6 +92,46 @@ export function RouteMap({
     camera.current?.setCamera({ ...home, ...cameraAnimation });
   };
 
+  /**
+   * The route fills the lower half of the map, its tooltip the upper half, above the room kept
+   * for the results sheet; the tooltip slides sideways to stay on screen.
+   */
+  const selectRoute = (route: RouteCard) => {
+    const frame = selectionFrame(route, isLocked(route, hasPremium));
+    const start = route.steps[0];
+    if (!frame || !start) {
+      return;
+    }
+    const padding = {
+      top: viewport.height / 2,
+      right: spacing['space-32'],
+      bottom: size['sheet-rest'],
+      left: spacing['space-32'],
+    };
+    camera.current?.setCamera({
+      ...('bounds' in frame ? { bounds: frame.bounds } : { centerCoordinate: frame.center }),
+      padding: {
+        paddingTop: padding.top,
+        paddingRight: padding.right,
+        paddingBottom: padding.bottom,
+        paddingLeft: padding.left,
+      },
+      ...cameraAnimation,
+    });
+    const startX =
+      'bounds' in frame
+        ? screenXOnFit(start.location, frame.bounds, { ...viewport, padding })
+        : viewport.width / 2;
+    setTooltipAnchor(
+      tooltipAnchorX(startX, {
+        screenWidth: viewport.width,
+        tooltipWidth: size['tooltip-w'],
+        margin: spacing['space-16'],
+      }),
+    );
+    onSelect(route);
+  };
+
   const routeOf = (id: unknown) => routes.find((route) => route.id === id);
 
   // Screen readers reach the markers as actions of the map, in the order of the results.
@@ -92,12 +145,12 @@ export function RouteMap({
   const handleAccessibilityAction = (event: AccessibilityActionEvent) => {
     const route = routeOf(event.nativeEvent.actionName);
     if (route) {
-      onRoutePress(route);
+      selectRoute(route);
     }
   };
 
   return (
-    <View className="flex-1 bg-surface">
+    <View onLayout={(event) => setViewport(event.nativeEvent.layout)} className="flex-1 bg-surface">
       <Mapbox.MapView
         style={{ flex: 1 }}
         styleJSON={mapStyleJson}
@@ -114,6 +167,7 @@ export function RouteMap({
           camera.current?.setCamera({ ...home, animationMode: 'none', animationDuration: 0 });
           isHome.current = true;
         }}
+        onPress={() => onSelect(null)}
       >
         <Mapbox.Camera ref={camera} defaultSettings={home} />
         {hasPosition && <Mapbox.LocationPuck visible />}
@@ -132,7 +186,7 @@ export function RouteMap({
           onPress={(event) => {
             const route = routeOf(event.features[0]?.properties?.routeId);
             if (route) {
-              onRoutePress(route);
+              selectRoute(route);
             }
           }}
         >
@@ -144,8 +198,20 @@ export function RouteMap({
               iconAllowOverlap: true,
               symbolZOrder: 'viewport-y',
             }}
+            // The selected route gives way to its tooltip and its steps.
+            filter={['!=', ['get', 'routeId'], selectedRoute?.id ?? '']}
           />
         </Mapbox.ShapeSource>
+        {selectedRoute && (
+          <SelectedRoute
+            key={selectedRoute.id}
+            route={selectedRoute}
+            isLocked={isLocked(selectedRoute, hasPremium)}
+            tooltipAnchor={tooltipAnchor}
+            onOpen={() => onOpenRoute(selectedRoute)}
+            onClose={() => onSelect(null)}
+          />
+        )}
       </Mapbox.MapView>
       <View
         accessible
@@ -163,7 +229,8 @@ export function RouteMap({
         <View pointerEvents="box-none" className="flex-1">
           {banner}
         </View>
-        <RecenterButton onPress={recenter} />
+        {/* Hidden while a route is selected (Ecrans › E-04). */}
+        {!selectedRoute && <RecenterButton onPress={recenter} />}
       </View>
     </View>
   );
