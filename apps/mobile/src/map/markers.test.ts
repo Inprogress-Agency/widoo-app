@@ -32,11 +32,31 @@ function route(id: string, overrides: Partial<RouteCard> = {}): RouteCard {
 }
 
 describe('routeMarkers', () => {
+  const durationOf = (card: RouteCard) => `${card.durationMin} min`;
+
   it('places one marker per route at its start, named after the route', () => {
-    const markers = routeMarkers([route('a'), route('b', { steps: [] })]);
+    const markers = routeMarkers([route('a'), route('b', { steps: [] })], {
+      isDrawn: () => true,
+      durationOf,
+    });
     expect(markers.features).toHaveLength(1);
     expect(markers.features[0]?.geometry.coordinates).toEqual([2.34, 48.86]);
-    expect(markers.features[0]?.properties).toEqual({ routeId: 'a', image: 'route-a' });
+    expect(markers.features[0]?.properties).toEqual({
+      routeId: 'a',
+      image: 'route-a',
+      duration: '120 min',
+    });
+  });
+
+  it('shows the empty photo box until the image of the route is drawn', () => {
+    const markers = routeMarkers([route('a'), route('b')], {
+      isDrawn: (image) => image === 'route-b',
+      durationOf,
+    });
+    expect(markers.features.map((feature) => feature.properties.image)).toEqual([
+      'marker-empty',
+      'route-b',
+    ]);
   });
 });
 
