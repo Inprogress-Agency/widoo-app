@@ -68,7 +68,7 @@ function toCard(row: CardRow): RouteCard {
   const stats = Stats.parse(row.stats ?? {});
   const pins = z.array(StepPin).parse(row.steps ?? []);
   const start = pins[0];
-  // A purged or anonymous author is shown without a creator line.
+  // A purged or deleted author, or a profile made non public (D-025): « Membre Widoo », no link.
   const author =
     row.is_official || !row.author_id || !row.author_first_name
       ? null
@@ -157,7 +157,7 @@ export function searchPageSql(
         where s.route_id = r.id) as steps
     from page
     join routes r on r.id = page.id
-    left join users u on u.id = r.author_id and u.deleted_at is null
+    left join users u on u.id = r.author_id and u.deleted_at is null and u.is_public
     order by ${orderBy(keys)}
   `;
 }

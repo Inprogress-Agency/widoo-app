@@ -8,7 +8,7 @@ import {
 import { eq, inArray, sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
-import { routes } from '../db/schema';
+import { routes, users } from '../db/schema';
 import { demoRouteIds, seed, seedId } from '../db/seed';
 import { uuidv7 } from '../db/uuid';
 import { testConfig } from '../test-config';
@@ -18,10 +18,19 @@ let app: Awaited<ReturnType<typeof buildApp>>;
 // Shared database, parallel files: the seed is idempotent and locked; the fixtures below sit in
 // a zone of their own, far from Paris, and are deleted afterwards.
 const fixtureIds: string[] = [];
+const privateAuthorUid = `search-private-${uuidv7()}`;
 beforeAll(async () => {
   app = await buildApp(testConfig());
   const { cityId } = await seed(app.db);
-  await app.db.insert(routes).values(fixtures.map((fixture) => fixtureRow(fixture, cityId)));
+  const [author] = await app.db
+    .insert(users)
+    .values({ firebaseUid: privateAuthorUid, firstName: 'Profil privé', isPublic: false })
+    .returning({ id: users.id });
+  await app.db
+    .insert(routes)
+    .values(
+      fixtures.map((fixture) => ({ ...fixtureRow(fixture, cityId), authorId: author?.id ?? null })),
+    );
   // Microseconds, which a JavaScript date would round: the cursor must still tell them apart.
   for (const fixture of fixtures) {
     await app.db
@@ -32,6 +41,7 @@ beforeAll(async () => {
 });
 afterAll(async () => {
   await app.db.delete(routes).where(inArray(routes.id, fixtureIds));
+  await app.db.delete(users).where(eq(users.firebaseUid, privateAuthorUid));
   await app.close();
 });
 
@@ -318,6 +328,15 @@ describe('GET /v1/routes/search on fixtures', () => {
       expect(paged).toEqual(all);
     },
   );
+
+  it('hides the author of a non public profile (D-025)', async () => {
+    const result = await search(zone);
+    expect(result.items).toHaveLength(fixtures.length);
+    for (const card of result.items) {
+      expect(card.isOfficial).toBe(false);
+      expect(card.author).toBeNull();
+    }
+  });
 
   it('counts without each group', async () => {
     expect(await count(`${zone}&budgets[]=high&durations[]=1_2h&breakdown=all_but_one`)).toEqual({
