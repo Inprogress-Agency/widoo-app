@@ -4,6 +4,7 @@ import {
   effectiveSort,
   isSectionId,
   mergePages,
+  sectionListStatus,
   serverSort,
   sortByDistance,
   zoneRadiusM,
@@ -104,5 +105,27 @@ describe('zoneRadiusM', () => {
     const radius = zoneRadiusM({ west: 2.343, south: 48.847, east: 2.384, north: 48.887 });
     expect(radius).toBeGreaterThan(1450);
     expect(radius).toBeLessThan(1550);
+  });
+});
+
+describe('sectionListStatus', () => {
+  const ready = { zone: 'success', hasZoneResults: true, pages: 'success', routeCount: 3 } as const;
+
+  it('shows the routes once the zone and the pages of the sort are there', () => {
+    expect(sectionListStatus(ready)).toBe('ready');
+    expect(sectionListStatus({ ...ready, routeCount: 0 })).toBe('empty');
+  });
+
+  it('follows the zone of the sheet: loading, failed, or offline without results kept', () => {
+    expect(sectionListStatus({ ...ready, zone: 'loading' })).toBe('loading');
+    expect(sectionListStatus({ ...ready, zone: 'error' })).toBe('error');
+    expect(sectionListStatus({ ...ready, zone: 'offline', hasZoneResults: false })).toBe('offline');
+  });
+
+  it('shows the results kept offline, and waits for the pages of another sort', () => {
+    expect(sectionListStatus({ ...ready, zone: 'offline' })).toBe('ready');
+    expect(sectionListStatus({ ...ready, pages: 'pending' })).toBe('loading');
+    expect(sectionListStatus({ ...ready, pages: 'offline' })).toBe('offline');
+    expect(sectionListStatus({ ...ready, pages: 'error' })).toBe('error');
   });
 });
