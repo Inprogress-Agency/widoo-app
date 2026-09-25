@@ -1,4 +1,4 @@
-import { taxonomies } from '@widoo/shared';
+import { labels, taxonomies } from '@widoo/shared';
 import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { buildMappings, parseUiIcon } from './mappings';
@@ -80,6 +80,19 @@ describe('buildMappings', () => {
   it('gives the chip « Gratuit » its tag, and no other budget an icon (D-053)', () => {
     expect(mappings.filterIcons.budgets).toEqual({ free: 'tag' });
   });
+
+  it.each([
+    ['budget', 'budgets'],
+    ['duration', 'durations'],
+  ] as const)(
+    'lists the %s labels of packages/shared, in the order of the taxonomy',
+    (group, taxonomy) => {
+      const expected = taxonomies[taxonomy].map(
+        (key) => (labels.fr[taxonomy] as Record<string, string>)[key],
+      );
+      expect(tokens.mappings.filterIcons[group]?.map(({ value }) => value)).toEqual(expected);
+    },
+  );
 
   it('gives every place category a family and an icon', () => {
     expect(Object.keys(mappings.placeCategories).sort()).toEqual(
