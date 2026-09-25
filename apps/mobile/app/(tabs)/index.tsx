@@ -1,7 +1,12 @@
 import { router } from 'expo-router';
 import { View } from 'react-native';
-import { ZoomInMessage } from '../../src/components/ZoneMessage';
-import { canSearchZone, resultsCount, selectedRoute } from '../../src/discovery/store';
+import { NoRoutesMessage, ZoomInMessage } from '../../src/components/ZoneMessage';
+import {
+  activeFilterCount,
+  canSearchZone,
+  resultsCount,
+  selectedRoute,
+} from '../../src/discovery/store';
 import { useDiscovery, useRouteSearch } from '../../src/discovery/useRouteSearch';
 import { useReleaseSplash } from '../../src/launch/splash';
 import { useUserLocation } from '../../src/location/useUserLocation';
@@ -18,7 +23,8 @@ export default function HomeScreen() {
   const { location, enable } = useUserLocation();
   // The home is ready once its map shows, at its centre (E-18: the launch screen until then).
   useReleaseSplash(location.status !== 'pending');
-  const { routes, clusters, status } = useRouteSearch();
+  const { routes, clusters, status, isEmpty } = useRouteSearch();
+  const filterCount = useDiscovery((state) => activeFilterCount(state.filters));
   const results = useDiscovery((state) => state.results);
   const route = useDiscovery(selectedRoute);
   const isSearchable = useDiscovery(canSearchZone);
@@ -26,6 +32,8 @@ export default function HomeScreen() {
   const showView = useDiscovery((state) => state.showView);
   const searchZone = useDiscovery((state) => state.searchZone);
   const select = useDiscovery((state) => state.select);
+  const widenZone = useDiscovery((state) => state.widenZone);
+  const clearFilters = useDiscovery((state) => state.clearFilters);
 
   if (location.status === 'pending') {
     // The permission dialog, or the last known position, is a moment away: the map waits for
@@ -57,8 +65,18 @@ export default function HomeScreen() {
             <SearchingPill isSearching={status === 'loading' && route === null} />
           )
         }
+        // Over an empty zone, the message offers to widen it: no recentre, and « Rechercher
+        // dans cette zone » only once the user moves the map.
+        hasRecenter={!isEmpty}
       />
-      {clusters && results && <ZoomInMessage count={resultsCount(results)} />}
+      {clusters && results && !isEmpty && <ZoomInMessage count={resultsCount(results)} />}
+      {isEmpty && (
+        <NoRoutesMessage
+          filterCount={filterCount}
+          onWiden={widenZone}
+          onClearFilters={clearFilters}
+        />
+      )}
     </View>
   );
 }
