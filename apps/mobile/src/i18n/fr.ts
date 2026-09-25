@@ -69,6 +69,25 @@ export const fr = {
       hoursMinutes_other: '{{count}} heures {{minutes}}',
     },
   },
+  // « ≈ 25 € par pers. », never « env. » nor a range (D-032).
+  budget: {
+    amount: '≈ {{euros}} €',
+    perPerson: 'par pers.',
+    spoken: 'environ {{euros}} euros par personne',
+    free: 'Gratuit',
+  },
+  distance: {
+    short: {
+      meters: '{{count}} m',
+      kilometers: '{{value}} km',
+    },
+    spoken: {
+      meters_one: '{{count}} mètre',
+      meters_other: '{{count}} mètres',
+      kilometers_one: '{{value}} kilomètre',
+      kilometers_other: '{{value}} kilomètres',
+    },
+  },
   rating: {
     label: 'Note {{value}} sur 5',
   },
