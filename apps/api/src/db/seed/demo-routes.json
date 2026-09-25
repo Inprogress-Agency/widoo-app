@@ -1,0 +1,284 @@
+{
+  "datasetDate": "2026-09-25T08:00:00.000Z",
+  "authors": [
+    {
+      "key": "camille",
+      "firstName": "Camille",
+      "bio": "À vélo dès qu’il fait beau, un carnet de croquis dans la sacoche."
+    },
+    {
+      "key": "yanis",
+      "firstName": "Yanis",
+      "bio": "Toujours une adresse pour dîner en bande, de préférence sans réserver."
+    }
+  ],
+  "places": [
+    {
+      "key": "maison-victor-hugo",
+      "name": "Maison de Victor Hugo",
+      "category": "museum",
+      "location": { "lat": 48.8548, "lng": 2.36614 },
+      "address": "6 place des Vosges, 75004 Paris",
+      "addressComponents": {
+        "postcode": "75004",
+        "arrondissement": "4e",
+        "neighborhood": "Le Marais"
+      },
+      "isIndoor": true,
+      "priceRange": "free",
+      "hours": [{ "weekdays": [1, 2, 3, 4, 5, 6], "opens": "10:00", "closes": "18:00" }]
+    },
+    {
+      "key": "musee-carnavalet",
+      "name": "Musée Carnavalet",
+      "category": "museum",
+      "location": { "lat": 48.85732, "lng": 2.36247 },
+      "address": "23 rue de Sévigné, 75003 Paris",
+      "addressComponents": {
+        "postcode": "75003",
+        "arrondissement": "3e",
+        "neighborhood": "Le Marais"
+      },
+      "isIndoor": true,
+      "priceRange": "free",
+      "hours": [{ "weekdays": [1, 2, 3, 4, 5, 6], "opens": "10:00", "closes": "18:00" }]
+    },
+    {
+      "key": "musee-cognacq-jay",
+      "name": "Musée Cognacq-Jay",
+      "category": "museum",
+      "location": { "lat": 48.85812, "lng": 2.36168 },
+      "address": "8 rue Elzévir, 75003 Paris",
+      "addressComponents": {
+        "postcode": "75003",
+        "arrondissement": "3e",
+        "neighborhood": "Le Marais"
+      },
+      "isIndoor": true,
+      "priceRange": "free",
+      "hours": [{ "weekdays": [1, 2, 3, 4, 5, 6], "opens": "10:00", "closes": "18:00" }]
+    },
+    {
+      "key": "marche-enfants-rouges",
+      "name": "Marché des Enfants Rouges",
+      "category": "restaurant",
+      "location": { "lat": 48.8628, "lng": 2.36197 },
+      "address": "39 rue de Bretagne, 75003 Paris",
+      "addressComponents": {
+        "postcode": "75003",
+        "arrondissement": "3e",
+        "neighborhood": "Le Marais"
+      },
+      "isIndoor": true,
+      "priceRange": "low",
+      "hours": [
+        { "weekdays": [1, 2, 3, 4, 5], "opens": "08:30", "closes": "20:30" },
+        { "weekdays": [6], "opens": "08:30", "closes": "17:00" }
+      ]
+    },
+    {
+      "key": "mur-des-je-t-aime",
+      "name": "Le Mur des je t’aime",
+      "category": "other",
+      "location": { "lat": 48.88481, "lng": 2.33852 },
+      "address": "square Jehan-Rictus, place des Abbesses, 75018 Paris",
+      "addressComponents": {
+        "postcode": "75018",
+        "arrondissement": "18e",
+        "neighborhood": "Montmartre"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": [
+        { "weekdays": [0, 1, 2, 3, 4], "opens": "08:00", "closes": "20:30" },
+        { "weekdays": [5, 6], "opens": "09:00", "closes": "20:30" }
+      ]
+    },
+    {
+      "key": "parvis-sacre-coeur",
+      "name": "Parvis du Sacré-Cœur",
+      "category": "viewpoint",
+      "location": { "lat": 48.88625, "lng": 2.34303 },
+      "address": "35 rue du Chevalier-de-la-Barre, 75018 Paris",
+      "addressComponents": {
+        "postcode": "75018",
+        "arrondissement": "18e",
+        "neighborhood": "Montmartre"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "place-du-tertre",
+      "name": "Place du Tertre",
+      "category": "walk",
+      "location": { "lat": 48.88653, "lng": 2.3408 },
+      "address": "place du Tertre, 75018 Paris",
+      "addressComponents": {
+        "postcode": "75018",
+        "arrondissement": "18e",
+        "neighborhood": "Montmartre"
+      },
+      "isIndoor": false,
+      "priceRange": "free",
+      "hours": []
+    },
+    {
+      "key": "musee-de-montmartre",
+      "name": "Musée de Montmartre",
+      "category": "museum",
+      "location": { "lat": 48.88805, "lng": 2.34063 },
+      "address": "12 rue Cortot, 75018 Paris",
+      "addressComponents": {
+        "postcode": "75018",
+        "arrondissement": "18e",
+        "neighborhood": "Montmartre"
+      },
+      "isIndoor": true,
+      "priceRange": "medium",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "10:00", "closes": "19:00" }]
+    },
+    {
+      "key": "la-maison-rose",
+      "name": "La Maison Rose",
+      "category": "restaurant",
+      "location": { "lat": 48.88799, "lng": 2.33965 },
+      "address": "2 rue de l’Abreuvoir, 75018 Paris",
+      "addressComponents": {
+        "postcode": "75018",
+        "arrondissement": "18e",
+        "neighborhood": "Montmartre"
+      },
+      "isIndoor": true,
+      "priceRange": "medium",
+      "hours": [{ "weekdays": [0, 1, 2, 3, 4, 5, 6], "opens": "12:00", "closes": "22:30" }]
+    }
+  ],
+  "routes": [
+    {
+      "key": "marais-a-l-abri",
+      "title": "Le Marais à l’abri de la pluie",
+      "description": "Trois musées gratuits dans des hôtels particuliers du Marais, sans jamais rester longtemps dehors, puis un goûter sous la halle du plus vieux marché couvert de Paris.",
+      "author": null,
+      "moods": ["culture", "romantic"],
+      "audiences": ["couple", "friends", "solo"],
+      "conditions": ["no_booking", "wheelchair", "indoor", "rainy"],
+      "transport": "walk",
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1775210676191-f450802fa51e?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1691472898646-7011d4d0ad55?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        }
+      ],
+      "computed": {
+        "duration_min": 245,
+        "budget_per_person_eur": { "min": 12, "max": 20 },
+        "distance_m": 1320,
+        "walking_m": 1320,
+        "effort": "easy",
+        "warnings": [],
+        "computed_at": "2026-09-25T08:00:00.000Z"
+      },
+      "steps": [
+        {
+          "place": "maison-victor-hugo",
+          "description": "L’appartement de l’écrivain, sur la place des Vosges. Collections permanentes gratuites.",
+          "durationMin": 45,
+          "costPerPerson": 0
+        },
+        {
+          "place": "musee-carnavalet",
+          "description": "Le musée de l’histoire de Paris : enseignes anciennes, salons reconstitués, chambre de Proust.",
+          "durationMin": 75,
+          "costPerPerson": 0,
+          "transitionNote": "Passer sous les arcades de la place, puis rue des Francs-Bourgeois."
+        },
+        {
+          "place": "musee-cognacq-jay",
+          "description": "Un petit musée du XVIIIᵉ siècle, calme, idéal pour ralentir.",
+          "durationMin": 45,
+          "costPerPerson": 0
+        },
+        {
+          "place": "marche-enfants-rouges",
+          "description": "Goûter ou dîner tôt sous la halle : cuisine marocaine, japonaise ou libanaise au comptoir.",
+          "durationMin": 60,
+          "costPerPerson": 16
+        }
+      ]
+    },
+    {
+      "key": "montmartre-a-deux",
+      "title": "Montmartre à deux, des Abbesses au coucher du soleil",
+      "description": "Une montée douce vers la Butte : le mur des je t’aime, la vue depuis le parvis du Sacré-Cœur, les peintres de la place du Tertre, puis le musée et un dîner à la Maison Rose.",
+      "author": null,
+      "moods": ["romantic", "instagrammable", "culture"],
+      "audiences": ["couple"],
+      "conditions": ["outdoor", "sunny"],
+      "transport": "walk",
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1561370665-7e266065fce1?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1623009070764-45002990256e?w=1200&h=800&fit=crop&auto=format&q=80",
+          "width": 1200,
+          "height": 800
+        }
+      ],
+      "computed": {
+        "duration_min": 230,
+        "budget_per_person_eur": { "min": 40, "max": 60 },
+        "distance_m": 1010,
+        "walking_m": 1010,
+        "effort": "easy",
+        "warnings": [],
+        "computed_at": "2026-09-25T08:00:00.000Z"
+      },
+      "steps": [
+        {
+          "place": "mur-des-je-t-aime",
+          "description": "« Je t’aime » écrit dans plus de 250 langues, dans un petit square des Abbesses.",
+          "durationMin": 15,
+          "costPerPerson": 0,
+          "transitionNote": "Monter par la rue Yvonne-Le-Tac puis les escaliers du square Louise-Michel."
+        },
+        {
+          "place": "parvis-sacre-coeur",
+          "description": "La vue sur tout Paris depuis les marches. Plus calme en fin d’après-midi en semaine.",
+          "durationMin": 30,
+          "costPerPerson": 0
+        },
+        {
+          "place": "place-du-tertre",
+          "description": "Les portraitistes et les terrasses du vieux village.",
+          "durationMin": 20,
+          "costPerPerson": 0
+        },
+        {
+          "place": "musee-de-montmartre",
+          "description": "Les jardins Renoir et l’atelier de Suzanne Valadon.",
+          "durationMin": 60,
+          "costPerPerson": 15
+        },
+        {
+          "place": "la-maison-rose",
+          "description": "Dîner dans la maison peinte par Utrillo. Réserver, la salle est petite.",
+          "durationMin": 90,
+          "costPerPerson": 35,
+          "bookingRequired": true,
+          "bookingProvider": "restaurant"
+        }
+      ]
+    }
+  ]
+}
