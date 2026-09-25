@@ -4,6 +4,7 @@ import { useEffect, useSyncExternalStore } from 'react';
 import { AppState, Platform } from 'react-native';
 import { createMMKV } from 'react-native-mmkv';
 import { createAnalytics, createLogClient } from './analytics';
+import { watchAppOpened } from './discovery';
 import { createConsentStore } from './consent';
 
 /** PostHog Cloud EU (wiki Securite-et-RGPD): fixed here so that no setting sends data elsewhere. */
@@ -68,14 +69,6 @@ export function useAppOpenedEvent() {
     if (!isGranted) {
       return;
     }
-    analytics.track('app_opened', { cold_start: true });
-    let previous = AppState.currentState;
-    const subscription = AppState.addEventListener('change', (next) => {
-      if (previous === 'background' && next === 'active') {
-        analytics.track('app_opened', { cold_start: false });
-      }
-      previous = next;
-    });
-    return () => subscription.remove();
+    return watchAppOpened(AppState, (properties) => analytics.track('app_opened', properties));
   }, [isGranted]);
 }
