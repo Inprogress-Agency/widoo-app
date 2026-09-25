@@ -1,4 +1,4 @@
-// Généré depuis tokens.json (version 8), ne pas modifier : pnpm --filter @widoo/tokens generate.
+// Généré depuis tokens.json (version 9), ne pas modifier : pnpm --filter @widoo/tokens generate.
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [],

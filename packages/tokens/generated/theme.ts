@@ -1,7 +1,7 @@
-// Généré depuis tokens.json (version 8), ne pas modifier : pnpm --filter @widoo/tokens generate.
+// Généré depuis tokens.json (version 9), ne pas modifier : pnpm --filter @widoo/tokens generate.
 import type { Audience, Condition, Mood, PlaceCategory, Transport } from '@widoo/shared';
 
-export const tokensVersion = 8;
+export const tokensVersion = 9;
 
 /** Light theme: the dark values are not validated and not generated. */
 export const colors = {

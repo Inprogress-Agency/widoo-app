@@ -57,7 +57,8 @@ describe('generated files', () => {
   });
 
   it('say where they come from', () => {
-    const header = '// Généré depuis tokens.json (version 8), ne pas modifier';
+    // The version follows the synced tokens.json, so an automated sync never breaks this test.
+    const header = `// Généré depuis tokens.json (version ${tokens.version}), ne pas modifier`;
     expect(readFileSync(presetPath, 'utf8').startsWith(header)).toBe(true);
     expect(readFileSync(themePath, 'utf8').startsWith(header)).toBe(true);
   });
