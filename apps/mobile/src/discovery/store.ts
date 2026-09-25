@@ -5,6 +5,7 @@ import {
   type RouteCard,
   type RouteFilterGroup,
   type RouteSearchResult,
+  type RouteSort,
 } from '@widoo/shared';
 import { createStore } from 'zustand/vanilla';
 import { scaleBbox, type Bbox } from '../map/geo';
@@ -56,6 +57,8 @@ export interface DiscoveryState {
   focusedRouteId: string | null;
   /** A view the app asks the map to show, such as the widened zone; `id` changes each time. */
   framing: { id: number; view: MapView } | null;
+  /** Sort of the « Voir tout » lists, kept for the session (Ecrans › E-04, sheet de tri). */
+  sort: RouteSort;
 }
 
 export interface DiscoveryActions {
@@ -79,6 +82,7 @@ export interface DiscoveryActions {
   select: (routeId: string | null) => void;
   /** The leading card of the carousel after a scroll of the user. */
   focus: (routeId: string) => void;
+  setSort: (sort: RouteSort) => void;
 }
 
 export type DiscoveryStore = DiscoveryState & DiscoveryActions;
@@ -94,6 +98,7 @@ export const initialDiscoveryState: DiscoveryState = {
   selectedRouteId: null,
   focusedRouteId: null,
   framing: null,
+  sort: 'recommended',
 };
 
 /** Number of active filters, the N of « Retirer les N filtres ». */
@@ -212,6 +217,7 @@ export function createDiscoveryStore() {
       },
       select: (routeId) => set({ selectedRouteId: routeId }),
       focus: (routeId) => set({ focusedRouteId: routeId }),
+      setSort: (sort) => set({ sort }),
     };
   });
 }
