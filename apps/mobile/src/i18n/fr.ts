@@ -23,6 +23,14 @@ export const fr = {
       retry: 'Réessayer',
     },
   },
+  map: {
+    label: 'Carte, {{count}} parcours',
+    marker: '{{title}}, {{duration}}',
+    recenter: 'Recentrer la carte',
+    locationOff: 'Position désactivée · autour de Paris',
+    enable: 'Activer',
+    enableLocation: 'Activer la localisation',
+  },
   routes: {
     title: 'Mes parcours',
   },
