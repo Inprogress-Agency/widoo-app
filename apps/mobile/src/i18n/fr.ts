@@ -29,6 +29,14 @@ export const fr = {
   profile: {
     title: 'Profil',
   },
+  badges: {
+    verified: 'Vérifié',
+    signature: 'Signature',
+    premium: 'Premium',
+    private: 'Privé',
+    new: 'Nouveau',
+    certified: 'Créateur certifié',
+  },
   consent: {
     title: "Mesure d'audience",
     body: "Avec votre accord, Widoo mesure l'usage de l'app pour l'améliorer, avec PostHog, hébergé dans l'Union européenne. Les rapports de plantage restent envoyés, sans information sur vous.",
