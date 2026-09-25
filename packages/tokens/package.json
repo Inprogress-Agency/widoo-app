@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "exports": {
+    ".": "./generated/theme.ts",
     "./tailwind-preset": "./generated/tailwind-preset.cjs"
   },
   "scripts": {

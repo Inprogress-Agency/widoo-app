@@ -9,3 +9,5 @@ export const tokensPath = fileURLToPath(new URL('../generated/tokens.json', impo
 export const presetPath = fileURLToPath(
   new URL('../generated/tailwind-preset.cjs', import.meta.url),
 );
+
+export const themePath = fileURLToPath(new URL('../generated/theme.ts', import.meta.url));
