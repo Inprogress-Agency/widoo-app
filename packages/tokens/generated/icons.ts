@@ -1,4 +1,4 @@
-// Généré depuis tokens.json (version 14), ne pas modifier : pnpm --filter @widoo/tokens generate.
+// Généré depuis tokens.json (version 26), ne pas modifier : pnpm --filter @widoo/tokens generate.
 import type { Icon } from 'phosphor-react-native';
 import { ArmchairIcon } from 'phosphor-react-native/src/icons/Armchair';
 import { ArrowRightIcon } from 'phosphor-react-native/src/icons/ArrowRight';
@@ -21,6 +21,8 @@ import { CameraIcon } from 'phosphor-react-native/src/icons/Camera';
 import { CarIcon } from 'phosphor-react-native/src/icons/Car';
 import { CaretDownIcon } from 'phosphor-react-native/src/icons/CaretDown';
 import { CaretLeftIcon } from 'phosphor-react-native/src/icons/CaretLeft';
+import { CaretRightIcon } from 'phosphor-react-native/src/icons/CaretRight';
+import { CaretUpIcon } from 'phosphor-react-native/src/icons/CaretUp';
 import { CastleTurretIcon } from 'phosphor-react-native/src/icons/CastleTurret';
 import { CheckIcon } from 'phosphor-react-native/src/icons/Check';
 import { CheckCircleIcon } from 'phosphor-react-native/src/icons/CheckCircle';
@@ -83,6 +85,7 @@ import { SparkleIcon } from 'phosphor-react-native/src/icons/Sparkle';
 import { StarIcon } from 'phosphor-react-native/src/icons/Star';
 import { SubwayIcon } from 'phosphor-react-native/src/icons/Subway';
 import { SunIcon } from 'phosphor-react-native/src/icons/Sun';
+import { TagIcon } from 'phosphor-react-native/src/icons/Tag';
 import { TicketIcon } from 'phosphor-react-native/src/icons/Ticket';
 import { TrashIcon } from 'phosphor-react-native/src/icons/Trash';
 import { TreeIcon } from 'phosphor-react-native/src/icons/Tree';
@@ -95,6 +98,7 @@ import { WarningCircleIcon } from 'phosphor-react-native/src/icons/WarningCircle
 import { WheelchairIcon } from 'phosphor-react-native/src/icons/Wheelchair';
 import { WifiSlashIcon } from 'phosphor-react-native/src/icons/WifiSlash';
 import { WineIcon } from 'phosphor-react-native/src/icons/Wine';
+import { XIcon } from 'phosphor-react-native/src/icons/X';
 import { XCircleIcon } from 'phosphor-react-native/src/icons/XCircle';
 import type { IconName } from './theme';
 
@@ -121,6 +125,8 @@ export const icons: Record<IconName, Icon> = {
   car: CarIcon,
   'caret-down': CaretDownIcon,
   'caret-left': CaretLeftIcon,
+  'caret-right': CaretRightIcon,
+  'caret-up': CaretUpIcon,
   'castle-turret': CastleTurretIcon,
   check: CheckIcon,
   'check-circle': CheckCircleIcon,
@@ -183,6 +189,7 @@ export const icons: Record<IconName, Icon> = {
   star: StarIcon,
   subway: SubwayIcon,
   sun: SunIcon,
+  tag: TagIcon,
   ticket: TicketIcon,
   trash: TrashIcon,
   tree: TreeIcon,
@@ -195,5 +202,6 @@ export const icons: Record<IconName, Icon> = {
   wheelchair: WheelchairIcon,
   'wifi-slash': WifiSlashIcon,
   wine: WineIcon,
+  x: XIcon,
   'x-circle': XCircleIcon,
 };
