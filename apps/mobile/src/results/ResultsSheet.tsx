@@ -32,6 +32,16 @@ import { SheetHandle } from './SheetHandle';
  */
 const springRest = { restDisplacementThreshold: 10, restSpeedThreshold: 10 };
 
+/**
+ * How far a drag on the content runs, in points, before it is told vertical, which moves the
+ * sheet, or horizontal, which the sheet lets go for the carousel of cards. Without it, the sheet
+ * takes a drag in any direction, and on Android react-native-gesture-handler then cancels the
+ * native scroll of the carousel. 10 points is the distance a pan of react-native-gesture-handler
+ * needs by default on iOS: the sheet keeps the feel it had there.
+ */
+const DIRECTION_SLOP = 10;
+const directionDecision: [number, number] = [-DIRECTION_SLOP, DIRECTION_SLOP];
+
 /** How close to a detent the sheet counts as on it, in detents. */
 const DETENT_TOLERANCE = 0.01;
 
@@ -146,6 +156,9 @@ export function ResultsSheet({
       animationConfigs={gestureConfig}
       overrideReduceMotion={ReduceMotion.System}
       animatedIndex={animatedIndex}
+      // The sheet only takes a vertical drag: a horizontal one is the carousel's.
+      activeOffsetY={directionDecision}
+      failOffsetX={directionDecision}
       handleComponent={null}
       // The sheet is not one element: the handle is its adjustable part, its content is read.
       accessible={false}
