@@ -7,6 +7,7 @@
  * upserted; the hours, steps and photos of the seed places and routes are rewritten.
  */
 import { and, eq, inArray, sql } from 'drizzle-orm';
+import { stableRecommendationOf } from '../recommendation/stable';
 import type { Db } from './client';
 import { envelopeOf } from './geography';
 import { cities, media, placeHours, places, routes, steps, users } from './schema';
@@ -149,11 +150,12 @@ async function seedRoutes(tx: Tx, cityId: string) {
 }
 
 function routeRow(route: DemoRoute, cityId: string) {
-  const locations = route.steps.map((step) => {
+  const stepPlaces = route.steps.map((step) => {
     const place = demoDataset.places.find((candidate) => candidate.key === step.place);
     if (!place) throw new Error(`Unknown place ${step.place}`);
-    return place.location;
+    return place;
   });
+  const locations = stepPlaces.map((place) => place.location);
   return {
     cityId,
     authorId: route.author === null ? null : seedId(`user:${route.author}`),
@@ -170,6 +172,18 @@ function routeRow(route: DemoRoute, cityId: string) {
     computed: route.computed,
     ...bucketsOf(route),
     publishedAt: seedAt,
+    // As the nightly job would compute it on the dataset date: no rating, every place verified.
+    recommendation: stableRecommendationOf(
+      {
+        isOfficial: route.author === null,
+        rating: { average: null, count: 0 },
+        publishedAt: seedAt,
+        computedAt: new Date(route.computed.computed_at),
+        placeStatuses: stepPlaces.map(() => 'verified' as const),
+        firstCategory: stepPlaces[0]?.category ?? null,
+      },
+      { now: seedAt },
+    ),
     createdAt: seedAt,
     updatedAt: seedAt,
   };
