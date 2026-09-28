@@ -31,8 +31,9 @@ export const fr = {
     locationOff: 'Position désactivée · autour de Paris',
     enable: 'Activer',
     enableLocation: 'Activer la localisation',
+    stepDot: 'Étape {{position}} sur {{total}}, {{place}}',
     tooltip: {
-      label: 'Parcours {{title}}, étape 1 sur {{total}}, {{step}}',
+      label: 'Parcours {{title}}, étape {{position}} sur {{total}}, {{step}}',
       lockedLabel_one: '{{title}}, parcours Premium, {{count}} étape en {{duration}}',
       lockedLabel_other: '{{title}}, parcours Premium, {{count}} étapes en {{duration}}',
       premium: 'Parcours Premium',

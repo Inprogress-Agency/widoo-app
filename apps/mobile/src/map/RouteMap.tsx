@@ -73,8 +73,8 @@ interface RouteMapProps {
   bottomInset?: number;
   /** A marker, or null for a tap elsewhere on the map. */
   onSelect: (route: RouteCard | null) => void;
-  /** « Voir plus » of the tooltip: the route sheet (E-05). */
-  onOpenRoute: (route: RouteCard) => void;
+  /** « Voir plus » of the tooltip: the route sheet (E-05), at the step it points at, from 1. */
+  onOpenRoute: (route: RouteCard, position: number) => void;
   /** « Rechercher dans cette zone », or the pill of a search on its way. */
   searchControl?: ReactNode;
   /** The recentre button, hidden over the message of an empty zone (Ecrans › E-01). */
@@ -117,6 +117,7 @@ export function RouteMap({
   const insets = useSafeAreaInsets();
   const safeBottom = Platform.OS === 'ios' ? insets.bottom : 0;
   const camera = useRef<ComponentRef<typeof Mapbox.Camera>>(null);
+  const map = useRef<ComponentRef<typeof Mapbox.MapView>>(null);
   const isHome = useRef(false);
   /** A gesture of the user moved the map since it last settled. */
   const isGestureMove = useRef(false);
@@ -271,6 +272,15 @@ export function RouteMap({
     }
   }, [selectedRoute, bottomInset]);
 
+  /** Where a point of the map is on the screen, in points, across; the map fills the width. */
+  const screenXOf = useCallback(async (location: LngLat) => {
+    const point = await map.current?.getPointInView(location);
+    if (!point) {
+      throw new Error('The map is not laid out yet');
+    }
+    return point[0] ?? 0;
+  }, []);
+
   const routeOf = (id: unknown) => routes.find((route) => route.id === id);
 
   const clusterShape = useMemo(() => clusterPoints(clusters ?? []), [clusters]);
@@ -318,6 +328,7 @@ export function RouteMap({
   return (
     <View onLayout={(event) => setViewport(event.nativeEvent.layout)} className="flex-1 bg-surface">
       <Mapbox.MapView
+        ref={map}
         style={{ flex: 1 }}
         styleJSON={mapStyleJson}
         compassEnabled={false}
@@ -431,7 +442,8 @@ export function RouteMap({
             key={selectedRoute.id}
             route={selectedRoute}
             tooltipAnchor={tooltipAnchor}
-            onOpen={() => onOpenRoute(selectedRoute)}
+            screenXOf={screenXOf}
+            onOpen={(position) => onOpenRoute(selectedRoute, position)}
             onClose={() => onSelect(null)}
           />
         )}

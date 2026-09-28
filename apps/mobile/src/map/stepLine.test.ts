@@ -18,6 +18,7 @@ describe('stepLine', () => {
       name: 'Canal Saint-Martin',
       detail: `Étape 1/4 · Balade · 20${nbsp}min`,
       spoken: 'Canal Saint-Martin, Balade, 20 minutes',
+      dotLabel: 'Étape 1 sur 4, Canal Saint-Martin, Balade',
     });
   });
 
@@ -26,6 +27,13 @@ describe('stepLine', () => {
       name: 'Balade',
       detail: 'Étape 1/5',
       spoken: 'Balade',
+      dotLabel: 'Étape 1 sur 5, Balade',
     });
+  });
+
+  it('numbers any step of the route, not only its start', () => {
+    const line = stepLine(t, { ...step, name: 'Café fictif', category: 'cafe' }, 3, 4);
+    expect(line.detail).toBe(`Étape 3/4 · Café · 20${nbsp}min`);
+    expect(line.dotLabel).toBe('Étape 3 sur 4, Café fictif, Café');
   });
 });

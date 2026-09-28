@@ -11,6 +11,8 @@ export interface StepLine {
   detail: string;
   /** What the screen reader says of the step: « Merci, Boutique, 30 minutes ». */
   spoken: string;
+  /** Its step dot on the map, for the screen reader: « Étape 3 sur 4, Merci, Boutique ». */
+  dotLabel: string;
 }
 
 /**
@@ -27,10 +29,11 @@ export function stepLine(t: TFunction, step: CardStep, position: number, total: 
     ...shown,
     ...(step.durationMin === null ? [] : [formatDuration(t, step.durationMin, 'short')]),
   ].join(t('map.tooltip.separator'));
+  const place = [name, ...shown].join(', ');
   const spoken = [
-    name,
-    ...shown,
+    place,
     ...(step.durationMin === null ? [] : [formatDuration(t, step.durationMin, 'spoken')]),
   ].join(', ');
-  return { name, detail, spoken };
+  const dotLabel = t('map.stepDot', { position, total, place });
+  return { name, detail, spoken, dotLabel };
 }
