@@ -288,6 +288,7 @@ function buildInterface(mappings: Mappings, theme: Theme, token: TokenCheck) {
     toast,
     immersive,
     motion: buildMotion(mappings.motion),
+    firstLaunch: mappings.firstLaunch,
   };
 }
 
