@@ -27,8 +27,8 @@ nvm use && corepack enable
 pnpm install
 docker compose up -d                  # Postgres 16 + PostGIS sur localhost:5432
 cp apps/api/.env.example apps/api/.env
-pnpm --filter api db:migrate          # schéma de la base, requis par les tests de l'API
-pnpm lint && pnpm typecheck && pnpm test
+pnpm --filter api db:migrate          # schéma de la base widoo, celle de pnpm dev
+pnpm lint && pnpm typecheck && pnpm test   # l'API teste sur widoo_test, créée et migrée au lancement
 pnpm build
 ```
 
@@ -94,6 +94,8 @@ Schéma unique : `apps/api/src/db/schema.ts` (Drizzle ORM). Migrations versionn�
 | `db:migrate` | applique les migrations en attente, sans effet si la base est à jour (la CI migre la base de test avant les tests) |
 | `db:seed` | données fictives : Paris, quelques lieux du Marais et un parcours ; idempotent, refusé en production |
 | `db:reset` | vide la base locale (tables, types, extensions, journal des migrations), puis `db:migrate` et `db:seed` ; refusé hors `localhost` et en production |
+
+**Base de test.** Les tests de l'API n'écrivent jamais dans `widoo`, la base de `pnpm dev` : ils tournent sur `widoo_test`, sur le même serveur. Avant les tests, le setup global de Vitest (`apps/api/src/test-global-setup.ts`) la crée si elle manque, puis applique les migrations en attente ; aucune commande à lancer. `DATABASE_URL`, s'il est posé dans le shell, la remplace, mais son nom doit finir par `_test`, sinon les tests refusent de démarrer : c'est le cas de la CI, dont la base éphémère s'appelle `widoo_test`. Port 5432 changé : `DATABASE_URL=postgres://widoo:widoo@localhost:<port>/widoo_test pnpm test`. Pour repartir d'une base de test vide (après une migration abandonnée sur une autre branche) : `docker compose exec db dropdb -U widoo widoo_test`, recréée au prochain `pnpm test`.
 
 Dans l'image, `docker run --rm -e DATABASE_URL=… widoo-api node dist/migrate.js` applique les migrations avant un déploiement.
 

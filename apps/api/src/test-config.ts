@@ -1,9 +1,9 @@
 import { loadConfig } from './config';
+import { testDatabaseUrl } from './test-database';
 
-// CI provides DATABASE_URL (PostGIS service); locally, `docker compose up -d`.
-const databaseUrl = process.env.DATABASE_URL ?? 'postgres://widoo:widoo@localhost:5432/widoo';
+const databaseUrl = testDatabaseUrl();
 
-/** Configuration of the integration tests: silent logs, local or CI database, demo Firebase project. */
+/** Configuration of the integration tests: silent logs, test database, demo Firebase project. */
 export const testConfig = (env: Record<string, string> = {}) =>
   loadConfig({
     DATABASE_URL: databaseUrl,
