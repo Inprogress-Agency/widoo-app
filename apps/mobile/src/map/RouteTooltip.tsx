@@ -17,19 +17,29 @@ interface RouteTooltipProps {
   route: RouteCard;
   /** The card is locked (`RouteCard.isLocked`): no step is named (D-014, D-075). */
   isLocked: boolean;
-  /** Position of the arrow along the tooltip, from 0 to 1: it points at the start. */
+  /** The step it points at, from 1: the start, or the step the user tapped. */
+  position: number;
+  /** Position of the arrow along the tooltip, from 0 to 1: it points at the step. */
   arrowAt: number;
   onOpen: () => void;
   onClose: () => void;
 }
 
 /**
- * Ink tooltip of a selected route, anchored on its start (Ecrans › E-04): title and rating, the
- * start step (place name, then « Étape 1/n · category · duration »), « Voir plus ». Locked, the step line becomes « Parcours Premium » and the number of
- * steps. It fades in, with or without « Réduire les animations », and takes the screen reader
- * focus; the escape gesture closes it. From 130 % of text, only the title and the rating remain.
+ * Ink tooltip of a selected route, anchored on its start or on the step tapped (Ecrans › E-04):
+ * title and rating, the step (place name, then « Étape i/n · category · duration »), « Voir
+ * plus ». Locked, the step line becomes « Parcours Premium » and the number of steps. It fades
+ * in, with or without « Réduire les animations », and takes the screen reader focus as a dialog;
+ * the escape gesture closes it. From 130 % of text, only the title and the rating remain.
  */
-export function RouteTooltip({ route, isLocked, arrowAt, onOpen, onClose }: RouteTooltipProps) {
+export function RouteTooltip({
+  route,
+  isLocked,
+  position,
+  arrowAt,
+  onOpen,
+  onClose,
+}: RouteTooltipProps) {
   const { t } = useTranslation();
   const isLargeText = useIsLargeText();
   const summary = useRef<View>(null);
@@ -46,15 +56,20 @@ export function RouteTooltip({ route, isLocked, arrowAt, onOpen, onClose }: Rout
 
   // A locked card carries its start alone: the count comes from the card, not its pins.
   const { stepCount } = route;
-  const start = route.steps[0];
-  const startLine = start ? stepLine(t, start, 1, stepCount) : null;
+  const step = route.steps[position - 1];
+  const line = step ? stepLine(t, step, position, stepCount) : null;
   const dialogLabel = isLocked
     ? t('map.tooltip.lockedLabel', {
         title: route.title,
         count: stepCount,
         duration: formatDuration(t, route.durationMin, 'spoken'),
       })
-    : t('map.tooltip.label', { title: route.title, total: stepCount, step: startLine?.spoken });
+    : t('map.tooltip.label', {
+        title: route.title,
+        position,
+        total: stepCount,
+        step: line?.spoken,
+      });
 
   return (
     <Animated.View style={fade} className="w-tooltip-min-w">
@@ -62,7 +77,13 @@ export function RouteTooltip({ route, isLocked, arrowAt, onOpen, onClose }: Rout
         onAccessibilityEscape={onClose}
         className="gap-12 self-stretch rounded-block bg-surface-strong p-16"
       >
-        <View ref={summary} accessible accessibilityLabel={dialogLabel} className="gap-12">
+        <View
+          ref={summary}
+          accessible
+          role="dialog"
+          accessibilityLabel={dialogLabel}
+          className="gap-12"
+        >
           {/* At large text sizes, the rating moves under the title, which keeps the full width. */}
           <View className={isLargeText ? 'items-start gap-8' : 'flex-row items-start gap-8'}>
             <Text
@@ -99,7 +120,7 @@ export function RouteTooltip({ route, isLocked, arrowAt, onOpen, onClose }: Rout
                   </View>
                 ) : (
                   <Text variant="item" color="on-strong">
-                    {startLine?.name}
+                    {line?.name}
                   </Text>
                 )}
                 <Text variant="body-s" color="on-strong-muted">
@@ -108,7 +129,7 @@ export function RouteTooltip({ route, isLocked, arrowAt, onOpen, onClose }: Rout
                         count: stepCount,
                         duration: formatDuration(t, route.durationMin, 'short'),
                       })
-                    : startLine?.detail}
+                    : line?.detail}
                 </Text>
               </View>
             </View>
@@ -118,10 +139,10 @@ export function RouteTooltip({ route, isLocked, arrowAt, onOpen, onClose }: Rout
       </View>
       <View
         className="-mt-6 size-12 rotate-45 bg-surface-strong"
-        // Centred on its share of the width: the arrow points at the start.
+        // Centred on its share of the width: the arrow points at the step.
         style={{ marginLeft: arrowAt * size['tooltip-min-w'] - spacing['space-12'] / 2 }}
       />
-      {/* The tooltip points at the start dot, not into it. */}
+      {/* The tooltip points at the step dot, tapped and so at its active size, not into it. */}
       <View style={{ height: size['step-dot-active'] / 2 }} />
     </Animated.View>
   );

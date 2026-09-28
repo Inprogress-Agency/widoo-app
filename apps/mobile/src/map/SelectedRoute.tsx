@@ -1,11 +1,16 @@
 import type { RouteCard } from '@widoo/shared';
-import { colors, motion, spacing } from '@widoo/tokens';
+import { colors, motion, size, spacing } from '@widoo/tokens';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Pressable, useWindowDimensions } from 'react-native';
 import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
 import { LockedStartDot, StepDot } from '../ui/StepDot';
 import { Mapbox } from './mapbox';
-import { routePath, routeStops } from './markers';
+import type { LngLat } from './geo';
+import { routePath, routeStops, type Stop } from './markers';
 import { RouteTooltip } from './RouteTooltip';
+import { stepLine } from './stepLine';
+import { tooltipAnchorX } from './tooltip';
 
 const fadeTransition = { duration: motion.durations.fade, delay: 0 };
 // A fade, kept with « Réduire les animations » (D-030).
@@ -21,24 +26,118 @@ function useIsFadedIn(): boolean {
   return isFadedIn;
 }
 
+interface StepPinProps {
+  stop: Stop & { category: NonNullable<Stop['category']> };
+  label: string;
+  isActive: boolean;
+  onTap: () => void;
+}
+
+/**
+ * A step dot of the selected route, in a touch target of 44 points: a tap opens its tooltip and
+ * draws it at its active size (Ecrans › E-04).
+ */
+function StepPin({ stop, label, isActive, onTap }: StepPinProps) {
+  return (
+    <Pressable
+      onPress={onTap}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ selected: isActive }}
+      className="size-touch-min items-center justify-center"
+    >
+      <Animated.View entering={stopFade}>
+        <StepDot category={stop.category} isActive={isActive} />
+      </Animated.View>
+    </Pressable>
+  );
+}
+
+/** The step the user tapped, from 0, and where its tooltip hangs from it. */
+interface TappedStep {
+  index: number;
+  anchor: number;
+}
+
 interface SelectedRouteProps {
   route: RouteCard;
   /** Where the tooltip hangs from the start, from 0 (left edge) to 1 (right edge). */
   tooltipAnchor: number;
-  onOpen: () => void;
+  /**
+   * Horizontal position of a point on the screen, from the map: a view on the map cannot measure
+   * itself there.
+   */
+  screenXOf: (location: LngLat) => Promise<number>;
+  /** « Voir plus », with the step the tooltip points at, from 1. */
+  onOpen: (position: number) => void;
   onClose: () => void;
 }
 
 /**
- * The selected route on the map (Ecrans › E-04): blue path, step dots by family and the tooltip
- * on the start, all fading in. A locked card keeps only its start, as the ink dot with the crown.
+ * The selected route on the map (Ecrans › E-04): blue path, step dots by family and one tooltip,
+ * on the start until the user taps a step, all fading in. Each tap moves the tooltip to its step,
+ * which fades in there anew (M-07), and draws that step at 34 points, the others at 28; the route
+ * stays selected. A locked card keeps only its start, as the ink dot with the crown, not tappable.
  * The dots of this one route are views on the map, never those of every route. Mounted again
  * for each route, so that each selection fades in anew.
  */
-export function SelectedRoute({ route, tooltipAnchor, onOpen, onClose }: SelectedRouteProps) {
+export function SelectedRoute({
+  route,
+  tooltipAnchor,
+  screenXOf,
+  onOpen,
+  onClose,
+}: SelectedRouteProps) {
+  const { t } = useTranslation();
+  const { width } = useWindowDimensions();
   const isFadedIn = useIsFadedIn();
+  const [tapped, setTapped] = useState<TappedStep | null>(null);
   const path = routePath(route);
-  const [start, ...others] = routeStops(route);
+  const stops = routeStops(route);
+  const tooltipIndex = tapped?.index ?? 0;
+  const tooltipStop = stops[tooltipIndex];
+
+  const tapStep = async (index: number, location: LngLat) => {
+    // Centred on the step when the map cannot tell where it is.
+    const screenX = await screenXOf(location).catch(() => width / 2);
+    setTapped({
+      index,
+      // The tooltip slides sideways to stay on screen, as over the start.
+      anchor: tooltipAnchorX(screenX, {
+        screenWidth: width,
+        tooltipWidth: size['tooltip-min-w'],
+        margin: spacing['space-16'],
+      }),
+    });
+  };
+
+  const renderStop = (stop: Stop, index: number) => {
+    const step = route.steps[index];
+    const category = stop.category;
+    return (
+      <Mapbox.MarkerView key={stop.key} coordinate={stop.location} allowOverlap>
+        {category && step ? (
+          <StepPin
+            stop={{ ...stop, category }}
+            label={stepLine(t, step, index + 1, route.stepCount).dotLabel}
+            isActive={tapped?.index === index}
+            onTap={() => void tapStep(index, stop.location)}
+          />
+        ) : (
+          <Animated.View entering={stopFade} pointerEvents="none">
+            <LockedStartDot />
+          </Animated.View>
+        )}
+      </Mapbox.MarkerView>
+    );
+  };
+
+  // The start is drawn last, above the other steps.
+  const drawOrder = stops.map((_, index) => index).slice(1);
+  if (stops.length > 0) {
+    drawOrder.push(0);
+  }
+
   return (
     <>
       {path && (
@@ -57,29 +156,25 @@ export function SelectedRoute({ route, tooltipAnchor, onOpen, onClose }: Selecte
           />
         </Mapbox.ShapeSource>
       )}
-      {[...others, start].flatMap((stop) =>
-        stop ? (
-          <Mapbox.MarkerView key={stop.key} coordinate={stop.location} allowOverlap>
-            <Animated.View entering={stopFade} pointerEvents="none">
-              {stop.category ? <StepDot category={stop.category} /> : <LockedStartDot />}
-            </Animated.View>
-          </Mapbox.MarkerView>
-        ) : (
-          []
-        ),
-      )}
-      {start && (
+      {drawOrder.map((index) => {
+        const stop = stops[index];
+        return stop ? renderStop(stop, index) : null;
+      })}
+      {tooltipStop && (
         <Mapbox.MarkerView
-          coordinate={start.location}
-          anchor={{ x: tooltipAnchor, y: 1 }}
+          // Mounted again on each step, so that the tooltip fades in from its new anchor (M-07).
+          key={`tooltip-${tooltipIndex}`}
+          coordinate={tooltipStop.location}
+          anchor={{ x: tapped?.anchor ?? tooltipAnchor, y: 1 }}
           allowOverlap
           allowOverlapWithPuck
         >
           <RouteTooltip
             route={route}
             isLocked={route.isLocked}
-            arrowAt={tooltipAnchor}
-            onOpen={onOpen}
+            position={tooltipIndex + 1}
+            arrowAt={tapped?.anchor ?? tooltipAnchor}
+            onOpen={() => onOpen(tooltipIndex + 1)}
             onClose={onClose}
           />
         </Mapbox.MarkerView>
