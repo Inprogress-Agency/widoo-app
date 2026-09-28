@@ -1,7 +1,7 @@
-// Généré depuis tokens.json (version 26), ne pas modifier : pnpm --filter @widoo/tokens generate.
+// Généré depuis tokens.json (version 28), ne pas modifier : pnpm --filter @widoo/tokens generate.
 import type { Audience, BudgetBucket, Condition, Mood, PlaceCategory, Transport } from '@widoo/shared';
 
-export const tokensVersion = 26;
+export const tokensVersion = 28;
 
 /** Light theme: the dark values are not validated and not generated. */
 export const colors = {
@@ -279,6 +279,7 @@ export const iconNames = [
   "barbell",
   "barricade",
   "bell",
+  "bell-slash",
   "bicycle",
   "binoculars",
   "bread",
@@ -293,6 +294,7 @@ export const iconNames = [
   "caret-right",
   "caret-up",
   "castle-turret",
+  "chart-bar",
   "check",
   "check-circle",
   "circle",
@@ -873,6 +875,15 @@ export const uiIcons = {
   "field-work": {
     "name": "seal-check",
     "color": "green-ink"
+  },
+  "reminders-off": {
+    "name": "bell-slash"
+  },
+  "analytics": {
+    "name": "chart-bar"
+  },
+  "sign-in": {
+    "name": "user"
   }
 } as const satisfies Record<string, { name: IconName; weight?: 'fill' | 'bold'; activeWeight?: 'fill'; color?: ColorToken }>;
 export type UiIconKey = keyof typeof uiIcons;
