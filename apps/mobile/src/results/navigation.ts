@@ -6,10 +6,24 @@ import type { SectionId } from '../discovery/sections';
 
 export type OpenSource = AnalyticsEvents['route_opened']['source'];
 
-/** The route sheet (E-05), provisional until #37; `route_opened` tells where it was opened from. */
-export function openRoute(route: RouteCard, source: OpenSource) {
+/**
+ * Where the route sheet (E-05) opens: at a step, from 1, for « Voir plus » of a step tooltip; at
+ * its top otherwise.
+ */
+export function routeHref(route: Pick<RouteCard, 'id'>, step?: number) {
+  return {
+    pathname: '/route/[id]' as const,
+    params: step === undefined ? { id: route.id } : { id: route.id, step: String(step) },
+  };
+}
+
+/**
+ * The route sheet (E-05), provisional until #37, at `step` if given; `route_opened` tells where it
+ * was opened from.
+ */
+export function openRoute(route: RouteCard, source: OpenSource, step?: number) {
   analytics.track('route_opened', routeOpenedEvent(route, source));
-  router.push({ pathname: '/route/[id]', params: { id: route.id } });
+  router.push(routeHref(route, step));
 }
 
 /** « Voir tout » of a section of the sheet (E-04), pushed on the home stack (M-03). */

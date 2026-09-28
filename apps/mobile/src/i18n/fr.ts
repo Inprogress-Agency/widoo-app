@@ -105,6 +105,7 @@ export const fr = {
   route: {
     title: 'Fiche du parcours',
     comingSoon: 'La fiche détaillée arrive bientôt.',
+    step: "Ouverte à l'étape {{position}}.",
     back: 'Retour',
   },
   routes: {
