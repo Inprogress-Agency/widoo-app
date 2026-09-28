@@ -3,6 +3,7 @@ import type { AppConfig } from '@widoo/shared';
 import { useTranslation } from 'react-i18next';
 import { apiUrl } from '../../src/api/client';
 import { useAppConfig } from '../../src/api/queries';
+import { useReleaseSplash } from '../../src/launch/splash';
 import { Screen } from '../../src/components/Screen';
 import { StatusMessage } from '../../src/components/StatusMessage';
 import { Button } from '../../src/ui/Button';
@@ -22,6 +23,8 @@ export default function HomeScreen() {
 function ConfigContent() {
   const { t } = useTranslation();
   const { data, error, isPaused, refetch } = useAppConfig();
+  // Until the map (#26), the home is ready once the configuration shows, or its error.
+  useReleaseSplash(data !== undefined || error !== null || isPaused);
   const retry = <Button label={t('home.config.retry')} onPress={() => void refetch()} />;
 
   if (data) {
