@@ -20,7 +20,7 @@ const route: RouteCard = {
   neighborhood: 'République',
   durationMin: 180,
   durationBucket: 'half_day',
-  budgetPerPersonEur: { min: 20, max: 30 },
+  budgetPerPersonEur: 25,
   budgetBucket: 'low',
   distanceM: 4200,
   rating: { average: 4.8, count: 12 },

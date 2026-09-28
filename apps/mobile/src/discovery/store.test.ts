@@ -26,7 +26,7 @@ function route(id: string): RouteCard {
     neighborhood: null,
     durationMin: 120,
     durationBucket: '1_2h',
-    budgetPerPersonEur: { min: 0, max: 0 },
+    budgetPerPersonEur: 0,
     budgetBucket: 'free',
     distanceM: 1500,
     rating: { average: null, count: 0 },

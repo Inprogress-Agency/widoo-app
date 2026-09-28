@@ -342,7 +342,7 @@ function fixtureRow(fixture: Fixture, cityId: string): typeof routes.$inferInser
     },
     computed: {
       duration_min: fixture.durationMin,
-      budget_per_person_eur: { min: 0, max: 0 },
+      budget_per_person_eur: 0,
       distance_m: 1000,
     },
     durationBucket: fixture.durationBucket,

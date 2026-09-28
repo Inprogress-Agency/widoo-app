@@ -21,7 +21,7 @@ const row = (access: CardRow['access']): CardRow => ({
   audiences: ['solo'],
   duration_bucket: '1_2h',
   budget_bucket: 'free',
-  computed: { duration_min: 90, budget_per_person_eur: { min: 0, max: 0 }, distance_m: 1200 },
+  computed: { duration_min: 90, budget_per_person_eur: 0, distance_m: 1200 },
   stats: {},
   author_id: null,
   author_first_name: null,
