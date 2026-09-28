@@ -1,6 +1,6 @@
 import type { LatLng, RouteSort } from '@widoo/shared';
 import { sql, type SQL } from 'drizzle-orm';
-import { places, routes, steps } from '../db/schema';
+import { routes } from '../db/schema';
 import type { SortKeyType, SortKeyValue } from './cursor';
 
 /** One column of a sort. Never null, so that a row comparison always decides. */
@@ -12,29 +12,12 @@ const id = (direction: SortKey['direction']): SortKey => ({
   type: 'uuid',
 });
 
-/**
- * Sort keys of each sort, the route id last to break ties. `recommended` waits for the
- * recommendation score (#63): verified places, then official routes, then the most recent
- * (wiki Modele-de-Donnees › requête centrale).
- */
-export function sortKeys(sort: RouteSort, near: LatLng | undefined): SortKey[] {
+/** Sorts paged on their keys; `recommended` is ranked in memory (`recommendation/rank.ts`). */
+export type KeysetSort = Exclude<RouteSort, 'recommended'>;
+
+/** Sort keys of each keyset sort, the route id last to break ties. */
+export function sortKeys(sort: KeysetSort, near: LatLng | undefined): SortKey[] {
   switch (sort) {
-    case 'recommended':
-      return [
-        {
-          expr: sql`(select count(*)::int from ${steps} join ${places} on ${places.id} = ${steps.placeId} where ${steps.routeId} = ${routes.id} and ${places.verificationStatus} = 'verified')`,
-          direction: 'desc',
-          type: 'int',
-        },
-        { expr: sql`${routes.isOfficial}::int`, direction: 'desc', type: 'int' },
-        {
-          // Microseconds: a JavaScript date would round them and skip or repeat a route.
-          expr: sql`coalesce((extract(epoch from ${routes.publishedAt}) * 1000000)::bigint, 0)`,
-          direction: 'desc',
-          type: 'bigint',
-        },
-        id('desc'),
-      ];
     case 'distance': {
       // `RouteSearchQuery` requires `near` with this sort.
       const { lat, lng } = near ?? { lat: 0, lng: 0 };

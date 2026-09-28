@@ -5,7 +5,7 @@
  * about a kilometre, and fixed ids (a second
  * run replaces them), runs a mix of the requests the app sends through the whole API, prints
  * p50 / p95 / p99 per request and overall, then deletes its rows. `--explain` also prints the
- * execution plans of the central search and of the count. Refused in production. Exits 1 when
+ * execution plans of the recommended candidates, of a keyset search and of the count. Refused in production. Exits 1 when
  * the overall p95 reaches 150 ms.
  */
 import {
@@ -23,6 +23,7 @@ import { envelopeOf } from '../db/geography';
 import { places, routes, steps } from '../db/schema';
 import { seed } from '../db/seed';
 import { namedUuidv7 } from '../db/uuid';
+import { candidatesSql } from './recommended';
 import { countSql, searchPageSql } from './repository';
 import { sortKeys } from './sort';
 
@@ -172,9 +173,10 @@ async function explain() {
     durations: ['half_day'],
   });
   const plans = {
-    'search, mood and condition': searchPageSql(
+    'recommended candidates, mood and condition': candidatesSql(search),
+    'search by rating, mood and condition': searchPageSql(
       search,
-      sortKeys(search.sort, undefined),
+      sortKeys('rating', undefined),
       undefined,
     ),
     'count, mood and duration': countSql(count),
