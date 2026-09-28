@@ -1,5 +1,5 @@
 // Généré depuis tokens.json (version 14), ne pas modifier : pnpm --filter @widoo/tokens generate.
-import type { Audience, Condition, Mood, PlaceCategory, Transport } from '@widoo/shared';
+import type { Audience, BudgetBucket, Condition, Mood, PlaceCategory, Transport } from '@widoo/shared';
 
 export const tokensVersion = 14;
 
@@ -461,7 +461,7 @@ export const placeCategories = {
   }
 } as const satisfies Record<PlaceCategory, { family: ActivityFamily; icon: IconName }>;
 
-/** Icon of each filter value; budget and duration are text only. */
+/** Icon of each filter value; durations are text only, budgets too except « Gratuit » (D-053). */
 export const filterIcons = {
   "audiences": {
     "solo": "user",
@@ -496,7 +496,7 @@ export const filterIcons = {
     "sunny": "sun",
     "rainy": "cloud-rain"
   }
-} as const satisfies { audiences: Record<Audience, IconName>; transports: Record<Transport, IconName>; moods: Record<Mood, IconName>; conditions: Record<Condition, IconName> };
+} as const satisfies { audiences: Record<Audience, IconName>; budgets?: Partial<Record<BudgetBucket, IconName>>; transports: Record<Transport, IconName>; moods: Record<Mood, IconName>; conditions: Record<Condition, IconName> };
 
 /** Color of the dot of each mood. */
 export const moodDots = {

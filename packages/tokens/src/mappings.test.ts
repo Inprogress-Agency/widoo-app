@@ -122,13 +122,39 @@ describe('buildMappings', () => {
       '« Seul » is not a label of audiences',
     ],
     [
-      'an icon on a text-only filter',
+      'an icon on a duration, shown as text only',
       withMappings((copy) => {
-        copy.filterIcons.budget = [{ value: 'Gratuit', icon: 'coins' }];
+        copy.filterIcons.duration = [{ value: 'Journée', icon: 'clock' }];
       }),
-      'filterIcons.budget',
+      'filterIcons.duration: an icon appeared',
+    ],
+    [
+      'an icon on a budget label unknown to packages/shared',
+      withMappings((copy) => {
+        copy.filterIcons.budget = [{ value: 'Offert', icon: 'tag' }];
+      }),
+      '« Offert » is not a label of budgets',
     ],
   ])('refuses %s', (_case, changed, message) => {
     expect(() => buildMappings(changed, theme)).toThrow(message);
+  });
+
+  it('maps an icon on « Gratuit » alone among the budgets, the others staying text (D-053)', () => {
+    const changed = withMappings((copy) => {
+      copy.filterIcons.budget = [
+        { value: 'Gratuit', icon: 'tag' },
+        { value: 'Plus de 70 €', icon: null },
+      ];
+    });
+    const built = buildMappings(changed, theme);
+    expect(built.filterIcons.budgets).toEqual({ free: 'tag' });
+    expect(built.iconNames).toContain('tag');
+  });
+
+  it('leaves the budgets out of the filter icons while none has an icon', () => {
+    const changed = withMappings((copy) => {
+      copy.filterIcons.budget = [{ value: 'Gratuit', icon: null }];
+    });
+    expect(buildMappings(changed, theme).filterIcons).not.toHaveProperty('budgets');
   });
 });

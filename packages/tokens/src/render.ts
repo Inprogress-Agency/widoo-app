@@ -128,9 +128,10 @@ export function renderThemeModule(tokens: Tokens, theme: Theme = buildTheme(toke
     {
       name: 'filterIcons',
       value: mappings.filterIcons,
-      comment: 'Icon of each filter value; budget and duration are text only.',
+      comment:
+        'Icon of each filter value; durations are text only, budgets too except « Gratuit » (D-053).',
       satisfies:
-        '{ audiences: Record<Audience, IconName>; transports: Record<Transport, IconName>; moods: Record<Mood, IconName>; conditions: Record<Condition, IconName> }',
+        '{ audiences: Record<Audience, IconName>; budgets?: Partial<Record<BudgetBucket, IconName>>; transports: Record<Transport, IconName>; moods: Record<Mood, IconName>; conditions: Record<Condition, IconName> }',
     },
     {
       name: 'moodDots',
@@ -184,7 +185,7 @@ export function renderThemeModule(tokens: Tokens, theme: Theme = buildTheme(toke
   });
 
   return `${header(tokens.version)}
-import type { Audience, Condition, Mood, PlaceCategory, Transport } from '@widoo/shared';
+import type { Audience, BudgetBucket, Condition, Mood, PlaceCategory, Transport } from '@widoo/shared';
 
 export const tokensVersion = ${tokens.version};
 
