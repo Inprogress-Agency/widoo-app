@@ -14,6 +14,8 @@ function route(id: string, overrides: Partial<RouteCard> = {}): RouteCard {
     isVerified: false,
     moods: ['culture'],
     audiences: [],
+    conditions: [],
+    transport: 'walk',
     district: null,
     neighborhood: null,
     durationMin: 120,
