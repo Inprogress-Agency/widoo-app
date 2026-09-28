@@ -1,4 +1,4 @@
-// Généré depuis tokens.json (version 29), ne pas modifier : pnpm --filter @widoo/tokens generate.
+// Généré depuis tokens.json (version 30), ne pas modifier : pnpm --filter @widoo/tokens generate.
 import type { Icon } from 'phosphor-react-native';
 import { ArmchairIcon } from 'phosphor-react-native/src/icons/Armchair';
 import { ArrowRightIcon } from 'phosphor-react-native/src/icons/ArrowRight';
@@ -40,6 +40,7 @@ import { DeviceMobileIcon } from 'phosphor-react-native/src/icons/DeviceMobile';
 import { DoorIcon } from 'phosphor-react-native/src/icons/Door';
 import { DotsSixVerticalIcon } from 'phosphor-react-native/src/icons/DotsSixVertical';
 import { DotsThreeIcon } from 'phosphor-react-native/src/icons/DotsThree';
+import { DownloadSimpleIcon } from 'phosphor-react-native/src/icons/DownloadSimple';
 import { EnvelopeSimpleIcon } from 'phosphor-react-native/src/icons/EnvelopeSimple';
 import { EnvelopeSimpleOpenIcon } from 'phosphor-react-native/src/icons/EnvelopeSimpleOpen';
 import { ExportIcon } from 'phosphor-react-native/src/icons/Export';
@@ -53,6 +54,7 @@ import { FrameCornersIcon } from 'phosphor-react-native/src/icons/FrameCorners';
 import { GearSixIcon } from 'phosphor-react-native/src/icons/GearSix';
 import { GlobeSimpleIcon } from 'phosphor-react-native/src/icons/GlobeSimple';
 import { GpsSlashIcon } from 'phosphor-react-native/src/icons/GpsSlash';
+import { HandPalmIcon } from 'phosphor-react-native/src/icons/HandPalm';
 import { HeadphonesIcon } from 'phosphor-react-native/src/icons/Headphones';
 import { HeartIcon } from 'phosphor-react-native/src/icons/Heart';
 import { HourglassMediumIcon } from 'phosphor-react-native/src/icons/HourglassMedium';
@@ -147,6 +149,7 @@ export const icons: Record<IconName, Icon> = {
   door: DoorIcon,
   'dots-six-vertical': DotsSixVerticalIcon,
   'dots-three': DotsThreeIcon,
+  'download-simple': DownloadSimpleIcon,
   'envelope-simple': EnvelopeSimpleIcon,
   'envelope-simple-open': EnvelopeSimpleOpenIcon,
   export: ExportIcon,
@@ -160,6 +163,7 @@ export const icons: Record<IconName, Icon> = {
   'gear-six': GearSixIcon,
   'globe-simple': GlobeSimpleIcon,
   'gps-slash': GpsSlashIcon,
+  'hand-palm': HandPalmIcon,
   headphones: HeadphonesIcon,
   heart: HeartIcon,
   'hourglass-medium': HourglassMediumIcon,
