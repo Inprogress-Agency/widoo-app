@@ -1,7 +1,7 @@
-// Généré depuis tokens.json (version 30), ne pas modifier : pnpm --filter @widoo/tokens generate.
+// Généré depuis tokens.json (version 33), ne pas modifier : pnpm --filter @widoo/tokens generate.
 import type { Audience, BudgetBucket, Condition, Mood, PlaceCategory, Transport } from '@widoo/shared';
 
-export const tokensVersion = 30;
+export const tokensVersion = 33;
 
 /** Light theme: the dark values are not validated and not generated. */
 export const colors = {
@@ -247,6 +247,9 @@ export const size = {
   "step-dot-active": 34,
   "marker": 56,
   "marker-active": 68,
+  "marker-border": 3,
+  "route-stroke": 5,
+  "route-casing": 9,
   "thumb": 48,
   "tooltip-min-w": 260,
   "card-w": 270,
@@ -254,6 +257,10 @@ export const size = {
   "card-list-w": 358,
   "card-list-h": 388,
   "sheet-rest": 120,
+  "sheet-half-top": 296,
+  "sheet-empty-top": 470,
+  "card-photo": 150,
+  "card-list-photo": 190,
   "hero-h": 380,
   "icon-s": 16,
   "icon-m": 20,
@@ -913,6 +920,11 @@ export const uiIcons = {
   },
   "export-data": {
     "name": "download-simple"
+  },
+  "rating": {
+    "name": "star",
+    "weight": "fill",
+    "color": "amber"
   }
 } as const satisfies Record<string, { name: IconName; weight?: 'fill' | 'bold'; activeWeight?: 'fill'; color?: ColorToken }>;
 export type UiIconKey = keyof typeof uiIcons;
