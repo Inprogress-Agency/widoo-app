@@ -22,6 +22,8 @@ function route(id: string): RouteCard {
     isVerified: false,
     moods: ['culture'],
     audiences: [],
+    conditions: [],
+    transport: 'walk',
     district: null,
     neighborhood: null,
     durationMin: 120,

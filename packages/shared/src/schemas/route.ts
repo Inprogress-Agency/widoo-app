@@ -50,6 +50,10 @@ const routeCardShape = {
   isVerified: z.boolean(),
   moods: z.array(z.enum(taxonomies.moods)),
   audiences: z.array(z.enum(taxonomies.audiences)),
+  /** Entered and derived conditions: the offline filters read them on the cached cards (E-03). */
+  conditions: z.array(z.enum(taxonomies.conditions)),
+  /** Main transport of the route, for the same offline filters. */
+  transport: z.enum(taxonomies.transports),
   /** Arrondissement and neighbourhood of the start, as displayed (« 3e », « Le Marais »). */
   district: z.string().nullable(),
   neighborhood: z.string().nullable(),
@@ -122,8 +126,6 @@ export const RouteDetail = z.object(routeCardShape).extend({
   status: z.enum(taxonomies.routeStatuses),
   description: z.string(),
   photoUrls: z.array(HttpsUrl),
-  conditions: z.array(z.enum(taxonomies.conditions)),
-  transport: z.enum(taxonomies.transports),
   walkingDistanceM: z.number().nonnegative(),
   steps: z.array(Step),
 });

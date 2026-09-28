@@ -53,6 +53,8 @@ const card = {
   isVerified: true,
   moods: ['culture'],
   audiences: ['couple'],
+  conditions: [],
+  transport: 'walk',
   district: '3e',
   neighborhood: 'Le Marais',
   durationMin: 180,
