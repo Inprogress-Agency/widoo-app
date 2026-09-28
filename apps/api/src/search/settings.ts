@@ -21,15 +21,33 @@ export async function readSetting(db: Db, key: string): Promise<unknown> {
 }
 
 /**
- * Cluster threshold, read from `settings` and kept one minute per process, so that a change
- * applies without a deployment. A missing or invalid value falls back to the default.
+ * A value read from `settings` and kept one minute per process, so that a change applies without
+ * a deployment. `parse` turns a missing or invalid value into its default.
  */
-export function createClusterThreshold(read: () => Promise<unknown>, now: () => number = Date.now) {
-  let cached: { value: number; readAt: number } | undefined;
-  return async (): Promise<number> => {
+export function createCachedSetting<T>(
+  read: () => Promise<unknown>,
+  parse: (value: unknown) => T,
+  now: () => number = () => Date.now(),
+) {
+  let cached: { value: T; readAt: number } | undefined;
+  return async (): Promise<T> => {
     if (cached && now() - cached.readAt < refreshMs) return cached.value;
-    const parsed = AreaKm2.safeParse(await read());
-    cached = { value: parsed.success ? parsed.data : defaultClusterAreaKm2, readAt: now() };
+    cached = { value: parse(await read()), readAt: now() };
     return cached.value;
   };
+}
+
+/** Cluster threshold, from `settings` or the default. */
+export function createClusterThreshold(
+  read: () => Promise<unknown>,
+  now: () => number = () => Date.now(),
+) {
+  return createCachedSetting(
+    read,
+    (value) => {
+      const parsed = AreaKm2.safeParse(value);
+      return parsed.success ? parsed.data : defaultClusterAreaKm2;
+    },
+    now,
+  );
 }
