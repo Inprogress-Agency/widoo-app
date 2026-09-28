@@ -1,6 +1,7 @@
 import { shadow, spacing, type UiIconKey } from '@widoo/tokens';
-import type { BottomTabBarProps } from 'expo-router/tabs';
-import { Platform, Pressable, View } from 'react-native';
+import { BottomTabBarHeightCallbackContext, type BottomTabBarProps } from 'expo-router/tabs';
+import { use, type ReactNode } from 'react';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Icon, uiIcon } from '../ui/Icon';
 import { Text } from '../ui/Text';
 
@@ -15,18 +16,29 @@ const icons: Record<string, UiIconKey> = {
   profile: 'tab-profile',
 };
 
+interface TabBarProps extends BottomTabBarProps {
+  /** Floats with the bar, just above the pill, such as the consent banner. */
+  accessory?: ReactNode;
+}
+
 /**
- * Tab bar of E-01: a white pill with the only shadow of the app; inactive tabs are warm grey
- * discs showing their icon only, the active tab an ink pill with its blue icon and its label.
- * Labels come from each screen's `title`; the bar is a dense component, capped at 1.3 times.
+ * Tab bar of E-01: a white pill with the only shadow of the app, floating over the screens,
+ * which run edge to edge behind it (the map of E-01). Inactive tabs are warm grey discs showing
+ * their icon only, the active tab an ink pill with its blue icon and its label. Labels come from
+ * each screen's `title`; the bar is a dense component, capped at 1.3 times. Its height, pill and
+ * accessory, is what the screens read as the tab bar height, to keep their content above it.
  */
-export function TabBar({ state, descriptors, navigation, insets }: BottomTabBarProps) {
+export function TabBar({ state, descriptors, navigation, insets, accessory }: TabBarProps) {
+  const onHeightChange = use(BottomTabBarHeightCallbackContext);
   return (
     <View
-      className="items-center bg-bg pt-8"
+      pointerEvents="box-none"
+      className="items-center gap-8"
+      onLayout={(event) => onHeightChange?.(event.nativeEvent.layout.height)}
       // Safe area measured at runtime.
-      style={{ paddingBottom: Math.max(insets.bottom, spacing['space-12']) }}
+      style={[styles.floating, { paddingBottom: Math.max(insets.bottom, spacing['space-12']) }]}
     >
+      {accessory}
       <View
         accessibilityRole="tablist"
         className="flex-row gap-8 rounded-pill bg-bg p-6"
@@ -80,3 +92,7 @@ export function TabBar({ state, descriptors, navigation, insets }: BottomTabBarP
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  floating: { position: 'absolute', left: 0, right: 0, bottom: 0 },
+});

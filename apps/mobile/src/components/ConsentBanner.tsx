@@ -6,8 +6,8 @@ import { Button } from '../ui/Button';
 import { Text } from '../ui/Text';
 
 /**
- * Consent to product analytics, asked at first launch (wiki Securite-et-RGPD). Above the tab
- * bar, it leaves the app usable: no answer means no analytics. Refusing weighs as much as
+ * Consent to product analytics, asked at first launch (wiki Securite-et-RGPD). Floating with the
+ * tab bar, just above it, it leaves the app usable: no answer means no analytics. Refusing weighs as much as
  * accepting: same button, same place.
  */
 export function ConsentBanner() {
@@ -35,7 +35,7 @@ function ConsentPrompt() {
   return (
     <View
       accessibilityLiveRegion="polite"
-      className="mx-16 mt-8 gap-12 rounded-card bg-surface p-16"
+      className="mx-16 gap-12 self-stretch rounded-card bg-surface p-16"
       // Height of the window, known at runtime.
       style={{ maxHeight: height * MAX_HEIGHT_RATIO }}
     >
