@@ -5,7 +5,9 @@ import BottomSheet, {
   useBottomSheetTimingConfigs,
 } from '@gorhom/bottom-sheet';
 import { colors, motion, radius } from '@widoo/tokens';
+import { BottomTabBarHeightContext } from 'expo-router/tabs';
 import {
+  use,
   useEffect,
   useImperativeHandle,
   useMemo,
@@ -40,13 +42,13 @@ export interface ResultsSheetMethods {
 
 interface ResultsSheetProps {
   ref?: Ref<ResultsSheetMethods>;
-  /** Height of the screen the sheet lives in, above the tab bar. */
+  /** Height of the screen the sheet lives in, edge to edge behind the floating tab bar. */
   containerHeight: number;
   /** What the rest detent shows whole, under the handle: header, message or summary. */
   peek: ReactNode;
   /** What the sheet shows further up. */
   children?: ReactNode;
-  /** The detent reached, and the height the sheet covers there. */
+  /** The detent reached, and the height the sheet covers there, tab bar included. */
   onLevelChange?: (level: SheetLevel, height: number) => void;
 }
 
@@ -55,7 +57,8 @@ interface ResultsSheetProps {
  * settles on the nearest detent in the direction of the gesture, with the spring of
  * `mappings.motion`, the same on iOS and Android, and a selection vibration at each detent
  * reached by the finger. Moved by the app, it takes `base`. With « Réduire les animations », it
- * jumps to its detent.
+ * jumps to its detent. It runs down to the foot of the screen, under the floating tab bar: its
+ * detents are counted above the bar, and its content scrolls clear of it.
  */
 export function ResultsSheet({
   ref,
@@ -65,6 +68,7 @@ export function ResultsSheet({
   onLevelChange,
 }: ResultsSheetProps) {
   const insets = useSafeAreaInsets();
+  const barHeight = use(BottomTabBarHeightContext) ?? 0;
   const sheet = useRef<BottomSheet>(null);
   const [peekHeight, setPeekHeight] = useState(0);
   const [level, setLevel] = useState<SheetLevel>('rest');
@@ -75,8 +79,8 @@ export function ResultsSheet({
   const reachedIndex = useSharedValue(0);
 
   const snapPoints = useMemo(
-    () => sheetSnapPoints({ containerHeight, topInset: insets.top, peekHeight }),
-    [containerHeight, insets.top, peekHeight],
+    () => sheetSnapPoints({ containerHeight, barHeight, topInset: insets.top, peekHeight }),
+    [containerHeight, barHeight, insets.top, peekHeight],
   );
   // Explicit on both systems: @gorhom/bottom-sheet springs on iOS and times 250 ms on Android.
   const gestureConfig = useBottomSheetSpringConfigs({
@@ -147,7 +151,10 @@ export function ResultsSheet({
       accessible={false}
       backgroundComponent={SheetBackground}
     >
-      <BottomSheetScrollView>
+      <BottomSheetScrollView
+        // Tab bar height measured at runtime: the end of the content scrolls above the bar.
+        contentContainerStyle={{ paddingBottom: barHeight }}
+      >
         <View onLayout={(event) => setPeekHeight(event.nativeEvent.layout.height)}>
           <SheetHandle level={level} onLevel={moveTo} />
           {peek}

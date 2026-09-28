@@ -66,7 +66,10 @@ interface RouteMapProps {
   selectedRoute: RouteCard | null;
   /** The card the user scrolled to in the sheet: the map comes round to its start, enlarged. */
   focusedRoute?: RouteCard | null;
-  /** Height the results sheet covers at the foot of the map: the focused start stays above it. */
+  /**
+   * Height the results sheet covers at the foot of the map, the floating tab bar included: the
+   * focused start stays above it. Without it, the sheet at rest above the bar.
+   */
   bottomInset?: number;
   /** A Premium route is locked for a user without subscription (D-014). */
   hasPremium: boolean;
@@ -96,7 +99,7 @@ export function RouteMap({
   framing,
   selectedRoute,
   focusedRoute = null,
-  bottomInset = size['sheet-rest'],
+  bottomInset: sheetCover,
   hasPremium,
   onSelect,
   onOpenRoute,
@@ -110,6 +113,9 @@ export function RouteMap({
   const isReducedMotion = useReducedMotion();
   // The map runs under the floating tab bar; nothing it shows may sit behind the bar.
   const tabBarHeight = use(BottomTabBarHeightContext) ?? 0;
+  /** The sheet at rest, above the tab bar. */
+  const restCover = tabBarHeight + size['sheet-rest'];
+  const bottomInset = sheetCover ?? restCover;
   // Mapbox lays its ornaments out in the safe area on iOS, from the edge of the view on Android.
   const insets = useSafeAreaInsets();
   const safeBottom = Platform.OS === 'ios' ? insets.bottom : 0;
@@ -156,7 +162,7 @@ export function RouteMap({
   // The controls and the map ornaments (Mapbox logo and attribution, required) sit just above
   // the results sheet, as high as it rises up to half the map; beyond, they stay under it.
   const isSheetLow = bottomInset <= viewport.height / 2;
-  const sheetTop = isSheetLow ? bottomInset : size['sheet-rest'];
+  const sheetTop = isSheetLow ? bottomInset : restCover;
   const ornamentBottom = sheetTop + ornamentMargin - safeBottom;
   // The controls clear the attribution button, a touch target in the corner below them.
   const controlsBottom = sheetTop + ornamentMargin + size['touch-min'] + spacing['space-8'];
@@ -247,8 +253,8 @@ export function RouteMap({
   /** Where the route was framed last, route and sheet height: framed again only on a change. */
   const framedFor = useRef('');
   const selectRoute = (route: RouteCard) => {
-    if (frameRoute(route, size['sheet-rest'])) {
-      framedFor.current = `${route.id}:${size['sheet-rest']}`;
+    if (frameRoute(route, restCover)) {
+      framedFor.current = `${route.id}:${restCover}`;
       onSelect(route);
     }
   };
