@@ -1,6 +1,7 @@
 export * from './analytics';
 export { assertNever } from './assert-never';
 export { budgetSumEur, displayedBudgetEur } from './budget';
+export { matchesFilters, type RouteFilters } from './filters';
 export { labels, type Locale, type TaxonomyLabels } from './labels';
 export * from './monitoring';
 export * from './taxonomies';
