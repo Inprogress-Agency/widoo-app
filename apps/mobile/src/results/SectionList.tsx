@@ -1,6 +1,8 @@
 import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import type { LatLng, RouteCard as RouteCardData } from '@widoo/shared';
-import { useRef } from 'react';
+import { spacing } from '@widoo/tokens';
+import { BottomTabBarHeightContext } from 'expo-router/tabs';
+import { use, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -42,7 +44,7 @@ interface SectionListProps {
  * « Voir tout » of a section (Ecrans › E-04): the title of the section and its zone, a pinned
  * bar with the count and the sort pill, and the cards of the whole zone in a vertical FlashList,
  * page after page as it scrolls (M-09). Loading, empty, failed and offline, it keeps its header
- * and its bar.
+ * and its bar. It runs under the floating tab bar, and its end scrolls clear of it.
  */
 export function SectionList({
   section,
@@ -53,6 +55,7 @@ export function SectionList({
 }: SectionListProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const tabBarHeight = use(BottomTabBarHeightContext) ?? 0;
   const list = useRef<FlashListRef<Row>>(null);
   const sortSheet = useRef<SortSheetMethods>(null);
   const { routes, sort, status, isLoadingMore, hasFailedMore, loadMore, retry, fetchedAt } =
@@ -147,6 +150,8 @@ export function SectionList({
           stickyHeaderIndices={[BAR_INDEX]}
           onEndReached={status === 'ready' ? loadMore : undefined}
           onEndReachedThreshold={0.5}
+          // Tab bar height measured at runtime: the last card and the foot end above the bar.
+          contentContainerStyle={{ paddingBottom: tabBarHeight + spacing['space-16'] }}
           ListFooterComponent={
             status === 'ready' ? (
               <ListFooter isLoading={isLoadingMore} hasFailed={hasFailedMore} onRetry={retry} />
