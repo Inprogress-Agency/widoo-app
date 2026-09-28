@@ -29,7 +29,9 @@ function route(id: string): RouteCard {
     budgetBucket: 'free',
     distanceM: 1500,
     rating: { average: null, count: 0 },
-    steps: [{ category: 'museum', location: { lat: 48.86, lng: 2.34 } }],
+    steps: [
+      { category: 'museum', location: { lat: 48.86, lng: 2.34 }, name: null, durationMin: null },
+    ],
   };
 }
 
