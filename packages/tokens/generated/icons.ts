@@ -1,4 +1,4 @@
-// Généré depuis tokens.json (version 28), ne pas modifier : pnpm --filter @widoo/tokens generate.
+// Généré depuis tokens.json (version 29), ne pas modifier : pnpm --filter @widoo/tokens generate.
 import type { Icon } from 'phosphor-react-native';
 import { ArmchairIcon } from 'phosphor-react-native/src/icons/Armchair';
 import { ArrowRightIcon } from 'phosphor-react-native/src/icons/ArrowRight';
@@ -36,6 +36,7 @@ import { CloudRainIcon } from 'phosphor-react-native/src/icons/CloudRain';
 import { CloudSlashIcon } from 'phosphor-react-native/src/icons/CloudSlash';
 import { CoffeeIcon } from 'phosphor-react-native/src/icons/Coffee';
 import { CrownSimpleIcon } from 'phosphor-react-native/src/icons/CrownSimple';
+import { DeviceMobileIcon } from 'phosphor-react-native/src/icons/DeviceMobile';
 import { DoorIcon } from 'phosphor-react-native/src/icons/Door';
 import { DotsSixVerticalIcon } from 'phosphor-react-native/src/icons/DotsSixVertical';
 import { DotsThreeIcon } from 'phosphor-react-native/src/icons/DotsThree';
@@ -142,6 +143,7 @@ export const icons: Record<IconName, Icon> = {
   'cloud-slash': CloudSlashIcon,
   coffee: CoffeeIcon,
   'crown-simple': CrownSimpleIcon,
+  'device-mobile': DeviceMobileIcon,
   door: DoorIcon,
   'dots-six-vertical': DotsSixVerticalIcon,
   'dots-three': DotsThreeIcon,
