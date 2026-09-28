@@ -48,11 +48,20 @@ const Env = z.object({
     .optional()
     .transform((value) => value || undefined)
     .pipe(z.url({ protocol: /^https?$/ }).optional()),
-  /** `staging` or `production` on Cloud Run, where NODE_ENV is `production` for both. */
+  /**
+   * `staging` or `production` on Cloud Run, where NODE_ENV is `production` for both; empty or
+   * absent, the reports carry NODE_ENV.
+   */
   SENTRY_ENVIRONMENT: z
     .string()
-    .regex(/^[a-z][a-z0-9-]{0,63}$/)
-    .optional(),
+    .optional()
+    .transform((value) => value || undefined)
+    .pipe(
+      z
+        .string()
+        .regex(/^[a-z][a-z0-9-]{0,63}$/)
+        .optional(),
+    ),
 });
 
 /** Guards against local settings that would weaken production: token checks, report transport. */
