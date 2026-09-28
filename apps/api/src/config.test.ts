@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { parseEnv } from 'node:util';
 import { describe, expect, it } from 'vitest';
 import { loadConfig } from './config';
 
@@ -36,6 +38,23 @@ describe('loadConfig', () => {
     const plain = 'http://public@localhost:9000/1';
     expect(load({ SENTRY_DSN: plain }).sentryDsn).toBe(plain);
     expect(() => load({ SENTRY_DSN: plain, NODE_ENV: 'production' })).toThrow(/HTTPS/);
+  });
+
+  it('falls back to NODE_ENV for an empty Sentry environment and rejects a malformed one', () => {
+    const load = (env: Record<string, string>) => loadConfig({ DATABASE_URL: databaseUrl, ...env });
+    expect(load({ SENTRY_ENVIRONMENT: '', NODE_ENV: 'test' }).sentryEnvironment).toBe('test');
+    expect(load({ SENTRY_ENVIRONMENT: '' }).sentryEnvironment).toBe('development');
+    expect(() => load({ SENTRY_ENVIRONMENT: 'Staging' })).toThrow(/SENTRY_ENVIRONMENT/);
+    expect(() => load({ SENTRY_ENVIRONMENT: '-staging' })).toThrow(/SENTRY_ENVIRONMENT/);
+  });
+
+  it('accepts .env.example as it stands', () => {
+    const example = readFileSync(new URL('../.env.example', import.meta.url), 'utf8');
+    expect(loadConfig(parseEnv(example))).toMatchObject({
+      isProduction: false,
+      sentryDsn: undefined,
+      sentryEnvironment: 'development',
+    });
   });
 
   it('names an invalid variable without echoing its value', () => {
