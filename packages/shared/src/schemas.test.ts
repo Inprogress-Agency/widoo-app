@@ -61,7 +61,7 @@ const card = {
   budgetBucket: 'low',
   distanceM: 2400,
   rating: { average: null, count: 0 },
-  steps: [{ category: 'museum', location }],
+  steps: [{ category: 'museum', location, name: 'Musée fictif', durationMin: 45 }],
 };
 const detail = {
   ...card,

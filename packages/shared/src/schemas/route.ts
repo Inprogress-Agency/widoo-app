@@ -63,7 +63,16 @@ export const RouteCard = z.object({
     count: z.number().int().nonnegative(),
   }),
   /** Map pins, in step order. */
-  steps: z.array(z.object({ category: z.enum(taxonomies.placeCategories), location: LatLng })),
+  steps: z.array(
+    z.object({
+      category: z.enum(taxonomies.placeCategories),
+      location: LatLng,
+      /** Place name, for the step line of the map tooltip. Null on a Premium route (D-014). */
+      name: z.string().min(1).nullable(),
+      /** Time spent on the spot. Null on a Premium route (D-014). */
+      durationMin: z.number().int().positive().nullable(),
+    }),
+  ),
 });
 export type RouteCard = z.infer<typeof RouteCard>;
 

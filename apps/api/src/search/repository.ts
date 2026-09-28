@@ -31,6 +31,8 @@ const Stats = z.object({
 
 const StepPin = z.object({
   category: z.enum(taxonomies.placeCategories),
+  name: z.string().min(1),
+  duration_min: z.number().int().positive(),
   lat: z.number(),
   lng: z.number(),
   verified: z.boolean(),
@@ -38,7 +40,7 @@ const StepPin = z.object({
   neighborhood: z.string().nullable(),
 });
 
-type CardRow = {
+export type CardRow = {
   id: string;
   title: string;
   is_official: boolean;
@@ -63,11 +65,15 @@ type CardRow = {
  */
 const httpsOrNull = (url: string | null) => (url?.startsWith('https://') ? url : null);
 
-function toCard(row: CardRow): RouteCard {
+/** Card of a search row. Exported for its tests. */
+export function toCard(row: CardRow): RouteCard {
   const computed = Computed.parse(row.computed);
   const stats = Stats.parse(row.stats ?? {});
   const pins = z.array(StepPin).parse(row.steps ?? []);
   const start = pins[0];
+  // A Premium route names no step (D-014), and the answer is public, whatever the plan of the
+  // caller: its pins keep only what they held before, a category and a location.
+  const isPremium = row.access === 'premium';
   // A purged or deleted author, or a profile made non public (D-025): « Membre Widoo », no link.
   const author =
     row.is_official || !row.author_id || !row.author_first_name
@@ -99,6 +105,8 @@ function toCard(row: CardRow): RouteCard {
     steps: pins.map((pin) => ({
       category: pin.category,
       location: { lat: pin.lat, lng: pin.lng },
+      name: isPremium ? null : pin.name,
+      durationMin: isPremium ? null : pin.duration_min,
     })),
   };
 }
@@ -147,6 +155,8 @@ export function searchPageSql(
         order by m.position limit 1) as cover,
       (select json_agg(json_build_object(
           'category', p.category,
+          'name', p.name,
+          'duration_min', s.duration_min,
           'lat', ST_Y(p.location::geometry),
           'lng', ST_X(p.location::geometry),
           'verified', p.verification_status = 'verified',

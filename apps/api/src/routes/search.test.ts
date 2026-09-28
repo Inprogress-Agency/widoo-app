@@ -140,6 +140,9 @@ describe('GET /v1/routes/search on the seed', () => {
       'shop',
       'shop',
     ]);
+    // Step line of the map tooltip: place name and time on the spot.
+    expect(card?.steps[0]).toMatchObject({ name: 'Merci', durationMin: 30 });
+    expect(card?.steps.at(-1)).toMatchObject({ name: 'Berthillon', durationMin: 20 });
   });
 
   it('names the author of a community route', async () => {
