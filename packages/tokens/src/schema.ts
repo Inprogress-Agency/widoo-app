@@ -18,10 +18,14 @@ const textStyle = z.object({
 
 const namedPx = z.array(z.object({ name: z.string(), value: px }));
 
+const chip = z.object({ bg: z.string(), ink: z.string() });
+
 const family = z.object({
   key: z.string(),
+  /** Its French name, the label of the mood of the same family (« Gastronomie »). */
+  label: z.string(),
   color: z.string(),
-  chip: z.object({ bg: z.string(), ink: z.string() }).nullable(),
+  chip: chip.nullable(),
   moodDot: z.string().nullable(),
 });
 
@@ -66,7 +70,7 @@ export const tokensSchema = z.object({
       z.object({ category: z.string(), family: z.string(), icon: z.string() }),
     ),
     filterIcons: z.record(z.string(), filterGroup),
-    moodDots: z.array(z.object({ mood: z.string(), dot: z.string() })),
+    moodDots: z.array(z.object({ mood: z.string(), dot: z.string(), chip: chip.optional() })),
     uiIcons: z.record(z.string(), z.string()),
     badges: z.record(z.string(), badge),
     darkSurfaces: z.array(z.string()),

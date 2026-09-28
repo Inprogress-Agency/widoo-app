@@ -65,6 +65,16 @@ describe('buildMappings', () => {
     expect(mappings.moodDots.nature).toBe('family-nature');
   });
 
+  it('tints each mood chip: the family of the same name, or its own (D-050)', () => {
+    expect(Object.keys(mappings.moodChips)).toEqual([...taxonomies.moods]);
+    expect(mappings.moodChips.shopping).toEqual({ bg: 'violet-soft', ink: 'violet-ink' });
+    expect(mappings.moodChips.food).toEqual({ bg: 'coral-soft', ink: 'coral-ink' });
+    expect(mappings.moodChips.romantic).toEqual({
+      bg: 'mood-romantic-soft',
+      ink: 'mood-romantic-ink',
+    });
+  });
+
   it('keys the filter icons by technical key, Extérieur on a bench', () => {
     expect(Object.keys(mappings.filterIcons)).toEqual([
       'audiences',
@@ -146,6 +156,13 @@ describe('buildMappings', () => {
         copy.moodDots[0] = { mood: 'culture', dot: 'pink' };
       }),
       'unknown token « pink »',
+    ],
+    [
+      'a mood without a chip tint of its own nor a family',
+      withMappings((copy) => {
+        copy.moodDots = copy.moodDots.map(({ mood, dot }) => ({ mood, dot }));
+      }),
+      'moodDots.romantic: no chip tint',
     ],
     [
       'a filter label unknown to packages/shared',
