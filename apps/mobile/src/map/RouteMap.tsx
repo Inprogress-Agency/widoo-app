@@ -1,9 +1,25 @@
 import type { MapState } from '@rnmapbox/maps';
 import type { LatLng, RouteCard } from '@widoo/shared';
 import { motion, size, spacing } from '@widoo/tokens';
-import { useCallback, useMemo, useRef, useState, type ComponentRef, type ReactNode } from 'react';
+import { BottomTabBarHeightContext } from 'expo-router/tabs';
+import {
+  use,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentRef,
+  type ReactNode,
+} from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View, useWindowDimensions, type AccessibilityActionEvent } from 'react-native';
+import {
+  Platform,
+  StyleSheet,
+  View,
+  useWindowDimensions,
+  type AccessibilityActionEvent,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useReducedMotion } from 'react-native-reanimated';
 import { colors } from '@widoo/tokens';
 import { formatDuration } from '../format/duration';
@@ -18,7 +34,7 @@ import { labelFont, mapStyleJson } from './style';
 import { screenXOnFit, tooltipAnchorX } from './tooltip';
 
 /** Map ornaments (Mapbox logo and attribution, required) sit in the margin of the screen. */
-const ornamentMargin = { bottom: spacing['space-8'], left: spacing['space-8'] };
+const ornamentMargin = spacing['space-8'];
 
 interface RouteMapProps {
   routes: readonly RouteCard[];
@@ -39,7 +55,8 @@ interface RouteMapProps {
 }
 
 /**
- * Map of E-01: Widoo style, one photo marker per route drawn by symbol layers, the photo from an
+ * Map of E-01, edge to edge behind the floating tab bar: its logo, attribution and controls stay
+ * above the bar. Widoo style, one photo marker per route drawn by symbol layers, the photo from an
  * image the app draws once per photo, the duration as a text of the map on a white pill; the
  * user's position as the Mapbox puck. The position never leaves the device:
  * only the zone of the map goes to the search.
@@ -60,6 +77,14 @@ export function RouteMap({
   const [viewport, setViewport] = useState({ width: 0, height: 0 });
   const [tooltipAnchor, setTooltipAnchor] = useState(0.5);
   const isReducedMotion = useReducedMotion();
+  // The map runs under the floating tab bar; nothing it shows may sit behind the bar.
+  const tabBarHeight = use(BottomTabBarHeightContext) ?? 0;
+  // Mapbox lays its ornaments out in the safe area on iOS, from the edge of the view on Android.
+  const insets = useSafeAreaInsets();
+  const safeBottom = Platform.OS === 'ios' ? insets.bottom : 0;
+  const ornamentBottom = tabBarHeight + ornamentMargin - safeBottom;
+  // The controls clear the attribution button, a touch target in the corner below them.
+  const controlsBottom = tabBarHeight + ornamentMargin + size['touch-min'] + spacing['space-8'];
   const camera = useRef<ComponentRef<typeof Mapbox.Camera>>(null);
   const hasZone = useRef(false);
   const isHome = useRef(false);
@@ -116,9 +141,9 @@ export function RouteMap({
       return;
     }
     const padding = {
-      top: viewport.height / 2,
+      top: (viewport.height - tabBarHeight) / 2,
       right: spacing['space-32'],
-      bottom: size['sheet-rest'],
+      bottom: tabBarHeight + size['sheet-rest'],
       left: spacing['space-32'],
     };
     camera.current?.setCamera({
@@ -171,8 +196,8 @@ export function RouteMap({
         scaleBarEnabled={false}
         pitchEnabled={false}
         rotateEnabled={false}
-        logoPosition={ornamentMargin}
-        attributionPosition={{ ...ornamentMargin, left: undefined, right: spacing['space-8'] }}
+        logoPosition={{ bottom: ornamentBottom, left: ornamentMargin }}
+        attributionPosition={{ bottom: ornamentBottom, right: ornamentMargin }}
         onMapIdle={handleMapIdle}
         // Android drops the default camera when it loads a style given as JSON: the map is put
         // back at its opening place once loaded, on both systems.
@@ -253,8 +278,9 @@ export function RouteMap({
       />
       <View
         pointerEvents="box-none"
-        className="flex-row items-end gap-8 px-16 pb-32"
-        style={styles.controls}
+        className="flex-row items-end gap-8 px-16"
+        // Tab bar height measured at runtime.
+        style={[styles.controls, { bottom: controlsBottom }]}
       >
         <View pointerEvents="box-none" className="flex-1">
           {banner}
@@ -267,5 +293,5 @@ export function RouteMap({
 }
 
 const styles = StyleSheet.create({
-  controls: { position: 'absolute', left: 0, right: 0, bottom: 0 },
+  controls: { position: 'absolute', left: 0, right: 0 },
 });
