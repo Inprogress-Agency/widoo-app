@@ -1,16 +1,14 @@
 import {
-  BottomSheetBackdrop,
   BottomSheetModal,
   BottomSheetView,
-  type BottomSheetBackdropProps,
-  type BottomSheetBackgroundProps,
   useBottomSheetTimingConfigs,
 } from '@gorhom/bottom-sheet';
-import { colors, radius, size } from '@widoo/tokens';
+import { size } from '@widoo/tokens';
 import { useEffect, useImperativeHandle, useRef, type Ref } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { ReduceMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ModalSheetBackground, ModalSheetHandle, modalSheetBackdrop } from './ModalSheetParts';
 import { setModalSheetOpen } from './ModalSheetShield';
 import { timing } from './motion';
 import { Text } from './Text';
@@ -69,19 +67,6 @@ export function SortSheet<T extends string>({
   // A screen left with the sheet open, by a back gesture, gives the screen readers back.
   useEffect(() => () => setModalSheetOpen(false), []);
 
-  const renderBackdrop = (props: BottomSheetBackdropProps) => (
-    <BottomSheetBackdrop
-      {...props}
-      appearsOnIndex={0}
-      disappearsOnIndex={-1}
-      // The veil color carries its own 40 %: the backdrop fades it in whole.
-      opacity={1}
-      style={[props.style, styles.veil]}
-      accessibilityLabel={closeLabel}
-      accessibilityRole="button"
-    />
-  );
-
   const choose = (next: T) => {
     onChange(next);
     sheet.current?.dismiss(closeConfig);
@@ -92,9 +77,9 @@ export function SortSheet<T extends string>({
       ref={sheet}
       animationConfigs={openConfig}
       overrideReduceMotion={ReduceMotion.System}
-      backdropComponent={renderBackdrop}
-      backgroundComponent={SheetBackground}
-      handleComponent={Handle}
+      backdropComponent={modalSheetBackdrop(closeLabel)}
+      backgroundComponent={ModalSheetBackground}
+      handleComponent={ModalSheetHandle}
       onDismiss={() => setModalSheetOpen(false)}
       accessible={false}
     >
@@ -195,33 +180,3 @@ function Radio({ isChecked, isDisabled = false }: { isChecked: boolean; isDisabl
     </View>
   );
 }
-
-/** Decorative bar: the sheet closes by a swipe down or on the veil. */
-function Handle() {
-  return (
-    <View className="items-center pb-8 pt-12" importantForAccessibility="no-hide-descendants">
-      <View className="h-4 w-32 rounded-pill bg-handle" />
-    </View>
-  );
-}
-
-/** White background with the sheet radius, decorative. */
-function SheetBackground({ style }: BottomSheetBackgroundProps) {
-  return (
-    <View
-      pointerEvents="none"
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants"
-      style={[style, styles.background]}
-    />
-  );
-}
-
-const styles = StyleSheet.create({
-  veil: { backgroundColor: colors.scrim },
-  background: {
-    backgroundColor: colors.bg,
-    borderTopLeftRadius: radius['radius-sheet'],
-    borderTopRightRadius: radius['radius-sheet'],
-  },
-});
