@@ -1,4 +1,4 @@
-// Généré depuis tokens.json (version 26), ne pas modifier : pnpm --filter @widoo/tokens generate.
+// Généré depuis tokens.json (version 28), ne pas modifier : pnpm --filter @widoo/tokens generate.
 import type { Icon } from 'phosphor-react-native';
 import { ArmchairIcon } from 'phosphor-react-native/src/icons/Armchair';
 import { ArrowRightIcon } from 'phosphor-react-native/src/icons/ArrowRight';
@@ -10,6 +10,7 @@ import { BankIcon } from 'phosphor-react-native/src/icons/Bank';
 import { BarbellIcon } from 'phosphor-react-native/src/icons/Barbell';
 import { BarricadeIcon } from 'phosphor-react-native/src/icons/Barricade';
 import { BellIcon } from 'phosphor-react-native/src/icons/Bell';
+import { BellSlashIcon } from 'phosphor-react-native/src/icons/BellSlash';
 import { BicycleIcon } from 'phosphor-react-native/src/icons/Bicycle';
 import { BinocularsIcon } from 'phosphor-react-native/src/icons/Binoculars';
 import { BreadIcon } from 'phosphor-react-native/src/icons/Bread';
@@ -24,6 +25,7 @@ import { CaretLeftIcon } from 'phosphor-react-native/src/icons/CaretLeft';
 import { CaretRightIcon } from 'phosphor-react-native/src/icons/CaretRight';
 import { CaretUpIcon } from 'phosphor-react-native/src/icons/CaretUp';
 import { CastleTurretIcon } from 'phosphor-react-native/src/icons/CastleTurret';
+import { ChartBarIcon } from 'phosphor-react-native/src/icons/ChartBar';
 import { CheckIcon } from 'phosphor-react-native/src/icons/Check';
 import { CheckCircleIcon } from 'phosphor-react-native/src/icons/CheckCircle';
 import { CircleIcon } from 'phosphor-react-native/src/icons/Circle';
@@ -114,6 +116,7 @@ export const icons: Record<IconName, Icon> = {
   barbell: BarbellIcon,
   barricade: BarricadeIcon,
   bell: BellIcon,
+  'bell-slash': BellSlashIcon,
   bicycle: BicycleIcon,
   binoculars: BinocularsIcon,
   bread: BreadIcon,
@@ -128,6 +131,7 @@ export const icons: Record<IconName, Icon> = {
   'caret-right': CaretRightIcon,
   'caret-up': CaretUpIcon,
   'castle-turret': CastleTurretIcon,
+  'chart-bar': ChartBarIcon,
   check: CheckIcon,
   'check-circle': CheckCircleIcon,
   circle: CircleIcon,
