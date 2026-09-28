@@ -64,7 +64,7 @@ export function TabBar({ state, descriptors, navigation, insets }: BottomTabBarP
               {icon && (
                 <Icon
                   {...uiIcon(icon, isFocused)}
-                  size="space-24"
+                  size="icon-l"
                   color={isFocused ? 'blue-on-strong' : 'ink'}
                 />
               )}

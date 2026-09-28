@@ -22,7 +22,7 @@ export function StepDot({ category, isActive = false }: StepDotProps) {
       className={`${isActive ? 'size-step-dot-active' : 'size-step-dot'} items-center justify-center rounded-pill border-2 border-bg`}
       style={{ backgroundColor: colors[activityFamilies[family].color] }}
     >
-      <Icon name={icon} size={isActive ? 'space-18' : 'space-16'} color="on-strong" />
+      <Icon name={icon} size="icon-s" color="on-strong" />
     </View>
   );
 }
