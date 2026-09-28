@@ -17,7 +17,7 @@ import { ratingOf } from '../db/route-stats';
 import { routes } from '../db/schema';
 import { decodeCursor, encodeCursor, type SortKeyValue } from './cursor';
 import { activeFilters, allOf, inZone } from './filters';
-import { after, keyColumn, orderBy, sortKeys, type SortKey } from './sort';
+import { after, keyColumn, orderBy, sortKeys, type KeysetSort, type SortKey } from './sort';
 
 /** `routes.computed` as the orchestration writes it: the card only reads these fields. */
 const Computed = z.object({
@@ -120,9 +120,32 @@ function keyValuesOf(row: CardRow, count: number): SortKeyValue[] {
 }
 
 /** Where clause of a search: the zone and every active filter group. */
-function searchWhere(query: Pick<RouteSearchQuery, 'bbox' | RouteFilterGroup>) {
+export function searchWhere(query: Pick<RouteSearchQuery, 'bbox' | RouteFilterGroup>) {
   return allOf([inZone(query.bbox), ...Object.values(activeFilters(query))]);
 }
+
+/** Card fields of the route `r`, after `cardJoins`. */
+export const cardColumns = sql`r.title, r.is_official, r.access, r.moods, r.audiences,
+      r.duration_bucket, r.budget_bucket, r.computed, r.stats,
+      u.id as author_id, u.first_name as author_first_name, u.avatar_url as author_avatar_url,
+      (select m.storage_path from media m
+        where m.owner_type = 'route' and m.owner_id = r.id
+        order by m.position limit 1) as cover,
+      (select json_agg(json_build_object(
+          'category', p.category,
+          'name', p.name,
+          'duration_min', s.duration_min,
+          'lat', ST_Y(p.location::geometry),
+          'lng', ST_X(p.location::geometry),
+          'verified', p.verification_status = 'verified',
+          'district', p.address_components->>'arrondissement',
+          'neighborhood', p.address_components->>'neighborhood'
+        ) order by s.position)
+        from steps s join places p on p.id = s.place_id
+        where s.route_id = r.id) as steps`;
+
+/** The author of a card, unless deleted or not public (D-025). */
+export const cardJoins = sql`left join users u on u.id = r.author_id and u.deleted_at is null and u.is_public`;
 
 /**
  * SQL of one page of cards: the matching routes with their sort keys `k0…`, the page after the
@@ -147,35 +170,18 @@ export function searchPageSql(
       order by ${orderBy(keys)}
       limit ${query.limit + 1}
     )
-    select page.*, r.title, r.is_official, r.access, r.moods, r.audiences,
-      r.duration_bucket, r.budget_bucket, r.computed, r.stats,
-      u.id as author_id, u.first_name as author_first_name, u.avatar_url as author_avatar_url,
-      (select m.storage_path from media m
-        where m.owner_type = 'route' and m.owner_id = r.id
-        order by m.position limit 1) as cover,
-      (select json_agg(json_build_object(
-          'category', p.category,
-          'name', p.name,
-          'duration_min', s.duration_min,
-          'lat', ST_Y(p.location::geometry),
-          'lng', ST_X(p.location::geometry),
-          'verified', p.verification_status = 'verified',
-          'district', p.address_components->>'arrondissement',
-          'neighborhood', p.address_components->>'neighborhood'
-        ) order by s.position)
-        from steps s join places p on p.id = s.place_id
-        where s.route_id = r.id) as steps
+    select page.*, ${cardColumns}
     from page
     join routes r on r.id = page.id
-    left join users u on u.id = r.author_id and u.deleted_at is null and u.is_public
+    ${cardJoins}
     order by ${orderBy(keys)}
   `;
 }
 
-/** One page of cards for a caller, anonymous when null, in the requested sort, after the cursor. */
+/** One page of cards for a caller, anonymous when null, in a keyset sort, after the cursor. */
 export async function searchRoutes(
   db: Db,
-  query: RouteSearchQuery,
+  query: RouteSearchQuery & { sort: KeysetSort },
   viewer: RouteViewer | null,
 ): Promise<{ items: RouteCard[]; nextCursor: string | null }> {
   const keys = sortKeys(query.sort, query.near);
