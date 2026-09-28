@@ -1,10 +1,10 @@
 import {
   colors,
-  spacing,
+  size as sizes,
   uiIcons,
   type ColorToken,
   type IconName,
-  type SpacingToken,
+  type SizeToken,
   type UiIconKey,
 } from '@widoo/tokens';
 import { icons } from '@widoo/tokens/icons';
@@ -12,10 +12,16 @@ import { View } from 'react-native';
 
 type Weight = 'regular' | 'fill' | 'bold';
 
+/**
+ * Icon sizes of tokens.json (D-054): `icon-s` 16 for status lines and dots, `icon-m` 20 for chips,
+ * `icon-l` 24 for tabs. Never the spacing scale.
+ */
+export type IconSize = Extract<SizeToken, `icon-${string}`>;
+
 export interface IconProps {
   name: IconName;
-  /** Side in points. tokens.json has no icon size yet: the spacing scale stands in. */
-  size?: SpacingToken;
+  /** Side, an icon size token. */
+  size?: IconSize;
   color?: ColorToken;
   /** Regular by default; fill for an active state, the rating, Premium and toasts; bold for the check and the plus. */
   weight?: Weight;
@@ -26,13 +32,13 @@ export interface IconProps {
 /** A Phosphor icon of tokens.json, by name: an icon outside the mappings does not exist. */
 export function Icon({
   name,
-  size = 'space-20',
+  size = 'icon-m',
   color = 'ink',
   weight = 'regular',
   accessibilityLabel,
 }: IconProps) {
   const Component = icons[name];
-  const glyph = <Component size={spacing[size]} color={colors[color]} weight={weight} />;
+  const glyph = <Component size={sizes[size]} color={colors[color]} weight={weight} />;
   if (accessibilityLabel === undefined) {
     return glyph;
   }

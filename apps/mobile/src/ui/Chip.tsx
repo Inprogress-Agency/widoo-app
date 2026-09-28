@@ -42,9 +42,9 @@ export function Chip({
       style={{ backgroundColor: colors[background] }}
     >
       {isActive ? (
-        <Icon name="check" size="space-16" color={ink} weight="bold" />
+        <Icon name="check" size="icon-m" color={ink} weight="bold" />
       ) : (
-        icon && <Icon name={icon} size="space-16" color={ink} />
+        icon && <Icon name={icon} size="icon-m" color={ink} />
       )}
       <Text variant="label" color={ink} isDense>
         {label}

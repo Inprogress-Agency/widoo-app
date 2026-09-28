@@ -27,7 +27,7 @@ export function Badge({ kind }: { kind: BadgeKind }) {
       {badge.icon && (
         <Icon
           name={badge.icon}
-          size="space-16"
+          size="icon-s"
           color={'iconColor' in badge ? badge.iconColor : badge.ink}
           weight={'iconWeight' in badge ? badge.iconWeight : 'regular'}
         />
