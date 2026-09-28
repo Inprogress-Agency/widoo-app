@@ -1,4 +1,9 @@
-import { routeFilterGroups, type RouteFilterGroup, type RouteSearchQuery } from '@widoo/shared';
+import {
+  routeFilterGroups,
+  type RouteCountQuery,
+  type RouteFilterGroup,
+  type RouteSearchQuery,
+} from '@widoo/shared';
 
 /**
  * What the app asks of `GET /v1/routes/search`: the zone, and optionally filters, sort and page.
@@ -7,8 +12,12 @@ import { routeFilterGroups, type RouteFilterGroup, type RouteSearchQuery } from 
 export type RouteSearchParams = Pick<RouteSearchQuery, 'bbox'> &
   Partial<Omit<RouteSearchQuery, 'bbox'>>;
 
-/** What the app asks of `GET /v1/routes/search/count`: the zone and the filters of a search. */
-export type RouteCountParams = Pick<RouteSearchParams, 'bbox' | RouteFilterGroup>;
+/**
+ * What the app asks of `GET /v1/routes/search/count`: the zone and the filters of a search, and
+ * `breakdown=all_but_one` for the count without each active group (E-03 zero result).
+ */
+export type RouteCountParams = Pick<RouteSearchParams, 'bbox' | RouteFilterGroup> &
+  Pick<RouteCountQuery, 'breakdown'>;
 
 /**
  * Query string of the search, as the API reads it: `bbox=w,s,e,n`, `near=lat,lng`, a list filter
@@ -35,4 +44,10 @@ export function searchQueryString(params: RouteSearchParams): string {
     query.set('limit', String(params.limit));
   }
   return query.toString();
+}
+
+/** Query string of the count: the search's, and the breakdown when asked. */
+export function countQueryString({ breakdown, ...params }: RouteCountParams): string {
+  const query = searchQueryString(params);
+  return breakdown ? `${query}&breakdown=${breakdown}` : query;
 }
