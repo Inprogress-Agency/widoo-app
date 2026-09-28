@@ -145,10 +145,18 @@ export function DiscoverySheet({
     // Over one page of results, the count of the zone; the listed routes until it comes.
     const count = t('sheet.count', { count: zoneCount ?? routes.length });
     const zone = position ? zoneName(routes, position) : t('sheet.paris');
+    // « 9 parcours · 3 filtres » once filters apply (Ecrans › E-01, filtres appliqués).
+    const filters = t('sheet.filterCount', { count: filterCount });
+    const subtitle =
+      filterCount > 0
+        ? t('sheet.filtered', { count, filters })
+        : zone
+          ? t('sheet.inZone', { count, zone })
+          : count;
     peek = (
       <SheetHeader
         title={t('sheet.nearby')}
-        subtitle={zone ? t('sheet.inZone', { count, zone }) : count}
+        subtitle={subtitle}
         action={<SeeAllLink onPress={() => onOpenSection('nearby')} />}
       />
     );

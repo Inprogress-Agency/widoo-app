@@ -133,7 +133,13 @@ export function useRouteSearch() {
     status,
     isOnline,
     retry,
-    /** An answered search without any route in the zone. */
-    isEmpty: status === 'success' && results !== null && resultsCount(results) === 0,
+    /**
+     * An answered search without any route in the zone; offline, no route kept passes the
+     * filters (Ecrans › E-03, hors connexion: the home shows its empty state).
+     */
+    isEmpty:
+      (status === 'success' || status === 'offline') &&
+      results !== null &&
+      resultsCount(results) === 0,
   };
 }
