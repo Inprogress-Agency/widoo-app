@@ -23,9 +23,24 @@ function route(id: string, overrides: Partial<RouteCard> = {}): RouteCard {
     distanceM: 1500,
     rating: { average: null, count: 0 },
     steps: [
-      { category: 'museum', location: { lat: 48.86, lng: 2.34 } },
-      { category: 'cafe', location: { lat: 48.87, lng: 2.35 } },
-      { category: 'park', location: { lat: 48.865, lng: 2.33 } },
+      {
+        category: 'museum',
+        location: { lat: 48.86, lng: 2.34 },
+        name: 'Musée fictif',
+        durationMin: 45,
+      },
+      {
+        category: 'cafe',
+        location: { lat: 48.87, lng: 2.35 },
+        name: 'Café fictif',
+        durationMin: 30,
+      },
+      {
+        category: 'park',
+        location: { lat: 48.865, lng: 2.33 },
+        name: 'Parc fictif',
+        durationMin: 20,
+      },
     ],
     ...overrides,
   };
