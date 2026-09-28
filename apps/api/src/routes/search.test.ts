@@ -8,7 +8,7 @@ import {
 import { eq, inArray, sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
-import { routes, users } from '../db/schema';
+import { routes, steps, users } from '../db/schema';
 import { demoRouteIds, seed, seedId } from '../db/seed';
 import { uuidv7 } from '../db/uuid';
 import { testConfig } from '../test-config';
@@ -140,6 +140,7 @@ describe('GET /v1/routes/search on the seed', () => {
       'shop',
       'shop',
     ]);
+    expect(card?.stepCount).toBe(4);
     // Step line of the map tooltip: place name and time on the spot.
     expect(card?.steps[0]).toMatchObject({ name: 'Merci', durationMin: 30 });
     expect(card?.steps.at(-1)).toMatchObject({ name: 'Berthillon', durationMin: 20 });
@@ -165,6 +166,63 @@ describe('GET /v1/routes/search on the seed', () => {
     expect(again.body).toBe('');
     const refused = await app.inject({ url: '/v1/routes/search?bbox=1' });
     expect(refused.headers['cache-control'] ?? '').not.toContain('public');
+  });
+});
+
+describe('GET /v1/routes/search on a Premium route (D-014)', () => {
+  // A Premium copy of a demo route, same places and steps, on a zone of its own far from Paris:
+  // the demo route is left untouched, and the answer holds the copy alone.
+  const premiumId = uuidv7();
+  fixtureIds.push(premiumId);
+  const premiumZone = 'bbox=19.99,19.99,20.01,20.01';
+  const marais = 'bbox=2.355,48.85,2.37,48.865&moods[]=food';
+
+  beforeAll(async () => {
+    const [demoRoute] = await app.db
+      .select()
+      .from(routes)
+      .where(eq(routes.id, demo('marais-gourmand')));
+    if (!demoRoute) throw new Error('Demo route missing from the seed');
+    const start = { lat: 20, lng: 20 };
+    await app.db.insert(routes).values({
+      ...demoRoute,
+      id: premiumId,
+      access: 'premium',
+      startLocation: start,
+      bounds: { west: 20, south: 20, east: 20.001, north: 20.001 },
+    });
+    const demoSteps = await app.db
+      .select()
+      .from(steps)
+      .where(eq(steps.routeId, demo('marais-gourmand')));
+    await app.db
+      .insert(steps)
+      .values(demoSteps.map((step) => ({ ...step, id: uuidv7(), routeId: premiumId })));
+  });
+
+  it('carries the start alone, unnamed, and counts every step', async () => {
+    const free = (await search(marais)).items.find((item) => item.id === demo('marais-gourmand'));
+    const [card] = (await search(premiumZone)).items;
+    expect(card).toMatchObject({ id: premiumId, access: 'premium', stepCount: 4 });
+    expect(card?.durationMin).toBe(free?.durationMin);
+    expect(card?.steps).toEqual([
+      { category: 'shop', location: free?.steps[0]?.location, name: null, durationMin: null },
+    ]);
+  });
+
+  it('sends no place, coordinate or category of the steps after the start', async () => {
+    const free = (await search(marais)).items.find((item) => item.id === demo('marais-gourmand'));
+    const hidden = free?.steps.slice(1) ?? [];
+    expect(hidden).toHaveLength(3);
+    const response = await app.inject({ url: `/v1/routes/search?${premiumZone}` });
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['cache-control']).toBe('public, max-age=30');
+    for (const step of hidden) {
+      expect(response.body).not.toContain(String(step.location.lat));
+      expect(response.body).not.toContain(String(step.location.lng));
+      expect(response.body).not.toContain(String(step.name));
+    }
+    expect(response.body).not.toContain('restaurant');
   });
 });
 

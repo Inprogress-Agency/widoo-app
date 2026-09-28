@@ -22,6 +22,7 @@ function route(id: string, overrides: Partial<RouteCard> = {}): RouteCard {
     budgetBucket: 'free',
     distanceM: 1500,
     rating: { average: null, count: 0 },
+    stepCount: 3,
     steps: [
       {
         category: 'museum',
@@ -44,6 +45,11 @@ function route(id: string, overrides: Partial<RouteCard> = {}): RouteCard {
     ],
     ...overrides,
   };
+}
+
+/** A Premium route as the search sends it: its start alone, its steps counted (D-014). */
+function premium(id: string): RouteCard {
+  return route(id, { access: 'premium', steps: route(id).steps.slice(0, 1) });
 }
 
 describe('routeMarkers', () => {
@@ -96,8 +102,18 @@ describe('selected route', () => {
   });
 
   it('shows only the locked start of a Premium route without subscription', () => {
-    const stops = routeStops(route('a', { access: 'premium' }), true);
+    const stops = routeStops(premium('a'), true);
     expect(stops).toEqual([{ key: 'a-0', location: [2.34, 48.86], category: null }]);
+  });
+
+  it('draws no path and no step but the start of a Premium card, whatever the plan', () => {
+    // The search sends the start alone of a Premium route: nothing else can be drawn.
+    const card = premium('a');
+    expect(routePath(card)).toBeNull();
+    expect(routeStops(card, false)).toEqual([
+      { key: 'a-0', location: [2.34, 48.86], category: 'museum' },
+    ]);
+    expect(selectionFrame(card, false)).toEqual({ center: [2.34, 48.86] });
   });
 
   it('frames the steps, or the start alone when locked', () => {
@@ -109,7 +125,7 @@ describe('selected route', () => {
   });
 
   it('has no path for a single step', () => {
-    const single = route('a', { steps: route('a').steps.slice(0, 1) });
+    const single = route('a', { stepCount: 1, steps: route('a').steps.slice(0, 1) });
     expect(routePath(single)).toBeNull();
     expect(selectionFrame(single, false)).toEqual({ center: [2.34, 48.86] });
   });

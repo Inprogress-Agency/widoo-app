@@ -24,6 +24,7 @@ const route: RouteCard = {
   budgetBucket: 'low',
   distanceM: 4200,
   rating: { average: 4.8, count: 12 },
+  stepCount: 1,
   steps: [
     { category: 'walk', location: { lat: 48.8674, lng: 2.3636 }, name: null, durationMin: null },
   ],

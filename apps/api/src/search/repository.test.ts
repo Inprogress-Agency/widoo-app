@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { toCard, type CardRow } from './repository';
 
-const pin = (name: string, durationMin: number) => ({
-  category: 'museum',
+const pin = (name: string, durationMin: number, category: string, lat: number, lng: number) => ({
+  category,
   name,
   duration_min: durationMin,
-  lat: 48.86,
-  lng: 2.35,
+  lat,
+  lng,
   verified: true,
   district: '3e',
   neighborhood: 'Le Marais',
@@ -27,24 +27,57 @@ const row = (access: CardRow['access']): CardRow => ({
   author_first_name: null,
   author_avatar_url: null,
   cover: null,
-  steps: [pin('Musée fictif', 45), pin('Galerie fictive', 30)],
+  steps: [
+    pin('Musée fictif', 45, 'museum', 48.861, 2.351),
+    pin('Galerie fictive', 30, 'gallery', 48.872, 2.362),
+    pin('Parc fictif', 20, 'park', 48.883, 2.373),
+  ],
 });
 
 describe('toCard', () => {
-  it('names each step and gives its time on the spot', () => {
-    expect(toCard(row('free')).steps).toEqual([
-      expect.objectContaining({ category: 'museum', name: 'Musée fictif', durationMin: 45 }),
-      expect.objectContaining({ category: 'museum', name: 'Galerie fictive', durationMin: 30 }),
+  it('carries every step of a free route, named, with its time on the spot', () => {
+    const card = toCard(row('free'));
+    expect(card.stepCount).toBe(3);
+    expect(card.steps).toEqual([
+      {
+        category: 'museum',
+        location: { lat: 48.861, lng: 2.351 },
+        name: 'Musée fictif',
+        durationMin: 45,
+      },
+      {
+        category: 'gallery',
+        location: { lat: 48.872, lng: 2.362 },
+        name: 'Galerie fictive',
+        durationMin: 30,
+      },
+      {
+        category: 'park',
+        location: { lat: 48.883, lng: 2.373 },
+        name: 'Parc fictif',
+        durationMin: 20,
+      },
     ]);
   });
 
-  it('names no step of a Premium route (D-014)', () => {
+  it('keeps the start alone of a Premium route, unnamed, and counts every step (D-014)', () => {
     const card = toCard(row('premium'));
-    expect(card.steps).toHaveLength(2);
-    for (const step of card.steps) {
-      expect(step).toMatchObject({ name: null, durationMin: null });
+    expect(card.stepCount).toBe(3);
+    expect(card.steps).toEqual([
+      { category: 'museum', location: { lat: 48.861, lng: 2.351 }, name: null, durationMin: null },
+    ]);
+    const body = JSON.stringify(card);
+    for (const hidden of [
+      'fictive',
+      'Musée',
+      'Parc fictif',
+      '48.872',
+      '2.362',
+      '48.883',
+      '2.373',
+    ]) {
+      expect(body).not.toContain(hidden);
     }
-    expect(JSON.stringify(card)).not.toContain('fictive');
-    expect(JSON.stringify(card)).not.toContain('Musée');
+    expect(body).not.toMatch(/gallery|park/);
   });
 });

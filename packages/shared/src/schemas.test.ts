@@ -61,6 +61,7 @@ const card = {
   budgetBucket: 'low',
   distanceM: 2400,
   rating: { average: null, count: 0 },
+  stepCount: 1,
   steps: [{ category: 'museum', location, name: 'Musée fictif', durationMin: 45 }],
 };
 const detail = {
@@ -107,6 +108,36 @@ describe('RouteCard budget and access', () => {
       access: 'premium',
     });
     expect(RouteCard.safeParse({ ...card, budgetBucket: 'premium' }).success).toBe(false);
+  });
+});
+
+describe('RouteCard steps', () => {
+  const start = { category: 'museum', location, name: null, durationMin: null };
+  const next = {
+    category: 'cafe',
+    location: { lat: 48.87, lng: 2.36 },
+    name: null,
+    durationMin: null,
+  };
+  const premium = { ...card, access: 'premium', stepCount: 4 };
+
+  it('counts the steps of a Premium route it carries the start of alone (D-014)', () => {
+    expect(RouteCard.parse({ ...premium, steps: [start] })).toMatchObject({
+      stepCount: 4,
+      steps: [start],
+    });
+  });
+
+  it('refuses a Premium card carrying a step after its start', () => {
+    expect(RouteCard.safeParse({ ...premium, steps: [start, next] }).success).toBe(false);
+  });
+
+  it('refuses a free card without all its steps', () => {
+    expect(RouteCard.safeParse({ ...card, stepCount: 2 }).success).toBe(false);
+  });
+
+  it('requires the step count', () => {
+    expect(RouteCard.safeParse({ ...card, stepCount: undefined }).success).toBe(false);
   });
 });
 
