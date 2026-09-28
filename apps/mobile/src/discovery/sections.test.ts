@@ -26,7 +26,7 @@ function route(id: string, start: { lat: number; lng: number } | null = null): R
     neighborhood: null,
     durationMin: 60,
     durationBucket: '1_2h',
-    budgetPerPersonEur: { min: 0, max: 0 },
+    budgetPerPersonEur: 0,
     budgetBucket: 'free',
     distanceM: 1000,
     rating: { average: null, count: 0 },

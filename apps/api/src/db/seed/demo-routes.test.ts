@@ -1,4 +1,4 @@
-import { taxonomies } from '@widoo/shared';
+import { budgetBucketOf, taxonomies } from '@widoo/shared';
 import { describe, expect, it } from 'vitest';
 import {
   assumedZeros,
@@ -58,12 +58,9 @@ describe('demo dataset', () => {
       expect(travel / route.computed.duration_min).toBeLessThanOrEqual(0.4);
     });
 
-    it('shows the budget as the step costs ± 20 %', () => {
-      const budget = budgetOf(route);
-      expect(route.computed.budget_per_person_eur).toEqual({
-        min: Math.floor(budget * 0.8),
-        max: Math.ceil(budget * 1.2),
-      });
+    it('carries the budget as the sum of its step costs, and its bucket from that sum', () => {
+      expect(route.computed.budget_per_person_eur).toBe(budgetOf(route));
+      expect(bucketsOf(route).budgetBucket).toBe(budgetBucketOf(budgetOf(route)));
     });
 
     it('rates the effort from the walking distance', () => {

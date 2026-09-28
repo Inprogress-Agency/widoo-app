@@ -57,7 +57,7 @@ const card = {
   neighborhood: 'Le Marais',
   durationMin: 180,
   durationBucket: 'half_day',
-  budgetPerPersonEur: { min: 20, max: 30 },
+  budgetPerPersonEur: 25,
   budgetBucket: 'low',
   distanceM: 2400,
   rating: { average: null, count: 0 },
@@ -109,6 +109,15 @@ describe('RouteCard budget and access', () => {
       access: 'premium',
     });
     expect(RouteCard.safeParse({ ...card, budgetBucket: 'premium' }).success).toBe(false);
+  });
+
+  it('carries the budget as a single sum per person, never a range (D-032)', () => {
+    expect(RouteCard.parse({ ...card, budgetPerPersonEur: 22.5 }).budgetPerPersonEur).toBe(22.5);
+    expect(RouteCard.parse({ ...card, budgetPerPersonEur: 0 }).budgetPerPersonEur).toBe(0);
+    expect(RouteCard.safeParse({ ...card, budgetPerPersonEur: { min: 20, max: 30 } }).success).toBe(
+      false,
+    );
+    expect(RouteCard.safeParse({ ...card, budgetPerPersonEur: -5 }).success).toBe(false);
   });
 });
 

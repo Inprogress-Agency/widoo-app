@@ -62,7 +62,8 @@ const DemoStep = z.object({
 /** Stored as is in `routes.computed`: snake_case keys, like the other computed jsonb columns. */
 const Computed = z.object({
   duration_min: z.number().int().positive(),
-  budget_per_person_eur: z.object({ min: euros, max: euros }),
+  /** Sum of the step costs per person, as `budgetOf` computes it (D-032). */
+  budget_per_person_eur: euros,
   distance_m: meters,
   walking_m: meters,
   effort: z.enum(['easy', 'moderate', 'intense']),
@@ -150,7 +151,7 @@ export const bucketsOf = (
   route: DemoRoute,
 ): { durationBucket: DurationBucket; budgetBucket: BudgetBucket } => ({
   durationBucket: durationBucketOf(route.computed.duration_min),
-  budgetBucket: budgetBucketOf(budgetOf(route)),
+  budgetBucket: budgetBucketOf(route.computed.budget_per_person_eur),
 });
 
 /**

@@ -746,7 +746,7 @@
       ],
       "computed": {
         "duration_min": 245,
-        "budget_per_person_eur": { "min": 12, "max": 20 },
+        "budget_per_person_eur": 16,
         "distance_m": 1320,
         "walking_m": 1320,
         "effort": "easy",
@@ -804,7 +804,7 @@
       ],
       "computed": {
         "duration_min": 230,
-        "budget_per_person_eur": { "min": 40, "max": 60 },
+        "budget_per_person_eur": 50,
         "distance_m": 1010,
         "walking_m": 1010,
         "effort": "easy",
@@ -870,7 +870,7 @@
       ],
       "computed": {
         "duration_min": 215,
-        "budget_per_person_eur": { "min": 11, "max": 17 },
+        "budget_per_person_eur": 14,
         "distance_m": 4430,
         "walking_m": 0,
         "effort": "easy",
@@ -934,7 +934,7 @@
       ],
       "computed": {
         "duration_min": 225,
-        "budget_per_person_eur": { "min": 17, "max": 27 },
+        "budget_per_person_eur": 22,
         "distance_m": 2070,
         "walking_m": 2070,
         "effort": "easy",
@@ -997,7 +997,7 @@
       ],
       "computed": {
         "duration_min": 100,
-        "budget_per_person_eur": { "min": 0, "max": 0 },
+        "budget_per_person_eur": 0,
         "distance_m": 1360,
         "walking_m": 1360,
         "effort": "easy",
@@ -1055,7 +1055,7 @@
       ],
       "computed": {
         "duration_min": 355,
-        "budget_per_person_eur": { "min": 27, "max": 41 },
+        "budget_per_person_eur": 34,
         "distance_m": 1980,
         "walking_m": 1980,
         "effort": "easy",
@@ -1118,7 +1118,7 @@
       ],
       "computed": {
         "duration_min": 345,
-        "budget_per_person_eur": { "min": 52, "max": 78 },
+        "budget_per_person_eur": 65,
         "distance_m": 3370,
         "walking_m": 1630,
         "effort": "easy",
@@ -1185,7 +1185,7 @@
       ],
       "computed": {
         "duration_min": 165,
-        "budget_per_person_eur": { "min": 11, "max": 17 },
+        "budget_per_person_eur": 14,
         "distance_m": 890,
         "walking_m": 890,
         "effort": "easy",
@@ -1242,7 +1242,7 @@
       ],
       "computed": {
         "duration_min": 135,
-        "budget_per_person_eur": { "min": 20, "max": 32 },
+        "budget_per_person_eur": 26,
         "distance_m": 2010,
         "walking_m": 2010,
         "effort": "easy",
@@ -1300,7 +1300,7 @@
       ],
       "computed": {
         "duration_min": 335,
-        "budget_per_person_eur": { "min": 0, "max": 0 },
+        "budget_per_person_eur": 0,
         "distance_m": 7250,
         "walking_m": 7250,
         "effort": "intense",
