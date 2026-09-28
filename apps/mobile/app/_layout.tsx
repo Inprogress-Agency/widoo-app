@@ -1,19 +1,19 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { DefaultTheme, Stack, ThemeProvider, type Theme } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
 import { colors } from '@widoo/tokens';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
 import '../global.css';
 import { useAppOpenedEvent } from '../src/analytics';
 import { queryClient } from '../src/api/query-client';
+import { holdSplash } from '../src/launch/splash';
 import '../src/i18n';
 import { initMonitoring } from '../src/monitoring';
 import { fonts } from '../src/ui/fonts';
 
 initMonitoring();
-void SplashScreen.preventAutoHideAsync();
+// The home lets the launch screen go when it is ready (E-18), 2 s at most.
+holdSplash();
 
 const navigationTheme: Theme = {
   ...DefaultTheme,
@@ -32,12 +32,6 @@ export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts(fonts);
   // A font that fails to load falls back to the system font rather than blocking the app.
   const isReady = fontsLoaded || fontError !== null;
-
-  useEffect(() => {
-    if (isReady) {
-      void SplashScreen.hideAsync();
-    }
-  }, [isReady]);
 
   if (!isReady) {
     return null;
