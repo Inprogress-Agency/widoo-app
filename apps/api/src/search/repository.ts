@@ -13,6 +13,7 @@ import { z } from 'zod';
 import { canAccessRoute, type RouteViewer } from '../access/route-access';
 import type { Db } from '../db/client';
 import type { BBox } from '../db/geography';
+import { ratingOf } from '../db/route-stats';
 import { routes } from '../db/schema';
 import { decodeCursor, encodeCursor, type SortKeyValue } from './cursor';
 import { activeFilters, allOf, inZone } from './filters';
@@ -23,11 +24,6 @@ const Computed = z.object({
   duration_min: z.number().int().nonnegative(),
   budget_per_person_eur: z.object({ min: z.number().nonnegative(), max: z.number().nonnegative() }),
   distance_m: z.number().nonnegative(),
-});
-
-const Stats = z.object({
-  rating_avg: z.number().min(1).max(5).nullable().catch(null).default(null),
-  rating_count: z.number().int().nonnegative().catch(0).default(0),
 });
 
 const StepPin = z.object({
@@ -69,7 +65,7 @@ const httpsOrNull = (url: string | null) => (url?.startsWith('https://') ? url :
 /** Card of a search row, for a caller at `now`. Exported for its tests. */
 export function toCard(row: CardRow, viewer: RouteViewer | null, now: Date): RouteCard {
   const computed = Computed.parse(row.computed);
-  const stats = Stats.parse(row.stats ?? {});
+  const rating = ratingOf(row.stats);
   const pins = z.array(StepPin).parse(row.steps ?? []);
   const start = pins[0];
   // A locked card names no step and shows its start alone (D-014): the steps 2 and after of a
@@ -103,7 +99,7 @@ export function toCard(row: CardRow, viewer: RouteViewer | null, now: Date): Rou
     budgetPerPersonEur: computed.budget_per_person_eur,
     budgetBucket: row.budget_bucket,
     distanceM: computed.distance_m,
-    rating: { average: stats.rating_avg, count: stats.rating_count },
+    rating,
     isLocked,
     stepCount: pins.length,
     steps: shownPins.map((pin) => ({
