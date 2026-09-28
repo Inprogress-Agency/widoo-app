@@ -163,7 +163,7 @@ export function RouteMap({
     setTooltipAnchor(
       tooltipAnchorX(startX, {
         screenWidth: viewport.width,
-        tooltipWidth: size['tooltip-w'],
+        tooltipWidth: size['tooltip-min-w'],
         margin: spacing['space-16'],
       }),
     );

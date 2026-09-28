@@ -56,7 +56,7 @@ export function RouteTooltip({ route, isLocked, arrowAt, onOpen, onClose }: Rout
     : t('map.tooltip.label', { title: route.title, total: stepCount, step: startLine?.spoken });
 
   return (
-    <Animated.View style={fade} className="w-tooltip-w">
+    <Animated.View style={fade} className="w-tooltip-min-w">
       <View
         onAccessibilityEscape={onClose}
         className="gap-12 self-stretch rounded-block bg-surface-strong p-16"
@@ -118,7 +118,7 @@ export function RouteTooltip({ route, isLocked, arrowAt, onOpen, onClose }: Rout
       <View
         className="-mt-6 size-12 rotate-45 bg-surface-strong"
         // Centred on its share of the width: the arrow points at the start.
-        style={{ marginLeft: arrowAt * size['tooltip-w'] - spacing['space-12'] / 2 }}
+        style={{ marginLeft: arrowAt * size['tooltip-min-w'] - spacing['space-12'] / 2 }}
       />
       {/* The tooltip points at the start dot, not into it. */}
       <View style={{ height: size['step-dot-active'] / 2 }} />
