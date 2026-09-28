@@ -545,6 +545,46 @@ export const moodDots = {
   "sport": "mood-sport"
 } as const satisfies Record<Mood, ColorToken>;
 
+/** Tint of the chip of each mood: its family, or its own drawn from its dot (D-050). */
+export const moodChips = {
+  "culture": {
+    "bg": "plum-soft",
+    "ink": "plum-ink"
+  },
+  "nature": {
+    "bg": "green-soft",
+    "ink": "green-ink"
+  },
+  "shopping": {
+    "bg": "violet-soft",
+    "ink": "violet-ink"
+  },
+  "food": {
+    "bg": "coral-soft",
+    "ink": "coral-ink"
+  },
+  "romantic": {
+    "bg": "mood-romantic-soft",
+    "ink": "mood-romantic-ink"
+  },
+  "unusual": {
+    "bg": "mood-unusual-soft",
+    "ink": "mood-unusual-ink"
+  },
+  "instagrammable": {
+    "bg": "mood-instagrammable-soft",
+    "ink": "mood-instagrammable-ink"
+  },
+  "relax": {
+    "bg": "mood-relax-soft",
+    "ink": "mood-relax-ink"
+  },
+  "sport": {
+    "bg": "mood-sport-soft",
+    "ink": "mood-sport-ink"
+  }
+} as const satisfies Record<Mood, { bg: ColorToken; ink: ColorToken }>;
+
 /** Interface icons: name, weight (always or when active), color. */
 export const uiIcons = {
   "search": {

@@ -137,7 +137,28 @@ function buildCatalog(mappings: Mappings, token: TokenCheck) {
     placeCategories,
     filterIcons: buildFilterIcons(mappings.filterIcons),
     moodDots,
+    moodChips: buildMoodChips(mappings, token),
   };
+}
+
+/**
+ * Tint of the chip of each mood (filterIconsNote, D-050): Culture, Nature, Shopping and
+ * Gastronomie take the chip of the family of the same name; the other moods carry their own,
+ * drawn from their dot.
+ */
+function buildMoodChips(mappings: Mappings, token: TokenCheck) {
+  const moodLabels: Record<string, string> = labels.fr.moods;
+  const moodChips = Object.fromEntries(
+    mappings.moodDots.map(({ mood, chip }) => {
+      const where = `moodDots.${mood}`;
+      const family = mappings.activityFamilies.find(({ label }) => label === moodLabels[mood]);
+      const tint = chip ?? family?.chip;
+      check(tint != null, `${where}: no chip tint, and no family named « ${moodLabels[mood]} »`);
+      return [mood, { bg: token('colors', tint.bg, where), ink: token('colors', tint.ink, where) }];
+    }),
+  );
+  checkKeys('moods', moodChips, 'moodDots');
+  return moodChips;
 }
 
 // Notes of a `mappings.uiIcons` value, in English or in French as Direction-Artistique writes them.
