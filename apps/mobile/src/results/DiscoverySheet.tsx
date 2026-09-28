@@ -25,7 +25,7 @@ import { zoneName } from './zone';
 export type OpenSource = AnalyticsEvents['route_opened']['source'];
 
 interface DiscoverySheetProps {
-  /** Height of the home screen, above the tab bar. */
+  /** Height of the home screen, edge to edge behind the floating tab bar. */
   containerHeight: number;
   /** The user's position; null without it: no distance, and the zone is Paris. */
   position: LatLng | null;
@@ -39,7 +39,7 @@ interface DiscoverySheetProps {
     retry: () => void;
   };
   onOpenRoute: (route: RouteCard, source: OpenSource) => void;
-  /** The detent reached, and the height the sheet covers at the foot of the map. */
+  /** The detent reached, and the height the sheet covers at the foot of the map, bar included. */
   onCoverChange?: (height: number) => void;
 }
 
