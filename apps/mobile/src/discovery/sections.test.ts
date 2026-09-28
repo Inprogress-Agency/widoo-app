@@ -30,7 +30,7 @@ function route(id: string, start: { lat: number; lng: number } | null = null): R
     budgetBucket: 'free',
     distanceM: 1000,
     rating: { average: null, count: 0 },
-    steps: start ? [{ category: 'park', location: start }] : [],
+    steps: start ? [{ category: 'park', location: start, name: null, durationMin: null }] : [],
   };
 }
 
