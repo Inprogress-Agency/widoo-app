@@ -18,7 +18,7 @@ export interface AnalyticsClient {
 
 interface AnalyticsOptions {
   consent: ConsentStore;
-  /** Creates the PostHog client once consent is granted. Absent without key: a no-op. */
+  /** Creates the client once consent is granted. Absent (development, or no key): a no-op. */
   createClient: (() => AnalyticsClient) | undefined;
   /** Erases what the SDK persisted (anonymous id, queue) when consent is missing or withdrawn. */
   clearClientStorage: () => void;
@@ -93,8 +93,8 @@ export type Analytics = ReturnType<typeof createAnalytics>;
 
 /**
  * A client that writes each event to a log instead of sending it: the local journal of the
- * events in development (`EXPO_PUBLIC_ANALYTICS_DEBUG=1` without PostHog key), behind consent
- * like the real one.
+ * events in development (`EXPO_PUBLIC_ANALYTICS_DEBUG=1`, a PostHog key being ignored there),
+ * behind consent like the real one.
  */
 export function createLogClient(log: (line: string) => void): AnalyticsClient {
   return {
