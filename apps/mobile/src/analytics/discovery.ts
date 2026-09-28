@@ -1,4 +1,5 @@
-import type { AnalyticsEvents } from '@widoo/shared';
+import type { AnalyticsEvents, AnalyticsFilters } from '@widoo/shared';
+import type { FiltersSource, SearchFilters } from '../discovery/store';
 
 /**
  * Properties of the discovery events (wiki Analytics › Découverte), built apart from the screens
@@ -20,6 +21,27 @@ export function mapSearchZoneEvent(
     zoom: analyticsZoom(search.view.zoom),
     results_count: resultsCount,
   };
+}
+
+/** The active filters as the catalog wants them: every group, empty when inactive. */
+export function filtersEvent(filters: SearchFilters): AnalyticsFilters {
+  return {
+    audiences: filters.audiences ?? [],
+    moods: filters.moods ?? [],
+    conditions: filters.conditions ?? [],
+    durations: filters.durations ?? [],
+    budgets: filters.budgets ?? [],
+    transports: filters.transports ?? [],
+  };
+}
+
+/** `filters_applied`, once the search of the new filters has answered. */
+export function filtersAppliedEvent(
+  filters: SearchFilters,
+  resultsCount: number,
+  source: FiltersSource,
+): AnalyticsEvents['filters_applied'] {
+  return { ...filtersEvent(filters), results_count: resultsCount, source };
 }
 
 type CardView = AnalyticsEvents['result_card_viewed'];
