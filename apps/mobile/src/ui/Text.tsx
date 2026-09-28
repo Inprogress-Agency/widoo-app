@@ -6,6 +6,7 @@ import {
   type TextStyleToken,
 } from '@widoo/tokens';
 import { Platform, Text as NativeText, type TextProps as NativeTextProps } from 'react-native';
+import { useFontScale } from './useFontScale';
 
 export interface TextProps extends NativeTextProps {
   /** Text style of tokens.json: size, line height, weight and letter spacing. */
@@ -29,10 +30,18 @@ function platformTextStyle(variant: TextStyleToken) {
   return Platform.OS === 'ios' ? { ...style, lineHeight } : style;
 }
 
-/** Every text of the app: a text style and a color of tokens.json, nothing written by hand. */
+/**
+ * Every text of the app: a text style and a color of tokens.json, nothing written by hand.
+ *
+ * When the system text size changes with the app open, iOS draws the text larger but keeps its
+ * measured frame: React Native's new renderer does not lay the tree out again (#150). A new font
+ * scale remounts the native text, which is measured afresh, and so are the views around it.
+ */
 export function Text({ variant, color = 'ink', isDense = false, style, ...props }: TextProps) {
+  const fontScale = useFontScale();
   return (
     <NativeText
+      key={fontScale}
       maxFontSizeMultiplier={isDense ? accessibility.maxFontSizeMultiplierDense : undefined}
       style={[platformTextStyle(variant), { color: colors[color] }, style]}
       {...props}
