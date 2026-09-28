@@ -49,13 +49,20 @@ function tokenCheck(theme: Theme): TokenCheck {
 // Filter groups of tokens.json and the taxonomy of packages/shared that holds their labels.
 const filterTaxonomies = {
   audiences: 'audiences',
+  budget: 'budgets',
   transport: 'transports',
   moods: 'moods',
   conditions: 'conditions',
 } as const satisfies Record<string, Taxonomy>;
 
-/** Amounts and hours are shown as text: these groups carry no icon. */
-const textOnlyFilters = ['budget', 'duration'];
+/** Hours are shown as text: this group carries no icon. */
+const textOnlyFilters = ['duration'];
+
+/**
+ * Amounts are shown as text too, except « Gratuit » and its tag (D-053): in these groups only the
+ * values with an icon are mapped, and the group appears in the result once a value has one.
+ */
+const optionalIconFilters = ['budget'];
 
 function buildFilterIcons(filterIcons: Mappings['filterIcons']) {
   const result: Record<string, Record<string, string>> = {};
@@ -72,15 +79,23 @@ function buildFilterIcons(filterIcons: Mappings['filterIcons']) {
     const byLabel = new Map<string, string>(
       Object.entries(labels.fr[taxonomy]).map(([key, label]) => [label, key]),
     );
+    const isOptional = optionalIconFilters.includes(group);
     const icons: Record<string, string> = {};
     for (const { value, icon } of entries) {
+      if (icon === null && isOptional) {
+        continue;
+      }
       const key = byLabel.get(value);
       check(key !== undefined, `filterIcons.${group}: « ${value} » is not a label of ${taxonomy}`);
       check(icon !== null, `filterIcons.${group}: « ${value} » has no icon`);
       icons[key] = icon;
     }
-    checkKeys(taxonomy, icons, `filterIcons.${group}`);
-    result[taxonomy] = icons;
+    if (!isOptional) {
+      checkKeys(taxonomy, icons, `filterIcons.${group}`);
+    }
+    if (Object.keys(icons).length > 0) {
+      result[taxonomy] = icons;
+    }
   }
   return result;
 }
