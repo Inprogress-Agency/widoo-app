@@ -93,6 +93,10 @@ describe('buildMappings', () => {
     expect(new Set(mappings.iconNames).size).toBe(mappings.iconNames.length);
   });
 
+  it('reads the launch screen timings of the first launch (E-18, D-060)', () => {
+    expect(mappings.firstLaunch.splash).toEqual({ fadeOutMs: 200, maxMs: 2000 });
+  });
+
   it('reads the press feedback and the haptics of D-030', () => {
     expect(mappings.motion.press).toEqual({
       filledVeil: { color: 'ink', opacity: 0.08 },

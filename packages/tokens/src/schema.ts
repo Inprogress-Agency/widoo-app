@@ -124,6 +124,10 @@ export const tokensSchema = z.object({
       scroll: z.object({ photoParallax: z.number(), barFadeDistancePx: z.number() }),
       haptics: z.record(z.string(), z.union([haptic, z.boolean()])),
     }),
+    /** First launch (E-18, D-060): the launch screen stays until the map is ready, `maxMs` at most. */
+    firstLaunch: z.object({
+      splash: z.object({ fadeOutMs: z.number().int(), maxMs: z.number().int() }),
+    }),
   }),
 });
 

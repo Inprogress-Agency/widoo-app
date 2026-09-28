@@ -177,6 +177,12 @@ export function renderThemeModule(tokens: Tokens, theme: Theme = buildTheme(toke
       comment:
         'Durations (ms), cubic-bezier curves, gesture spring, press feedback and haptics (D-030).',
     },
+    {
+      name: 'firstLaunch',
+      value: mappings.firstLaunch,
+      comment:
+        'First launch (E-18, D-060): the launch screen fades out once the map is ready, maxMs at most.',
+    },
   ];
 
   const body = declarations.map(({ name, value, comment, type, satisfies }) => {

@@ -1130,4 +1130,12 @@ export const motion = {
   }
 } as const;
 
+/** First launch (E-18, D-060): the launch screen fades out once the map is ready, maxMs at most. */
+export const firstLaunch = {
+  "splash": {
+    "fadeOutMs": 200,
+    "maxMs": 2000
+  }
+} as const;
+
 export type IconName = (typeof iconNames)[number];
