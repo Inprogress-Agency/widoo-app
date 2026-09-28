@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { taxonomies } from '../taxonomies';
 import { HttpsUrl, LatLng } from './common';
 import { Place } from './place';
+import { RecommendationReason } from './recommendation';
 
 const euros = z.number().nonnegative();
 
@@ -92,6 +93,11 @@ export const RouteCard = z
      * alone, to choose what the map shows. Always false for a free route (D-075).
      */
     isLocked: z.boolean(),
+    /**
+     * Main reason of the rank, with `sort=recommended` only; null when no component stands out.
+     * Absent with the other sorts.
+     */
+    reason: RecommendationReason.nullable().optional(),
   })
   .refine((card) => card.access === 'premium' || !card.isLocked, {
     path: ['isLocked'],

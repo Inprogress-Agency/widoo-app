@@ -11,5 +11,6 @@ export * from './schemas/config';
 export * from './schemas/error';
 export * from './schemas/me';
 export * from './schemas/place';
+export * from './schemas/recommendation';
 export * from './schemas/route';
 export * from './schemas/search';
