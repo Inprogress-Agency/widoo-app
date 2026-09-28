@@ -1,4 +1,4 @@
-import { labels, type RouteCard } from '@widoo/shared';
+import type { RouteCard } from '@widoo/shared';
 import { size, spacing } from '@widoo/tokens';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -11,6 +11,7 @@ import { timing } from '../ui/motion';
 import { Rating } from '../ui/Rating';
 import { Text } from '../ui/Text';
 import { useIsLargeText } from '../ui/useIsLargeText';
+import { stepLine } from './stepLine';
 
 interface RouteTooltipProps {
   route: RouteCard;
@@ -24,7 +25,7 @@ interface RouteTooltipProps {
 
 /**
  * Ink tooltip of a selected route, anchored on its start (Ecrans › E-04): title and rating, the
- * start step, « Voir plus ». Locked, the step line becomes « Parcours Premium » and the number of
+ * start step (place name, then « Étape 1/n · category · duration »), « Voir plus ». Locked, the step line becomes « Parcours Premium » and the number of
  * steps. It fades in, with or without « Réduire les animations », and takes the screen reader
  * focus; the escape gesture closes it. From 130 % of text, only the title and the rating remain.
  */
@@ -45,14 +46,14 @@ export function RouteTooltip({ route, isLocked, arrowAt, onOpen, onClose }: Rout
 
   const stepCount = route.steps.length;
   const start = route.steps[0];
-  const category = start ? labels.fr.placeCategories[start.category] : '';
+  const startLine = start ? stepLine(t, start, 1, stepCount) : null;
   const dialogLabel = isLocked
     ? t('map.tooltip.lockedLabel', {
         title: route.title,
         count: stepCount,
         duration: formatDuration(t, route.durationMin, 'spoken'),
       })
-    : t('map.tooltip.label', { title: route.title, total: stepCount, place: category });
+    : t('map.tooltip.label', { title: route.title, total: stepCount, step: startLine?.spoken });
 
   return (
     <Animated.View style={fade} className="w-tooltip-w">
@@ -97,7 +98,7 @@ export function RouteTooltip({ route, isLocked, arrowAt, onOpen, onClose }: Rout
                   </View>
                 ) : (
                   <Text variant="item" color="on-strong">
-                    {category}
+                    {startLine?.name}
                   </Text>
                 )}
                 <Text variant="body-s" color="on-strong-muted">
@@ -106,7 +107,7 @@ export function RouteTooltip({ route, isLocked, arrowAt, onOpen, onClose }: Rout
                         count: stepCount,
                         duration: formatDuration(t, route.durationMin, 'short'),
                       })
-                    : t('map.tooltip.step', { total: stepCount })}
+                    : startLine?.detail}
                 </Text>
               </View>
             </View>

@@ -101,6 +101,17 @@ describe('buildMappings', () => {
     expect(mappings.placeCategories.event_venue).toEqual({ family: 'leisure', icon: 'ticket' });
   });
 
+  it('labels each place category as packages/shared does, which the app reads', () => {
+    const raw = JSON.parse(readFileSync(tokensPath, 'utf8')) as {
+      mappings: { placeCategories: { category: string; label: string }[] };
+    };
+    expect(
+      Object.fromEntries(
+        raw.mappings.placeCategories.map(({ category, label }) => [category, label]),
+      ),
+    ).toEqual(labels.fr.placeCategories);
+  });
+
   it('lists every icon once', () => {
     expect(mappings.iconNames).toContain('crown-simple');
     expect(new Set(mappings.iconNames).size).toBe(mappings.iconNames.length);
