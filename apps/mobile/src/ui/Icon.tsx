@@ -7,8 +7,8 @@ import {
   type SpacingToken,
   type UiIconKey,
 } from '@widoo/tokens';
+import { icons } from '@widoo/tokens/icons';
 import { View } from 'react-native';
-import { icons } from './icons';
 
 type Weight = 'regular' | 'fill' | 'bold';
 
