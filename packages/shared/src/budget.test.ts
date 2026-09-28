@@ -22,8 +22,8 @@ describe('displayedBudgetEur', () => {
 });
 
 describe('budgetSumEur', () => {
-  it('reads the sum in the middle of the range the search answers', () => {
-    expect(budgetSumEur({ budgetPerPersonEur: { min: 16, max: 24 } })).toBe(20);
-    expect(budgetSumEur({ budgetPerPersonEur: { min: 0, max: 0 } })).toBe(0);
+  it('reads the sum the search answers, exact', () => {
+    expect(budgetSumEur({ budgetPerPersonEur: 22 })).toBe(22);
+    expect(budgetSumEur({ budgetPerPersonEur: 0 })).toBe(0);
   });
 });

@@ -110,7 +110,7 @@ function benchRoute(index: number, cityId: string) {
     bounds: envelopeOf(stops.map((stop) => stop.location)),
     computed: {
       duration_min: durationMin,
-      budget_per_person_eur: { min: budget, max: budget },
+      budget_per_person_eur: budget,
       distance_m: Math.round(between(500, 8000)),
     },
     durationBucket: durationBucketOf(durationMin),

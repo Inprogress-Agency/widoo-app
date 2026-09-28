@@ -19,10 +19,13 @@ import { decodeCursor, encodeCursor, type SortKeyValue } from './cursor';
 import { activeFilters, allOf, inZone } from './filters';
 import { after, keyColumn, orderBy, sortKeys, type KeysetSort, type SortKey } from './sort';
 
-/** `routes.computed` as the orchestration writes it: the card only reads these fields. */
+/**
+ * `routes.computed` as the orchestration writes it: the card only reads these fields. The budget
+ * is the sum of the step costs per person (D-032).
+ */
 const Computed = z.object({
   duration_min: z.number().int().nonnegative(),
-  budget_per_person_eur: z.object({ min: z.number().nonnegative(), max: z.number().nonnegative() }),
+  budget_per_person_eur: z.number().nonnegative(),
   distance_m: z.number().nonnegative(),
 });
 

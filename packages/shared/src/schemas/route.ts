@@ -55,7 +55,8 @@ const routeCardShape = {
   neighborhood: z.string().nullable(),
   durationMin: z.number().int().nonnegative(),
   durationBucket: z.enum(taxonomies.durations),
-  budgetPerPersonEur: z.object({ min: euros, max: euros }),
+  /** Sum of the step costs per person, exact: the card rounds it for display (D-032). */
+  budgetPerPersonEur: euros,
   budgetBucket: z.enum(taxonomies.budgets),
   distanceM: z.number().nonnegative(),
   rating: z.object({

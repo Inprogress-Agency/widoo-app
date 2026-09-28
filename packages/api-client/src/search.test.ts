@@ -20,7 +20,7 @@ const card: RouteCard = {
   neighborhood: 'Canal Saint-Martin',
   durationMin: 180,
   durationBucket: 'half_day',
-  budgetPerPersonEur: { min: 0, max: 15 },
+  budgetPerPersonEur: 8,
   budgetBucket: 'low',
   distanceM: 3200,
   rating: { average: 4.6, count: 12 },
