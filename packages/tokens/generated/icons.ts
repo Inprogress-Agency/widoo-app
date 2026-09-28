@@ -1,4 +1,4 @@
-// Généré depuis tokens.json (version 30), ne pas modifier : pnpm --filter @widoo/tokens generate.
+// Généré depuis tokens.json (version 33), ne pas modifier : pnpm --filter @widoo/tokens generate.
 import type { Icon } from 'phosphor-react-native';
 import { ArmchairIcon } from 'phosphor-react-native/src/icons/Armchair';
 import { ArrowRightIcon } from 'phosphor-react-native/src/icons/ArrowRight';
