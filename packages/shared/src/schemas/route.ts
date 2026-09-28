@@ -36,8 +36,8 @@ const Author = z.object({
   avatarUrl: HttpsUrl.nullable(),
 });
 
-/** Search result card (E-01, E-04). */
-export const RouteCard = z.object({
+/** Fields of a search result card, shared with the full route sheet. */
+const routeCardShape = {
   id: z.uuid(),
   title: z.string().min(1),
   coverUrl: HttpsUrl.nullable(),
@@ -62,7 +62,12 @@ export const RouteCard = z.object({
     average: z.number().min(1).max(5).nullable(),
     count: z.number().int().nonnegative(),
   }),
-  /** Map pins, in step order. */
+  /** Number of steps of the route, whether or not `steps` carries them all. */
+  stepCount: z.number().int().nonnegative(),
+  /**
+   * Map pins, in step order. A Premium route carries its start alone: the search is public, so
+   * its steps 2 and after never leave the API, neither place nor coordinates (D-014).
+   */
   steps: z.array(
     z.object({
       category: z.enum(taxonomies.placeCategories),
@@ -73,11 +78,25 @@ export const RouteCard = z.object({
       durationMin: z.number().int().positive().nullable(),
     }),
   ),
-});
+};
+
+/**
+ * Search result card (E-01, E-04). A free route carries all its steps; a Premium route its start
+ * at most, which the API answer is checked against before it is sent.
+ */
+export const RouteCard = z
+  .object(routeCardShape)
+  .refine(
+    (card) =>
+      card.access === 'premium'
+        ? card.steps.length <= Math.min(card.stepCount, 1)
+        : card.steps.length === card.stepCount,
+    { path: ['steps'], message: 'A Premium card carries its start alone, a free card every step' },
+  );
 export type RouteCard = z.infer<typeof RouteCard>;
 
 /** Full route sheet (E-05). */
-export const RouteDetail = RouteCard.extend({
+export const RouteDetail = z.object(routeCardShape).extend({
   status: z.enum(taxonomies.routeStatuses),
   description: z.string(),
   photoUrls: z.array(HttpsUrl),

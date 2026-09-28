@@ -44,7 +44,8 @@ export function RouteTooltip({ route, isLocked, arrowAt, onOpen, onClose }: Rout
     }
   }, [opacity]);
 
-  const stepCount = route.steps.length;
+  // A Premium card carries its start alone: the count comes from the card, not its pins.
+  const { stepCount } = route;
   const start = route.steps[0];
   const startLine = start ? stepLine(t, start, 1, stepCount) : null;
   const dialogLabel = isLocked
