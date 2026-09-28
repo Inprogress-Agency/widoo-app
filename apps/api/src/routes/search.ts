@@ -2,8 +2,15 @@ import { RouteCount, RouteCountQuery, RouteSearchQuery, RouteSearchResult } from
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { cacheHook } from '../http-cache';
 import { areaKm2 } from '../search/filters';
+import { weightsKey, weightsOf } from '../recommendation/weights';
+import { searchRecommended } from '../search/recommended';
 import { clusterRoutes, countRoutes, searchRoutes } from '../search/repository';
-import { clusterAreaKey, createClusterThreshold, readSetting } from '../search/settings';
+import {
+  clusterAreaKey,
+  createCachedSetting,
+  createClusterThreshold,
+  readSetting,
+} from '../search/settings';
 
 /**
  * Discovery (wiki API › découverte) : routes of a map zone with filters, and their count for the
@@ -13,6 +20,10 @@ import { clusterAreaKey, createClusterThreshold, readSetting } from '../search/s
  */
 export const searchRoutesPlugin: FastifyPluginAsyncZod = async (app) => {
   const clusterAreaKm2 = createClusterThreshold(() => readSetting(app.db, clusterAreaKey));
+  const recommendationWeights = createCachedSetting(
+    () => readSetting(app.db, weightsKey),
+    weightsOf,
+  );
 
   app.get(
     '/routes/search',
@@ -31,7 +42,16 @@ export const searchRoutesPlugin: FastifyPluginAsyncZod = async (app) => {
       if (areaKm2(query.bbox) > (await clusterAreaKm2())) {
         return { items: [], nextCursor: null, clusters: await clusterRoutes(app.db, query) };
       }
-      return { ...(await searchRoutes(app.db, query, request.user)), clusters: null };
+      const page =
+        query.sort === 'recommended'
+          ? await searchRecommended(
+              app.db,
+              query,
+              { weights: await recommendationWeights(), now: new Date() },
+              request.user,
+            )
+          : await searchRoutes(app.db, { ...query, sort: query.sort }, request.user);
+      return { ...page, clusters: null };
     },
   );
 
