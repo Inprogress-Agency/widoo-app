@@ -1,5 +1,6 @@
 import {
   ApiError,
+  budgetBucketOf,
   RouteCount,
   RouteSearchResult,
   type BudgetBucket,
@@ -72,6 +73,25 @@ const central = 'bbox=2.32,48.835,2.40,48.89&limit=50';
 const allParis = 'bbox=2.2241,48.8156,2.4699,48.9022';
 
 describe('GET /v1/routes/search on the seed', () => {
+  it('answers the budget as the sum of the step costs, its bucket from that sum (D-032)', async () => {
+    const sums = await app.db
+      .select({
+        routeId: steps.routeId,
+        euros: sql<number>`sum(${steps.costPerPerson})::float8`,
+      })
+      .from(steps)
+      .where(inArray(steps.routeId, demoRouteIds))
+      .groupBy(steps.routeId);
+    const sumOf = new Map(sums.map((row) => [row.routeId, row.euros]));
+    // The whole city answers clusters: the central zone holds every demo route but one.
+    const cards = (await search(central)).items.filter((card) => demoRouteIds.includes(card.id));
+    expect(cards).toHaveLength(demoRouteIds.length - 1);
+    for (const card of cards) {
+      expect(card.budgetPerPersonEur).toBe(sumOf.get(card.id));
+      expect(card.budgetBucket).toBe(budgetBucketOf(card.budgetPerPersonEur));
+    }
+  });
+
   it('filters by mood', async () => {
     expect(demoIdsOf(await search(`${central}&moods[]=food`))).toEqual([demo('marais-gourmand')]);
   });
