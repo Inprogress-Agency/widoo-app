@@ -2,7 +2,7 @@ import { buildMappings } from './mappings';
 import type { Tokens } from './schema';
 import { buildTheme, type Theme } from './theme';
 
-const header = (version: number) =>
+export const header = (version: number) =>
   `// Généré depuis tokens.json (version ${version}), ne pas modifier : pnpm --filter @widoo/tokens generate.`;
 
 const json = (value: unknown) => JSON.stringify(value, null, 2);

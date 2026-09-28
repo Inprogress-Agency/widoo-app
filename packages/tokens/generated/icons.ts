@@ -1,6 +1,5 @@
-import type { IconName } from '@widoo/tokens';
+// Généré depuis tokens.json (version 14), ne pas modifier : pnpm --filter @widoo/tokens generate.
 import type { Icon } from 'phosphor-react-native';
-// One import per icon: the package root would bundle the 1,500 icons of Phosphor.
 import { ArmchairIcon } from 'phosphor-react-native/src/icons/Armchair';
 import { ArrowRightIcon } from 'phosphor-react-native/src/icons/ArrowRight';
 import { ArrowSquareOutIcon } from 'phosphor-react-native/src/icons/ArrowSquareOut';
@@ -51,8 +50,8 @@ import { GlobeSimpleIcon } from 'phosphor-react-native/src/icons/GlobeSimple';
 import { GpsSlashIcon } from 'phosphor-react-native/src/icons/GpsSlash';
 import { HeadphonesIcon } from 'phosphor-react-native/src/icons/Headphones';
 import { HeartIcon } from 'phosphor-react-native/src/icons/Heart';
-import { HouseIcon } from 'phosphor-react-native/src/icons/House';
 import { HourglassMediumIcon } from 'phosphor-react-native/src/icons/HourglassMedium';
+import { HouseIcon } from 'phosphor-react-native/src/icons/House';
 import { InfoIcon } from 'phosphor-react-native/src/icons/Info';
 import { KeyIcon } from 'phosphor-react-native/src/icons/Key';
 import { LightningIcon } from 'phosphor-react-native/src/icons/Lightning';
@@ -97,11 +96,9 @@ import { WheelchairIcon } from 'phosphor-react-native/src/icons/Wheelchair';
 import { WifiSlashIcon } from 'phosphor-react-native/src/icons/WifiSlash';
 import { WineIcon } from 'phosphor-react-native/src/icons/Wine';
 import { XCircleIcon } from 'phosphor-react-native/src/icons/XCircle';
+import type { IconName } from './theme';
 
-/**
- * Phosphor component of every icon named by tokens.json. The compiler rejects a missing or an
- * unknown name: an icon added to the mappings is added here, and nothing else.
- */
+/** Phosphor component of every icon named by tokens.json, one import each. */
 export const icons: Record<IconName, Icon> = {
   armchair: ArmchairIcon,
   'arrow-right': ArrowRightIcon,
@@ -153,8 +150,8 @@ export const icons: Record<IconName, Icon> = {
   'gps-slash': GpsSlashIcon,
   headphones: HeadphonesIcon,
   heart: HeartIcon,
-  house: HouseIcon,
   'hourglass-medium': HourglassMediumIcon,
+  house: HouseIcon,
   info: InfoIcon,
   key: KeyIcon,
   lightning: LightningIcon,

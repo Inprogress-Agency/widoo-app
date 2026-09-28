@@ -1,7 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { presetPath, themePath, tokensPath } from './paths';
-import { renderPreset, renderThemeModule } from './render';
+import { renderIconsModule } from './icons';
+import { buildMappings } from './mappings';
+import { iconsPath, presetPath, themePath, tokensPath } from './paths';
+import { header, renderPreset, renderThemeModule } from './render';
 import { tokensSchema } from './schema';
 import { buildTheme } from './theme';
 
@@ -54,12 +56,17 @@ describe('generated files', () => {
   it('are up to date with tokens.json (pnpm --filter @widoo/tokens generate)', () => {
     expect(readFileSync(presetPath, 'utf8')).toBe(renderPreset(tokens, theme));
     expect(readFileSync(themePath, 'utf8')).toBe(renderThemeModule(tokens, theme));
+    const { iconNames } = buildMappings(tokens.mappings, theme);
+    expect(readFileSync(iconsPath, 'utf8')).toBe(
+      renderIconsModule(header(tokens.version), iconNames),
+    );
   });
 
   it('say where they come from', () => {
     // The version follows the synced tokens.json, so an automated sync never breaks this test.
-    const header = `// Généré depuis tokens.json (version ${tokens.version}), ne pas modifier`;
-    expect(readFileSync(presetPath, 'utf8').startsWith(header)).toBe(true);
-    expect(readFileSync(themePath, 'utf8').startsWith(header)).toBe(true);
+    const origin = `// Généré depuis tokens.json (version ${tokens.version}), ne pas modifier`;
+    for (const path of [presetPath, themePath, iconsPath]) {
+      expect(readFileSync(path, 'utf8').startsWith(origin)).toBe(true);
+    }
   });
 });

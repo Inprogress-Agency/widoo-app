@@ -11,3 +11,5 @@ export const presetPath = fileURLToPath(
 );
 
 export const themePath = fileURLToPath(new URL('../generated/theme.ts', import.meta.url));
+
+export const iconsPath = fileURLToPath(new URL('../generated/icons.ts', import.meta.url));
