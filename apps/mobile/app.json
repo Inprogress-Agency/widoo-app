@@ -6,13 +6,49 @@
     "scheme": "widoo",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
     "ios": {
       "bundleIdentifier": "app.widoo",
-      "supportsTablet": false
+      "supportsTablet": false,
+      "icon": {
+        "light": "./assets/icon.png",
+        "dark": "./assets/icon-dark.png",
+        "tinted": "./assets/icon-tinted.png"
+      },
+      "infoPlist": {
+        "UIStatusBarStyle": "UIStatusBarStyleLightContent"
+      }
     },
     "android": {
-      "package": "app.widoo"
+      "package": "app.widoo",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-foreground.png",
+        "monochromeImage": "./assets/adaptive-monochrome.png",
+        "backgroundColor": "#5A7FCF"
+      }
     },
-    "plugins": ["expo-router", "@sentry/react-native"]
+    "plugins": [
+      "expo-router",
+      "@sentry/react-native",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#5A7FCF",
+          "ios": {
+            "image": "./assets/splash.png",
+            "enableFullScreenImage_legacy": true,
+            "resizeMode": "cover",
+            "backgroundColor": "#5A7FCF",
+            "dark": { "image": "./assets/splash.png", "backgroundColor": "#5A7FCF" }
+          },
+          "android": {
+            "image": "./assets/splash-android.png",
+            "imageWidth": 288,
+            "backgroundColor": "#4E74C8",
+            "dark": { "image": "./assets/splash-android.png", "backgroundColor": "#4E74C8" }
+          }
+        }
+      ]
+    ]
   }
 }
