@@ -24,7 +24,14 @@ const card: RouteCard = {
   budgetBucket: 'low',
   distanceM: 3200,
   rating: { average: 4.6, count: 12 },
-  steps: [{ category: 'walk', location: { lat: 48.871, lng: 2.365 } }],
+  steps: [
+    {
+      category: 'walk',
+      location: { lat: 48.871, lng: 2.365 },
+      name: 'Canal Saint-Martin',
+      durationMin: 60,
+    },
+  ],
 };
 
 describe('searchQueryString', () => {
