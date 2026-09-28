@@ -16,6 +16,8 @@ const card: RouteCard = {
   isVerified: true,
   moods: ['relax'],
   audiences: ['couple'],
+  conditions: [],
+  transport: 'walk',
   district: '10e',
   neighborhood: 'Canal Saint-Martin',
   durationMin: 180,

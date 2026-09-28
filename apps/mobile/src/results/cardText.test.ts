@@ -16,6 +16,8 @@ const route: RouteCard = {
   isVerified: true,
   moods: ['nature', 'relax'],
   audiences: ['couple'],
+  conditions: [],
+  transport: 'walk',
   district: '10e',
   neighborhood: 'République',
   durationMin: 180,
