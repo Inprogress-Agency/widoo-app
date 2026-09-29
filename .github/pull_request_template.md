@@ -23,7 +23,7 @@ Formatage mécanique : non
 
 Niveau : <!-- 1, 2 ou 3 selon CLAUDE.md › Sécurité et données, avec justification en une ligne. -->
 
-Taille : <!-- À renseigner dès qu'un commit dépasse 400 lignes utiles : le commit et la justification. -->
+Taille : <!-- À renseigner dès qu'un commit dépasse 400 lignes utiles : le commit et la justification. Y signaler aussi, s'il y en a, les fichiers de données de seed (**/seed/*.json, hors calcul) et leur nombre de lignes, affiché par le check « Diff size ». Cette mention ne justifie pas un commit de code de plus de 400 lignes : le check ne sait pas les distinguer et accepte toute ligne remplie, avec un avertissement que la revue vérifie. -->
 
 <!-- Revue OWASP en quelques lignes si le diff la déclenche. Nouvelle dépendance : nom, raison, alternative écartée. -->
 
