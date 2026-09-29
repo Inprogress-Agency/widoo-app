@@ -1,4 +1,4 @@
-// Généré depuis tokens.json (version 34), ne pas modifier : pnpm --filter @widoo/tokens generate.
+// Généré depuis tokens.json (version 35), ne pas modifier : pnpm --filter @widoo/tokens generate.
 import type { Icon } from 'phosphor-react-native';
 import { ArmchairIcon } from 'phosphor-react-native/src/icons/Armchair';
 import { ArrowRightIcon } from 'phosphor-react-native/src/icons/ArrowRight';
@@ -64,6 +64,7 @@ import { KeyIcon } from 'phosphor-react-native/src/icons/Key';
 import { LightningIcon } from 'phosphor-react-native/src/icons/Lightning';
 import { LinkBreakIcon } from 'phosphor-react-native/src/icons/LinkBreak';
 import { ListChecksIcon } from 'phosphor-react-native/src/icons/ListChecks';
+import { LockOpenIcon } from 'phosphor-react-native/src/icons/LockOpen';
 import { LockSimpleIcon } from 'phosphor-react-native/src/icons/LockSimple';
 import { MagnifyingGlassIcon } from 'phosphor-react-native/src/icons/MagnifyingGlass';
 import { MapPinIcon } from 'phosphor-react-native/src/icons/MapPin';
@@ -173,6 +174,7 @@ export const icons: Record<IconName, Icon> = {
   lightning: LightningIcon,
   'link-break': LinkBreakIcon,
   'list-checks': ListChecksIcon,
+  'lock-open': LockOpenIcon,
   'lock-simple': LockSimpleIcon,
   'magnifying-glass': MagnifyingGlassIcon,
   'map-pin': MapPinIcon,
