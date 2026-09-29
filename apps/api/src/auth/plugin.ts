@@ -13,9 +13,14 @@ declare module 'fastify' {
     requireAuth: AuthHook;
     /** `requireAuth`, then refuses a role that does not hold `role` (403). */
     requireRole: (role: Exclude<UserRole, 'user'>) => AuthHook;
+    /**
+     * Optional authentication (wiki API › conventions): without an `Authorization` header the
+     * caller stays anonymous; with one, the same checks as `requireAuth`, 401 included.
+     */
+    optionalAuth: AuthHook;
   }
   interface FastifyRequest {
-    /** The account of the caller, read from the database; null until `requireAuth` ran. */
+    /** The account of the caller, read from the database; null until an auth hook ran. */
     user: User | null;
   }
 }
@@ -25,8 +30,9 @@ const BEARER = /^Bearer ([^\s]{1,4096})$/i;
 
 /**
  * Authentication on demand: public routes stay public, authenticated routes declare
- * `onRequest: app.requireAuth` or `app.requireRole(...)`. The role always comes from the
- * database, read again on every request, never from the token.
+ * `onRequest: app.requireAuth` or `app.requireRole(...)`, a public route whose answer depends on
+ * the caller `app.optionalAuth`. The role always comes from the database, read again on every
+ * request, never from the token.
  */
 export function registerAuth(app: FastifyInstance, verifier: TokenVerifier): void {
   app.decorateRequest('user', null);
@@ -61,6 +67,12 @@ export function registerAuth(app: FastifyInstance, verifier: TokenVerifier): voi
 
   app.decorate('requireAuth', async (request: FastifyRequest) => {
     await authenticate(request);
+  });
+  // An invalid or expired token is refused, never read as anonymous: the app refreshes it.
+  app.decorate('optionalAuth', async (request: FastifyRequest) => {
+    if (request.headers.authorization !== undefined) {
+      await authenticate(request);
+    }
   });
   app.decorate(
     'requireRole',
