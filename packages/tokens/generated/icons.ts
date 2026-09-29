@@ -1,4 +1,4 @@
-// Généré depuis tokens.json (version 35), ne pas modifier : pnpm --filter @widoo/tokens generate.
+// Généré depuis tokens.json (version 37), ne pas modifier : pnpm --filter @widoo/tokens generate.
 import type { Icon } from 'phosphor-react-native';
 import { ArmchairIcon } from 'phosphor-react-native/src/icons/Armchair';
 import { ArrowRightIcon } from 'phosphor-react-native/src/icons/ArrowRight';
@@ -93,6 +93,7 @@ import { SubwayIcon } from 'phosphor-react-native/src/icons/Subway';
 import { SunIcon } from 'phosphor-react-native/src/icons/Sun';
 import { TagIcon } from 'phosphor-react-native/src/icons/Tag';
 import { TicketIcon } from 'phosphor-react-native/src/icons/Ticket';
+import { TranslateIcon } from 'phosphor-react-native/src/icons/Translate';
 import { TrashIcon } from 'phosphor-react-native/src/icons/Trash';
 import { TreeIcon } from 'phosphor-react-native/src/icons/Tree';
 import { UserIcon } from 'phosphor-react-native/src/icons/User';
@@ -203,6 +204,7 @@ export const icons: Record<IconName, Icon> = {
   sun: SunIcon,
   tag: TagIcon,
   ticket: TicketIcon,
+  translate: TranslateIcon,
   trash: TrashIcon,
   tree: TreeIcon,
   user: UserIcon,
