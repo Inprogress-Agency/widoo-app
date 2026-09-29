@@ -83,6 +83,8 @@ for s in "En cours" "À review" "À déployer" "Terminés"; do
 done
 check "ticket dev vide → Prêts" "$(status_decision - Prêts)" set
 check "ticket dev Cadrage → Prêts" "$(status_decision Cadrage Prêts)" set
+check "ticket Bloqués (sync-status-labels.sh) → Prêts" "$(status_decision Bloqués Prêts)" set
+check "ticket Bloqués → Cadrage s'il repasse needs-design" "$(status_decision Bloqués Cadrage)" set
 check "ticket design À déployer → Terminés" "$(status_decision "À déployer" Terminés)" set
 
 echo "sync-project.sh — argument inconnu refusé avant tout appel (PATH vide : gh inaccessible)"
