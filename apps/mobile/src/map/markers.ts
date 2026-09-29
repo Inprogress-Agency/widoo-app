@@ -17,11 +17,6 @@ export interface PointProperties {
 
 export const markerImage = (routeId: string) => `route-${routeId}`;
 
-/** A Premium route without subscription shows neither its path nor its steps (D-014). */
-export function isLocked(route: Pick<RouteCard, 'access'>, hasPremium: boolean): boolean {
-  return route.access === 'premium' && !hasPremium;
-}
-
 /**
  * One photo marker per route, at its start; a route without step has no place on the map. The
  * photo box stays empty until the image of the route is drawn.
@@ -55,9 +50,15 @@ export function routeMarkers(
   };
 }
 
+/*
+ * The selected route is drawn from the lock of its card, never from its access (D-075): a locked
+ * card shows neither path nor steps, its start alone as the locked dot (D-014); an unlocked
+ * Premium card is drawn as a free one.
+ */
+
 /** Path between the steps, in step order: straight lines until the directions reach the card. */
 export function routePath(route: RouteCard): Feature<LineString> | null {
-  if (route.steps.length < 2) {
+  if (route.isLocked || route.steps.length < 2) {
     return null;
   }
   return {
@@ -77,30 +78,27 @@ export interface Stop {
   category: PlaceCategory | null;
 }
 
-/** Step dots of the selected route; only the start, as a locked dot, for a locked route. */
-export function routeStops(route: RouteCard, isRouteLocked: boolean): Stop[] {
-  const steps = isRouteLocked ? route.steps.slice(0, 1) : route.steps;
+/** Step dots of the selected route; only the start, as a locked dot, for a locked card. */
+export function routeStops(route: RouteCard): Stop[] {
+  const steps = route.isLocked ? route.steps.slice(0, 1) : route.steps;
   return steps.map((step, index) => ({
     key: `${route.id}-${index}`,
     location: toLngLat(step.location),
-    category: isRouteLocked ? null : step.category,
+    category: route.isLocked ? null : step.category,
   }));
 }
 
 /**
  * What the camera frames when a route is selected: its steps, or only its start, kept at the
- * current zoom, for a locked route or a route of a single step.
+ * current zoom, for a locked card or a route of a single step.
  */
-export function selectionFrame(
-  route: RouteCard,
-  isRouteLocked: boolean,
-): { bounds: Bounds } | { center: LngLat } | null {
+export function selectionFrame(route: RouteCard): { bounds: Bounds } | { center: LngLat } | null {
   const start = route.steps[0];
   if (!start) {
     return null;
   }
   const bounds = boundsOf(route.steps.map((step) => step.location));
-  if (isRouteLocked || route.steps.length < 2 || !bounds) {
+  if (route.isLocked || route.steps.length < 2 || !bounds) {
     return { center: toLngLat(start.location) };
   }
   return { bounds };

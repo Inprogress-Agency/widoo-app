@@ -23,7 +23,6 @@ function useIsFadedIn(): boolean {
 
 interface SelectedRouteProps {
   route: RouteCard;
-  isLocked: boolean;
   /** Where the tooltip hangs from the start, from 0 (left edge) to 1 (right edge). */
   tooltipAnchor: number;
   onOpen: () => void;
@@ -32,20 +31,14 @@ interface SelectedRouteProps {
 
 /**
  * The selected route on the map (Ecrans › E-04): blue path, step dots by family and the tooltip
- * on the start, all fading in. Locked, only the start remains, as the ink dot with the crown.
+ * on the start, all fading in. A locked card keeps only its start, as the ink dot with the crown.
  * The dots of this one route are views on the map, never those of every route. Mounted again
  * for each route, so that each selection fades in anew.
  */
-export function SelectedRoute({
-  route,
-  isLocked,
-  tooltipAnchor,
-  onOpen,
-  onClose,
-}: SelectedRouteProps) {
+export function SelectedRoute({ route, tooltipAnchor, onOpen, onClose }: SelectedRouteProps) {
   const isFadedIn = useIsFadedIn();
-  const path = isLocked ? null : routePath(route);
-  const [start, ...others] = routeStops(route, isLocked);
+  const path = routePath(route);
+  const [start, ...others] = routeStops(route);
   return (
     <>
       {path && (
@@ -84,7 +77,7 @@ export function SelectedRoute({
         >
           <RouteTooltip
             route={route}
-            isLocked={isLocked}
+            isLocked={route.isLocked}
             arrowAt={tooltipAnchor}
             onOpen={onOpen}
             onClose={onClose}

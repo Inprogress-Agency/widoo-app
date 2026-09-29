@@ -1,6 +1,6 @@
 import type { RouteCard } from '@widoo/shared';
 import { describe, expect, it } from 'vitest';
-import { isLocked, routeMarkers, routePath, routeStops, selectionFrame } from './markers';
+import { routeMarkers, routePath, routeStops, selectionFrame } from './markers';
 
 // Fictitious routes.
 function route(id: string, overrides: Partial<RouteCard> = {}): RouteCard {
@@ -48,9 +48,14 @@ function route(id: string, overrides: Partial<RouteCard> = {}): RouteCard {
   };
 }
 
-/** A Premium route as the search sends it: its start alone, its steps counted (D-014). */
-function premium(id: string): RouteCard {
+/** A locked Premium card, as the search sends it: its start alone, its steps counted (D-014). */
+function locked(id: string): RouteCard {
   return route(id, { access: 'premium', isLocked: true, steps: route(id).steps.slice(0, 1) });
+}
+
+/** A Premium card unlocked for a caller with the right to it: every step (D-075). */
+function unlocked(id: string): RouteCard {
+  return route(id, { access: 'premium', isLocked: false });
 }
 
 describe('routeMarkers', () => {
@@ -82,14 +87,6 @@ describe('routeMarkers', () => {
   });
 });
 
-describe('isLocked', () => {
-  it('locks a Premium route for a user without subscription only', () => {
-    expect(isLocked({ access: 'premium' }, false)).toBe(true);
-    expect(isLocked({ access: 'premium' }, true)).toBe(false);
-    expect(isLocked({ access: 'free' }, false)).toBe(false);
-  });
-});
-
 describe('selected route', () => {
   it('draws the path and every step dot by category', () => {
     const selected = route('a');
@@ -98,36 +95,42 @@ describe('selected route', () => {
       [2.35, 48.87],
       [2.33, 48.865],
     ]);
-    const categories = routeStops(selected, false).map((stop) => stop.category);
+    const categories = routeStops(selected).map((stop) => stop.category);
     expect(categories).toEqual(['museum', 'cafe', 'park']);
   });
 
-  it('shows only the locked start of a Premium route without subscription', () => {
-    const stops = routeStops(premium('a'), true);
-    expect(stops).toEqual([{ key: 'a-0', location: [2.34, 48.86], category: null }]);
-  });
-
-  it('draws no path and no step but the start of a Premium card, whatever the plan', () => {
-    // The search sends the start alone of a Premium route: nothing else can be drawn.
-    const card = premium('a');
+  it('shows a locked card as its start alone, locked, framed at the current zoom (D-014)', () => {
+    const card = locked('a');
     expect(routePath(card)).toBeNull();
-    expect(routeStops(card, false)).toEqual([
-      { key: 'a-0', location: [2.34, 48.86], category: 'museum' },
-    ]);
-    expect(selectionFrame(card, false)).toEqual({ center: [2.34, 48.86] });
+    expect(routeStops(card)).toEqual([{ key: 'a-0', location: [2.34, 48.86], category: null }]);
+    expect(selectionFrame(card)).toEqual({ center: [2.34, 48.86] });
   });
 
-  it('frames the steps, or the start alone when locked', () => {
-    expect(selectionFrame(route('a'), false)).toEqual({
+  it('keeps a locked card to its start, whatever steps it would carry', () => {
+    const card = route('a', { access: 'premium', isLocked: true });
+    expect(routePath(card)).toBeNull();
+    expect(routeStops(card)).toEqual([{ key: 'a-0', location: [2.34, 48.86], category: null }]);
+    expect(selectionFrame(card)).toEqual({ center: [2.34, 48.86] });
+  });
+
+  it('draws an unlocked Premium card as a free one: path, steps and frame (D-075)', () => {
+    const card = unlocked('a');
+    const free = route('a');
+    expect(routePath(card)).toEqual(routePath(free));
+    expect(routeStops(card)).toEqual(routeStops(free));
+    expect(selectionFrame(card)).toEqual({ bounds: { ne: [2.35, 48.87], sw: [2.33, 48.86] } });
+  });
+
+  it('frames the steps, and nothing without a step', () => {
+    expect(selectionFrame(route('a'))).toEqual({
       bounds: { ne: [2.35, 48.87], sw: [2.33, 48.86] },
     });
-    expect(selectionFrame(route('a'), true)).toEqual({ center: [2.34, 48.86] });
-    expect(selectionFrame(route('b', { steps: [] }), false)).toBeNull();
+    expect(selectionFrame(route('b', { steps: [] }))).toBeNull();
   });
 
   it('has no path for a single step', () => {
     const single = route('a', { stepCount: 1, steps: route('a').steps.slice(0, 1) });
     expect(routePath(single)).toBeNull();
-    expect(selectionFrame(single, false)).toEqual({ center: [2.34, 48.86] });
+    expect(selectionFrame(single)).toEqual({ center: [2.34, 48.86] });
   });
 });

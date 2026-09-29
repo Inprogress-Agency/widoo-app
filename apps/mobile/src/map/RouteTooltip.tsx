@@ -15,7 +15,7 @@ import { stepLine } from './stepLine';
 
 interface RouteTooltipProps {
   route: RouteCard;
-  /** Premium route without subscription: no step is named (D-014). */
+  /** The card is locked (`RouteCard.isLocked`): no step is named (D-014, D-075). */
   isLocked: boolean;
   /** Position of the arrow along the tooltip, from 0 to 1: it points at the start. */
   arrowAt: number;
@@ -44,7 +44,7 @@ export function RouteTooltip({ route, isLocked, arrowAt, onOpen, onClose }: Rout
     }
   }, [opacity]);
 
-  // A Premium card carries its start alone: the count comes from the card, not its pins.
+  // A locked card carries its start alone: the count comes from the card, not its pins.
   const { stepCount } = route;
   const start = route.steps[0];
   const startLine = start ? stepLine(t, start, 1, stepCount) : null;
