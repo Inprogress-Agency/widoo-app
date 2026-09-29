@@ -1,0 +1,54 @@
+name: Status labels
+
+# status:ready ou status:blocked sur chaque ticket ouvert hors epic, design, needs-design et Inbox,
+# selon ses bloqueurs ouverts, et colonne Prêts ou Bloqués du Project : scripts/sync-status-labels.sh.
+# Chaque passage recalcule tous les tickets : un événement manqué est rattrapé au suivant.
+on:
+  # Pas d'événement de workflow pour l'ajout ou le retrait d'une dépendance : la fermeture d'un
+  # bloqueur passe par « closed », le reste par le passage de nuit ou un lancement manuel.
+  issues:
+    types: [closed, reopened, labeled, unlabeled]
+  schedule:
+    - cron: '23 3 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Simuler, sans rien écrire (journal dans le résumé du job)
+        type: boolean
+        default: false
+
+# Labels écrits avec GITHUB_TOKEN : ils ne relancent pas ce workflow.
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+concurrency:
+  group: status-labels
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync status labels
+    # Seuls ces labels changent le résultat ; les autres (prio, area…) ne relancent rien.
+    if: >-
+      github.event_name != 'issues'
+      || (github.event.action != 'labeled' && github.event.action != 'unlabeled')
+      || contains(fromJSON('["status:ready", "status:blocked", "type:epic", "type:design", "needs-design", "inbox"]'), github.event.label.name)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # PROJECT_TOKEN (jeton d'Ilan : Projects en lecture et écriture sur l'organisation, Issues en
+      # lecture sur widoo-app) : colonnes lues et rangées. Absent : labels seuls, et un ticket en
+      # développement n'est reconnu qu'à sa branche issue/N-… ou à sa PR ouverte.
+      - name: Sync labels and columns
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          REPO: ${{ github.repository }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: scripts/sync-status-labels.sh
