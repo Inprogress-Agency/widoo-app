@@ -1,7 +1,7 @@
 import type { RouteCard } from '@widoo/shared';
 import { describe, expect, it, vi } from 'vitest';
 import { createApiClient } from '.';
-import { searchQueryString } from './search';
+import { searchQueryString, type RouteCountParams } from './search';
 
 const bbox = { west: 2.33, south: 48.85, east: 2.37, north: 48.88 };
 
@@ -16,6 +16,8 @@ const card: RouteCard = {
   isVerified: true,
   moods: ['relax'],
   audiences: ['couple'],
+  conditions: [],
+  transport: 'walk',
   district: '10e',
   neighborhood: 'Canal Saint-Martin',
   durationMin: 180,
@@ -115,5 +117,22 @@ describe('countRoutes', () => {
       'http://10.0.2.2:8080/v1/routes/search/count?bbox=2.33%2C48.85%2C2.37%2C48.88&moods=nature',
     );
     expect(getToken).not.toHaveBeenCalled();
+  });
+
+  it('asks the count without each active group', async () => {
+    const body = { count: 0, without: { moods: 12, durations: 3 } };
+    const fetch = vi.fn<typeof globalThis.fetch>(async () => Response.json(body));
+    const client = createApiClient({ baseUrl: 'http://10.0.2.2:8080', fetch });
+
+    const params: RouteCountParams = {
+      bbox,
+      moods: ['nature'],
+      durations: ['weekend'],
+      breakdown: 'all_but_one',
+    };
+    await expect(client.countRoutes(params)).resolves.toEqual(body);
+    const query = new URL(String(fetch.mock.calls[0]?.[0])).searchParams;
+    expect(query.get('breakdown')).toBe('all_but_one');
+    expect(query.getAll('durations')).toEqual(['weekend']);
   });
 });

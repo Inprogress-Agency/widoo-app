@@ -19,6 +19,8 @@ const row = (access: CardRow['access']): CardRow => ({
   access,
   moods: ['culture'],
   audiences: ['solo'],
+  conditions: ['indoor'],
+  transport: 'walk',
   duration_bucket: '1_2h',
   budget_bucket: 'free',
   computed: { duration_min: 90, budget_per_person_eur: 0, distance_m: 1200 },

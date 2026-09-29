@@ -148,6 +148,8 @@ describe('GET /v1/routes/search on the seed', () => {
       author: null,
       isVerified: true,
       moods: ['food', 'shopping'],
+      conditions: ['no_booking', 'indoor'],
+      transport: 'walk',
       district: '3e',
       neighborhood: 'Le Marais',
       durationBucket: '1_2h',

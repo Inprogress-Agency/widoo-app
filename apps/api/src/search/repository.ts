@@ -47,6 +47,8 @@ export type CardRow = {
   access: RouteCard['access'];
   moods: RouteCard['moods'];
   audiences: RouteCard['audiences'];
+  conditions: RouteCard['conditions'];
+  transport: RouteCard['transport'];
   duration_bucket: RouteCard['durationBucket'];
   budget_bucket: RouteCard['budgetBucket'];
   computed: unknown;
@@ -95,6 +97,8 @@ export function toCard(row: CardRow, viewer: RouteViewer | null, now: Date): Rou
     isVerified: pins.length > 0 && pins.every((pin) => pin.verified),
     moods: row.moods,
     audiences: row.audiences,
+    conditions: row.conditions,
+    transport: row.transport,
     district: start?.district ?? null,
     neighborhood: start?.neighborhood ?? null,
     durationMin: computed.duration_min,
@@ -129,7 +133,7 @@ export function searchWhere(query: Pick<RouteSearchQuery, 'bbox' | RouteFilterGr
 
 /** Card fields of the route `r`, after `cardJoins`. */
 export const cardColumns = sql`r.title, r.is_official, r.access, r.moods, r.audiences,
-      r.duration_bucket, r.budget_bucket, r.computed, r.stats,
+      r.conditions, r.transport, r.duration_bucket, r.budget_bucket, r.computed, r.stats,
       u.id as author_id, u.first_name as author_first_name, u.avatar_url as author_avatar_url,
       (select m.storage_path from media m
         where m.owner_type = 'route' and m.owner_id = r.id

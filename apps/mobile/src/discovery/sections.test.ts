@@ -22,6 +22,8 @@ function route(id: string, start: { lat: number; lng: number } | null = null): R
     isVerified: false,
     moods: [],
     audiences: [],
+    conditions: [],
+    transport: 'walk',
     district: null,
     neighborhood: null,
     durationMin: 60,

@@ -3,6 +3,8 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   analyticsZoom,
   createCardViewTracker,
+  filtersAppliedEvent,
+  filtersEvent,
   mapSearchZoneEvent,
   newCardViews,
   routeOpenedEvent,
@@ -32,6 +34,30 @@ describe('mapSearchZoneEvent', () => {
   it('rounds the zoom to a tenth of a level', () => {
     expect(analyticsZoom(12.04)).toBe(12);
     expect(analyticsZoom(12.05)).toBe(12.1);
+  });
+});
+
+describe('filters events', () => {
+  const filters = { moods: ['culture' as const], budgets: ['high' as const] };
+
+  it('sends every group of filters_applied, empty when inactive, with the count and the source', () => {
+    const event = filtersAppliedEvent(filters, 9, 'chip');
+    expect(event).toEqual({
+      audiences: [],
+      moods: ['culture'],
+      conditions: [],
+      durations: [],
+      budgets: ['high'],
+      transports: [],
+      results_count: 9,
+      source: 'chip',
+    });
+    expectInCatalog('filters_applied', event);
+    expectInCatalog('filters_applied', filtersAppliedEvent({}, 0, 'panel'));
+  });
+
+  it('sends the active filters of filters_no_results', () => {
+    expectInCatalog('filters_no_results', filtersEvent(filters));
   });
 });
 

@@ -140,6 +140,12 @@ export function renderThemeModule(tokens: Tokens, theme: Theme = buildTheme(toke
       satisfies: 'Record<Mood, ColorToken>',
     },
     {
+      name: 'moodChips',
+      value: mappings.moodChips,
+      comment: 'Tint of the chip of each mood: its family, or its own drawn from its dot (D-050).',
+      satisfies: 'Record<Mood, { bg: ColorToken; ink: ColorToken }>',
+    },
+    {
       name: 'uiIcons',
       value: mappings.uiIcons,
       comment: 'Interface icons: name, weight (always or when active), color.',

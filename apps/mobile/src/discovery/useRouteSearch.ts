@@ -10,10 +10,16 @@ import type { RouteCard } from '@widoo/shared';
 import { useCallback, useEffect, useSyncExternalStore } from 'react';
 import { useStore } from 'zustand';
 import { analytics } from '../analytics';
-import { mapSearchZoneEvent } from '../analytics/discovery';
+import { filtersAppliedEvent, filtersEvent, mapSearchZoneEvent } from '../analytics/discovery';
 import { api } from '../api/client';
 import { latestCachedResults, searchQueryKey } from '../api/search-cache';
-import { createDiscoveryStore, resultsCount, type DiscoveryStore } from './store';
+import {
+  activeFilterCount,
+  createDiscoveryStore,
+  resultsCount,
+  type DiscoveryStore,
+  type ZoneSearch,
+} from './store';
 
 /** The API caches the search for 30 seconds (`Cache-Control: max-age=30`): so does the app. */
 const SEARCH_STALE_TIME_MS = 30_000;
@@ -37,6 +43,23 @@ export function useIsOnline(): boolean {
   );
 }
 
+/**
+ * Events of an answered search: `map_search_zone`, and after a chip or the panel,
+ * `filters_applied`, then `filters_no_results` when the filters leave no route in the zone.
+ */
+function trackAnswer(search: ZoneSearch, count: number) {
+  analytics.track('map_search_zone', mapSearchZoneEvent(search, count));
+  if (search.filtersSource) {
+    analytics.track(
+      'filters_applied',
+      filtersAppliedEvent(search.filters, count, search.filtersSource),
+    );
+    if (count === 0 && activeFilterCount(search.filters) > 0) {
+      analytics.track('filters_no_results', filtersEvent(search.filters));
+    }
+  }
+}
+
 /** No answer at all: the request never reached the API. */
 const isUnreachable = (error: unknown) =>
   error instanceof ApiRequestError && (error.kind === 'network' || error.kind === 'timeout');
@@ -44,7 +67,7 @@ const isUnreachable = (error: unknown) =>
 /**
  * Runs the search the discovery store asks for, and hands its answer back to the store: the zone
  * and the filters go to the API, the user's position never does. Each answered search sends
- * `map_search_zone`.
+ * `map_search_zone`, and `filters_applied` after a change of filters.
  */
 export function useRouteSearch() {
   const search = useDiscovery((state) => state.search);
@@ -83,7 +106,7 @@ export function useRouteSearch() {
       goOffline(search.id, latestCachedResults(client));
     } else if (data) {
       if (receive(search.id, data, dataUpdatedAt)) {
-        analytics.track('map_search_zone', mapSearchZoneEvent(search, resultsCount(data)));
+        trackAnswer(search, resultsCount(data));
       }
     } else if (isError) {
       fail(search.id);
@@ -110,7 +133,13 @@ export function useRouteSearch() {
     status,
     isOnline,
     retry,
-    /** An answered search without any route in the zone. */
-    isEmpty: status === 'success' && results !== null && resultsCount(results) === 0,
+    /**
+     * An answered search without any route in the zone; offline, no route kept passes the
+     * filters (Ecrans › E-03, hors connexion: the home shows its empty state).
+     */
+    isEmpty:
+      (status === 'success' || status === 'offline') &&
+      results !== null &&
+      resultsCount(results) === 0,
   };
 }
