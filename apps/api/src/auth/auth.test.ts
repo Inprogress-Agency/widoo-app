@@ -24,6 +24,9 @@ async function buildTestApp(tokenVerifier: TokenVerifier = verifier) {
   app.get('/v1/test/private', { onRequest: app.requireAuth }, async (request) => ({
     userId: request.user?.id,
   }));
+  app.get('/v1/test/optional', { onRequest: app.optionalAuth }, async (request) => ({
+    userId: request.user?.id ?? null,
+  }));
   app.get('/v1/test/moderation', { onRequest: app.requireRole('moderator') }, async () => ({}));
   // Both guards, as when a plugin requires authentication and one of its routes a role.
   app.get(
@@ -131,6 +134,46 @@ describe('requireAuth', () => {
     await failing.close();
     expect(response.statusCode).toBe(500);
     expect(response.body).not.toContain('fictitious outage');
+  });
+});
+
+describe('optionalAuth', () => {
+  it('leaves the caller anonymous without an Authorization header', async () => {
+    const response = await app.inject({ url: '/v1/test/optional' });
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ userId: null });
+  });
+
+  it('reads the account of a valid token', async () => {
+    const { uid, headers } = signIn();
+    const response = await app.inject({ url: '/v1/test/optional', headers });
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ userId: (await userOf(uid))?.id });
+  });
+
+  // No silent fallback on the anonymous answer: the app refreshes its token (D-075).
+  it.each([
+    ['an empty header', { authorization: '' }],
+    ['another scheme', { authorization: 'Basic ZmljdGl0aW91cw==' }],
+    ['a token the verifier refuses', { authorization: 'Bearer fictitious-token' }],
+  ])('answers 401 unauthorized with %s', async (_, headers) => {
+    const response = await app.inject({ url: '/v1/test/optional', headers });
+    expect(response.statusCode).toBe(401);
+    expect(ApiError.parse(response.json()).code).toBe('unauthorized');
+  });
+
+  it('refuses a deleted account and an anonymous Firebase session', async () => {
+    const deleted = signIn();
+    await app.inject({ url: '/v1/test/optional', headers: deleted.headers });
+    await app.db
+      .update(users)
+      .set({ deletedAt: new Date() })
+      .where(eq(users.firebaseUid, deleted.uid));
+    const anonymous = signIn({ signInProvider: 'anonymous' });
+    for (const { headers } of [deleted, anonymous]) {
+      expect((await app.inject({ url: '/v1/test/optional', headers })).statusCode).toBe(401);
+    }
+    expect(await userOf(anonymous.uid)).toBeUndefined();
   });
 });
 
