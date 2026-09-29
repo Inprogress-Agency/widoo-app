@@ -28,7 +28,7 @@ export const searchRoutesPlugin: FastifyPluginAsyncZod = async (app) => {
       if (areaKm2(query.bbox) > (await clusterAreaKm2())) {
         return { items: [], nextCursor: null, clusters: await clusterRoutes(app.db, query) };
       }
-      return { ...(await searchRoutes(app.db, query)), clusters: null };
+      return { ...(await searchRoutes(app.db, query, request.user)), clusters: null };
     },
   );
 
