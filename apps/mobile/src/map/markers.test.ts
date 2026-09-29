@@ -22,6 +22,7 @@ function route(id: string, overrides: Partial<RouteCard> = {}): RouteCard {
     budgetBucket: 'free',
     distanceM: 1500,
     rating: { average: null, count: 0 },
+    isLocked: false,
     stepCount: 3,
     steps: [
       {
@@ -49,7 +50,7 @@ function route(id: string, overrides: Partial<RouteCard> = {}): RouteCard {
 
 /** A Premium route as the search sends it: its start alone, its steps counted (D-014). */
 function premium(id: string): RouteCard {
-  return route(id, { access: 'premium', steps: route(id).steps.slice(0, 1) });
+  return route(id, { access: 'premium', isLocked: true, steps: route(id).steps.slice(0, 1) });
 }
 
 describe('routeMarkers', () => {

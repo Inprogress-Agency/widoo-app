@@ -61,6 +61,7 @@ const card = {
   budgetBucket: 'low',
   distanceM: 2400,
   rating: { average: null, count: 0 },
+  isLocked: false,
   stepCount: 1,
   steps: [{ category: 'museum', location, name: 'Musée fictif', durationMin: 45 }],
 };
@@ -119,25 +120,45 @@ describe('RouteCard steps', () => {
     name: null,
     durationMin: null,
   };
-  const premium = { ...card, access: 'premium', stepCount: 4 };
+  const locked = { ...card, access: 'premium', isLocked: true, stepCount: 4 };
 
-  it('counts the steps of a Premium route it carries the start of alone (D-014)', () => {
-    expect(RouteCard.parse({ ...premium, steps: [start] })).toMatchObject({
+  it('counts the steps of a locked card it carries the start of alone (D-014)', () => {
+    expect(RouteCard.parse({ ...locked, steps: [start] })).toMatchObject({
+      isLocked: true,
       stepCount: 4,
       steps: [start],
     });
   });
 
-  it('refuses a Premium card carrying a step after its start', () => {
-    expect(RouteCard.safeParse({ ...premium, steps: [start, next] }).success).toBe(false);
+  it('refuses a locked card carrying a step after its start', () => {
+    expect(RouteCard.safeParse({ ...locked, steps: [start, next] }).success).toBe(false);
+  });
+
+  it('refuses a locked card naming its start or giving its time on the spot', () => {
+    const named = { ...start, name: 'Musée fictif' };
+    const timed = { ...start, durationMin: 45 };
+    expect(RouteCard.safeParse({ ...locked, steps: [named] }).success).toBe(false);
+    expect(RouteCard.safeParse({ ...locked, steps: [timed] }).success).toBe(false);
+  });
+
+  it('carries every step of an unlocked Premium card, as a free one (D-075)', () => {
+    const steps = [card.steps[0], { ...next, name: 'Café fictif', durationMin: 30 }];
+    const unlocked = { ...card, access: 'premium', isLocked: false, stepCount: 2, steps };
+    expect(RouteCard.parse(unlocked)).toMatchObject({ isLocked: false, steps });
+    expect(RouteCard.safeParse({ ...unlocked, steps: steps.slice(0, 1) }).success).toBe(false);
+  });
+
+  it('never locks a free route', () => {
+    expect(RouteCard.safeParse({ ...locked, access: 'free', steps: [start] }).success).toBe(false);
   });
 
   it('refuses a free card without all its steps', () => {
     expect(RouteCard.safeParse({ ...card, stepCount: 2 }).success).toBe(false);
   });
 
-  it('requires the step count', () => {
+  it('requires the step count and the lock', () => {
     expect(RouteCard.safeParse({ ...card, stepCount: undefined }).success).toBe(false);
+    expect(RouteCard.safeParse({ ...card, isLocked: undefined }).success).toBe(false);
   });
 });
 
