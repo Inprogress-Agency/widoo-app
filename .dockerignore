@@ -1,8 +1,10 @@
-# Build context of infra/api.Dockerfile: sources only, no local state or secrets.
+# Build context of infra/api.Dockerfile and infra/web.Dockerfile: sources only, no local state or
+# secrets.
 **/node_modules
 **/dist
 **/coverage
 **/.turbo
+**/.next
 **/.env
 **/.env.*
 !**/.env.example
