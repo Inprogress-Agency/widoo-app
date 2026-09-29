@@ -162,6 +162,24 @@ describe('RouteCard steps', () => {
   });
 });
 
+describe('RouteCard reason', () => {
+  it('reads a card without reason, with a null one, or with a reason key', () => {
+    expect(RouteCard.parse(card).reason).toBeUndefined();
+    expect(RouteCard.parse({ ...card, reason: null }).reason).toBeNull();
+    expect(RouteCard.parse({ ...card, reason: { key: 'verified' } }).reason).toEqual({
+      key: 'verified',
+    });
+  });
+
+  it('requires the distance of near_you, and only a known key', () => {
+    expect(
+      RouteCard.parse({ ...card, reason: { key: 'near_you', distanceM: 600 } }).reason,
+    ).toEqual({ key: 'near_you', distanceM: 600 });
+    expect(RouteCard.safeParse({ ...card, reason: { key: 'near_you' } }).success).toBe(false);
+    expect(RouteCard.safeParse({ ...card, reason: { key: 'Très bien noté' } }).success).toBe(false);
+  });
+});
+
 describe('RouteSearchQuery', () => {
   const bbox = '2.33,48.85,2.37,48.87';
 

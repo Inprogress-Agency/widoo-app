@@ -49,6 +49,21 @@ const Env = z.object({
     .transform((value) => value || undefined)
     .pipe(z.url({ protocol: /^https?$/ }).optional()),
   /**
+   * Service token of the scheduled jobs (`/internal/*`, Cloud Scheduler), sent as a Bearer
+   * token: 32 to 256 letters, digits, `-` or `_`. Empty or absent, the internal routes do not
+   * exist (404).
+   */
+  INTERNAL_TOKEN: z
+    .string()
+    .optional()
+    .transform((value) => value || undefined)
+    .pipe(
+      z
+        .string()
+        .regex(/^[A-Za-z0-9_-]{32,256}$/, 'Expected 32 to 256 letters, digits, - or _')
+        .optional(),
+    ),
+  /**
    * `staging` or `production` on Cloud Run, where NODE_ENV is `production` for both; empty or
    * absent, the reports carry NODE_ENV.
    */
@@ -105,6 +120,7 @@ export const Config = ProductionEnv.transform((env) => ({
   firebaseProjectId: env.FIREBASE_PROJECT_ID,
   sentryDsn: env.SENTRY_DSN,
   sentryEnvironment: env.SENTRY_ENVIRONMENT ?? env.NODE_ENV,
+  internalToken: env.INTERNAL_TOKEN,
 }));
 export type Config = z.output<typeof Config>;
 

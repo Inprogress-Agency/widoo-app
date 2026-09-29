@@ -6,11 +6,12 @@ import {
   type DurationBucket,
 } from '@widoo/shared';
 import { eq, inArray, sql } from 'drizzle-orm';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { buildApp } from '../app';
-import { routes, steps, users } from '../db/schema';
+import { routes, settings, steps, users } from '../db/schema';
 import { demoRouteIds, seed, seedId } from '../db/seed';
 import { uuidv7 } from '../db/uuid';
+import { weightsKey } from '../recommendation/weights';
 import { testConfig } from '../test-config';
 
 let app: Awaited<ReturnType<typeof buildApp>>;
@@ -368,27 +369,31 @@ describe('GET /v1/routes/search on fixtures', () => {
     ['duration', ['e', 'b', 'c', 'd', 'a']],
     ['rating', ['e', 'a', 'd', 'b', 'c']],
     ['distance&near=10.021,10.021', ['e', 'd', 'c', 'b', 'a']],
-    ['recommended', ['e', 'd', 'c', 'b', 'a']],
+    // Proximity first, then the Bayesian quality: `a` has the best rating, far from the position.
+    ['recommended&near=10.021,10.021', ['e', 'd', 'c', 'a', 'b']],
   ])('sorts by %s', async (sort, expected) => {
     expect(keysOf(await search(`${zone}&sort=${sort}`))).toEqual(expected);
   });
 
-  it.each(['duration', 'rating', 'distance&near=10.021,10.021', 'recommended'])(
-    'pages by %s with a cursor, without gap or repeat',
-    async (sort) => {
-      const all = keysOf(await search(`${zone}&sort=${sort}`));
-      const paged: (string | undefined)[] = [];
-      let cursor: string | null = null;
-      do {
-        const page: RouteSearchResult = await search(
-          `${zone}&sort=${sort}&limit=2${cursor ? `&cursor=${cursor}` : ''}`,
-        );
-        paged.push(...keysOf(page));
-        cursor = page.nextCursor;
-      } while (cursor);
-      expect(paged).toEqual(all);
-    },
-  );
+  it.each([
+    'duration',
+    'rating',
+    'distance&near=10.021,10.021',
+    'recommended',
+    'recommended&near=10.021,10.021',
+  ])('pages by %s with a cursor, without gap or repeat', async (sort) => {
+    const all = keysOf(await search(`${zone}&sort=${sort}`));
+    const paged: (string | undefined)[] = [];
+    let cursor: string | null = null;
+    do {
+      const page: RouteSearchResult = await search(
+        `${zone}&sort=${sort}&limit=2${cursor ? `&cursor=${cursor}` : ''}`,
+      );
+      paged.push(...keysOf(page));
+      cursor = page.nextCursor;
+    } while (cursor);
+    expect(paged).toEqual(all);
+  });
 
   it('hides the author of a non public profile (D-025)', async () => {
     const result = await search(zone);
@@ -404,6 +409,53 @@ describe('GET /v1/routes/search on fixtures', () => {
       count: 0,
       without: { durations: 2, budgets: 2 },
     });
+  });
+});
+
+describe('GET /v1/routes/search?sort=recommended on fixtures (#63)', () => {
+  const near = `${zone}&near=10.021,10.021`;
+
+  it('gives each card its main reason, the distance when near the position', async () => {
+    const result = await search(near);
+    expect(result.items[0]?.reason).toEqual({ key: 'near_you', distanceM: expect.any(Number) });
+    const distance = result.items[0]?.reason?.key === 'near_you' ? result.items[0].reason : null;
+    expect(distance?.distanceM).toBeGreaterThan(100);
+    expect(distance?.distanceM).toBeLessThan(250);
+    for (const card of result.items) expect(card.reason).not.toBeUndefined();
+  });
+
+  it('says nothing is near without a position, and gives no reason with another sort', async () => {
+    for (const card of (await search(zone)).items) {
+      expect(card.reason?.key).not.toBe('near_you');
+    }
+    for (const card of (await search(`${zone}&sort=rating`)).items) {
+      expect(card.reason).toBeUndefined();
+    }
+  });
+
+  it('changes the order when a weight changes in settings, without a restart', async () => {
+    const weights = { proximity: 0, quality: 1, freshness: 0 };
+    // The weights are read again once a minute: the clock moves on instead of the test waiting.
+    const realNow = Date.now.bind(Date);
+    let offsetMs = 0;
+    const clock = vi.spyOn(Date, 'now').mockImplementation(() => realNow() + offsetMs);
+    try {
+      expect(keysOf(await search(near))).toEqual(['e', 'd', 'c', 'a', 'b']);
+      await app.db
+        .insert(settings)
+        .values({ key: weightsKey, value: weights })
+        .onConflictDoUpdate({ target: settings.key, set: { value: weights } });
+      offsetMs = 61_000;
+      // Quality alone: `a` (4.5 over 10 ratings) first, then `d`, `e`; `b` and `c` tie at 0.5.
+      const byQuality = keysOf(await search(near));
+      expect(byQuality.slice(0, 3)).toEqual(['a', 'd', 'e']);
+      expect(byQuality.slice(3).sort()).toEqual(['b', 'c']);
+    } finally {
+      await app.db.delete(settings).where(eq(settings.key, weightsKey));
+      offsetMs = 122_000;
+      expect(keysOf(await search(near))).toEqual(['e', 'd', 'c', 'a', 'b']);
+      clock.mockRestore();
+    }
   });
 });
 

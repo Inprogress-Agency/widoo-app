@@ -20,7 +20,18 @@ describe('loadConfig', () => {
       firebaseProjectId: undefined,
       sentryDsn: undefined,
       sentryEnvironment: 'development',
+      internalToken: undefined,
     });
+  });
+
+  it('reads the internal service token, an empty one meaning none', () => {
+    const load = (env: Record<string, string>) => loadConfig({ DATABASE_URL: databaseUrl, ...env });
+    const token = 'fictitious-internal-token-0123456789';
+    expect(load({ INTERNAL_TOKEN: token }).internalToken).toBe(token);
+    expect(load({ INTERNAL_TOKEN: '' }).internalToken).toBeUndefined();
+    expect(() => load({ INTERNAL_TOKEN: 'short' })).toThrow(/INTERNAL_TOKEN/);
+    expect(() => load({ INTERNAL_TOKEN: `${token} space` })).toThrow(/INTERNAL_TOKEN/);
+    expect(() => load({ INTERNAL_TOKEN: `${token} space` })).not.toThrow(token);
   });
 
   it('reads the Sentry DSN and environment, an empty DSN meaning none', () => {

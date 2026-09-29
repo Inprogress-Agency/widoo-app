@@ -15,6 +15,7 @@ import { loggerOptions, requestIdOf, type LogStream } from './logger';
 import { parseQueryString } from './query-string';
 import { configRoutes } from './routes/config';
 import { healthRoutes } from './routes/health';
+import { defaultInternalJobs, internalRoutes, type InternalJobs } from './routes/internal';
 import { meRoutes } from './routes/me';
 import { searchRoutesPlugin } from './routes/search';
 import { registerSecurity } from './security';
@@ -23,6 +24,8 @@ export type BuildAppOptions = {
   logStream?: LogStream;
   /** Tests only (`TestTokenVerifier`): replaces Firebase. Refused in production. */
   tokenVerifier?: TokenVerifier;
+  /** Tests only: replaces the jobs of the internal routes. Refused in production. */
+  internalJobs?: InternalJobs;
 };
 
 /** Firebase unless a verifier is injected; fails at startup rather than on the first request. */
@@ -42,6 +45,9 @@ function tokenVerifierOf(config: Config, injected: TokenVerifier | undefined): T
 /** Builds the API without listening, so that tests drive it with `app.inject()`. */
 export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   const tokenVerifier = tokenVerifierOf(config, options.tokenVerifier);
+  if (options.internalJobs && config.isProduction) {
+    throw new Error('Injected internal jobs are refused in production');
+  }
   const app = Fastify({
     logger: loggerOptions(config.logLevel, options.logStream),
     genReqId: requestIdOf,
@@ -74,6 +80,13 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   await app.register(configRoutes, { prefix: '/v1', minAppVersion: config.minAppVersion });
   await app.register(meRoutes, { prefix: '/v1' });
   await app.register(searchRoutesPlugin, { prefix: '/v1' });
+  if (config.internalToken) {
+    await app.register(internalRoutes, {
+      prefix: '/v1',
+      token: config.internalToken,
+      jobs: options.internalJobs ?? defaultInternalJobs,
+    });
+  }
 
   return app;
 }

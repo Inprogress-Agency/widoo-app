@@ -1,12 +1,12 @@
 /**
- * `pnpm --filter api bench:search`: p95 of the route search on 1 000 synthetic routes (#25).
+ * `pnpm --filter api bench:search`: p95 of the route search on 1 000 synthetic routes (#25, #63).
  *
  * Inserts 1 000 fictitious published routes over Paris, each with 3 to 5 places of its own within
- * about a kilometre, and fixed ids (a second
- * run replaces them), runs a mix of the requests the app sends through the whole API, prints
- * p50 / p95 / p99 per request and overall, then deletes its rows. `--explain` also prints the
- * execution plans of the central search and of the count. Refused in production. Exits 1 when
- * the overall p95 reaches 150 ms.
+ * about a kilometre, and fixed ids (a second run replaces them), computes their stored
+ * recommendation components, runs a mix of the requests the app sends through the whole API,
+ * prints p50 / p95 / p99 per request and overall, then deletes its rows. `--explain` also prints
+ * the execution plans of the recommended candidates, of a keyset search and of the count.
+ * Refused in production. Exits 1 when the overall p95 reaches 150 ms.
  */
 import {
   budgetBucketOf,
@@ -23,6 +23,9 @@ import { envelopeOf } from '../db/geography';
 import { places, routes, steps } from '../db/schema';
 import { seed } from '../db/seed';
 import { namedUuidv7 } from '../db/uuid';
+import { recomputeRecommendations } from '../recommendation/job';
+import { defaultWeights } from '../recommendation/weights';
+import { candidatesSql, searchRecommended } from './recommended';
 import { countSql, searchPageSql } from './repository';
 import { sortKeys } from './sort';
 
@@ -31,6 +34,8 @@ const maxSteps = 5;
 const warmup = 50;
 const rounds = 60;
 const budgetMs = 150;
+/** Criterion of #63: `sort=recommended` ranking all 1 000 routes. */
+const recommendedBudgetMs = 200;
 const paris = { west: 2.25, south: 48.815, east: 2.42, north: 48.9 };
 const benchTime = Date.parse('2026-01-01T00:00:00Z');
 const benchId = (name: string) => namedUuidv7(`widoo-bench:${name}`, benchTime);
@@ -131,6 +136,8 @@ async function insertBenchRows(cityId: string) {
     await app.db.insert(routes).values(batch.map((item) => item.route));
     await app.db.insert(steps).values(batch.flatMap((item) => item.steps));
   }
+  // The stable components of the score, as the nightly job leaves them.
+  await recomputeRecommendations(app.db, { now: new Date(benchTime), routeIds });
   await app.db.execute(sql`analyze routes, steps, places`);
 }
 
@@ -138,6 +145,7 @@ async function insertBenchRows(cityId: string) {
 const zone = 'bbox=2.345,48.855,2.385,48.88';
 const requests: Record<string, string> = {
   'search, no filter': `/v1/routes/search?${zone}`,
+  'search, recommended, near': `/v1/routes/search?${zone}&sort=recommended&near=48.867,2.363`,
   'search, mood': `/v1/routes/search?${zone}&moods[]=food&moods[]=culture`,
   'search, combination': `/v1/routes/search?${zone}&moods[]=culture&audiences[]=couple&conditions[]=no_booking&budgets[]=low&budgets[]=medium`,
   'search, distance, 50': `/v1/routes/search?${zone}&sort=distance&near=48.867,2.363&limit=50`,
@@ -172,9 +180,10 @@ async function explain() {
     durations: ['half_day'],
   });
   const plans = {
-    'search, mood and condition': searchPageSql(
+    'recommended candidates, mood and condition': candidatesSql(search),
+    'search by rating, mood and condition': searchPageSql(
       search,
-      sortKeys(search.sort, undefined),
+      sortKeys('rating', undefined),
       undefined,
     ),
     'count, mood and duration': countSql(count),
@@ -185,6 +194,37 @@ async function explain() {
     );
     console.info(`\n--- ${name}\n${rows.map((row) => row['QUERY PLAN']).join('\n')}`);
   }
+}
+
+/**
+ * Worst case of the recommended sort: every route of the city is a candidate. Over the cluster
+ * threshold the API answers clusters, so the search is called directly, without HTTP.
+ */
+async function timeWholeCityRecommended(): Promise<number> {
+  const query = RouteSearchQuery.parse({
+    bbox: `${paris.west},${paris.south},${paris.east},${paris.north}`,
+    near: '48.867,2.363',
+  });
+  const samples: number[] = [];
+  let candidates = 0;
+  for (let round = 0; round < warmup + rounds; round++) {
+    const started = performance.now();
+    // An anonymous caller, as most searches are.
+    const page = await searchRecommended(
+      app.db,
+      query,
+      { weights: defaultWeights, now: new Date() },
+      null,
+    );
+    if (round >= warmup) samples.push(performance.now() - started);
+    candidates = page.items.length;
+  }
+  const sorted = samples.toSorted((a, b) => a - b);
+  const p95 = percentile(sorted, 95);
+  console.info(
+    `${'recommended, whole city'.padEnd(24)} ${format(percentile(sorted, 50))} ${format(p95)} ${format(percentile(sorted, 99))}  (${routeCount} bench routes in the zone, ${candidates} cards)`,
+  );
+  return p95;
 }
 
 try {
@@ -217,9 +257,14 @@ try {
   console.info(
     `${'overall'.padEnd(24)} ${format(percentile(sorted, 50))} ${format(p95)} ${format(percentile(sorted, 99))}  (${sorted.length} requests)`,
   );
+  const wholeCity = await timeWholeCityRecommended();
   if (process.argv.includes('--explain')) await explain();
   if (p95 >= budgetMs) {
     console.error(`\np95 ${p95.toFixed(1)} ms: above the ${budgetMs} ms budget`);
+    process.exitCode = 1;
+  }
+  if (wholeCity >= recommendedBudgetMs) {
+    console.error(`\nrecommended p95 ${wholeCity.toFixed(1)} ms: above ${recommendedBudgetMs} ms`);
     process.exitCode = 1;
   }
 } finally {
