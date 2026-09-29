@@ -10,6 +10,7 @@ import {
 } from '@widoo/shared';
 import { sql, type SQL } from 'drizzle-orm';
 import { z } from 'zod';
+import { canAccessRoute, type RouteViewer } from '../access/route-access';
 import type { Db } from '../db/client';
 import type { BBox } from '../db/geography';
 import { routes } from '../db/schema';
@@ -65,16 +66,15 @@ export type CardRow = {
  */
 const httpsOrNull = (url: string | null) => (url?.startsWith('https://') ? url : null);
 
-/** Card of a search row. Exported for its tests. */
-export function toCard(row: CardRow): RouteCard {
+/** Card of a search row, for a caller at `now`. Exported for its tests. */
+export function toCard(row: CardRow, viewer: RouteViewer | null, now: Date): RouteCard {
   const computed = Computed.parse(row.computed);
   const stats = Stats.parse(row.stats ?? {});
   const pins = z.array(StepPin).parse(row.steps ?? []);
   const start = pins[0];
   // A locked card names no step and shows its start alone (D-014): the steps 2 and after of a
-  // Premium route are left out, their count kept. The search has no caller yet: every Premium
-  // card is locked.
-  const isLocked = row.access === 'premium';
+  // Premium route never leave the API for a caller without the right to it, their count kept.
+  const isLocked = !canAccessRoute(row, viewer, now);
   const shownPins = isLocked ? pins.slice(0, 1) : pins;
   // A purged or deleted author, or a profile made non public (D-025): « Membre Widoo », no link.
   const author =
@@ -176,10 +176,11 @@ export function searchPageSql(
   `;
 }
 
-/** One page of cards, in the requested sort, after the cursor. */
+/** One page of cards for a caller, anonymous when null, in the requested sort, after the cursor. */
 export async function searchRoutes(
   db: Db,
   query: RouteSearchQuery,
+  viewer: RouteViewer | null,
 ): Promise<{ items: RouteCard[]; nextCursor: string | null }> {
   const keys = sortKeys(query.sort, query.near);
   const cursor = query.cursor
@@ -196,7 +197,8 @@ export async function searchRoutes(
   const last = pageRows.at(-1);
   const nextCursor =
     hasMore && last ? encodeCursor(query.sort, keyValuesOf(last, keys.length)) : null;
-  return { items: pageRows.map(toCard), nextCursor };
+  const now = new Date();
+  return { items: pageRows.map((row) => toCard(row, viewer, now)), nextCursor };
 }
 
 /** Grid of 8 × 8 cells over the zone. */
