@@ -1,7 +1,7 @@
-// Généré depuis tokens.json (version 35), ne pas modifier : pnpm --filter @widoo/tokens generate.
+// Généré depuis tokens.json (version 37), ne pas modifier : pnpm --filter @widoo/tokens generate.
 import type { Audience, BudgetBucket, Condition, Mood, PlaceCategory, Transport } from '@widoo/shared';
 
-export const tokensVersion = 35;
+export const tokensVersion = 37;
 
 /** Light theme: the dark values are not validated and not generated. */
 export const colors = {
@@ -369,6 +369,7 @@ export const iconNames = [
   "sun",
   "tag",
   "ticket",
+  "translate",
   "trash",
   "tree",
   "user",
@@ -929,6 +930,9 @@ export const uiIcons = {
   },
   "unlocked-routes": {
     "name": "lock-open"
+  },
+  "translated": {
+    "name": "translate"
   }
 } as const satisfies Record<string, { name: IconName; weight?: 'fill' | 'bold'; activeWeight?: 'fill'; color?: ColorToken }>;
 export type UiIconKey = keyof typeof uiIcons;
