@@ -1,5 +1,6 @@
 'use client';
 
+import { localizedPath } from '@/lib/seo';
 import { useLocale } from '@/lib/i18n/use-locale';
 import { messages } from '@/messages';
 import Link from 'next/link';
@@ -13,7 +14,10 @@ export function NotFoundContainer() {
       <title>{meta.notFound.title}</title>
       <h1 className="font-extrabold">{notFound.title}</h1>
       <p className="mt-12 text-muted">{notFound.body}</p>
-      <Link className="mt-24 inline-block text-blue-ink underline" href={`/${locale}`}>
+      <Link
+        className="mt-24 inline-block text-blue-ink underline"
+        href={localizedPath(locale, '/')}
+      >
         {notFound.home}
       </Link>
     </main>
