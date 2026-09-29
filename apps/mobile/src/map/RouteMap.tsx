@@ -31,7 +31,7 @@ import { bboxCenter, initialSpanM, toBbox, toLngLat, zoomForSpan, type LngLat } 
 import { Mapbox } from './mapbox';
 import { RecenterButton } from './MapControls';
 import { sharedMarkerImages, usePhotoMarkerImages } from './markerImages';
-import { isLocked, routeMarkers, selectionFrame } from './markers';
+import { routeMarkers, selectionFrame } from './markers';
 import { durationLabel, labelPillImage, photoOffsetY, rimWidth } from './markerShape';
 import { SelectedRoute } from './SelectedRoute';
 import { labelFont, mapStyleJson } from './style';
@@ -71,8 +71,6 @@ interface RouteMapProps {
    * focused start stays above it. Without it, the sheet at rest above the bar.
    */
   bottomInset?: number;
-  /** A Premium route is locked for a user without subscription (D-014). */
-  hasPremium: boolean;
   /** A marker, or null for a tap elsewhere on the map. */
   onSelect: (route: RouteCard | null) => void;
   /** « Voir plus » of the tooltip: the route sheet (E-05). */
@@ -100,7 +98,6 @@ export function RouteMap({
   selectedRoute,
   focusedRoute = null,
   bottomInset: sheetCover,
-  hasPremium,
   onSelect,
   onOpenRoute,
   searchControl,
@@ -215,7 +212,7 @@ export function RouteMap({
    * for the results sheet; the tooltip slides sideways to stay on screen.
    */
   const frameRoute = (route: RouteCard, bottom: number) => {
-    const frame = selectionFrame(route, isLocked(route, hasPremium));
+    const frame = selectionFrame(route);
     const start = route.steps[0];
     if (!frame || !start) {
       return false;
@@ -433,7 +430,6 @@ export function RouteMap({
           <SelectedRoute
             key={selectedRoute.id}
             route={selectedRoute}
-            isLocked={isLocked(selectedRoute, hasPremium)}
             tooltipAnchor={tooltipAnchor}
             onOpen={() => onOpenRoute(selectedRoute)}
             onClose={() => onSelect(null)}

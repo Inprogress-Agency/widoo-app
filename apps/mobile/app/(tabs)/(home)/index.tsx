@@ -53,8 +53,6 @@ export default function HomeScreen() {
         selectedRoute={route}
         focusedRoute={focused}
         bottomInset={sheetCover}
-        // No account in the app until E-10: nobody is Premium yet.
-        hasPremium={false}
         onSelect={(next) => select(next?.id ?? null)}
         onOpenRoute={(next) => openRoute(next, 'marker')}
         searchControl={
