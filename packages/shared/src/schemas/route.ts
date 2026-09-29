@@ -65,33 +65,48 @@ const routeCardShape = {
   /** Number of steps of the route, whether or not `steps` carries them all. */
   stepCount: z.number().int().nonnegative(),
   /**
-   * Map pins, in step order. A Premium route carries its start alone: the search is public, so
-   * its steps 2 and after never leave the API, neither place nor coordinates (D-014).
+   * Map pins, in step order. A locked card carries its start alone: the steps 2 and after of a
+   * Premium route never leave the API for a caller without the right to it (D-014, D-075).
    */
   steps: z.array(
     z.object({
       category: z.enum(taxonomies.placeCategories),
       location: LatLng,
-      /** Place name, for the step line of the map tooltip. Null on a Premium route (D-014). */
+      /** Place name, for the step line of the map tooltip. Null on a locked card (D-014). */
       name: z.string().min(1).nullable(),
-      /** Time spent on the spot. Null on a Premium route (D-014). */
+      /** Time spent on the spot. Null on a locked card (D-014). */
       durationMin: z.number().int().positive().nullable(),
     }),
   ),
 };
 
 /**
- * Search result card (E-01, E-04). A free route carries all its steps; a Premium route its start
- * at most, which the API answer is checked against before it is sent.
+ * Search result card (E-01, E-04). An unlocked card carries all its steps; a locked card its
+ * start at most, unnamed, which the API answer is checked against before it is sent (D-075).
  */
 export const RouteCard = z
-  .object(routeCardShape)
+  .object({
+    ...routeCardShape,
+    /**
+     * True when a Premium route is locked for the caller: the app reads it, never `access`
+     * alone, to choose what the map shows. Always false for a free route (D-075).
+     */
+    isLocked: z.boolean(),
+  })
+  .refine((card) => card.access === 'premium' || !card.isLocked, {
+    path: ['isLocked'],
+    message: 'A free route is never locked',
+  })
   .refine(
     (card) =>
-      card.access === 'premium'
-        ? card.steps.length <= Math.min(card.stepCount, 1)
+      card.isLocked
+        ? card.steps.length <= Math.min(card.stepCount, 1) &&
+          card.steps.every((step) => step.name === null && step.durationMin === null)
         : card.steps.length === card.stepCount,
-    { path: ['steps'], message: 'A Premium card carries its start alone, a free card every step' },
+    {
+      path: ['steps'],
+      message: 'A locked card carries its start alone, an unlocked card every step',
+    },
   );
 export type RouteCard = z.infer<typeof RouteCard>;
 

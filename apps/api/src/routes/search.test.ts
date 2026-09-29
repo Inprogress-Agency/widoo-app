@@ -140,7 +140,7 @@ describe('GET /v1/routes/search on the seed', () => {
       'shop',
       'shop',
     ]);
-    expect(card?.stepCount).toBe(4);
+    expect(card).toMatchObject({ isLocked: false, stepCount: 4 });
     // Step line of the map tooltip: place name and time on the spot.
     expect(card?.steps[0]).toMatchObject({ name: 'Merci', durationMin: 30 });
     expect(card?.steps.at(-1)).toMatchObject({ name: 'Berthillon', durationMin: 20 });
@@ -203,7 +203,7 @@ describe('GET /v1/routes/search on a Premium route (D-014)', () => {
   it('carries the start alone, unnamed, and counts every step', async () => {
     const free = (await search(marais)).items.find((item) => item.id === demo('marais-gourmand'));
     const [card] = (await search(premiumZone)).items;
-    expect(card).toMatchObject({ id: premiumId, access: 'premium', stepCount: 4 });
+    expect(card).toMatchObject({ id: premiumId, access: 'premium', isLocked: true, stepCount: 4 });
     expect(card?.durationMin).toBe(free?.durationMin);
     expect(card?.steps).toEqual([
       { category: 'shop', location: free?.steps[0]?.location, name: null, durationMin: null },

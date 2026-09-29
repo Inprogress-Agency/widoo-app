@@ -71,10 +71,11 @@ export function toCard(row: CardRow): RouteCard {
   const stats = Stats.parse(row.stats ?? {});
   const pins = z.array(StepPin).parse(row.steps ?? []);
   const start = pins[0];
-  // A Premium route names no step and shows its start alone (D-014); the answer is public,
-  // whatever the plan of the caller, so its steps 2 and after are left out, their count kept.
-  const isPremium = row.access === 'premium';
-  const shownPins = isPremium ? pins.slice(0, 1) : pins;
+  // A locked card names no step and shows its start alone (D-014): the steps 2 and after of a
+  // Premium route are left out, their count kept. The search has no caller yet: every Premium
+  // card is locked.
+  const isLocked = row.access === 'premium';
+  const shownPins = isLocked ? pins.slice(0, 1) : pins;
   // A purged or deleted author, or a profile made non public (D-025): « Membre Widoo », no link.
   const author =
     row.is_official || !row.author_id || !row.author_first_name
@@ -103,12 +104,13 @@ export function toCard(row: CardRow): RouteCard {
     budgetBucket: row.budget_bucket,
     distanceM: computed.distance_m,
     rating: { average: stats.rating_avg, count: stats.rating_count },
+    isLocked,
     stepCount: pins.length,
     steps: shownPins.map((pin) => ({
       category: pin.category,
       location: { lat: pin.lat, lng: pin.lng },
-      name: isPremium ? null : pin.name,
-      durationMin: isPremium ? null : pin.duration_min,
+      name: isLocked ? null : pin.name,
+      durationMin: isLocked ? null : pin.duration_min,
     })),
   };
 }

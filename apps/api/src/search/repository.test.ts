@@ -37,7 +37,7 @@ const row = (access: CardRow['access']): CardRow => ({
 describe('toCard', () => {
   it('carries every step of a free route, named, with its time on the spot', () => {
     const card = toCard(row('free'));
-    expect(card.stepCount).toBe(3);
+    expect(card).toMatchObject({ isLocked: false, stepCount: 3 });
     expect(card.steps).toEqual([
       {
         category: 'museum',
@@ -62,7 +62,7 @@ describe('toCard', () => {
 
   it('keeps the start alone of a Premium route, unnamed, and counts every step (D-014)', () => {
     const card = toCard(row('premium'));
-    expect(card.stepCount).toBe(3);
+    expect(card).toMatchObject({ isLocked: true, stepCount: 3 });
     expect(card.steps).toEqual([
       { category: 'museum', location: { lat: 48.861, lng: 2.351 }, name: null, durationMin: null },
     ]);
