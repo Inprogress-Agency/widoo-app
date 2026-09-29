@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Synchronise le Status du Project « Widoo — MVP » avec les labels et l'état des issues :
-#   issue ouverte  status:ready  → Prêts     } seulement depuis un statut vide, Cadrage ou Prêts :
+#   issue ouverte  status:ready  → Prêts     } seulement depuis un statut vide, Cadrage, Prêts ou Bloqués :
 #   issue ouverte  needs-design  → Cadrage   } un ticket parti en développement ne recule jamais
 #   issue fermée   type:design   → Terminés  (quel que soit le statut courant)
 # Un item En cours, À review, À déployer ou Terminés garde son statut malgré status:ready ou
@@ -24,7 +24,7 @@ def rule: (.labels | map(.name? // .)) as $l
     elif .state == "OPEN" and ($l | index("status:ready")) then {target: "Prêts", label: "status:ready"}
     elif .state == "OPEN" and ($l | index("needs-design")) then {target: "Cadrage", label: "needs-design"}
     else empty end;
-def unstarted: . == null or . == "" or . == "-" or . == "Cadrage" or . == "Prêts";
+def unstarted: . == null or . == "" or . == "-" or . == "Cadrage" or . == "Prêts" or . == "Bloqués";
 def decide($current; $target):
   if $current == $target then "same"
   elif $target == "Terminés" or ($current | unstarted) then "set"
