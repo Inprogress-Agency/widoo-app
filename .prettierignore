@@ -7,3 +7,5 @@ pnpm-lock.yaml
 .expo/
 apps/mobile/ios/
 apps/mobile/android/
+# Next.js build output (apps/web).
+.next/
