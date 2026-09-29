@@ -26,8 +26,11 @@ export interface Request {
   path: `/v1/${string}`;
   /** Serialized as JSON. */
   body?: unknown;
-  /** Sends the bearer token, refreshed and retried once after a 401. */
-  auth?: boolean;
+  /**
+   * Sends the bearer token, refreshed and retried once after a 401. `optional`: a public route
+   * whose answer depends on the caller, sent without token when `getToken` gives none (D-075).
+   */
+  auth?: boolean | 'optional';
   /** Cancellation by the caller (TanStack Query passes one): rethrown as is, not wrapped. */
   signal?: AbortSignal;
 }

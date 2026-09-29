@@ -62,17 +62,45 @@ describe('searchQueryString', () => {
 });
 
 describe('searchRoutes', () => {
-  it('reads the cards of a zone without token', async () => {
-    const body = { items: [card], nextCursor: null, clusters: null };
+  const body = { items: [card], nextCursor: null, clusters: null };
+  const url = 'http://10.0.2.2:8080/v1/routes/search?bbox=2.33%2C48.85%2C2.37%2C48.88';
+  const headersOf = (fetch: ReturnType<typeof vi.fn<typeof globalThis.fetch>>, call = 0) =>
+    new Headers(fetch.mock.calls[call]?.[1]?.headers);
+
+  it('reads the cards of a zone without token when there is none', async () => {
+    for (const getToken of [undefined, vi.fn(async () => null)]) {
+      const fetch = vi.fn<typeof globalThis.fetch>(async () => Response.json(body));
+      const client = createApiClient({ baseUrl: 'http://10.0.2.2:8080', fetch, getToken });
+
+      await expect(client.searchRoutes({ bbox })).resolves.toEqual(body);
+      expect(fetch.mock.calls[0]?.[0]).toBe(url);
+      expect(headersOf(fetch).has('authorization')).toBe(false);
+    }
+  });
+
+  it('sends the token of the signed-in user when there is one (D-075)', async () => {
     const fetch = vi.fn<typeof globalThis.fetch>(async () => Response.json(body));
     const getToken = vi.fn(async () => 'token-1');
     const client = createApiClient({ baseUrl: 'http://10.0.2.2:8080', fetch, getToken });
 
     await expect(client.searchRoutes({ bbox })).resolves.toEqual(body);
-    expect(fetch.mock.calls[0]?.[0]).toBe(
-      'http://10.0.2.2:8080/v1/routes/search?bbox=2.33%2C48.85%2C2.37%2C48.88',
+    expect(getToken).toHaveBeenCalledWith({ forceRefresh: false });
+    expect(headersOf(fetch).get('authorization')).toBe('Bearer token-1');
+  });
+
+  it('refreshes an expired token once, never falling back without it', async () => {
+    const fetch = vi.fn<typeof globalThis.fetch>(async () => Response.json(body));
+    fetch.mockResolvedValueOnce(
+      Response.json({ code: 'unauthorized', message: 'Invalid token' }, { status: 401 }),
     );
-    expect(getToken).not.toHaveBeenCalled();
+    const getToken = vi.fn(async ({ forceRefresh }: { forceRefresh: boolean }) =>
+      forceRefresh ? 'token-2' : 'token-1',
+    );
+    const client = createApiClient({ baseUrl: 'http://10.0.2.2:8080', fetch, getToken });
+
+    await expect(client.searchRoutes({ bbox })).resolves.toEqual(body);
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(headersOf(fetch, 1).get('authorization')).toBe('Bearer token-2');
   });
 });
 
