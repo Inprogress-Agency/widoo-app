@@ -24,13 +24,15 @@ export function createApiClient(options: ApiClientOptions) {
 
     /**
      * `GET /v1/routes/search`: the routes of a map zone, or its clusters when the zone is too
-     * large. Public: sent without token.
+     * large. Public, with the token of the signed-in user when `getToken` gives one: the cards of
+     * the Premium routes the user has the right to come unlocked (D-075).
      */
     searchRoutes: (params: RouteSearchParams, signal?: AbortSignal) =>
       request({
         method: 'GET',
         path: `/v1/routes/search?${searchQueryString(params)}`,
         schema: RouteSearchResult,
+        auth: 'optional',
         signal,
       }),
 
