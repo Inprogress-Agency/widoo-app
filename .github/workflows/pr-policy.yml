@@ -57,6 +57,10 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      # Le script est vérifié avant de mesurer : un motif d'exclusion qui s'élargit fait échouer le check.
+      - name: Test the measure script
+        run: bash .github/scripts/diff-size.test.sh
+
       - name: Measure useful diff per commit
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
