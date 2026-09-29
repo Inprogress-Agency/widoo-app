@@ -126,3 +126,17 @@ jobs:
       - name: Audit dependencies
         if: steps.detect.outputs.has_code == 'true'
         run: pnpm audit --audit-level=high
+
+  scripts:
+    name: Process script tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # Tests hors ligne des scripts de process (jq seul, ni gh ni réseau), à chaque PR : le job
+      # « Lint, types, tests » saute celles qui ne touchent que scripts/ et .github/.
+      - name: Run scripts/*.test.sh
+        run: for t in scripts/*.test.sh; do "$t"; done
