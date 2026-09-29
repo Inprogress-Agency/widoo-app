@@ -15,12 +15,9 @@ export function displayedBudgetEur(sumEur: number): number {
   return Math.max(BUDGET_STEP_EUR, Math.round(sumEur / BUDGET_STEP_EUR) * BUDGET_STEP_EUR);
 }
 
-/**
- * Sum of the step costs of a card. The search still answers the former range, the sum less and
- * plus 20 %: its middle is the sum, until the card carries the sum itself.
- */
+/** Sum of the step costs of a card, as the search answers it (D-032). */
 export function budgetSumEur({
-  budgetPerPersonEur: { min, max },
+  budgetPerPersonEur,
 }: Pick<RouteCard, 'budgetPerPersonEur'>): number {
-  return (min + max) / 2;
+  return budgetPerPersonEur;
 }

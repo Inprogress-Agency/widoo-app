@@ -6,11 +6,11 @@ import { formatDistance } from './distance';
 
 const t = i18next.t;
 const nbsp = '\u00a0';
-const range = (min: number, max: number) => ({ budgetPerPersonEur: { min, max } });
+const sum = (euros: number) => ({ budgetPerPersonEur: euros });
 
 describe('formatBudget', () => {
   it('writes the rounded sum per person, never a range', () => {
-    expect(formatBudget(t, range(20, 30))).toEqual({
+    expect(formatBudget(t, sum(23))).toEqual({
       amount: `≈${nbsp}25${nbsp}€`,
       perPerson: 'par pers.',
       spoken: 'environ 25 euros par personne',
@@ -18,8 +18,8 @@ describe('formatBudget', () => {
   });
 
   it('keeps 5 € for a small sum, and says free at zero', () => {
-    expect(formatBudget(t, range(1, 2)).amount).toBe(`≈${nbsp}5${nbsp}€`);
-    expect(formatBudget(t, range(0, 0))).toEqual({
+    expect(formatBudget(t, sum(1.5)).amount).toBe(`≈${nbsp}5${nbsp}€`);
+    expect(formatBudget(t, sum(0))).toEqual({
       amount: 'Gratuit',
       perPerson: null,
       spoken: 'Gratuit',
