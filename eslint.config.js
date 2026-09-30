@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import prettier from 'eslint-config-prettier/flat';
+import nextPlugin from '@next/eslint-plugin-next';
 import betterTailwindcss from 'eslint-plugin-better-tailwindcss';
 import reactHooks from 'eslint-plugin-react-hooks';
 import { defineConfig, globalIgnores } from 'eslint/config';
@@ -19,6 +20,9 @@ export default defineConfig(
     '**/.expo/',
     'apps/mobile/ios/',
     'apps/mobile/android/',
+    // Next.js: build output and the route types written by `next typegen`.
+    'apps/web/.next/',
+    'apps/web/next-env.d.ts',
   ]),
   js.configs.recommended,
   tseslint.configs.strict,
@@ -52,6 +56,51 @@ export default defineConfig(
             match: [{ type: 'objectValues', path: '^.*className$' }],
           },
         ],
+      },
+    },
+    rules: {
+      'better-tailwindcss/no-unknown-classes': 'error',
+      'better-tailwindcss/no-restricted-classes': [
+        'error',
+        {
+          restrict: [
+            { pattern: '\\[.*\\]', message: 'Arbitrary value: use a token of tokens.json.' },
+          ],
+        },
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: `Literal[value=${handWrittenColor}]`,
+          message: 'Color written by hand: use a color token of @widoo/tokens.',
+        },
+        {
+          selector: `TemplateElement[value.raw=${handWrittenColor}]`,
+          message: 'Color written by hand: use a color token of @widoo/tokens.',
+        },
+      ],
+    },
+  },
+  {
+    // Site (Next.js): rules of hooks, and the Next.js rules for pages, links, images and fonts.
+    files: ['apps/web/**/*.{ts,tsx}'],
+    extends: [reactHooks.configs.flat.recommended],
+    plugins: { '@next/next': nextPlugin },
+    settings: { next: { rootDir: fileURLToPath(new URL('apps/web/', import.meta.url)) } },
+    rules: {
+      ...nextPlugin.configs.recommended.rules,
+      ...nextPlugin.configs['core-web-vitals'].rules,
+      'react-hooks/exhaustive-deps': 'error',
+    },
+  },
+  {
+    // Same rule as the app: styles from tokens.json only (Site-Web, apps/web/AGENTS.md).
+    files: ['apps/web/src/**/*.{ts,tsx}'],
+    plugins: { 'better-tailwindcss': betterTailwindcss },
+    settings: {
+      'better-tailwindcss': {
+        tailwindConfig: fileURLToPath(new URL('apps/web/tailwind.config.cjs', import.meta.url)),
+        selectors: [{ kind: 'attribute', name: '^className$', match: [{ type: 'strings' }] }],
       },
     },
     rules: {

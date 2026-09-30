@@ -1,0 +1,15 @@
+{
+  // Strict options shared by the monorepo, then what Next.js needs: DOM types, JSX kept for its
+  // compiler, the `next` plugin, and the route types written by `next typegen`.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "jsx": "preserve",
+    "allowJs": false,
+    "incremental": true,
+    "plugins": [{ "name": "next" }],
+    "paths": { "@/*": ["./src/*"] }
+  },
+  "include": ["next-env.d.ts", "next.config.ts", "src", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
