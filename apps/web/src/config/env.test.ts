@@ -11,6 +11,7 @@ describe('parseEnv', () => {
       SITE_INDEXABLE: false,
       APP_STORE_URL: undefined,
       PLAY_STORE_URL: undefined,
+      WIDOO_API_URL: undefined,
     });
   });
 
@@ -43,6 +44,15 @@ describe('parseEnv', () => {
     expect(parseEnv({ ...base, APP_STORE_URL: '' }).APP_STORE_URL).toBeUndefined();
     expect(() => parseEnv({ ...base, PLAY_STORE_URL: 'http://play.example' })).toThrow(
       /PLAY_STORE_URL/,
+    );
+  });
+
+  it('reads the API origin, without path', () => {
+    expect(parseEnv({ ...base, WIDOO_API_URL: 'https://api.example' }).WIDOO_API_URL).toBe(
+      'https://api.example',
+    );
+    expect(() => parseEnv({ ...base, WIDOO_API_URL: 'https://api.example/v1' })).toThrow(
+      /WIDOO_API_URL/,
     );
   });
 });
