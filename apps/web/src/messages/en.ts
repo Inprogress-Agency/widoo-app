@@ -9,7 +9,7 @@ export const en: Messages = {
         'Ready-to-go outing ideas in Paris: walks, romantic, family or free outings, with duration, budget and opening hours. Free app.',
     },
     notFound: {
-      title: 'Page not found | Widoo',
+      title: 'Page not found · Widoo',
     },
   },
   home: {
@@ -19,8 +19,8 @@ export const en: Messages = {
   },
   notFound: {
     title: 'This page does not exist',
-    body: 'The link may be incomplete, or the page may have moved.',
-    home: 'Back to the home page',
+    body: 'The address may be incomplete. Outing ideas are waiting for you on the home page and in the app.',
+    ideas: 'See the outing ideas',
   },
   error: {
     title: 'Something went wrong',

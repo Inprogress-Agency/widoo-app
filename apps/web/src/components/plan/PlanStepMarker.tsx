@@ -15,6 +15,7 @@ export function PlanStepMarker({
   position,
   appearAt,
   compact,
+  labels = true,
   animated,
 }: {
   step: PlanStep;
@@ -23,6 +24,8 @@ export function PlanStepMarker({
   appearAt: number;
   /** Phone (E-21): short name, smaller pin, label on the side that stays in the frame. */
   compact: boolean;
+  /** Its label beside it (none on the missing page). */
+  labels?: boolean;
   animated: boolean;
 }) {
   return (
@@ -32,15 +35,17 @@ export function PlanStepMarker({
           <StepPin category={step.category} small={compact} />
         </Appear>
       </div>
-      <div className={clsx('absolute -translate-y-1/2', labelSide(step, compact))}>
-        <Appear animated={animated} delay={appearAt + planMotion.followGap}>
-          <StepLabel
-            time={step.time}
-            name={compact ? (step.shortName ?? step.name) : step.name}
-            locked={step.locked}
-          />
-        </Appear>
-      </div>
+      {labels && (
+        <div className={clsx('absolute -translate-y-1/2', labelSide(step, compact))}>
+          <Appear animated={animated} delay={appearAt + planMotion.followGap}>
+            <StepLabel
+              time={step.time}
+              name={compact ? (step.shortName ?? step.name) : step.name}
+              locked={step.locked}
+            />
+          </Appear>
+        </div>
+      )}
     </div>
   );
 }

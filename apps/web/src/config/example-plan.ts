@@ -38,6 +38,8 @@ export type Plan = {
   avenues: { columns: readonly number[]; rows: readonly number[] };
   /** Radius of the turns of the line. */
   turn: number;
+  /** Indexes, in `points`, of the turns kept sharp besides those under a step. */
+  sharpTurns?: readonly number[];
   points: readonly Point[];
   steps: readonly PlanStep[];
   walks: readonly PlanWalk[];
@@ -111,3 +113,17 @@ export function lockPlan(plan: Plan, categoryLabels: Record<PlaceCategory, strin
     ),
   };
 }
+
+/**
+ * The plan of the missing page (E-21, D-074): the example route stops halfway, above the museum:
+ * it turns right at the next crossing and stops 27 px further, where a question mark stands
+ * (measured on the mockup of the computer). Only the start keeps its pin, without label; the turn
+ * of the museum stays sharp, as on the mockup.
+ */
+export const unfinishedPlan: Plan = {
+  ...examplePlan,
+  points: [...examplePlan.points.slice(0, 6), { x: 27, y: -204 }],
+  steps: examplePlan.steps.slice(0, 1),
+  walks: [],
+  sharpTurns: [4],
+};

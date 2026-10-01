@@ -41,9 +41,18 @@ module.exports = {
       // Sizes of the site drawn in E-21 and missing from tokens.json: to move there (DESIGN), then
       // remove from here.
       size: { qr: '120px' },
+      // Title of the missing page (E-21, D-074): 42/44 on the phone, 64/66 on the computer, tighter
+      // by 4 % (measured on the mockups), and the text under it.
+      fontSize: {
+        'display-m': ['42px', { lineHeight: '44px', letterSpacing: '-1.68px', fontWeight: '800' }],
+        'display-xl': ['64px', { lineHeight: '66px', letterSpacing: '-2.56px', fontWeight: '800' }],
+        lead: ['17px', { lineHeight: '24px', fontWeight: '500' }],
+        'lead-l': ['18px', { lineHeight: '28px', fontWeight: '500' }],
+      },
       // Width of the pages, held at the mockups of the computer (1440 px), then the blue frame on
       // the computer (E-21, measured on the mockups): its margin, the width of its column, the
-      // photo of a shared route, the text beside the QR code.
+      // photo of a shared route, the text beside the QR code and under the title of the missing
+      // page.
       spacing: { frame: '64px' },
       width: { 'frame-column': '540px' },
       maxWidth: {
@@ -52,6 +61,7 @@ module.exports = {
         'shared-photo-tablet': '218px',
         'frame-column-tablet': '656px',
         'scan-text': '300px',
+        'lost-text': '440px',
       },
       // White border of a step pin on the plan (E-21).
       borderWidth: { pin: '3px' },
