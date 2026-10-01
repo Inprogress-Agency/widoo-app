@@ -3,7 +3,8 @@ import { planMotion } from '@/config/motion';
 import { fill } from '@/lib/i18n/fill';
 import { placeOnScreen, progressAt, type Point } from '@/lib/plan-geometry';
 import clsx from 'clsx';
-import { useId, type CSSProperties } from 'react';
+import { useId, type CSSProperties, type ReactNode } from 'react';
+import { PlanEndMarker } from './PlanEndMarker';
 import { PlanFade, type PlanFadeSide } from './PlanFade';
 import { PlanHorizon } from './PlanHorizon';
 import { PlanLayer } from './PlanLayer';
@@ -14,8 +15,8 @@ import { PlanWalkMarker } from './PlanWalkMarker';
 
 type Props = {
   plan: Plan;
-  /** « {minutes} min à pied », in the language of the page. */
-  walkText: string;
+  /** « {minutes} min à pied », in the language of the page; without it, no walking times. */
+  walkText?: string;
   /** Point of the frame where the origin of the grid sits, in CSS lengths (`'72%'`). */
   anchor: { x: string; y: string };
   /** Pixels from the anchor to the origin of the grid, to frame the route. */
@@ -39,6 +40,13 @@ type Props = {
   fade?: PlanFadeSide;
   /** Computer: the darker curve at the bottom of the frame (E-21). */
   horizon?: boolean;
+  /** Names and times of the steps beside their pins (none on the missing page). */
+  labels?: boolean;
+  /**
+   * Drawn on the last point of the line once the line reaches it: the question mark of the
+   * missing page (E-21, D-074).
+   */
+  end?: ReactNode;
   /**
    * E-21 › Mouvement: the line draws itself, each step appears when the line reaches it, then its
    * name and the walking time that leaves it. With « Réduire les animations », the line is drawn
@@ -67,6 +75,8 @@ export function RoutePlan({
   walks = !compact,
   fade,
   horizon = false,
+  labels = true,
+  end,
   animated = true,
   className,
 }: Props) {
@@ -93,7 +103,7 @@ export function RoutePlan({
           <PlanLine
             points={plan.points}
             turn={plan.turn}
-            sharp={new Set(plan.steps.map((step) => step.point))}
+            sharp={new Set([...plan.steps.map((step) => step.point), ...(plan.sharpTurns ?? [])])}
             animated={animated}
           />
         </PlanLayer>
@@ -110,12 +120,24 @@ export function RoutePlan({
               position={screen(point)}
               appearAt={reachedAt(step.point)}
               compact={compact}
+              labels={labels}
               animated={animated}
             />
           );
         })}
 
+        {end && (
+          <PlanEndMarker
+            position={screen(plan.points.at(-1) ?? { x: 0, y: 0 })}
+            appearAt={reachedAt(plan.points.length - 1)}
+            animated={animated}
+          >
+            {end}
+          </PlanEndMarker>
+        )}
+
         {walks &&
+          walkText &&
           plan.walks.map((walk, index) => (
             <PlanWalkMarker
               key={index}
