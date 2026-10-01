@@ -46,7 +46,7 @@ module.exports = {
       fontSize: {
         'display-m': ['42px', { lineHeight: '44px', letterSpacing: '-1.68px', fontWeight: '800' }],
         'display-xl': ['64px', { lineHeight: '66px', letterSpacing: '-2.56px', fontWeight: '800' }],
-        lead: ['17px', { lineHeight: '24px', fontWeight: '500' }],
+        lead: ['16px', { lineHeight: '24px', fontWeight: '500' }],
         'lead-l': ['18px', { lineHeight: '28px', fontWeight: '500' }],
       },
       // Width of the pages, held at the mockups of the computer (1440 px), then the blue frame on
@@ -65,6 +65,9 @@ module.exports = {
       },
       // White border of a step pin on the plan (E-21).
       borderWidth: { pin: '3px' },
+      // Shell of the blue frame (E-21, « coque #EDF1FA »): 8 px, 6 px on the phone.
+      colors: { 'frame-shell': '#EDF1FA' },
+      ringWidth: { 6: '6px' },
       // Blue plan: under the content on the phone and the tablet (measured on E-21), and the
       // least height of the frame on the computer, so that the whole route shows.
       height: { 'plan-phone': '340px', 'plan-tablet': '410px', 'store-badge': '42px' },
