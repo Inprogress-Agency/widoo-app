@@ -23,6 +23,11 @@ export const fr = {
     title: 'Que faire à Paris aujourd’hui\u00a0?',
     tagline:
       'Des idées de sortie à Paris, prêtes à vivre\u00a0: les étapes, la durée, le budget et les horaires.',
+    reviews: 'Avis sur l’app',
+    reviewSource: { appStore: 'Avis App Store', googlePlay: 'Avis Google Play' },
+    ratingSpoken: 'Noté {rating} sur 5',
+    stickerMeta: '{steps} en {duration}',
+    qrLabel: 'QR code pour télécharger l’app',
   },
   notFound: {
     title: 'Cette page n’existe pas',

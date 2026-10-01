@@ -53,6 +53,9 @@ module.exports = {
         'display-xl': ['64px', { lineHeight: '66px', letterSpacing: '-2.56px', fontWeight: '800' }],
         lead: ['16px', { lineHeight: '24px', fontWeight: '500' }],
         'lead-l': ['18px', { lineHeight: '28px', fontWeight: '500' }],
+        // Cards laid on the plan of the hero: the quote of a review, the title of the sticker.
+        quote: ['15px', { lineHeight: '22px', letterSpacing: '-0.15px', fontWeight: '700' }],
+        'sticker-title': ['15px', { lineHeight: '20px', fontWeight: '800' }],
         // « widoo » of the logo in the header: 21 px, 23 px on the computer.
         wordmark: ['21px', { lineHeight: '28px', fontWeight: '800' }],
         'wordmark-l': ['23px', { lineHeight: '28px', fontWeight: '800' }],
@@ -62,11 +65,14 @@ module.exports = {
       // photo of a shared route, the text beside the QR code and under the title of the missing
       // page.
       spacing: { frame: '64px', gutter: '40px' },
+      // The review and the sticker laid on the plan of the hero.
       width: {
         'frame-column': '540px',
+        review: '300px',
         // « Télécharger l'app », the same width in every language so that the header never moves.
         'download-button': '200px',
         'download-button-l': '204px',
+        sticker: '210px',
       },
       maxWidth: {
         page: '1440px',
@@ -81,11 +87,16 @@ module.exports = {
       // Shell of the blue frame (E-21, « coque #EDF1FA »): 8 px, 6 px on the phone.
       colors: { 'frame-shell': '#EDF1FA' },
       ringWidth: { 6: '6px' },
+      // Shadow of the cards laid on the plan, tinted blue (E-21: rgba(38, 62, 128, 0.18)).
+      boxShadow: { sticker: '0 12px 28px rgba(38, 62, 128, 0.18)' },
+      // Tilt of the cards laid on the plan (measured on E-21).
+      rotate: { review: '-3deg', 'review-phone': '-2deg', 'review-back': '3deg', sticker: '4deg' },
       // Blue plan: under the content on the phone and the tablet (measured on E-21), and the
       // least height of the frame on the computer, so that the whole route shows.
       height: {
         'plan-phone': '340px',
         'plan-tablet': '410px',
+        'sticker-photo': '118px',
         'store-badge': '42px',
         // Header of the site (E-21): 56 px on the phone, 72 on the tablet, 76 on the computer.
         header: '56px',
@@ -99,6 +110,9 @@ module.exports = {
         'plan-draw': { from: { strokeDashoffset: '1' } },
         'plan-pop': { from: { opacity: '0', transform: 'scale(0.9)' } },
         'plan-fade': { from: { opacity: '0' } },
+        // Hero: the text rises 10 px, the sticker lands, the reviews come in.
+        rise: { from: { opacity: '0', transform: 'translateY(10px)' } },
+        land: { from: { opacity: '0', scale: '1.08' } },
       },
       // Buttons (E-21 › Mouvement): 0.97 when pressed, in 160 ms; the icon of « Télécharger
       // l'app » moves down 2 px on hover, with a mouse only.
@@ -109,6 +123,8 @@ module.exports = {
         'plan-draw': 'plan-draw 1800ms linear 300ms both',
         'plan-pop': 'plan-pop 260ms cubic-bezier(0.23, 1, 0.32, 1) both',
         'plan-fade': 'plan-fade 200ms linear both',
+        rise: 'rise 500ms cubic-bezier(0.23, 1, 0.32, 1) both',
+        land: 'land 500ms cubic-bezier(0.23, 1, 0.32, 1) both',
       },
     },
   },

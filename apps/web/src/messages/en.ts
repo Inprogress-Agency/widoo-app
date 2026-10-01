@@ -24,6 +24,11 @@ export const en: Messages = {
     title: 'What to do in Paris today?',
     tagline:
       'Outing ideas in Paris, ready to go: the stops, the duration, the budget and the opening hours.',
+    reviews: 'Reviews of the app',
+    reviewSource: { appStore: 'App Store review', googlePlay: 'Google Play review' },
+    ratingSpoken: 'Rated {rating} out of 5',
+    stickerMeta: '{steps} in {duration}',
+    qrLabel: 'QR code to download the app',
   },
   notFound: {
     title: 'This page does not exist',
