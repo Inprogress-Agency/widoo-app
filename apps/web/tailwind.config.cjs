@@ -45,7 +45,7 @@ module.exports = {
       // Sizes of the site drawn in E-21 and missing from tokens.json: to move there (DESIGN), then
       // remove from here.
       // QR code, and the disc of the icon of « Télécharger l'app » on the computer.
-      size: { qr: '120px', 'download-disc': '36px' },
+      size: { qr: '120px', 'qr-hero': '116px', 'download-disc': '36px' },
       // Title of the missing page (E-21, D-074): 42/44 on the phone, 64/66 on the computer, tighter
       // by 4 % (measured on the mockups), and the text under it.
       fontSize: {
@@ -53,6 +53,11 @@ module.exports = {
         'display-xl': ['64px', { lineHeight: '66px', letterSpacing: '-2.56px', fontWeight: '800' }],
         lead: ['16px', { lineHeight: '24px', fontWeight: '500' }],
         'lead-l': ['18px', { lineHeight: '28px', fontWeight: '500' }],
+        // Title of the hero: same sizes, a little more space between its lines (measured).
+        hero: ['42px', { lineHeight: '46px', letterSpacing: '-1.68px', fontWeight: '800' }],
+        'hero-l': ['56px', { lineHeight: '64px', letterSpacing: '-2.24px', fontWeight: '800' }],
+        'hero-xl': ['64px', { lineHeight: '70px', letterSpacing: '-2.56px', fontWeight: '800' }],
+        'lead-xl': ['19px', { lineHeight: '29px', fontWeight: '500' }],
         // Cards laid on the plan of the hero: the quote of a review, the title of the sticker.
         quote: ['15px', { lineHeight: '22px', letterSpacing: '-0.15px', fontWeight: '700' }],
         'sticker-title': ['15px', { lineHeight: '20px', fontWeight: '800' }],
@@ -65,9 +70,11 @@ module.exports = {
       // photo of a shared route, the text beside the QR code and under the title of the missing
       // page.
       spacing: { frame: '64px', gutter: '40px' },
-      // The review and the sticker laid on the plan of the hero.
+      // Hero: the stores as wide as each other, the review and the sticker laid on the plan.
       width: {
         'frame-column': '540px',
+        'store-badge-hero': '166px',
+        'store-badge-hero-phone': '148px',
         review: '300px',
         // « Télécharger l'app », the same width in every language so that the header never moves.
         'download-button': '200px',
@@ -81,6 +88,10 @@ module.exports = {
         'frame-column-tablet': '656px',
         'scan-text': '300px',
         'lost-text': '440px',
+        // Line of the hero cut as on the mockups: after « prêtes à » on the phone…
+        'tagline-phone': '300px',
+        // …and on the tablet after « la durée, le ».
+        'tagline-tablet': '560px',
       },
       // White border of a step pin on the plan (E-21).
       borderWidth: { pin: '3px' },
@@ -96,6 +107,8 @@ module.exports = {
       height: {
         'plan-phone': '340px',
         'plan-tablet': '410px',
+        'plan-hero-phone': '495px',
+        'plan-hero-tablet': '527px',
         'sticker-photo': '118px',
         'store-badge': '42px',
         // Header of the site (E-21): 56 px on the phone, 72 on the tablet, 76 on the computer.
