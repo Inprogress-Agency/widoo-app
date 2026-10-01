@@ -32,6 +32,8 @@ WORKDIR /app
 # build are copied next to it. Owned by root, run as node: the process cannot rewrite its own code.
 COPY --from=build /repo/apps/web/.next/standalone ./
 COPY --from=build /repo/apps/web/.next/static ./apps/web/.next/static
+# Files served as is (official store badges, icon of the app).
+COPY --from=build /repo/apps/web/public ./apps/web/public
 USER node
 EXPOSE 8080
 CMD ["node", "apps/web/server.js"]

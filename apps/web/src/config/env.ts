@@ -38,6 +38,15 @@ const Env = z.object({
   /** Store pages of the app; absent until the app is published. */
   APP_STORE_URL: OptionalUrl,
   PLAY_STORE_URL: OptionalUrl,
+  /**
+   * Origin of the Widoo API, called by the server only. Absent: shared routes are unknown, except
+   * in development, where the demo routes of `lib/shared-route/fixtures.ts` answer.
+   */
+  WIDOO_API_URL: z
+    .string()
+    .optional()
+    .transform((value) => value || undefined)
+    .pipe(Origin.optional()),
 });
 
 export type SiteEnv = z.infer<typeof Env>;
