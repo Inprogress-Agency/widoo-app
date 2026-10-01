@@ -12,6 +12,14 @@ export const en: Messages = {
       title: 'Page not found · Widoo',
     },
   },
+  header: {
+    skip: 'Skip to content',
+    home: 'Widoo, home',
+    sections: 'Sections of the page',
+    nav: { ideas: 'Outing ideas', districts: 'Neighbourhoods', questions: 'Questions' },
+    download: 'Get the app',
+    language: 'Language',
+  },
   home: {
     title: 'What to do in Paris today?',
     tagline:
