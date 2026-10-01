@@ -47,3 +47,17 @@ export function storeLinkFor(
   url.searchParams.set('referrer', referrer.toString());
   return url.toString();
 }
+
+/**
+ * Where `/app` leads (Site-Web › Routes; QR codes of the site and of the printed matter): the
+ * store of the phone, its source passed on (`?src=`, #234), or the home page of the language on a
+ * computer and when the store is not configured.
+ */
+export function appDownloadTarget(
+  userAgent: string,
+  stores: StoreLinks,
+  home: string,
+  source?: string,
+): string {
+  return storeLinkFor(detectPlatform(userAgent), stores, { source }) ?? home;
+}
