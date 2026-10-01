@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { messages } from '.';
 import { locales } from '@/config/locales';
+import { labels } from '@widoo/shared';
 
 function strings(value: unknown, path = ''): [string, string][] {
   if (typeof value === 'string') return [[path, value]];
@@ -43,5 +44,17 @@ describe('texts in English', () => {
   it('have exactly the keys of the French texts', () => {
     const keys = (locale: 'fr' | 'en') => strings(messages[locale]).map(([path]) => path);
     expect(keys('en')).toEqual(keys('fr'));
+  });
+});
+
+describe('mood labels', () => {
+  it('in French are the labels of the app (@widoo/shared)', () => {
+    expect(messages.fr.moods).toEqual(labels.fr.moods);
+  });
+});
+
+describe('place category labels', () => {
+  it('in French are the labels of the app (@widoo/shared)', () => {
+    expect(messages.fr.placeCategories).toEqual(labels.fr.placeCategories);
   });
 });
