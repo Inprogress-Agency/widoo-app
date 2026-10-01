@@ -10,6 +10,11 @@ type Props = {
   texts: Messages['stores'];
   appStoreUrl?: string;
   playStoreUrl?: string;
+  /**
+   * `hero`: as wide as each other (E-21 › Hero), 148 px on the phone, 166 px from the tablet,
+   * stacked on the computer.
+   */
+  layout?: 'row' | 'hero';
   className?: string;
 };
 
@@ -19,7 +24,15 @@ type Props = {
  * the tablet, 42 px high side by side, as on the mockups. A store without address is not
  * shown.
  */
-export function StoreBadges({ locale, texts, appStoreUrl, playStoreUrl, className }: Props) {
+export function StoreBadges({
+  locale,
+  texts,
+  appStoreUrl,
+  playStoreUrl,
+  layout = 'row',
+  className,
+}: Props) {
+  const hero = layout === 'hero';
   const files = storeBadges[locale];
   const badges = [
     { url: appStoreUrl, label: texts.appStore, file: files.appStore },
@@ -28,11 +41,21 @@ export function StoreBadges({ locale, texts, appStoreUrl, playStoreUrl, classNam
   if (badges.length === 0) return null;
 
   return (
-    <ul className={clsx('flex gap-10 max-md:justify-center max-md:gap-12', className)}>
+    <ul
+      className={clsx(
+        hero ? 'flex gap-12 xl:flex-col' : 'flex gap-10 max-md:justify-center max-md:gap-12',
+        className,
+      )}
+    >
       {badges.map(({ url, label, file }) => (
         // Phone: centred 12 px apart, as on the mockup, a little smaller on a narrow screen
         // rather than on a second line.
-        <li key={file.src} className="max-md:overflow-hidden">
+        <li
+          key={file.src}
+          className={
+            hero ? 'w-store-badge-hero-phone md:w-store-badge-hero' : 'max-md:overflow-hidden'
+          }
+        >
           <a href={url} className="block max-md:max-w-full">
             <Image
               src={file.src}
@@ -40,7 +63,11 @@ export function StoreBadges({ locale, texts, appStoreUrl, playStoreUrl, classNam
               width={file.width}
               height={file.height}
               unoptimized
-              className="h-touch-min w-auto max-w-full object-contain md:h-store-badge"
+              className={
+                hero
+                  ? 'h-auto w-full'
+                  : 'h-touch-min w-auto max-w-full object-contain md:h-store-badge'
+              }
             />
           </a>
         </li>

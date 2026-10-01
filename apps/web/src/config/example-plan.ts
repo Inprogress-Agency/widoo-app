@@ -72,7 +72,14 @@ export const examplePlan: Plan = {
     { x: 126, y: 102 },
   ],
   steps: [
-    { point: 0, time: '10:00', name: 'Place des Abbesses', category: 'walk', side: 'right' },
+    {
+      point: 0,
+      time: '10:00',
+      name: 'Place des Abbesses',
+      shortName: 'Abbesses',
+      category: 'walk',
+      side: 'right',
+    },
     {
       point: 4,
       time: '10:35',
@@ -98,6 +105,13 @@ export const examplePlan: Plan = {
     { minutes: 20, at: { x: 252, y: -102 }, after: 2 },
   ],
 };
+
+/** The example route of the hero, on its sticker (E-21): « Montmartre sans les touristes ». */
+export const exampleRoute = {
+  title: 'Montmartre sans les touristes',
+  durationMin: 420,
+  stepCount: examplePlan.steps.length,
+} as const;
 
 /**
  * The plan of a Premium route (E-21): the steps after the start show only their category and a
