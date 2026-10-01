@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import type { ReactNode } from 'react';
 
 /**
@@ -11,10 +12,12 @@ import type { ReactNode } from 'react';
 export function BlueFrame({
   backdrop,
   below,
+  column = 'card',
   children,
 }: {
   backdrop?: ReactNode;
   below?: ReactNode;
+  column?: 'card' | 'hero';
   children: ReactNode;
 }) {
   return (
@@ -23,7 +26,14 @@ export function BlueFrame({
     <main id="contenu" className="px-18 pb-16 pt-6 md:px-24 md:pb-24 md:pt-8">
       <div className="relative overflow-hidden rounded-sheet bg-blue ring-6 ring-frame-shell md:ring-8 xl:flex xl:min-h-plan-frame xl:items-center">
         {backdrop}
-        <div className="relative flex flex-col gap-20 p-20 md:box-content md:max-w-frame-column-tablet md:p-32 xl:w-frame-column xl:shrink-0 xl:pl-frame">
+        <div
+          className={clsx(
+            'relative flex flex-col gap-20 p-20 md:box-content md:max-w-frame-column-tablet xl:w-frame-column xl:shrink-0 xl:pl-frame',
+            // The hero of the home page starts 28 px from the top on the phone and keeps 40 px
+            // around its text on the tablet (measured).
+            column === 'hero' ? 'pt-28 md:p-gutter xl:p-32' : 'md:p-32',
+          )}
+        >
           {children}
         </div>
         {below}
