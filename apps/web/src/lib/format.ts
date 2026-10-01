@@ -59,3 +59,12 @@ export function formatShortDate(iso: string, locale: SiteLocale): string {
     timeZone: 'Europe/Paris',
   }).format(new Date(iso));
 }
+
+/** « il y a 3 jours », « yesterday »: how old a review is, in whole days (E-21). */
+export function formatDaysAgo(iso: string, now: Date, locale: SiteLocale): string {
+  const days = Math.max(0, Math.floor((now.getTime() - new Date(iso).getTime()) / 86_400_000));
+  return new Intl.RelativeTimeFormat(localeTags[locale].lang, { numeric: 'auto' }).format(
+    -days,
+    'day',
+  );
+}
