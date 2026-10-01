@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   formatBudget,
+  formatDaysAgo,
   formatDistance,
   formatDuration,
   formatRating,
@@ -73,5 +74,19 @@ describe('formatShortDate', () => {
     expect(formatShortDate('2026-09-20T10:00:00Z', 'fr')).toBe('20 sept.');
     expect(formatShortDate('2026-09-20T10:00:00Z', 'en')).toBe('Sep 20');
     expect(formatShortDate('2026-09-19T23:30:00Z', 'fr')).toBe('20 sept.');
+  });
+});
+
+describe('formatDaysAgo', () => {
+  const now = new Date('2026-09-28T12:00:00Z');
+
+  it('counts whole days', () => {
+    expect(formatDaysAgo('2026-09-25T09:00:00Z', now, 'fr')).toBe('il y a 3 jours');
+    expect(formatDaysAgo('2026-09-25T09:00:00Z', now, 'en')).toBe('3 days ago');
+  });
+
+  it('says yesterday and today', () => {
+    expect(formatDaysAgo('2026-09-27T09:00:00Z', now, 'fr')).toBe('hier');
+    expect(formatDaysAgo('2026-09-28T08:00:00Z', now, 'en')).toBe('today');
   });
 });
