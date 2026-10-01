@@ -2,6 +2,7 @@
 
 import { detectPlatform, storeLinkFor, type StoreLinks } from '@/lib/store-links';
 import type { MouseEvent } from 'react';
+import { whiteButton } from '../ui/ButtonLink';
 
 type Props = {
   label: string;
@@ -42,11 +43,7 @@ export function OpenInAppButton({ label, appLink, stores, routeId, source }: Pro
   }
 
   return (
-    <a
-      href={appLink}
-      onClick={open}
-      className="block rounded-pill bg-bg px-32 py-16 text-center text-button-l text-blue-ink"
-    >
+    <a href={appLink} onClick={open} className={whiteButton}>
       {label}
     </a>
   );

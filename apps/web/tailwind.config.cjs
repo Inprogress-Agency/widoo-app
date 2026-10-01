@@ -41,16 +41,16 @@ module.exports = {
       // Sizes of the site drawn in E-21 and missing from tokens.json: to move there (DESIGN), then
       // remove from here.
       size: { qr: '120px' },
-      // Width of the pages, held at the mockups of the computer (1440 px), then the page of a
-      // shared link on the computer (E-21, measured on the mockup): margin of the blue frame,
-      // width of the card and of its photo, width of the text beside the QR code.
+      // Width of the pages, held at the mockups of the computer (1440 px), then the blue frame on
+      // the computer (E-21, measured on the mockups): its margin, the width of its column, the
+      // photo of a shared route, the text beside the QR code.
       spacing: { frame: '64px' },
-      width: { 'shared-card': '540px' },
+      width: { 'frame-column': '540px' },
       maxWidth: {
         page: '1440px',
         'shared-photo': '196px',
         'shared-photo-tablet': '218px',
-        'shared-card-tablet': '656px',
+        'frame-column-tablet': '656px',
         'scan-text': '300px',
       },
       // White border of a step pin on the plan (E-21).
