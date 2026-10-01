@@ -1,8 +1,9 @@
 import '../globals.css';
+import { SiteHeader } from '@/components/header/SiteHeader';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { localeTags, locales } from '@/config/locales';
 import { site } from '@/config/site';
-import { readLocale } from '@/lib/i18n/messages';
+import { getMessages, readLocale } from '@/lib/i18n/messages';
 import { Plus_Jakarta_Sans } from 'next/font/google';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
@@ -39,7 +40,10 @@ export default async function LocaleLayout({
     // translators): accepted on this element only, its children are still checked.
     <html lang={localeTags[locale].lang} className={jakarta.variable} suppressHydrationWarning>
       <body className="bg-bg font-sans font-medium text-ink antialiased">
-        <PageContainer>{children}</PageContainer>
+        <PageContainer>
+          <SiteHeader locale={locale} texts={getMessages(locale).header} />
+          {children}
+        </PageContainer>
       </body>
     </html>
   );

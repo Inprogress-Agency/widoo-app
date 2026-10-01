@@ -33,14 +33,19 @@ const webTextStyles = ({ addUtilities }) => {
 module.exports = {
   content: ['./src/**/*.{ts,tsx}'],
   presets: [{ ...tokens, plugins: [] }],
-  plugins: [webTextStyles],
+  plugins: [
+    webTextStyles,
+    // `hover-hover:` applies with a mouse only, never after a tap (E-21 › Mouvement).
+    ({ addVariant }) => addVariant('hover-hover', '@media (hover: hover)'),
+  ],
   theme: {
     extend: {
       fontFamily: { sans: ['var(--font-jakarta)', 'system-ui', 'sans-serif'] },
       fontWeight: { medium: '500', extrabold: '800' },
       // Sizes of the site drawn in E-21 and missing from tokens.json: to move there (DESIGN), then
       // remove from here.
-      size: { qr: '120px' },
+      // QR code, and the disc of the icon of « Télécharger l'app » on the computer.
+      size: { qr: '120px', 'download-disc': '36px' },
       // Title of the missing page (E-21, D-074): 42/44 on the phone, 64/66 on the computer, tighter
       // by 4 % (measured on the mockups), and the text under it.
       fontSize: {
@@ -48,13 +53,21 @@ module.exports = {
         'display-xl': ['64px', { lineHeight: '66px', letterSpacing: '-2.56px', fontWeight: '800' }],
         lead: ['16px', { lineHeight: '24px', fontWeight: '500' }],
         'lead-l': ['18px', { lineHeight: '28px', fontWeight: '500' }],
+        // « widoo » of the logo in the header: 21 px, 23 px on the computer.
+        wordmark: ['21px', { lineHeight: '28px', fontWeight: '800' }],
+        'wordmark-l': ['23px', { lineHeight: '28px', fontWeight: '800' }],
       },
       // Width of the pages, held at the mockups of the computer (1440 px), then the blue frame on
       // the computer (E-21, measured on the mockups): its margin, the width of its column, the
       // photo of a shared route, the text beside the QR code and under the title of the missing
       // page.
-      spacing: { frame: '64px' },
-      width: { 'frame-column': '540px' },
+      spacing: { frame: '64px', gutter: '40px' },
+      width: {
+        'frame-column': '540px',
+        // « Télécharger l'app », the same width in every language so that the header never moves.
+        'download-button': '200px',
+        'download-button-l': '204px',
+      },
       maxWidth: {
         page: '1440px',
         'shared-photo': '196px',
@@ -70,7 +83,15 @@ module.exports = {
       ringWidth: { 6: '6px' },
       // Blue plan: under the content on the phone and the tablet (measured on E-21), and the
       // least height of the frame on the computer, so that the whole route shows.
-      height: { 'plan-phone': '340px', 'plan-tablet': '410px', 'store-badge': '42px' },
+      height: {
+        'plan-phone': '340px',
+        'plan-tablet': '410px',
+        'store-badge': '42px',
+        // Header of the site (E-21): 56 px on the phone, 72 on the tablet, 76 on the computer.
+        header: '56px',
+        'header-tablet': '72px',
+        'header-desktop': '76px',
+      },
       minHeight: { 'plan-frame': '720px' },
       // Plan of E-21 › Mouvement; timings shared with src/config/motion.ts (checked by the tests).
       // Only the start states are in the keyframes: without animation, everything shows.
@@ -79,6 +100,11 @@ module.exports = {
         'plan-pop': { from: { opacity: '0', transform: 'scale(0.9)' } },
         'plan-fade': { from: { opacity: '0' } },
       },
+      // Buttons (E-21 › Mouvement): 0.97 when pressed, in 160 ms; the icon of « Télécharger
+      // l'app » moves down 2 px on hover, with a mouse only.
+      scale: { press: '0.97' },
+      transitionDuration: { press: '160ms' },
+      translate: { nudge: '2px' },
       animation: {
         'plan-draw': 'plan-draw 1800ms linear 300ms both',
         'plan-pop': 'plan-pop 260ms cubic-bezier(0.23, 1, 0.32, 1) both',

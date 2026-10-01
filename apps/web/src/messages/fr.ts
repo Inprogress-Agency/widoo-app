@@ -11,6 +11,14 @@ export const fr = {
       title: 'Page introuvable · Widoo',
     },
   },
+  header: {
+    skip: 'Aller au contenu',
+    home: 'Widoo, accueil',
+    sections: 'Sections de la page',
+    nav: { ideas: 'Idées de sortie', districts: 'Quartiers', questions: 'Questions' },
+    download: 'Télécharger l’app',
+    language: 'Langue',
+  },
   home: {
     title: 'Que faire à Paris aujourd’hui\u00a0?',
     tagline:
