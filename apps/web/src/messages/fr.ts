@@ -8,7 +8,7 @@ export const fr = {
         'Des idées de sortie à Paris prêtes à vivre\u00a0: balades, sorties en amoureux, en famille ou gratuites, avec durée, budget et horaires. App gratuite.',
     },
     notFound: {
-      title: 'Page introuvable | Widoo',
+      title: 'Page introuvable · Widoo',
     },
   },
   home: {
@@ -18,8 +18,8 @@ export const fr = {
   },
   notFound: {
     title: 'Cette page n’existe pas',
-    body: 'Le lien est peut-être incomplet, ou la page a été déplacée.',
-    home: 'Retour à l’accueil',
+    body: 'L’adresse est peut-être incomplète. Les idées de sortie vous attendent sur l’accueil et dans l’app.',
+    ideas: 'Voir les idées de sortie',
   },
   error: {
     title: 'Une erreur est survenue',
