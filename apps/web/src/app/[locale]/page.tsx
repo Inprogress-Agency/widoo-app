@@ -2,6 +2,7 @@ import { appName, publisher, site } from '@/config/site';
 import { HomeContainer } from '@/containers/HomeContainer';
 import { getMessages, readLocale } from '@/lib/i18n/messages';
 import { homeJsonLd } from '@/lib/json-ld';
+import { getHeroReviews } from '@/lib/reviews/source';
 import { buildMetadata } from '@/lib/seo';
 import type { Metadata } from 'next';
 
@@ -33,5 +34,15 @@ export default async function HomePage({ params }: Props) {
     appStoreUrl: site.APP_STORE_URL,
     playStoreUrl: site.PLAY_STORE_URL,
   });
-  return <HomeContainer messages={messages} jsonLd={jsonLd} />;
+  return (
+    <HomeContainer
+      locale={locale}
+      messages={messages}
+      stores={{ appStoreUrl: site.APP_STORE_URL, playStoreUrl: site.PLAY_STORE_URL }}
+      appLink={new URL('/app', site.SITE_URL).toString()}
+      reviews={await getHeroReviews()}
+      now={new Date()}
+      jsonLd={jsonLd}
+    />
+  );
 }

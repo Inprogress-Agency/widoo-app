@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { appRouteLink, detectPlatform, readSource, storeLinkFor } from './store-links';
+import {
+  appDownloadTarget,
+  appRouteLink,
+  detectPlatform,
+  readSource,
+  storeLinkFor,
+} from './store-links';
 
 const stores = {
   appStoreUrl: 'https://apps.example/widoo',
@@ -55,5 +61,27 @@ describe('storeLinkFor', () => {
   it('gives no store to a computer, nor when the store is not configured', () => {
     expect(storeLinkFor('desktop', stores)).toBeUndefined();
     expect(storeLinkFor('android', {})).toBeUndefined();
+  });
+});
+
+describe('appDownloadTarget', () => {
+  const iphone = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)';
+  const android = 'Mozilla/5.0 (Linux; Android 15; Pixel 9)';
+  const mac = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_6)';
+
+  it('opens the store of the phone', () => {
+    expect(appDownloadTarget(iphone, stores, '/fr')).toBe(stores.appStoreUrl);
+    expect(appDownloadTarget(android, stores, '/fr')).toBe(stores.playStoreUrl);
+  });
+
+  it('passes the source to Google Play', () => {
+    expect(appDownloadTarget(android, stores, '/fr', 'flyer-abbesses')).toBe(
+      'https://play.example/store/apps/details?id=app.widoo&referrer=src%3Dflyer-abbesses',
+    );
+  });
+
+  it('sends a computer, or a phone without store link, to the home page', () => {
+    expect(appDownloadTarget(mac, stores, '/en')).toBe('/en');
+    expect(appDownloadTarget(iphone, {}, '/fr')).toBe('/fr');
   });
 });

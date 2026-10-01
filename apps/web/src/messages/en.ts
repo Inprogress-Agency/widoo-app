@@ -12,10 +12,23 @@ export const en: Messages = {
       title: 'Page not found · Widoo',
     },
   },
+  header: {
+    skip: 'Skip to content',
+    home: 'Widoo, home',
+    sections: 'Sections of the page',
+    nav: { ideas: 'Outing ideas', districts: 'Neighbourhoods', questions: 'Questions' },
+    download: 'Get the app',
+    language: 'Language',
+  },
   home: {
     title: 'What to do in Paris today?',
     tagline:
       'Outing ideas in Paris, ready to go: the stops, the duration, the budget and the opening hours.',
+    reviews: 'Reviews of the app',
+    reviewSource: { appStore: 'App Store review', googlePlay: 'Google Play review' },
+    ratingSpoken: 'Rated {rating} out of 5',
+    stickerMeta: '{steps} in {duration}',
+    qrLabel: 'QR code to download the app',
   },
   notFound: {
     title: 'This page does not exist',
