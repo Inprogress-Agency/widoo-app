@@ -13,6 +13,9 @@ export const site = parseEnv({
 /** Publisher of the app, named in the footer and the structured data. */
 export const publisher = { name: 'Inprogress Agency' } as const;
 
+/** Address of the team for the visitors (E-21 › Questions, pied de page). */
+export const contactEmail = 'contact@widoo.app';
+
 /** Name of the app in the structured data and the browser tab. */
 export const appName = 'Widoo';
 
