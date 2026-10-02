@@ -1,3 +1,4 @@
+import { FinalBanner } from '@/components/home/banner/FinalBanner';
 import { Districts } from '@/components/home/districts/Districts';
 import { Faq } from '@/components/home/faq/Faq';
 import { HowItWorks } from '@/components/home/how-it-works/HowItWorks';
@@ -41,8 +42,8 @@ type Props = {
  * Home page of the site (E-21). The hero: title, line, stores and, on the computer, the QR code
  * of `/app`; the blue plan of the example route with its sticker and a review. The plan sits
  * behind the frame on the computer, under the text on the phone and the tablet. Then the sections:
- * « Comment ça marche », the moods and the districts (#237), the questions (#238); the final
- * banner and the footer arrive with #238.
+ * « Comment ça marche », the moods and the districts (#237), the questions and the final banner
+ * (#238); the footer arrives with #238.
  */
 export function HomeContainer({
   locale,
@@ -79,6 +80,14 @@ export function HomeContainer({
             <Ideas locale={locale} messages={messages} routes={ideaRoutes} />
             <Districts locale={locale} texts={messages.districts} routes={districtRoutes} />
             <Faq texts={messages.faq} />
+            <FinalBanner
+              locale={locale}
+              texts={messages.banner}
+              storeTexts={messages.stores}
+              qrLabel={texts.qrLabel}
+              stores={stores}
+              appLink={appLink}
+            />
           </>
         }
         backdrop={<DesktopPlan walkText={messages.plan.walk} review={review()} sticker={sticker} />}

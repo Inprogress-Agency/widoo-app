@@ -86,6 +86,12 @@ module.exports = {
         },
       });
     },
+    // Gradient of the W of the logo (final banner, #238): `stop-w-light-start`, `stop-w-light-end`.
+    ({ addUtilities, theme }) =>
+      addUtilities({
+        '.stop-w-light-start': { stopColor: theme('colors.w-light-start') },
+        '.stop-w-light-end': { stopColor: theme('colors.w-light-end') },
+      }),
     // « Comment ça marche »: its path draws itself as the page scrolls (E-21 › Mouvement), where
     // the browser ties animations to scrolling; elsewhere it shows drawn.
     ({ addUtilities }) =>
@@ -193,6 +199,16 @@ module.exports = {
           { lineHeight: '24px', letterSpacing: '-0.19px', fontWeight: '800' },
         ],
         'body-m': ['15px', { lineHeight: '22px', fontWeight: '500' }],
+        // Title of the final banner (#238): 30/34 on the phone, 40/44 on the tablet (52/56 on the
+        // computer, as the sections). À reporter dans tokens.json.
+        'banner-title': [
+          '30px',
+          { lineHeight: '34px', letterSpacing: '-1.05px', fontWeight: '800' },
+        ],
+        'banner-title-l': [
+          '40px',
+          { lineHeight: '44px', letterSpacing: '-1.4px', fontWeight: '800' },
+        ],
       },
       // Width of the pages, held at the mockups of the computer (1440 px), then the blue frame on
       // the computer (E-21, measured on the mockups): its margin, the width of its column, the
@@ -222,12 +238,20 @@ module.exports = {
         112: '112px',
         120: '120px',
         128: '128px',
+        // Final banner on the phone (#238): its text under the W.
+        250: '250px',
       },
       // Hero: the stores as wide as each other, the review and the sticker laid on the plan.
       width: {
         'frame-column': '540px',
         'store-badge-hero': '166px',
         'store-badge-hero-phone': '148px',
+        // Final banner (#238): the stores, 150 px side by side on the phone, 169 px stacked from
+        // the tablet; its text on the tablet and the computer. À reporter dans tokens.json.
+        'store-badge-banner-phone': '150px',
+        'store-badge-banner': '169px',
+        'banner-text-tablet': '360px',
+        'banner-text': '520px',
         review: '300px',
         // « Télécharger l'app », the same width in every language so that the header never moves.
         'download-button': '198px',
@@ -283,6 +307,9 @@ module.exports = {
         // tokens.json.
         'district-map': '#EAF0FA',
         'district-park': '#DCEBE4',
+        // Light of the line of the W of the logo, from its top to its bottom (logo-widoo.svg).
+        'w-light-start': '#FAF9F6',
+        'w-light-end': '#BFD7EA',
       },
       ringWidth: { 5: '5px', 6: '6px' },
       // Shadow of the cards laid on the plan, tinted blue (E-21: rgba(38, 62, 128, 0.18)).
@@ -306,6 +333,9 @@ module.exports = {
         // Edge of a closed question, none once open (#238). À reporter dans tokens.json.
         'faq-edge': 'inset 0 0 0 1px #DCE3F2',
         none: 'none',
+        // Final banner (#238): light on the top edge of the blue, shadow of its QR code.
+        'banner-edge': 'inset 0 1px 0 rgba(255, 255, 255, 0.18)',
+        qr: '0 10px 30px rgba(38, 62, 128, 0.18)',
       },
       // Phone around a screenshot of the app and its screen (#237): computer, second step of the
       // computer, tablet, phone. À reporter dans tokens.json.
@@ -334,6 +364,9 @@ module.exports = {
         'district-thumb': '14px',
         // « Une autre question ? » (#238). À reporter dans tokens.json.
         contact: '28px',
+        // Final banner on the phone (#238): its frame, its blue.
+        'banner-shell-phone': '38px',
+        'banner-phone': '32px',
       },
       // Tilt of the cards laid on the plan (measured on E-21).
       rotate: {
@@ -394,6 +427,9 @@ module.exports = {
         'rating-l': '34px',
         // Plan of Paris of « Quartiers » on the computer (#237).
         'district-map': '640px',
+        // Final banner (#238): the tablet, the computer. À reporter dans tokens.json.
+        'banner-tablet': '440px',
+        banner: '460px',
       },
       minHeight: {
         'plan-frame': '720px',
@@ -407,6 +443,8 @@ module.exports = {
       // The path of the tablet starts 80 px off the left, its line 22 px from the top, and turns
       // 14 px past the column; on the phone, the line between two numbers.
       inset: {
+        // The W of the final banner, held in its top right corner (#238).
+        0: '0px',
         'how-2': '430px',
         'how-3': '836px',
         'how-1-top': '40px',
@@ -439,6 +477,8 @@ module.exports = {
       translate: { nudge: '2px' },
       animation: {
         'plan-draw': 'plan-draw 1800ms linear 300ms both',
+        // The W of the final banner (#238): at once, slowing down at the end, as the steps of the plan.
+        'w-draw': 'plan-draw 1200ms cubic-bezier(0.23, 1, 0.32, 1) both',
         'plan-pop': 'plan-pop 260ms cubic-bezier(0.23, 1, 0.32, 1) both',
         'plan-fade': 'plan-fade 200ms linear both',
         rise: 'rise 500ms cubic-bezier(0.23, 1, 0.32, 1) both',

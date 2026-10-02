@@ -151,6 +151,10 @@ export const fr = {
     contactTitle: 'Une autre question\u00a0?',
     contactText: 'L’équipe Widoo vous répond par e-mail.',
   },
+  banner: {
+    title: 'Votre prochaine sortie commence ici',
+    lead: 'Gratuit, sur iPhone et Android.',
+  },
   notFound: {
     title: 'Cette page n’existe pas',
     body: 'L’adresse est peut-être incomplète. Les idées de sortie vous attendent sur l’accueil et dans l’app.',
