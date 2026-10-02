@@ -4,7 +4,8 @@ import { MinusIcon, PlusIcon } from '@phosphor-icons/react/ssr';
  * A question of « Questions fréquentes » (E-21): a tile that opens on its answer, white with a
  * blue edge when closed, light blue when open. Native `details`: opened with the mouse, the
  * keyboard and screen readers alike. The + turns into a − (200 ms); the answer opens in height
- * (globals.css).
+ * (`faq-item`, tailwind.config.cjs). The space under the answer is a padding, not a margin: a
+ * margin is added only once the opening ends, and the tile then grew a second time.
  */
 export function FaqItem({
   question,
@@ -36,7 +37,7 @@ export function FaqItem({
           />
         </span>
       </summary>
-      <p className="mb-22 max-w-faq-answer text-faq-answer text-ink">{answer}</p>
+      <p className="max-w-faq-answer pb-22 text-faq-answer text-ink">{answer}</p>
     </details>
   );
 }
