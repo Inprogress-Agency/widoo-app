@@ -209,6 +209,11 @@ module.exports = {
           '40px',
           { lineHeight: '44px', letterSpacing: '-1.4px', fontWeight: '800' },
         ],
+        // Footer (#238): « widoo », its links (15/44 on the phone, a line as high as a touch), the
+        // other language. À reporter dans tokens.json.
+        'wordmark-s': ['20px', { lineHeight: '23px', letterSpacing: '-0.6px', fontWeight: '800' }],
+        'link-s': ['14px', { lineHeight: '20px', fontWeight: '600' }],
+        'footer-link-phone': ['15px', { lineHeight: '44px', fontWeight: '600' }],
       },
       // Width of the pages, held at the mockups of the computer (1440 px), then the blue frame on
       // the computer (E-21, measured on the mockups): its margin, the width of its column, the
@@ -294,7 +299,8 @@ module.exports = {
       },
       // « Questions fréquentes » on the computer (#238): the title and the contact on the left,
       // the questions on the right, as high as they need without pushing the contact down.
-      gridTemplateColumns: { faq: '380px 1fr' },
+      // Footer on the phone and the tablet (#238): what fills the row, then what sits on its right.
+      gridTemplateColumns: { faq: '380px 1fr', footer: '1fr auto' },
       gridTemplateRows: { faq: 'auto 1fr' },
       // Shell of the blue frame (E-21, « coque #EDF1FA »): 8 px, 6 px on the phone.
       colors: {
