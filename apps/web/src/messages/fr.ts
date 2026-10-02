@@ -48,6 +48,36 @@ export const fr = {
       },
     ],
   },
+  ideas: {
+    title: 'Des idées de sortie pour chaque envie',
+    lead: 'En amoureux, entre amis, en famille ou sous la pluie\u00a0: choisissez selon votre envie, votre budget et votre temps.',
+    moods: {
+      romantic: {
+        title: 'Sortie en amoureux',
+        text: 'Une balade au bord de l’eau, un verre au soleil couchant, une table un peu cachée.',
+      },
+      friends: {
+        title: 'Entre amis',
+        text: 'Friperies, adresses gourmandes et terrasses, pour une après-midi qui s’étire.',
+      },
+      freeFamily: {
+        title: 'Sorties gratuites et en famille',
+        text: 'Parcs, points de vue et jeux en plein air, sans rien dépenser.',
+      },
+      rainy: {
+        title: 'Que faire quand il pleut',
+        text: 'Passages couverts, musées et cafés\u00a0: des parcours à l’abri, pensés pour les jours de pluie.',
+      },
+      fullDay: {
+        title: 'Toute une journée',
+        text: 'Du matin au soir, un quartier en entier, pauses comprises.',
+      },
+    },
+    routeMeta: '{duration}, {budget}, {author}',
+    free: 'gratuit',
+    byWidoo: 'par Widoo',
+    byMember: 'par {name}',
+  },
   notFound: {
     title: 'Cette page n’existe pas',
     body: 'L’adresse est peut-être incomplète. Les idées de sortie vous attendent sur l’accueil et dans l’app.',
