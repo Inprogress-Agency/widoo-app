@@ -49,6 +49,36 @@ export const en: Messages = {
       },
     ],
   },
+  ideas: {
+    title: 'Outing ideas for every mood',
+    lead: 'As a couple, with friends, with the family or in the rain: choose by mood, budget and time.',
+    moods: {
+      romantic: {
+        title: 'Romantic outing',
+        text: 'A walk by the water, a drink at sunset, a slightly hidden table.',
+      },
+      friends: {
+        title: 'With friends',
+        text: 'Thrift shops, foodie spots and terraces, for a long afternoon.',
+      },
+      freeFamily: {
+        title: 'Free and family outings',
+        text: 'Parks, viewpoints and open-air games, without spending a thing.',
+      },
+      rainy: {
+        title: 'What to do when it rains',
+        text: 'Covered passages, museums and cafés: sheltered routes, made for rainy days.',
+      },
+      fullDay: {
+        title: 'A whole day',
+        text: 'From morning to evening, a whole neighbourhood, breaks included.',
+      },
+    },
+    routeMeta: '{duration}, {budget}, {author}',
+    free: 'free',
+    byWidoo: 'by Widoo',
+    byMember: 'by {name}',
+  },
   notFound: {
     title: 'This page does not exist',
     body: 'The address may be incomplete. Outing ideas are waiting for you on the home page and in the app.',
