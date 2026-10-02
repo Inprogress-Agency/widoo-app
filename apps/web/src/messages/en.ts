@@ -30,6 +30,25 @@ export const en: Messages = {
     stickerMeta: '{steps} in {duration}',
     qrLabel: 'QR code to download the app',
   },
+  howItWorks: {
+    title: 'Walks in Paris, all ready to go',
+    lead: 'A place to see, a café, a street to climb: each route links the stops together. All you have to do is go.',
+    steps: [
+      {
+        title: 'Choose your outing',
+        text: 'Duration, budget, distance and stops: everything is shown, and checked on site by those who did it.',
+      },
+      {
+        title: 'Plan it',
+        text: 'Pick the day. Widoo tells you exactly {strong}, checks the opening hours and reminds you of the outing the evening before at 6 pm.',
+        strong: 'what to bring and what to book',
+      },
+      {
+        title: 'Let yourself be guided',
+        text: 'On site, follow the path from one stop to the next, without missing anything on the way.',
+      },
+    ],
+  },
   notFound: {
     title: 'This page does not exist',
     body: 'The address may be incomplete. Outing ideas are waiting for you on the home page and in the app.',

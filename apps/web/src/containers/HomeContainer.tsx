@@ -1,3 +1,4 @@
+import { HowItWorks } from '@/components/home/how-it-works/HowItWorks';
 import { ReviewStack } from '@/components/home/ReviewStack';
 import { RouteSticker } from '@/components/home/RouteSticker';
 import { BlueFrame } from '@/components/layout/BlueFrame';
@@ -30,8 +31,8 @@ type Props = {
 /**
  * Home page of the site (E-21). The hero: title, line, stores and, on the computer, the QR code
  * of `/app`; the blue plan of the example route with its sticker and a review. The plan sits
- * behind the frame on the computer, under the text on the phone and the tablet. The sections
- * below arrive with #237 and #238.
+ * behind the frame on the computer, under the text on the phone and the tablet. Then the sections:
+ * « Comment ça marche » (#237); the others arrive with #237 and #238.
  */
 export function HomeContainer({ locale, messages, stores, appLink, reviews, now, jsonLd }: Props) {
   const texts = messages.home;
@@ -52,6 +53,7 @@ export function HomeContainer({ locale, messages, stores, appLink, reviews, now,
       <JsonLd data={jsonLd} />
       <BlueFrame
         column="hero"
+        after={<HowItWorks texts={messages.howItWorks} />}
         backdrop={<DesktopPlan walkText={messages.plan.walk} review={review()} sticker={sticker} />}
         below={
           <PhoneAndTabletPlan
