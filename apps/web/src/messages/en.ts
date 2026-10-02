@@ -152,6 +152,10 @@ export const en: Messages = {
     contactTitle: 'Another question?',
     contactText: 'The Widoo team answers by email.',
   },
+  banner: {
+    title: 'Your next outing starts here',
+    lead: 'Free, on iPhone and Android.',
+  },
   notFound: {
     title: 'This page does not exist',
     body: 'The address may be incomplete. Outing ideas are waiting for you on the home page and in the app.',
