@@ -1,17 +1,12 @@
 'use client';
 
 import { locales, type SiteLocale } from '@/config/locales';
+import { pathInLocale } from '@/lib/i18n/path-in-locale';
 import clsx from 'clsx';
 import { usePathname } from 'next/navigation';
 import { Fragment, type MouseEvent } from 'react';
 
 const names: Record<SiteLocale, string> = { fr: 'Français', en: 'English' };
-
-/** The same address in another language: the first segment of the path changes. */
-export function pathInLocale(pathname: string, locale: SiteLocale): string {
-  const rest = pathname.replace(/^\/(fr|en)(?=\/|$)/, '');
-  return `/${locale}${rest === '/' ? '' : rest}`;
-}
 
 /**
  * « FR | EN » (E-21): the current language in ink, the other one in grey, 44 px high to the touch;
