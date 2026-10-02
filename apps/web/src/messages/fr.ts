@@ -29,6 +29,25 @@ export const fr = {
     stickerMeta: '{steps} en {duration}',
     qrLabel: 'QR code pour télécharger l’app',
   },
+  howItWorks: {
+    title: 'Des balades à Paris toutes prêtes',
+    lead: 'Un lieu à voir, un café, une rue à remonter : chaque parcours enchaîne les étapes. Vous n’avez plus qu’à y aller.',
+    steps: [
+      {
+        title: 'Choisissez votre sortie',
+        text: 'Durée, budget, distance et étapes : tout est affiché, et vérifié sur place par ceux qui l’ont faite.',
+      },
+      {
+        title: 'Programmez-la',
+        text: 'Choisissez le jour. Widoo vous dit exactement {strong}, vérifie les horaires et vous rappelle la sortie la veille à 18:00.',
+        strong: 'quoi prévoir et quoi réserver',
+      },
+      {
+        title: 'Laissez-vous guider',
+        text: 'Sur place, suivez le chemin d’une étape à l’autre, sans rien rater en route.',
+      },
+    ],
+  },
   notFound: {
     title: 'Cette page n’existe pas',
     body: 'L’adresse est peut-être incomplète. Les idées de sortie vous attendent sur l’accueil et dans l’app.',
