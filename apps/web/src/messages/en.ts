@@ -162,6 +162,16 @@ export const en: Messages = {
     terms: 'Terms of use',
     privacy: 'Privacy policy',
   },
+  legal: {
+    updated: 'Updated on {date}',
+    summary: 'In short',
+    meta: {
+      title: '{name} · Widoo',
+      terms:
+        'The rules for using Widoo, the app of ready-made outings in Paris: account, routes, Premium, moderation.',
+      privacy: 'The data Widoo uses, why, who receives it and how to exercise your rights.',
+    },
+  },
   notFound: {
     title: 'This page does not exist',
     body: 'The address may be incomplete. Outing ideas are waiting for you on the home page and in the app.',
