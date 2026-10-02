@@ -18,7 +18,17 @@ export function pathInLocale(pathname: string, locale: SiteLocale): string {
  * each one opens the same page in its language, with the query of the address (the token of a
  * private link).
  */
-export function LanguageSwitch({ current, label }: { current: SiteLocale; label: string }) {
+export function LanguageSwitch({
+  current,
+  label,
+  small,
+}: {
+  current: SiteLocale;
+  label: string;
+  /** 14 px, in the footer. */
+  small?: boolean;
+}) {
+  const bold = small ? 'text-credit-title' : 'text-button';
   const pathname = usePathname();
   function keepQuery(event: MouseEvent<HTMLAnchorElement>) {
     if (!window.location.search && !window.location.hash) return;
@@ -32,7 +42,7 @@ export function LanguageSwitch({ current, label }: { current: SiteLocale; label:
       {locales.map((locale, index) => (
         <Fragment key={locale}>
           {index > 0 && (
-            <span aria-hidden className="text-button text-line">
+            <span aria-hidden className={clsx(bold, 'text-line')}>
               |
             </span>
           )}
@@ -46,13 +56,15 @@ export function LanguageSwitch({ current, label }: { current: SiteLocale; label:
             // Each language keeps the room of its bold version: nothing moves when it changes.
             className="grid px-2 py-12 uppercase"
           >
-            <span aria-hidden className="invisible col-start-1 row-start-1 text-button">
+            <span aria-hidden className={clsx('invisible col-start-1 row-start-1', bold)}>
               {locale}
             </span>
             <span
               className={clsx(
                 'col-start-1 row-start-1 text-center',
-                locale === current ? 'text-button text-ink' : 'text-body-semibold text-muted',
+                locale === current
+                  ? [bold, 'text-ink']
+                  : [small ? 'text-link-s' : 'text-body-semibold', 'text-muted'],
               )}
             >
               {locale}

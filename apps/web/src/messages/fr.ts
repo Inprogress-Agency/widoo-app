@@ -114,6 +114,53 @@ export const fr = {
       },
     },
   },
+  faq: {
+    title: 'Questions fréquentes',
+    lead: 'Tout ce qu’il faut savoir avant votre première sortie.',
+    items: [
+      {
+        question: 'Widoo est-il gratuit\u00a0?',
+        answer:
+          'Oui. L’app est gratuite, les parcours gratuits s’ouvrent sans compte et créer vos parcours ne coûte rien. Les parcours Premium s’ouvrent avec un abonnement (essai gratuit de 7\u00a0jours), un pass de 7\u00a0jours ou à l’unité.',
+      },
+      {
+        question: 'Faut-il créer un compte\u00a0?',
+        answer:
+          'Non, pour parcourir la carte et ouvrir les parcours gratuits. Un compte gratuit sert à enregistrer vos favoris, programmer une sortie et recevoir ses rappels.',
+      },
+      {
+        question: 'Qu’est-ce qu’un parcours Widoo\u00a0?',
+        answer:
+          'Une sortie clé en main\u00a0: plusieurs étapes qui s’enchaînent, avec la durée, le budget, la distance et les horaires de chaque lieu.',
+      },
+      {
+        question: 'Les informations sont-elles à jour\u00a0?',
+        answer:
+          'Les parcours sont vérifiés sur place par ceux qui les font, et Widoo vérifie les horaires quand vous programmez une sortie. Un lieu peut changer sans prévenir\u00a0: vérifiez avant de réserver.',
+      },
+      {
+        question: 'Puis-je créer mon propre parcours\u00a0?',
+        answer:
+          'Oui, depuis l’app, gratuitement et sans limite. Chaque parcours est publié après relecture par l’équipe Widoo.',
+      },
+      {
+        question: 'Widoo existe-t-il ailleurs qu’à Paris\u00a0?',
+        answer: 'Pas encore\u00a0: Widoo commence par Paris.',
+      },
+    ],
+    contactTitle: 'Une autre question\u00a0?',
+    contactText: 'L’équipe Widoo vous répond par e-mail.',
+  },
+  banner: {
+    title: 'Votre prochaine sortie commence ici',
+    lead: 'Gratuit, sur iPhone et Android.',
+  },
+  footer: {
+    copyright: '© 2026 {publisher}, conçu à Paris',
+    links: 'Liens du pied de page',
+    terms: 'Conditions d’utilisation',
+    privacy: 'Politique de confidentialité',
+  },
   notFound: {
     title: 'Cette page n’existe pas',
     body: 'L’adresse est peut-être incomplète. Les idées de sortie vous attendent sur l’accueil et dans l’app.',
