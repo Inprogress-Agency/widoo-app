@@ -9,6 +9,8 @@ export type SeoInput = {
   locale: SiteLocale;
   /** Path of the page without the language prefix: `/` for the home page, `/conditions`… */
   path: string;
+  /** Path of the page in each language when it differs from `path` (the legal pages, #242). */
+  paths?: Record<SiteLocale, string>;
   title: string;
   description?: string;
   /** Pages that must never be indexed, whatever the environment: private links (`/r/`). */
@@ -28,9 +30,10 @@ export function localizedPath(locale: SiteLocale, path: string): string {
  */
 export function buildMetadata(input: SeoInput): Metadata {
   const { siteUrl, locale, path, title, description } = input;
-  const canonical = localizedPath(locale, path);
+  const pathIn = (other: SiteLocale) => input.paths?.[other] ?? path;
+  const canonical = localizedPath(locale, pathIn(locale));
   const languages: Record<string, string> = Object.fromEntries(
-    locales.map((other) => [localeTags[other].lang, localizedPath(other, path)]),
+    locales.map((other) => [localeTags[other].lang, localizedPath(other, pathIn(other))]),
   );
   if (path === '/') languages['x-default'] = '/';
   const index = input.indexable && !input.noIndex;

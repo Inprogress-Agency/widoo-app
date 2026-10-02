@@ -5,6 +5,7 @@ import {
   formatDistance,
   formatDuration,
   formatRating,
+  formatLongDate,
   formatShortDate,
   roundBudget,
 } from './format';
@@ -66,6 +67,13 @@ describe('formatRating', () => {
   it('writes one decimal in the notation of the language', () => {
     expect(formatRating(4.9, 'fr')).toBe('4,9');
     expect(formatRating(5, 'en')).toBe('5.0');
+  });
+});
+
+describe('formatLongDate', () => {
+  it('writes the day, the month and the year, in Paris time', () => {
+    expect(plain(formatLongDate('2026-09-27T23:30:00Z', 'fr'))).toBe('28 septembre 2026');
+    expect(plain(formatLongDate('2026-09-28', 'en'))).toBe('September 28, 2026');
   });
 });
 

@@ -19,9 +19,6 @@ export const publisher = { name: 'Inprogress Agency' } as const;
  */
 export const contactEmail = 'contact@widooapp.com';
 
-/** Paths of the legal pages, under the language (#242, E-19 › aligner). */
-export const legalPaths = { terms: '/conditions', privacy: '/confidentialite' } as const;
-
 /** Name of the app in the structured data and the browser tab. */
 export const appName = 'Widoo';
 
