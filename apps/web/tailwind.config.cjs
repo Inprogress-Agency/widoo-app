@@ -3,6 +3,23 @@ const tokens = require('@widoo/tokens/tailwind-preset');
 const fontStack = 'var(--font-jakarta), system-ui, sans-serif';
 
 /**
+ * « Quartiers » on the computer (E-21, #237): place of each card and of the names of the banks on
+ * the plan of Paris, [left, top] in px, from the source of the mockups. À reporter dans
+ * tokens.json.
+ */
+const districtPlaces = {
+  montmartre: [420, 36],
+  buttesChaumont: [842, 64],
+  canalSaintMartin: [712, 196],
+  passages: [248, 214],
+  marais: [560, 318],
+  saintGermain: [284, 510],
+  latinQuarter: [660, 500],
+  'bank-right': [960, 392],
+  'bank-left': [1000, 522],
+};
+
+/**
  * The text styles of tokens.json (`text-title-xl`, `text-body`…) name the font files of the app
  * (`PlusJakartaSans-800`). On the site the font is loaded once by next/font under
  * `--font-jakarta`: each style keeps its size, line height and spacing, and gets the family and
@@ -37,6 +54,16 @@ module.exports = {
     webTextStyles,
     // `hover-hover:` applies with a mouse only, never after a tap (E-21 › Mouvement).
     ({ addVariant }) => addVariant('hover-hover', '@media (hover: hover)'),
+    // « Quartiers »: `place-<district>` lays a card or the name of a bank on the plan of Paris.
+    ({ addUtilities }) =>
+      addUtilities(
+        Object.fromEntries(
+          Object.entries(districtPlaces).map(([name, [left, top]]) => [
+            `.place-${name}`,
+            { position: 'absolute', left: `${left}px`, top: `${top}px` },
+          ]),
+        ),
+      ),
     // « Comment ça marche »: its path draws itself as the page scrolls (E-21 › Mouvement), where
     // the browser ties animations to scrolling; elsewhere it shows drawn.
     ({ addUtilities }) =>
@@ -67,6 +94,11 @@ module.exports = {
         star: '13px',
         'star-l': '15px',
         'credit-logo': '28px',
+        // « Quartiers » (#237): photo or icon of a district, on the phone and the tablet then on
+        // the computer, and its icon.
+        'district-thumb': '52px',
+        'district-thumb-xl': '60px',
+        'district-icon': '26px',
       },
       // Title of the missing page (E-21, D-074): 42/44 on the phone, 64/66 on the computer, tighter
       // by 4 % (measured on the mockups), and the text under it.
@@ -119,6 +151,8 @@ module.exports = {
         'rating-value-l': ['15px', { lineHeight: '18px', fontWeight: '800' }],
         'credit-title': ['14px', { lineHeight: '20px', fontWeight: '700' }],
         'credit-initial': ['11px', { lineHeight: '12px', fontWeight: '800' }],
+        // « Quartiers » (#237): « Rive droite », « Rive gauche ». À reporter dans tokens.json.
+        'bank-label': ['12px', { lineHeight: '16px', letterSpacing: '1.68px', fontWeight: '800' }],
       },
       // Width of the pages, held at the mockups of the computer (1440 px), then the blue frame on
       // the computer (E-21, measured on the mockups): its margin, the width of its column, the
@@ -145,6 +179,7 @@ module.exports = {
         96: '96px',
         112: '112px',
         120: '120px',
+        128: '128px',
       },
       // Hero: the stores as wide as each other, the review and the sticker laid on the plan.
       width: {
@@ -163,6 +198,13 @@ module.exports = {
         'shot-s': '232px',
         'shot-tablet': '188px',
         'shot-phone': '196px',
+        // A card of « Quartiers » (#237): on the tablet, then on the computer, wider for the long
+        // names. À reporter dans tokens.json.
+        'district-tablet': '324px',
+        district: '300px',
+        'district-wide': '330px',
+        // The Seine of « Quartiers » on the tablet: from 12 px before the plan to its right edge.
+        'seine-tablet': 'calc(100% + 32px)',
       },
       maxWidth: {
         page: '1440px',
@@ -189,6 +231,10 @@ module.exports = {
         'shot-edge': '#DCE3F2',
         // Empty part of the stars of a rating (E-21 › Envies, #237). À reporter dans tokens.json.
         'star-empty': '#DDE3EE',
+        // Plan of Paris of « Quartiers »: its ground and its parks (#237). À reporter dans
+        // tokens.json.
+        'district-map': '#EAF0FA',
+        'district-park': '#DCEBE4',
       },
       ringWidth: { 5: '5px', 6: '6px' },
       // Shadow of the cards laid on the plan, tinted blue (E-21: rgba(38, 62, 128, 0.18)).
@@ -204,6 +250,11 @@ module.exports = {
         'idea-phone': '0 16px 36px rgba(38, 62, 128, 0.18)',
         idea: '0 18px 40px rgba(38, 62, 128, 0.18)',
         rating: '0 6px 16px rgba(38, 62, 128, 0.18)',
+        // « Quartiers » (#237): a card on the plan, « Tout Paris est dans l'app », the edge of the
+        // plan on the computer. À reporter dans tokens.json.
+        district: '0 12px 30px rgba(38, 62, 128, 0.18)',
+        'app-link': '0 10px 24px rgba(38, 62, 128, 0.18)',
+        'map-edge': 'inset 0 0 0 1px rgba(78, 116, 200, 0.10)',
       },
       // Phone around a screenshot of the app and its screen (#237): computer, second step of the
       // computer, tablet, phone. À reporter dans tokens.json.
@@ -225,6 +276,11 @@ module.exports = {
         'idea-phone': '26px',
         idea: '28px',
         'idea-photo-phone': '19px',
+        // « Quartiers » (#237): the frame of the plan (phone, then tablet and computer), the plan
+        // inside, the photo of a district.
+        'map-shell-phone': '34px',
+        'map-phone': '28px',
+        'district-thumb': '14px',
       },
       // Tilt of the cards laid on the plan (measured on E-21).
       rotate: {
@@ -283,6 +339,8 @@ module.exports = {
         'idea-photo-large': '584px',
         rating: '30px',
         'rating-l': '34px',
+        // Plan of Paris of « Quartiers » on the computer (#237).
+        'district-map': '640px',
       },
       minHeight: {
         'plan-frame': '720px',

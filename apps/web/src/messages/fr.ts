@@ -78,6 +78,42 @@ export const fr = {
     byWidoo: 'par Widoo',
     byMember: 'par {name}',
   },
+  districts: {
+    title: 'Balades à Paris, quartier par quartier',
+    lead: 'Chaque quartier a ses parcours, pensés par l’équipe Widoo et par ceux qui y vivent.',
+    banks: { right: 'Rive droite', left: 'Rive gauche' },
+    allParis: 'Tout Paris est dans l’app',
+    items: {
+      montmartre: {
+        name: 'Montmartre',
+        text: 'Escaliers, vignes et ateliers, loin de la place du Tertre.',
+      },
+      buttesChaumont: {
+        name: 'Buttes-Chaumont et Belleville',
+        text: 'Un parc à flanc de colline et des rues qui grimpent vers les points de vue.',
+      },
+      canalSaintMartin: {
+        name: 'Canal Saint-Martin',
+        text: 'Écluses, passerelles et pique-niques au bord de l’eau.',
+      },
+      passages: {
+        name: 'Les passages couverts',
+        text: 'Galerie Vivienne et ses voisins, pour flâner à l’abri.',
+      },
+      marais: {
+        name: 'Le Marais',
+        text: 'Hôtels particuliers, friperies et boulangeries, à deux pas les uns des autres.',
+      },
+      saintGermain: {
+        name: 'Saint-Germain-des-Prés',
+        text: 'Librairies, galeries et cafés de la rive gauche.',
+      },
+      latinQuarter: {
+        name: 'Le Quartier latin',
+        text: 'Ruelles, cinémas d’art et d’essai et jardin du Luxembourg.',
+      },
+    },
+  },
   notFound: {
     title: 'Cette page n’existe pas',
     body: 'L’adresse est peut-être incomplète. Les idées de sortie vous attendent sur l’accueil et dans l’app.',
