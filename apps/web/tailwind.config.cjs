@@ -57,8 +57,17 @@ module.exports = {
       fontWeight: { medium: '500', bold: '700', extrabold: '800' },
       // Sizes of the site drawn in E-21 and missing from tokens.json: to move there (DESIGN), then
       // remove from here.
-      // QR code, and the disc of the icon of « Télécharger l'app » on the computer.
-      size: { qr: '120px', 'qr-hero': '116px', 'download-disc': '36px' },
+      // QR code, and the disc of the icon of « Télécharger l'app » on the computer; stars of a
+      // rating on a photo and the logo of Widoo beside an example route (#237, à reporter dans
+      // tokens.json).
+      size: {
+        qr: '120px',
+        'qr-hero': '116px',
+        'download-disc': '36px',
+        star: '13px',
+        'star-l': '15px',
+        'credit-logo': '28px',
+      },
       // Title of the missing page (E-21, D-074): 42/44 on the phone, 64/66 on the computer, tighter
       // by 4 % (measured on the mockups), and the text under it.
       fontSize: {
@@ -100,6 +109,16 @@ module.exports = {
           { lineHeight: '30px', letterSpacing: '-0.36px', fontWeight: '800' },
         ],
         'step-number': ['18px', { lineHeight: '20px', fontWeight: '800' }],
+        // « Envies » (#237): title of the large card on the computer, rating on a photo, creator
+        // of an example route. À reporter dans tokens.json.
+        'idea-title-xl': [
+          '28px',
+          { lineHeight: '34px', letterSpacing: '-0.56px', fontWeight: '800' },
+        ],
+        'rating-value': ['13px', { lineHeight: '18px', fontWeight: '800' }],
+        'rating-value-l': ['15px', { lineHeight: '18px', fontWeight: '800' }],
+        'credit-title': ['14px', { lineHeight: '20px', fontWeight: '700' }],
+        'credit-initial': ['11px', { lineHeight: '12px', fontWeight: '800' }],
       },
       // Width of the pages, held at the mockups of the computer (1440 px), then the blue frame on
       // the computer (E-21, measured on the mockups): its margin, the width of its column, the
@@ -110,17 +129,21 @@ module.exports = {
         gutter: '40px',
         // Sections of the home page (#237), measured in the source of the mockups. À reporter dans
         // tokens.json.
+        2: '2px',
         7: '7px',
         14: '14px',
         22: '22px',
         36: '36px',
+        44: '44px',
         48: '48px',
         52: '52px',
+        56: '56px',
         64: '64px',
         72: '72px',
         80: '80px',
         88: '88px',
         96: '96px',
+        112: '112px',
         120: '120px',
       },
       // Hero: the stores as wide as each other, the review and the sticker laid on the plan.
@@ -164,6 +187,8 @@ module.exports = {
         'frame-shell': '#EDF1FA',
         // Edge of the phone around a screenshot of the app (#237). À reporter dans tokens.json.
         'shot-edge': '#DCE3F2',
+        // Empty part of the stars of a rating (E-21 › Envies, #237). À reporter dans tokens.json.
+        'star-empty': '#DDE3EE',
       },
       ringWidth: { 5: '5px', 6: '6px' },
       // Shadow of the cards laid on the plan, tinted blue (E-21: rgba(38, 62, 128, 0.18)).
@@ -174,6 +199,11 @@ module.exports = {
         'shot-phone': '0 24px 48px rgba(38, 62, 128, 0.18)',
         'shot-tablet': '0 26px 52px rgba(38, 62, 128, 0.18)',
         shot: '0 30px 60px rgba(38, 62, 128, 0.18)',
+        // « Envies » (#237): photo sticker on the phone and from the tablet, rating on a photo. À
+        // reporter dans tokens.json.
+        'idea-phone': '0 16px 36px rgba(38, 62, 128, 0.18)',
+        idea: '0 18px 40px rgba(38, 62, 128, 0.18)',
+        rating: '0 6px 16px rgba(38, 62, 128, 0.18)',
       },
       // Phone around a screenshot of the app and its screen (#237): computer, second step of the
       // computer, tablet, phone. À reporter dans tokens.json.
@@ -187,6 +217,14 @@ module.exports = {
         'screen-phone': '25px',
         // Turn of the path of « Comment ça marche » on the tablet: 40 px in the middle of the line.
         'how-path': '45px',
+        // « Envies » (#237): its blue panel (phone, tablet, computer), a photo sticker and its photo
+        // on the phone, then from the tablet. À reporter dans tokens.json.
+        'panel-phone': '36px',
+        'panel-tablet': '40px',
+        panel: '48px',
+        'idea-phone': '26px',
+        idea: '28px',
+        'idea-photo-phone': '19px',
       },
       // Tilt of the cards laid on the plan (measured on E-21).
       rotate: {
@@ -199,6 +237,18 @@ module.exports = {
         'shot-1-phone': '-2deg',
         'shot-2': '2deg',
         'shot-3': '-1.5deg',
+        // Photo stickers of « Envies », one tilt per mood: phone and tablet, then computer (#237).
+        // À reporter dans tokens.json.
+        'idea-1': '-1.8deg',
+        'idea-2': '1.5deg',
+        'idea-3': '-1.2deg',
+        'idea-4': '1.2deg',
+        'idea-5': '-1.5deg',
+        'idea-1-xl': '-3deg',
+        'idea-2-xl': '2.5deg',
+        'idea-3-xl': '-2deg',
+        'idea-4-xl': '2deg',
+        'idea-5-xl': '-2.5deg',
       },
       // Blue plan: under the content on the phone and the tablet (measured on E-21), and the
       // least height of the frame on the computer, so that the whole route shows.
@@ -223,6 +273,16 @@ module.exports = {
         'shot-phone': '408px',
         'how-path-tablet': '1388px',
         'how-bar': 'calc(100% + 48px)',
+        // Photos of « Envies » (#237): phone; tablet, the first one larger; computer, the first one
+        // as high as two rows. Rating on a photo, larger on the first one. À reporter dans
+        // tokens.json.
+        'idea-photo-phone': '172px',
+        'idea-photo-tablet': '196px',
+        'idea-photo-large-tablet': '320px',
+        'idea-photo': '190px',
+        'idea-photo-large': '584px',
+        rating: '30px',
+        'rating-l': '34px',
       },
       minHeight: {
         'plan-frame': '720px',
@@ -260,7 +320,9 @@ module.exports = {
       // Buttons (E-21 › Mouvement): 0.97 when pressed, in 160 ms; the icon of « Télécharger
       // l'app » moves down 2 px on hover, with a mouse only.
       scale: { press: '0.97' },
-      transitionDuration: { press: '160ms' },
+      // A photo sticker of « Envies » straightens up on hover in 250 ms (#237).
+      transitionDuration: { press: '160ms', tilt: '250ms' },
+      transitionTimingFunction: { out: 'cubic-bezier(0.23, 1, 0.32, 1)' },
       translate: { nudge: '2px' },
       animation: {
         'plan-draw': 'plan-draw 1800ms linear 300ms both',

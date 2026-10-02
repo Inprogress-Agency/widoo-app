@@ -1,4 +1,5 @@
 import { HowItWorks } from '@/components/home/how-it-works/HowItWorks';
+import { Ideas } from '@/components/home/ideas/Ideas';
 import { ReviewStack } from '@/components/home/ReviewStack';
 import { RouteSticker } from '@/components/home/RouteSticker';
 import { BlueFrame } from '@/components/layout/BlueFrame';
@@ -12,6 +13,7 @@ import type { SiteLocale } from '@/config/locales';
 import { heroMotion } from '@/config/motion';
 import { formatDuration } from '@/lib/format';
 import { fill, plural } from '@/lib/i18n/fill';
+import type { IdeaRoutes } from '@/lib/ideas/types';
 import type { AppReview } from '@/lib/reviews/types';
 import type { StoreLinks } from '@/lib/store-links';
 import type { Messages } from '@/messages';
@@ -24,6 +26,8 @@ type Props = {
   /** Address of `/app`, behind the QR code of the computer. */
   appLink: string;
   reviews: AppReview[];
+  /** Example routes of the moods (E-21 › Envies), from the API. */
+  ideaRoutes: IdeaRoutes;
   now: Date;
   jsonLd: Record<string, unknown>;
 };
@@ -32,9 +36,18 @@ type Props = {
  * Home page of the site (E-21). The hero: title, line, stores and, on the computer, the QR code
  * of `/app`; the blue plan of the example route with its sticker and a review. The plan sits
  * behind the frame on the computer, under the text on the phone and the tablet. Then the sections:
- * « Comment ça marche » (#237); the others arrive with #237 and #238.
+ * « Comment ça marche » and the moods (#237); the others arrive with #237 and #238.
  */
-export function HomeContainer({ locale, messages, stores, appLink, reviews, now, jsonLd }: Props) {
+export function HomeContainer({
+  locale,
+  messages,
+  stores,
+  appLink,
+  reviews,
+  ideaRoutes,
+  now,
+  jsonLd,
+}: Props) {
   const texts = messages.home;
   const sticker = (
     <RouteSticker
@@ -53,7 +66,12 @@ export function HomeContainer({ locale, messages, stores, appLink, reviews, now,
       <JsonLd data={jsonLd} />
       <BlueFrame
         column="hero"
-        after={<HowItWorks texts={messages.howItWorks} />}
+        after={
+          <>
+            <HowItWorks texts={messages.howItWorks} />
+            <Ideas locale={locale} messages={messages} routes={ideaRoutes} />
+          </>
+        }
         backdrop={<DesktopPlan walkText={messages.plan.walk} review={review()} sticker={sticker} />}
         below={
           <PhoneAndTabletPlan
