@@ -32,19 +32,19 @@ export function SiteHeader({ locale, texts }: { locale: SiteLocale; texts: Messa
       </div>
       <nav
         aria-label={texts.sections}
-        className="absolute left-1/2 hidden -translate-x-1/2 xl:flex"
+        className="absolute left-1/2 hidden -translate-x-1/2 gap-32 xl:flex"
       >
         {sections.map((section) => (
           <Link
             key={section.id}
             href={`${home}#${section.id}`}
-            className="px-20 text-body-medium text-ink"
+            className="px-4 py-12 text-body-semibold text-ink"
           >
             {section.label}
           </Link>
         ))}
       </nav>
-      <div className="flex items-center gap-20 xl:gap-24">
+      <div className="flex items-center gap-16 xl:gap-20">
         <LanguageSwitch current={locale} label={texts.language} />
         <div className="hidden md:block">
           <DownloadButton href={localizedPath(locale, '/app')} label={texts.download} />

@@ -14,8 +14,9 @@ export function pathInLocale(pathname: string, locale: SiteLocale): string {
 }
 
 /**
- * « FR | EN » (E-21): the current language in ink, the other one in grey; each one opens the same
- * page in its language, with the query of the address (the token of a private link).
+ * « FR | EN » (E-21): the current language in ink, the other one in grey, 44 px high to the touch;
+ * each one opens the same page in its language, with the query of the address (the token of a
+ * private link).
  */
 export function LanguageSwitch({ current, label }: { current: SiteLocale; label: string }) {
   const pathname = usePathname();
@@ -27,10 +28,14 @@ export function LanguageSwitch({ current, label }: { current: SiteLocale; label:
     );
   }
   return (
-    <nav aria-label={label} className="flex items-center gap-12">
+    <nav aria-label={label} className="flex items-center gap-6">
       {locales.map((locale, index) => (
         <Fragment key={locale}>
-          {index > 0 && <span aria-hidden className="h-16 border-l border-line" />}
+          {index > 0 && (
+            <span aria-hidden className="text-button text-line">
+              |
+            </span>
+          )}
           <a
             href={pathInLocale(pathname, locale)}
             hrefLang={locale}
@@ -39,7 +44,7 @@ export function LanguageSwitch({ current, label }: { current: SiteLocale; label:
             aria-current={locale === current ? 'true' : undefined}
             onClick={keepQuery}
             // Each language keeps the room of its bold version: nothing moves when it changes.
-            className="grid uppercase"
+            className="grid px-2 py-12 uppercase"
           >
             <span aria-hidden className="invisible col-start-1 row-start-1 text-button">
               {locale}
@@ -47,7 +52,7 @@ export function LanguageSwitch({ current, label }: { current: SiteLocale; label:
             <span
               className={clsx(
                 'col-start-1 row-start-1 text-center',
-                locale === current ? 'text-button text-ink' : 'text-body-medium text-muted',
+                locale === current ? 'text-button text-ink' : 'text-body-semibold text-muted',
               )}
             >
               {locale}
