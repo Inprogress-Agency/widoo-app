@@ -9,4 +9,8 @@
     outline: 3px solid theme('colors.ink');
     outline-offset: 3px;
   }
+  /* The content reached by « Aller au contenu » takes the focus without a ring around the page. */
+  #contenu:focus {
+    outline: none;
+  }
 }
