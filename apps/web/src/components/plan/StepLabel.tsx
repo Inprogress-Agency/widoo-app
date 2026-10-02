@@ -24,7 +24,7 @@ export function StepLabel({
       )}
     >
       <span className="text-label-strong text-ink">{time}</span>
-      <span className="text-label text-ink">{name}</span>
+      <span className="text-label-semibold text-ink">{name}</span>
       {locked && <LockSimpleIcon className="size-icon-s text-muted" />}
     </span>
   );

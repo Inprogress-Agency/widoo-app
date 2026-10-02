@@ -11,7 +11,9 @@ import type { ReactNode } from 'react';
 // Self-hosted at build time: no request to Google from the browser (Site-Web › Rendu et cache).
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: ['500', '800'],
+  // The weights of the mockups (E-21): 500 for the text, 600 for the links of the header and the
+  // names of the steps on the plan, 700 for the names and the buttons, 800 for the titles.
+  weight: ['500', '600', '700', '800'],
   display: 'swap',
   variable: '--font-jakarta',
 });

@@ -10,7 +10,7 @@ export function DownloadButton({ href, label }: { href: string; label: string })
   return (
     <a
       href={href}
-      className="group flex h-touch-min w-download-button items-center justify-between gap-12 rounded-pill bg-blue pl-20 pr-6 text-button text-on-blue transition-transform duration-press active:scale-press xl:h-button-h xl:w-download-button-l"
+      className="group flex h-touch-min w-download-button items-center justify-between gap-12 whitespace-nowrap rounded-pill bg-blue pl-22 pr-6 text-button text-on-blue transition-transform duration-press active:scale-press xl:h-button-h xl:w-download-button-l"
     >
       {label}
       <span

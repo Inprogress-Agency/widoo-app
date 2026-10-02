@@ -115,9 +115,10 @@ module.exports = {
         // Cards laid on the plan of the hero: the quote of a review, the title of the sticker.
         quote: ['15px', { lineHeight: '22px', letterSpacing: '-0.15px', fontWeight: '700' }],
         'sticker-title': ['15px', { lineHeight: '20px', fontWeight: '800' }],
-        // « widoo » of the logo in the header: 21 px, 23 px on the computer.
-        wordmark: ['21px', { lineHeight: '28px', fontWeight: '800' }],
-        'wordmark-l': ['23px', { lineHeight: '28px', fontWeight: '800' }],
+        // « widoo » of the logo in the header: 22/25, 24/28 on the computer, tighter by 3 % (source
+        // of the mockups).
+        wordmark: ['22px', { lineHeight: '25px', letterSpacing: '-0.66px', fontWeight: '800' }],
+        'wordmark-l': ['24px', { lineHeight: '28px', letterSpacing: '-0.72px', fontWeight: '800' }],
         // Sections of the home page (#237): title, 34/38 on the phone, 44/48 on the tablet, 52/56
         // on the computer, tighter by 3.5 %; the text under it; the title of a step and its
         // number. À reporter dans tokens.json.
@@ -153,6 +154,10 @@ module.exports = {
         'credit-initial': ['11px', { lineHeight: '12px', fontWeight: '800' }],
         // « Quartiers » (#237): « Rive droite », « Rive gauche ». À reporter dans tokens.json.
         'bank-label': ['12px', { lineHeight: '16px', letterSpacing: '1.68px', fontWeight: '800' }],
+        // `body-medium` and `label` in 600, as on the mockups: the links of the header, the other
+        // language, the names of the steps on the plan. À reporter dans tokens.json.
+        'body-semibold': ['15px', { lineHeight: '20px', fontWeight: '600' }],
+        'label-semibold': ['13px', { lineHeight: '18px', fontWeight: '600' }],
       },
       // Width of the pages, held at the mockups of the computer (1440 px), then the blue frame on
       // the computer (E-21, measured on the mockups): its margin, the width of its column, the
@@ -165,6 +170,8 @@ module.exports = {
         // tokens.json.
         2: '2px',
         7: '7px',
+        // Between the icon and « widoo » in the header, on the phone and the tablet.
+        9: '9px',
         14: '14px',
         22: '22px',
         36: '36px',
@@ -188,8 +195,8 @@ module.exports = {
         'store-badge-hero-phone': '148px',
         review: '300px',
         // « Télécharger l'app », the same width in every language so that the header never moves.
-        'download-button': '200px',
-        'download-button-l': '204px',
+        'download-button': '198px',
+        'download-button-l': '202px',
         sticker: '210px',
         // « Comment ça marche » (#237): a step on the computer, the screenshots of the app in their
         // phone (computer, second step of the computer, tablet, phone). À reporter dans tokens.json.
