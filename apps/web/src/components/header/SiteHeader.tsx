@@ -47,7 +47,7 @@ export function SiteHeader({ locale, texts }: { locale: SiteLocale; texts: Messa
       <div className="flex items-center gap-16 xl:gap-20">
         <LanguageSwitch current={locale} label={texts.language} />
         <div className="hidden md:block">
-          <DownloadButton href={localizedPath(locale, '/app')} label={texts.download} />
+          <DownloadButton href={`${home}#telecharger`} label={texts.download} />
         </div>
       </div>
     </header>

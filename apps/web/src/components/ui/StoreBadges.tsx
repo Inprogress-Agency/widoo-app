@@ -12,9 +12,10 @@ type Props = {
   playStoreUrl?: string;
   /**
    * `hero`: as wide as each other (E-21 › Hero), 148 px on the phone, 166 px from the tablet,
-   * stacked on the computer.
+   * stacked on the computer. `banner`: 150 px side by side on the phone, 169 px stacked from the
+   * tablet (E-21 › Bandeau final).
    */
-  layout?: 'row' | 'hero';
+  layout?: 'row' | 'hero' | 'banner';
   className?: string;
 };
 
@@ -33,6 +34,7 @@ export function StoreBadges({
   className,
 }: Props) {
   const hero = layout === 'hero';
+  const banner = layout === 'banner';
   const files = storeBadges[locale];
   const badges = [
     { url: appStoreUrl, label: texts.appStore, file: files.appStore },
@@ -43,7 +45,9 @@ export function StoreBadges({
   return (
     <ul
       className={clsx(
-        hero ? 'flex gap-12 xl:flex-col' : 'flex gap-10 max-md:justify-center max-md:gap-12',
+        hero && 'flex gap-12 xl:flex-col',
+        banner && 'flex flex-wrap gap-10 md:flex-col',
+        layout === 'row' && 'flex gap-10 max-md:justify-center max-md:gap-12',
         className,
       )}
     >
@@ -52,9 +56,11 @@ export function StoreBadges({
         // rather than on a second line.
         <li
           key={file.src}
-          className={
-            hero ? 'w-store-badge-hero-phone md:w-store-badge-hero' : 'max-md:overflow-hidden'
-          }
+          className={clsx(
+            hero && 'w-store-badge-hero-phone md:w-store-badge-hero',
+            banner && 'w-store-badge-banner-phone md:w-store-badge-banner',
+            layout === 'row' && 'max-md:overflow-hidden',
+          )}
         >
           <a href={url} className="block max-md:max-w-full">
             <Image
@@ -64,9 +70,9 @@ export function StoreBadges({
               height={file.height}
               unoptimized
               className={
-                hero
-                  ? 'h-auto w-full'
-                  : 'h-touch-min w-auto max-w-full object-contain md:h-store-badge'
+                layout === 'row'
+                  ? 'h-touch-min w-auto max-w-full object-contain md:h-store-badge'
+                  : 'h-auto w-full'
               }
             />
           </a>

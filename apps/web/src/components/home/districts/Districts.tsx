@@ -76,7 +76,10 @@ export function Districts({
             {bank('right')}
             <SeineDivider />
             {bank('left')}
-            <AllParisLink href={localizedPath(locale, '/app')} label={texts.allParis} />
+            <AllParisLink
+              href={`${localizedPath(locale, '/')}#telecharger`}
+              label={texts.allParis}
+            />
           </div>
         </div>
       </div>

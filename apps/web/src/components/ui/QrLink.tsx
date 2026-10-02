@@ -11,11 +11,14 @@ export async function QrLink({
   link,
   label,
   size = 'default',
+  raised,
 }: {
   link: string;
   label: string;
   /** `hero`: 116 px, the code itself the same size (E-21 › Hero). */
   size?: 'default' | 'hero';
+  /** With the shadow tinted blue of the final banner. */
+  raised?: boolean;
 }) {
   const svg = await qrCodeSvg(link);
   return (
@@ -23,6 +26,7 @@ export async function QrLink({
       className={clsx(
         'relative block shrink-0 rounded-section bg-bg',
         size === 'hero' ? 'size-qr-hero p-10' : 'size-qr p-12',
+        raised && 'shadow-qr',
       )}
     >
       {/* A data URI, allowed by the CSP (`img-src data:`); next/image does not apply. */}
