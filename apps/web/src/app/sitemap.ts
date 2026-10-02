@@ -3,5 +3,5 @@ import { buildSitemap } from '@/lib/crawling';
 import type { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return site.SITE_INDEXABLE ? buildSitemap(site.SITE_URL) : [];
+  return site.SITE_INDEXABLE ? buildSitemap(site.SITE_URL, Boolean(site.WIDOO_API_URL)) : [];
 }
