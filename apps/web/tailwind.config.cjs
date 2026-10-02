@@ -64,6 +64,28 @@ module.exports = {
           ]),
         ),
       ),
+    // « Questions fréquentes » (E-21 › Mouvement, #238): `faq-item` on a `details`, the answer opens
+    // in height and opacity in 220 ms where the browser animates `details`, at once elsewhere;
+    // with « Réduire les animations », a fade only.
+    ({ addBase, addComponents }) => {
+      addBase({ ':root': { interpolateSize: 'allow-keywords' } });
+      addComponents({
+        '.faq-item summary::-webkit-details-marker': { display: 'none' },
+        '.faq-item::details-content': {
+          blockSize: '0',
+          opacity: '0',
+          overflow: 'clip',
+          transition:
+            'block-size 220ms cubic-bezier(0.23, 1, 0.32, 1), opacity 220ms cubic-bezier(0.23, 1, 0.32, 1), content-visibility 220ms allow-discrete',
+        },
+        '.faq-item[open]::details-content': { blockSize: 'auto', opacity: '1' },
+        '@media (prefers-reduced-motion: reduce)': {
+          '.faq-item::details-content': {
+            transition: 'opacity 200ms ease, content-visibility 200ms allow-discrete',
+          },
+        },
+      });
+    },
     // « Comment ça marche »: its path draws itself as the page scrolls (E-21 › Mouvement), where
     // the browser ties animations to scrolling; elsewhere it shows drawn.
     ({ addUtilities }) =>
@@ -99,6 +121,9 @@ module.exports = {
         'district-thumb': '52px',
         'district-thumb-xl': '60px',
         'district-icon': '26px',
+        // « Questions fréquentes » (#238): the disc of + and −, the envelope of the contact.
+        'faq-icon': '36px',
+        'contact-icon': '18px',
       },
       // Title of the missing page (E-21, D-074): 42/44 on the phone, 64/66 on the computer, tighter
       // by 4 % (measured on the mockups), and the text under it.
@@ -158,6 +183,16 @@ module.exports = {
         // language, the names of the steps on the plan. À reporter dans tokens.json.
         'body-semibold': ['15px', { lineHeight: '20px', fontWeight: '600' }],
         'label-semibold': ['13px', { lineHeight: '18px', fontWeight: '600' }],
+        // « Questions fréquentes » (#238): a question (17/23 on the phone), its answer, the title
+        // and the text of « Une autre question ? ». À reporter dans tokens.json.
+        'faq-question': ['18px', { lineHeight: '24px', fontWeight: '700' }],
+        'faq-question-phone': ['17px', { lineHeight: '23px', fontWeight: '700' }],
+        'faq-answer': ['16px', { lineHeight: '26px', fontWeight: '500' }],
+        'contact-title': [
+          '19px',
+          { lineHeight: '24px', letterSpacing: '-0.19px', fontWeight: '800' },
+        ],
+        'body-m': ['15px', { lineHeight: '22px', fontWeight: '500' }],
       },
       // Width of the pages, held at the mockups of the computer (1440 px), then the blue frame on
       // the computer (E-21, measured on the mockups): its margin, the width of its column, the
@@ -230,7 +265,13 @@ module.exports = {
         'section-heading': '640px',
         'section-heading-tablet': '580px',
         'how-text': '330px',
+        // An answer of « Questions fréquentes » (#238). À reporter dans tokens.json.
+        'faq-answer': '600px',
       },
+      // « Questions fréquentes » on the computer (#238): the title and the contact on the left,
+      // the questions on the right, as high as they need without pushing the contact down.
+      gridTemplateColumns: { faq: '380px 1fr' },
+      gridTemplateRows: { faq: 'auto 1fr' },
       // Shell of the blue frame (E-21, « coque #EDF1FA »): 8 px, 6 px on the phone.
       colors: {
         'frame-shell': '#EDF1FA',
@@ -262,6 +303,9 @@ module.exports = {
         district: '0 12px 30px rgba(38, 62, 128, 0.18)',
         'app-link': '0 10px 24px rgba(38, 62, 128, 0.18)',
         'map-edge': 'inset 0 0 0 1px rgba(78, 116, 200, 0.10)',
+        // Edge of a closed question, none once open (#238). À reporter dans tokens.json.
+        'faq-edge': 'inset 0 0 0 1px #DCE3F2',
+        none: 'none',
       },
       // Phone around a screenshot of the app and its screen (#237): computer, second step of the
       // computer, tablet, phone. À reporter dans tokens.json.
@@ -288,6 +332,8 @@ module.exports = {
         'map-shell-phone': '34px',
         'map-phone': '28px',
         'district-thumb': '14px',
+        // « Une autre question ? » (#238). À reporter dans tokens.json.
+        contact: '28px',
       },
       // Tilt of the cards laid on the plan (measured on E-21).
       rotate: {
@@ -353,6 +399,8 @@ module.exports = {
         'plan-frame': '720px',
         // Text of a step of « Comment ça marche » on the tablet, so that the screenshots line up.
         'how-text-tablet': '212px',
+        // A question of « Questions fréquentes », 72 px high when it holds on one line (#238).
+        'faq-question': '72px',
       },
       // Places of the steps of « Comment ça marche » on the computer (#237), in its 1200 px
       // column. À reporter dans tokens.json.
