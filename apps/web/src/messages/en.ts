@@ -30,6 +30,91 @@ export const en: Messages = {
     stickerMeta: '{steps} in {duration}',
     qrLabel: 'QR code to download the app',
   },
+  howItWorks: {
+    title: 'Walks in Paris, all ready to go',
+    lead: 'A place to see, a café, a street to climb: each route links the stops together. All you have to do is go.',
+    steps: [
+      {
+        title: 'Choose your outing',
+        text: 'Duration, budget, distance and stops: everything is shown, and checked on site by those who did it.',
+      },
+      {
+        title: 'Plan it',
+        text: 'Pick the day. Widoo tells you exactly {strong}, checks the opening hours and reminds you of the outing the evening before at 6 pm.',
+        strong: 'what to bring and what to book',
+      },
+      {
+        title: 'Let yourself be guided',
+        text: 'On site, follow the path from one stop to the next, without missing anything on the way.',
+      },
+    ],
+  },
+  ideas: {
+    title: 'Outing ideas for every mood',
+    lead: 'As a couple, with friends, with the family or in the rain: choose by mood, budget and time.',
+    moods: {
+      romantic: {
+        title: 'Romantic outing',
+        text: 'A walk by the water, a drink at sunset, a slightly hidden table.',
+      },
+      friends: {
+        title: 'With friends',
+        text: 'Thrift shops, foodie spots and terraces, for a long afternoon.',
+      },
+      freeFamily: {
+        title: 'Free and family outings',
+        text: 'Parks, viewpoints and open-air games, without spending a thing.',
+      },
+      rainy: {
+        title: 'What to do when it rains',
+        text: 'Covered passages, museums and cafés: sheltered routes, made for rainy days.',
+      },
+      fullDay: {
+        title: 'A whole day',
+        text: 'From morning to evening, a whole neighbourhood, breaks included.',
+      },
+    },
+    routeMeta: '{duration}, {budget}, {author}',
+    free: 'free',
+    byWidoo: 'by Widoo',
+    byMember: 'by {name}',
+  },
+  districts: {
+    title: 'Walks in Paris, neighbourhood by neighbourhood',
+    lead: 'Each neighbourhood has its routes, made by the Widoo team and by the people who live there.',
+    banks: { right: 'Right Bank', left: 'Left Bank' },
+    allParis: 'All of Paris is in the app',
+    items: {
+      montmartre: {
+        name: 'Montmartre',
+        text: 'Stairs, vineyards and workshops, away from the Place du Tertre.',
+      },
+      buttesChaumont: {
+        name: 'Buttes-Chaumont and Belleville',
+        text: 'A hillside park and streets climbing up to the viewpoints.',
+      },
+      canalSaintMartin: {
+        name: 'Canal Saint-Martin',
+        text: 'Locks, footbridges and picnics by the water.',
+      },
+      passages: {
+        name: 'The covered passages',
+        text: 'Galerie Vivienne and its neighbours, to stroll under cover.',
+      },
+      marais: {
+        name: 'Le Marais',
+        text: 'Mansions, thrift shops and bakeries, a stone’s throw from each other.',
+      },
+      saintGermain: {
+        name: 'Saint-Germain-des-Prés',
+        text: 'Bookshops, galleries and cafés of the Left Bank.',
+      },
+      latinQuarter: {
+        name: 'The Latin Quarter',
+        text: 'Lanes, art-house cinemas and the Luxembourg Gardens.',
+      },
+    },
+  },
   notFound: {
     title: 'This page does not exist',
     body: 'The address may be incomplete. Outing ideas are waiting for you on the home page and in the app.',

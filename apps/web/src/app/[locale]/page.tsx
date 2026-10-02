@@ -2,6 +2,8 @@ import { appName, publisher, site } from '@/config/site';
 import { HomeContainer } from '@/containers/HomeContainer';
 import { getMessages, readLocale } from '@/lib/i18n/messages';
 import { homeJsonLd } from '@/lib/json-ld';
+import { getDistrictRoutes } from '@/lib/districts/source';
+import { getIdeaRoutes } from '@/lib/ideas/source';
 import { getHeroReviews } from '@/lib/reviews/source';
 import { buildMetadata } from '@/lib/seo';
 import type { Metadata } from 'next';
@@ -41,6 +43,8 @@ export default async function HomePage({ params }: Props) {
       stores={{ appStoreUrl: site.APP_STORE_URL, playStoreUrl: site.PLAY_STORE_URL }}
       appLink={new URL('/app', site.SITE_URL).toString()}
       reviews={await getHeroReviews()}
+      ideaRoutes={await getIdeaRoutes()}
+      districtRoutes={await getDistrictRoutes()}
       now={new Date()}
       jsonLd={jsonLd}
     />

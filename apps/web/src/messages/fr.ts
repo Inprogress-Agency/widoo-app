@@ -29,6 +29,91 @@ export const fr = {
     stickerMeta: '{steps} en {duration}',
     qrLabel: 'QR code pour télécharger l’app',
   },
+  howItWorks: {
+    title: 'Des balades à Paris toutes prêtes',
+    lead: 'Un lieu à voir, un café, une rue à remonter : chaque parcours enchaîne les étapes. Vous n’avez plus qu’à y aller.',
+    steps: [
+      {
+        title: 'Choisissez votre sortie',
+        text: 'Durée, budget, distance et étapes : tout est affiché, et vérifié sur place par ceux qui l’ont faite.',
+      },
+      {
+        title: 'Programmez-la',
+        text: 'Choisissez le jour. Widoo vous dit exactement {strong}, vérifie les horaires et vous rappelle la sortie la veille à 18:00.',
+        strong: 'quoi prévoir et quoi réserver',
+      },
+      {
+        title: 'Laissez-vous guider',
+        text: 'Sur place, suivez le chemin d’une étape à l’autre, sans rien rater en route.',
+      },
+    ],
+  },
+  ideas: {
+    title: 'Des idées de sortie pour chaque envie',
+    lead: 'En amoureux, entre amis, en famille ou sous la pluie\u00a0: choisissez selon votre envie, votre budget et votre temps.',
+    moods: {
+      romantic: {
+        title: 'Sortie en amoureux',
+        text: 'Une balade au bord de l’eau, un verre au soleil couchant, une table un peu cachée.',
+      },
+      friends: {
+        title: 'Entre amis',
+        text: 'Friperies, adresses gourmandes et terrasses, pour une après-midi qui s’étire.',
+      },
+      freeFamily: {
+        title: 'Sorties gratuites et en famille',
+        text: 'Parcs, points de vue et jeux en plein air, sans rien dépenser.',
+      },
+      rainy: {
+        title: 'Que faire quand il pleut',
+        text: 'Passages couverts, musées et cafés\u00a0: des parcours à l’abri, pensés pour les jours de pluie.',
+      },
+      fullDay: {
+        title: 'Toute une journée',
+        text: 'Du matin au soir, un quartier en entier, pauses comprises.',
+      },
+    },
+    routeMeta: '{duration}, {budget}, {author}',
+    free: 'gratuit',
+    byWidoo: 'par Widoo',
+    byMember: 'par {name}',
+  },
+  districts: {
+    title: 'Balades à Paris, quartier par quartier',
+    lead: 'Chaque quartier a ses parcours, pensés par l’équipe Widoo et par ceux qui y vivent.',
+    banks: { right: 'Rive droite', left: 'Rive gauche' },
+    allParis: 'Tout Paris est dans l’app',
+    items: {
+      montmartre: {
+        name: 'Montmartre',
+        text: 'Escaliers, vignes et ateliers, loin de la place du Tertre.',
+      },
+      buttesChaumont: {
+        name: 'Buttes-Chaumont et Belleville',
+        text: 'Un parc à flanc de colline et des rues qui grimpent vers les points de vue.',
+      },
+      canalSaintMartin: {
+        name: 'Canal Saint-Martin',
+        text: 'Écluses, passerelles et pique-niques au bord de l’eau.',
+      },
+      passages: {
+        name: 'Les passages couverts',
+        text: 'Galerie Vivienne et ses voisins, pour flâner à l’abri.',
+      },
+      marais: {
+        name: 'Le Marais',
+        text: 'Hôtels particuliers, friperies et boulangeries, à deux pas les uns des autres.',
+      },
+      saintGermain: {
+        name: 'Saint-Germain-des-Prés',
+        text: 'Librairies, galeries et cafés de la rive gauche.',
+      },
+      latinQuarter: {
+        name: 'Le Quartier latin',
+        text: 'Ruelles, cinémas d’art et d’essai et jardin du Luxembourg.',
+      },
+    },
+  },
   notFound: {
     title: 'Cette page n’existe pas',
     body: 'L’adresse est peut-être incomplète. Les idées de sortie vous attendent sur l’accueil et dans l’app.',
