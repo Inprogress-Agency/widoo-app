@@ -60,6 +60,16 @@ export function formatShortDate(iso: string, locale: SiteLocale): string {
   }).format(new Date(iso));
 }
 
+/** « 28 septembre 2026 » in French, « September 28, 2026 » in English, in the time zone of Paris. */
+export function formatLongDate(iso: string, locale: SiteLocale): string {
+  return new Intl.DateTimeFormat(localeTags[locale].lang, {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'Europe/Paris',
+  }).format(new Date(iso));
+}
+
 /** « il y a 3 jours », « yesterday »: how old a review is, in whole days (E-21). */
 export function formatDaysAgo(iso: string, now: Date, locale: SiteLocale): string {
   const days = Math.max(0, Math.floor((now.getTime() - new Date(iso).getTime()) / 86_400_000));
