@@ -1,7 +1,8 @@
 import { LanguageSwitch } from '@/components/header/LanguageSwitch';
 import { SiteLogo } from '@/components/header/SiteLogo';
 import type { SiteLocale } from '@/config/locales';
-import { contactEmail, legalPaths, publisher } from '@/config/site';
+import { legalPaths } from '@/config/legal';
+import { contactEmail, publisher } from '@/config/site';
 import { fill } from '@/lib/i18n/fill';
 import { localizedPath } from '@/lib/seo';
 import type { Messages } from '@/messages';
@@ -36,10 +37,10 @@ export function SiteFooter({
         aria-label={texts.links}
         className="col-span-2 row-start-2 flex flex-col md:flex-row md:flex-wrap md:gap-24 xl:order-3 xl:gap-32"
       >
-        <Link href={localizedPath(locale, legalPaths.terms)} className={link}>
+        <Link href={localizedPath(locale, legalPaths.terms[locale])} className={link}>
           {texts.terms}
         </Link>
-        <Link href={localizedPath(locale, legalPaths.privacy)} className={link}>
+        <Link href={localizedPath(locale, legalPaths.privacy[locale])} className={link}>
           {texts.privacy}
         </Link>
         <a href={`mailto:${contactEmail}`} className={link}>

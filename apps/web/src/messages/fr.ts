@@ -161,6 +161,17 @@ export const fr = {
     terms: 'Conditions d’utilisation',
     privacy: 'Politique de confidentialité',
   },
+  legal: {
+    updated: 'Mise à jour le {date}',
+    summary: 'L’essentiel',
+    meta: {
+      title: '{name} · Widoo',
+      terms:
+        'Les règles d’utilisation de Widoo, l’app de sorties toutes prêtes à Paris\u00a0: compte, parcours, Premium, modération.',
+      privacy:
+        'Les données que Widoo utilise, pourquoi, qui les reçoit et comment exercer vos droits.',
+    },
+  },
   notFound: {
     title: 'Cette page n’existe pas',
     body: 'L’adresse est peut-être incomplète. Les idées de sortie vous attendent sur l’accueil et dans l’app.',

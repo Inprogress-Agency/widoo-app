@@ -1,21 +1,26 @@
-import { localeTags, locales } from '@/config/locales';
+import { legalDocs, legalPaths } from '@/config/legal';
+import { localeTags, locales, type SiteLocale } from '@/config/locales';
 import type { MetadataRoute } from 'next';
 import { localizedPath } from './seo';
 
-/** Paths of the indexable pages, without the language prefix. The legal pages arrive with #242. */
-export const indexablePaths = ['/'] as const;
+const home: Record<SiteLocale, string> = { fr: '/', en: '/' };
 
-/** Every indexable page in every language, each linked to its other versions. */
-export function buildSitemap(siteUrl: string): MetadataRoute.Sitemap {
-  return indexablePaths.flatMap((path) => {
+/**
+ * Every indexable page in every language, each linked to its other versions: the home page, and
+ * the legal pages once the API serves their texts (`withLegal`, #242), with their path in each
+ * language.
+ */
+export function buildSitemap(siteUrl: string, withLegal: boolean): MetadataRoute.Sitemap {
+  const pages = [home, ...(withLegal ? legalDocs.map((doc) => legalPaths[doc]) : [])];
+  return pages.flatMap((paths) => {
     const languages = Object.fromEntries(
       locales.map((locale) => [
         localeTags[locale].lang,
-        `${siteUrl}${localizedPath(locale, path)}`,
+        `${siteUrl}${localizedPath(locale, paths[locale])}`,
       ]),
     );
     return locales.map((locale) => ({
-      url: `${siteUrl}${localizedPath(locale, path)}`,
+      url: `${siteUrl}${localizedPath(locale, paths[locale])}`,
       alternates: { languages },
     }));
   });

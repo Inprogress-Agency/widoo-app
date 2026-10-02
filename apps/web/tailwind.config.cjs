@@ -296,6 +296,8 @@ module.exports = {
         'how-text': '330px',
         // An answer of « Questions fréquentes » (#238). À reporter dans tokens.json.
         'faq-answer': '600px',
+        // Column of text of the legal pages (#242, comment of Ilan: 680 px at most).
+        legal: '680px',
       },
       // « Questions fréquentes » on the computer (#238): the title and the contact on the left,
       // the questions on the right, as high as they need without pushing the contact down.

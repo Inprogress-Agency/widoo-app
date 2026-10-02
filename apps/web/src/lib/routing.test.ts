@@ -56,6 +56,18 @@ describe('decideRouting', () => {
     });
   });
 
+  it('sends the short address of a legal page to its path in the language of the browser', () => {
+    expect(decideRouting({ ...request, pathname: '/conditions', acceptLanguage: 'en' })).toEqual({
+      kind: 'redirect',
+      location: '/en/terms',
+      status: 307,
+      negotiated: true,
+    });
+    expect(decideRouting({ ...request, pathname: '/privacy', search: '?src=store' })).toMatchObject(
+      { location: '/fr/confidentialite?src=store' },
+    );
+  });
+
   it('does not take a path that only starts like a language for a prefix', () => {
     expect(decideRouting({ ...request, pathname: '/fresh' })).toMatchObject({ kind: 'rewrite' });
   });
