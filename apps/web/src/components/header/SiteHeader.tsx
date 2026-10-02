@@ -1,6 +1,7 @@
 import type { SiteLocale } from '@/config/locales';
 import { localizedPath } from '@/lib/seo';
 import type { Messages } from '@/messages';
+import Link from 'next/link';
 import { DownloadButton } from './DownloadButton';
 import { LanguageSwitch } from './LanguageSwitch';
 import { SiteLogo } from './SiteLogo';
@@ -9,7 +10,9 @@ import { SkipLink } from './SkipLink';
 /**
  * Header of every page (E-21, D-070), measured on the mockups. Computer: logo, the links to the
  * sections of the home page centred on the page, FR | EN and « Télécharger l'app ». Tablet: no
- * links. Phone: logo and FR | EN. « Aller au contenu » comes first, shown on focus only.
+ * links. Phone: logo and FR | EN. « Aller au contenu » comes first, shown on focus only. The links
+ * to the sections go through Next.js, so that « Précédent » in the browser comes back to them from
+ * another page (a plain link adds a history entry that Next.js ignores).
  */
 export function SiteHeader({ locale, texts }: { locale: SiteLocale; texts: Messages['header'] }) {
   const home = localizedPath(locale, '/');
@@ -32,13 +35,13 @@ export function SiteHeader({ locale, texts }: { locale: SiteLocale; texts: Messa
         className="absolute left-1/2 hidden -translate-x-1/2 xl:flex"
       >
         {sections.map((section) => (
-          <a
+          <Link
             key={section.id}
             href={`${home}#${section.id}`}
             className="px-20 text-body-medium text-ink"
           >
             {section.label}
-          </a>
+          </Link>
         ))}
       </nav>
       <div className="flex items-center gap-20 xl:gap-24">
