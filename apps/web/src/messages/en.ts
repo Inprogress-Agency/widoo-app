@@ -79,6 +79,42 @@ export const en: Messages = {
     byWidoo: 'by Widoo',
     byMember: 'by {name}',
   },
+  districts: {
+    title: 'Walks in Paris, neighbourhood by neighbourhood',
+    lead: 'Each neighbourhood has its routes, made by the Widoo team and by the people who live there.',
+    banks: { right: 'Right Bank', left: 'Left Bank' },
+    allParis: 'All of Paris is in the app',
+    items: {
+      montmartre: {
+        name: 'Montmartre',
+        text: 'Stairs, vineyards and workshops, away from the Place du Tertre.',
+      },
+      buttesChaumont: {
+        name: 'Buttes-Chaumont and Belleville',
+        text: 'A hillside park and streets climbing up to the viewpoints.',
+      },
+      canalSaintMartin: {
+        name: 'Canal Saint-Martin',
+        text: 'Locks, footbridges and picnics by the water.',
+      },
+      passages: {
+        name: 'The covered passages',
+        text: 'Galerie Vivienne and its neighbours, to stroll under cover.',
+      },
+      marais: {
+        name: 'Le Marais',
+        text: 'Mansions, thrift shops and bakeries, a stone’s throw from each other.',
+      },
+      saintGermain: {
+        name: 'Saint-Germain-des-Prés',
+        text: 'Bookshops, galleries and cafés of the Left Bank.',
+      },
+      latinQuarter: {
+        name: 'The Latin Quarter',
+        text: 'Lanes, art-house cinemas and the Luxembourg Gardens.',
+      },
+    },
+  },
   notFound: {
     title: 'This page does not exist',
     body: 'The address may be incomplete. Outing ideas are waiting for you on the home page and in the app.',
