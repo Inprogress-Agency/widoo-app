@@ -115,6 +115,43 @@ export const en: Messages = {
       },
     },
   },
+  faq: {
+    title: 'Frequently asked questions',
+    lead: 'All you need to know before your first outing.',
+    items: [
+      {
+        question: 'Is Widoo free?',
+        answer:
+          'Yes. The app is free, free routes open without an account and creating your own routes costs nothing. Premium routes open with a subscription (7-day free trial), a 7-day pass or one by one.',
+      },
+      {
+        question: 'Do I need an account?',
+        answer:
+          'No, to browse the map and open the free routes. A free account lets you save your favourites, plan an outing and get its reminders.',
+      },
+      {
+        question: 'What is a Widoo route?',
+        answer:
+          'A ready-made outing: several stops in a row, with the duration, the budget, the distance and the opening hours of each place.',
+      },
+      {
+        question: 'Is the information up to date?',
+        answer:
+          'Routes are checked on site by those who walk them, and Widoo checks the opening hours when you plan an outing. A place can change without notice: check before booking.',
+      },
+      {
+        question: 'Can I create my own route?',
+        answer:
+          'Yes, from the app, for free and without limit. Each route is published after a review by the Widoo team.',
+      },
+      {
+        question: 'Is Widoo available outside Paris?',
+        answer: 'Not yet: Widoo starts with Paris.',
+      },
+    ],
+    contactTitle: 'Another question?',
+    contactText: 'The Widoo team answers by email.',
+  },
   notFound: {
     title: 'This page does not exist',
     body: 'The address may be incomplete. Outing ideas are waiting for you on the home page and in the app.',
