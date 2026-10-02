@@ -156,6 +156,12 @@ export const en: Messages = {
     title: 'Your next outing starts here',
     lead: 'Free, on iPhone and Android.',
   },
+  footer: {
+    copyright: '© 2026 {publisher}, designed in Paris',
+    links: 'Footer links',
+    terms: 'Terms of use',
+    privacy: 'Privacy policy',
+  },
   notFound: {
     title: 'This page does not exist',
     body: 'The address may be incomplete. Outing ideas are waiting for you on the home page and in the app.',

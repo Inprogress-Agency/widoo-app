@@ -1,3 +1,4 @@
+import { SiteFooter } from '@/components/footer/SiteFooter';
 import { FinalBanner } from '@/components/home/banner/FinalBanner';
 import { Districts } from '@/components/home/districts/Districts';
 import { Faq } from '@/components/home/faq/Faq';
@@ -43,7 +44,7 @@ type Props = {
  * of `/app`; the blue plan of the example route with its sticker and a review. The plan sits
  * behind the frame on the computer, under the text on the phone and the tablet. Then the sections:
  * « Comment ça marche », the moods and the districts (#237), the questions and the final banner
- * (#238); the footer arrives with #238.
+ * (#238). The footer follows the main content.
  */
 export function HomeContainer({
   locale,
@@ -120,6 +121,7 @@ export function HomeContainer({
           </div>
         </Rise>
       </BlueFrame>
+      <SiteFooter locale={locale} texts={messages.footer} headerTexts={messages.header} />
     </>
   );
 }

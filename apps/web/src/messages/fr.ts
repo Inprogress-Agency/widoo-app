@@ -155,6 +155,12 @@ export const fr = {
     title: 'Votre prochaine sortie commence ici',
     lead: 'Gratuit, sur iPhone et Android.',
   },
+  footer: {
+    copyright: '© 2026 {publisher}, conçu à Paris',
+    links: 'Liens du pied de page',
+    terms: 'Conditions d’utilisation',
+    privacy: 'Politique de confidentialité',
+  },
   notFound: {
     title: 'Cette page n’existe pas',
     body: 'L’adresse est peut-être incomplète. Les idées de sortie vous attendent sur l’accueil et dans l’app.',
