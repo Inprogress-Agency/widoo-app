@@ -12,10 +12,10 @@ export function RouteSticker({ title, meta }: { title: string; meta: string }) {
       className="animate-land motion-reduce:animate-plan-fade"
       style={{ animationDelay: `${heroMotion.stickerAt}ms` }}
     >
-      <div className="w-sticker rotate-sticker rounded-section bg-bg p-6 shadow-sticker">
-        <div className="h-sticker-photo rounded-block bg-blue-soft" />
-        <p className="mt-12 px-6 text-sticker-title text-ink">{title}</p>
-        <p className="mb-6 px-6 text-label text-muted">{meta}</p>
+      <div className="w-sticker-tablet rotate-sticker rounded-sheet bg-bg px-7 pb-12 pt-7 shadow-sticker xl:w-sticker">
+        <div className="h-sticker-photo-tablet rounded-card bg-blue-soft xl:h-sticker-photo" />
+        <p className="mt-10 px-6 text-sticker-title text-ink">{title}</p>
+        <p className="px-6 text-label text-muted">{meta}</p>
       </div>
     </div>
   );

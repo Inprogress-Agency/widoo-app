@@ -260,7 +260,9 @@ module.exports = {
         // « Télécharger l'app », the same width in every language so that the header never moves.
         'download-button': '198px',
         'download-button-l': '202px',
-        sticker: '210px',
+        // Sticker of the hero (E-21): 188 px on the tablet, 212 on the computer.
+        sticker: '212px',
+        'sticker-tablet': '188px',
         // « Comment ça marche » (#237): a step on the computer, the screenshots of the app in their
         // phone (computer, second step of the computer, tablet, phone). À reporter dans tokens.json.
         'how-step': '364px',
@@ -407,7 +409,8 @@ module.exports = {
         'plan-tablet': '410px',
         'plan-hero-phone': '495px',
         'plan-hero-tablet': '527px',
-        'sticker-photo': '118px',
+        'sticker-photo': '124px',
+        'sticker-photo-tablet': '108px',
         // Store badges: the same height for both, everywhere; 44 px on the phone (touch-min).
         'store-badge': '48px',
         // Header of the site (E-21): 56 px on the phone, 72 on the tablet, 76 on the computer.
