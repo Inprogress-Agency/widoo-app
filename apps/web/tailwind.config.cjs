@@ -145,6 +145,7 @@ module.exports = {
         'lead-xl': ['19px', { lineHeight: '29px', fontWeight: '500' }],
         // Cards laid on the plan of the hero: the quote of a review, the title of the sticker.
         quote: ['15px', { lineHeight: '22px', letterSpacing: '-0.15px', fontWeight: '700' }],
+        'quote-s': ['14px', { lineHeight: '20px', letterSpacing: '-0.14px', fontWeight: '700' }],
         'sticker-title': ['15px', { lineHeight: '20px', fontWeight: '800' }],
         // « widoo » of the logo in the header: 22/25, 24/28 on the computer, tighter by 3 % (source
         // of the mockups).
@@ -252,7 +253,10 @@ module.exports = {
         // Final banner (#238): its text on the tablet and the computer. À reporter dans tokens.json.
         'banner-text-tablet': '360px',
         'banner-text': '520px',
+        // Review of the hero (E-21): 306 px on the phone, 280 on the tablet, 300 on the computer.
         review: '300px',
+        'review-tablet': '280px',
+        'review-phone': '306px',
         // « Télécharger l'app », the same width in every language so that the header never moves.
         'download-button': '198px',
         'download-button-l': '202px',
@@ -376,6 +380,7 @@ module.exports = {
         review: '-3deg',
         'review-phone': '-2deg',
         'review-back': '3deg',
+        'review-back-phone': '4deg',
         sticker: '4deg',
         // Screenshots of « Comment ça marche », one tilt per step (#237). À reporter dans tokens.json.
         'shot-1': '-2.5deg',
