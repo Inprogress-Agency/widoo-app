@@ -9,6 +9,7 @@ API de staging sur Google Cloud ([#24](https://github.com/Inprogress-Agency/wido
 | `gcp/1-foundation.sh` | API Google, Artifact Registry, comptes de service, Workload Identity Federation |
 | `gcp/2-database.sh` | réseau, Cloud SQL, base, utilisateur, secrets |
 | `gcp/3-run.sh` | service Cloud Run `widoo-api` et job de migration `widoo-api-migrate` |
+| `gcp/demo-seed.sh` | chargement ou retrait du jeu de démonstration dans la base de staging, par une exécution du job de migration |
 | `gcp/artifact-cleanup.json` | nettoyage des images : les 10 plus récentes gardées, les autres supprimées après 30 jours |
 | `../.github/workflows/deploy-staging.yml` | build, migration et déploiement à chaque push sur `main` |
 
@@ -128,6 +129,31 @@ Ordre de grandeur mensuel en `europe-west9`, à confirmer dans le simulateur de 
 7. Trafic basculé sur la nouvelle révision, puis `/v1/health` de l'URL publique.
 
 Durée attendue : 5 à 7 minutes, dont 2 à 3 de build. Les logs ne montrent que l'image, les noms de révision, les URL et la réponse de `/v1/health` : les valeurs des secrets ne passent jamais par GitHub.
+
+## Jeu de démonstration en staging
+
+La base de staging ne reçoit aucune donnée par le déploiement. Le jeu de démonstration de [#32](https://github.com/Inprogress-Agency/widoo-app/issues/32) (Paris, 10 parcours sur des lieux réels, 2 auteurs fictifs, photos Unsplash) s'y charge à la main ([#287](https://github.com/Inprogress-Agency/widoo-app/issues/287)), par Ilan ou Paul, avec le rôle Owner :
+
+```bash
+cd infra/gcp
+./demo-seed.sh load --dry-run
+./demo-seed.sh load            # 1 minute environ, puis le nombre de parcours de la zone : {"count":10}
+```
+
+Le script lance une exécution du job `widoo-api-migrate` avec ses arguments et une variable surchargés pour cette exécution seulement : `node --enable-source-maps dist/demo-seed.js load` et `DEMO_SEED=staging`. Le job garde sa configuration, son image (celle du dernier déploiement), son réseau et son secret `DATABASE_URL`. Aucune ressource ni aucun droit nouveau. Surcharger une exécution demande la permission `run.jobs.runWithOverrides`, que le rôle Owner porte ; le déployeur GitHub n'est utilisable que par `deploy-staging.yml` (conditions de la fédération, section Droits), qui lance le job sans rien surcharger. Le lancer après le déploiement du commit qui livre `dist/demo-seed.js`, jamais pendant un déploiement.
+
+`dist/demo-seed.js` refuse avant toute requête :
+
+- sans la variable d'opt-in `DEMO_SEED=staging` ;
+- hors du projet `widoo-staging`. Le projet est lu sur le serveur de métadonnées de Google Cloud, à une adresse écrite dans le code, et comparé à `widoo-staging`, écrit dans le code lui aussi : aucune variable ne peut le changer. La production vit dans un autre projet ([#246](https://github.com/Inprogress-Agency/widoo-app/issues/246)) et y est refusée, même avec l'opt-in. Sans serveur de métadonnées (un poste, un autre hébergeur) ou avec une réponse illisible, le projet est inconnu : refusé aussi.
+
+`db:seed` reste refusé dans l'image (`NODE_ENV=production`). En local, le jeu de démonstration vient de `pnpm --filter api db:seed`.
+
+Relancé, le chargement laisse le même état : identifiants fixes, lignes du jeu mises à jour, étapes, horaires et photos du jeu réécrits ; rien d'autre n'est touché, sauf Paris, créée ou réactivée. Les photos sont servies depuis leur URL Unsplash (`media.storage_path`) : rien à copier dans un bucket.
+
+**Retour arrière** : `./demo-seed.sh remove` (mêmes garde-fous) supprime, dans une seule transaction, les 10 parcours avec leurs étapes et leurs photos, les lieux du jeu qu'aucun autre parcours n'utilise, et les 2 auteurs fictifs. Paris et toute donnée hors du jeu restent ; un lieu du jeu repris par un parcours de recette est gardé. Le script affiche ensuite `{"count":0}` si aucun autre parcours n'est dans la zone. Relancé, il ne supprime rien.
+
+Suivi d'une exécution : `gcloud run jobs executions list --job=widoo-api-migrate --region=europe-west9 --project=widoo-staging`. La ligne de résultat (nombres de lignes, aucune valeur) est dans les logs de l'exécution.
 
 ## Vérifier les critères de #24
 
