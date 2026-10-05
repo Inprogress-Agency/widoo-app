@@ -1,8 +1,8 @@
 /**
- * `node dist/demo-seed.js load` in the API image: loads the demo dataset on staging
- * (`demo-seed.ts`), as an execution of the migration job with overridden arguments. Refused
- * without DEMO_SEED=staging and outside the widoo-staging project. Locally, the demo dataset
- * comes from `pnpm db:seed`.
+ * `node dist/demo-seed.js load|remove` in the API image: loads or removes the demo dataset on
+ * staging (`demo-seed.ts`), as an execution of the migration job with overridden arguments
+ * (`infra/gcp/demo-seed.sh`). Refused without DEMO_SEED=staging and outside the widoo-staging
+ * project. Locally, the demo dataset comes from `pnpm db:seed`.
  */
 import { loadConfig } from '../config';
 import { createDb, createSql } from './client';
