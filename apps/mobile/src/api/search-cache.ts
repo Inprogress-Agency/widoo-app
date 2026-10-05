@@ -1,6 +1,11 @@
-import type { Query, QueryClient } from '@tanstack/react-query';
+import type { Query, QueryClient, QueryKey } from '@tanstack/react-query';
 import { RouteSearchResult } from '@widoo/shared';
 import type { CachedResults } from '../discovery/store';
+
+/** What reads back a query kept on the device: a schema of `@widoo/shared`. */
+export interface PersistedQuerySchema {
+  safeParse(data: unknown): { success: boolean; data?: unknown };
+}
 
 /** Key prefix of the zone searches: `['routes', 'search', bbox, filters]`. */
 export const searchQueryKey = ['routes', 'search'] as const;
@@ -8,8 +13,18 @@ export const searchQueryKey = ['routes', 'search'] as const;
 /** Results older than a week are not shown offline, and not kept. */
 export const OFFLINE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
-const isSearch = (query: Query) =>
-  query.queryKey[0] === searchQueryKey[0] && query.queryKey[1] === searchQueryKey[1];
+const isSearchKey = (queryKey: QueryKey) =>
+  queryKey[0] === searchQueryKey[0] && queryKey[1] === searchQueryKey[1];
+
+const isSearch = (query: Query) => isSearchKey(query.queryKey);
+
+/**
+ * The schema a query kept on the device is read back with, the one its answer from the network
+ * is checked against; null for a query the persister never writes, which is then not read back.
+ */
+export function persistedQuerySchema(queryKey: QueryKey): PersistedQuerySchema | null {
+  return isSearchKey(queryKey) ? RouteSearchResult : null;
+}
 
 /** The last search answered, the only one kept on the device. */
 function latestSearchQuery(client: QueryClient): Query | null {
