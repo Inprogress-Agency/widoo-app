@@ -246,15 +246,10 @@ module.exports = {
         // Final banner on the phone (#238): its text under the W.
         250: '250px',
       },
-      // Hero: the stores as wide as each other, the review and the sticker laid on the plan.
+      // Hero: the review and the sticker laid on the plan.
       width: {
         'frame-column': '540px',
-        'store-badge-hero': '166px',
-        'store-badge-hero-phone': '148px',
-        // Final banner (#238): the stores, 150 px side by side on the phone, 169 px stacked from
-        // the tablet; its text on the tablet and the computer. À reporter dans tokens.json.
-        'store-badge-banner-phone': '150px',
-        'store-badge-banner': '169px',
+        // Final banner (#238): its text on the tablet and the computer. À reporter dans tokens.json.
         'banner-text-tablet': '360px',
         'banner-text': '520px',
         review: '300px',
@@ -408,7 +403,8 @@ module.exports = {
         'plan-hero-phone': '495px',
         'plan-hero-tablet': '527px',
         'sticker-photo': '118px',
-        'store-badge': '42px',
+        // Store badges: the same height for both, everywhere; 44 px on the phone (touch-min).
+        'store-badge': '48px',
         // Header of the site (E-21): 56 px on the phone, 72 on the tablet, 76 on the computer.
         header: '56px',
         'header-tablet': '72px',
