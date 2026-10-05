@@ -79,6 +79,22 @@ describe('discovery store', () => {
     expect(hasMoved).toBe(false);
   });
 
+  it('waits for a searchable zone before the initial search, and never keeps another one', () => {
+    const uninitialised: MapView = { bbox: { west: -8, south: -8, east: 8, north: 8 }, zoom: 0 };
+    const empty: MapView = {
+      bbox: { west: 2.35, south: 48.86, east: 2.35, north: 48.86 },
+      zoom: 13,
+    };
+    store.getState().showView(uninitialised, false);
+    store.getState().showView(empty, false);
+    expect(store.getState()).toMatchObject({ view: null, search: null, status: 'idle' });
+
+    store.getState().showView(home, false);
+    expect(store.getState().search).toMatchObject({ view: home, trigger: 'initial' });
+    store.getState().showView(empty, true);
+    expect(store.getState()).toMatchObject({ view: home, hasMoved: false });
+  });
+
   it('never searches on a move: it shows the button and keeps the previous results', () => {
     openedWith('a', 'b');
     const before = store.getState().search;
