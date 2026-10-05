@@ -10,6 +10,7 @@ import {
 import { createStore } from 'zustand/vanilla';
 import { scaleBbox, type Bbox } from '../map/geo';
 import { filterResults, removeGroup, toggleFilter, type Filter } from './filters';
+import { isSearchableZone } from './zone';
 
 /** What started a search, as `map_search_zone` reports it (wiki Analytics). */
 export type SearchTrigger = AnalyticsEvents['map_search_zone']['trigger'];
@@ -75,7 +76,10 @@ export interface DiscoveryState {
 }
 
 export interface DiscoveryActions {
-  /** The map settled on `view`. Its first view starts the initial search; a manual move shows the button. */
+  /**
+   * The map settled on `view`. Its first searchable view starts the initial search; a manual move
+   * shows the button. A degenerate zone is ignored.
+   */
   showView: (view: MapView, isManual: boolean) => void;
   /** Searches the zone on screen with the active filters. */
   searchZone: (trigger: SearchTrigger) => void;
@@ -188,6 +192,11 @@ export function createDiscoveryStore() {
     return {
       ...initialDiscoveryState,
       showView: (view, isManual) => {
+        // Neither the search nor the count of the panel goes out with a degenerate zone: the
+        // first searchable one starts the initial search.
+        if (!isSearchableZone(view.bbox)) {
+          return;
+        }
         const { search, hasMoved } = get();
         set({ view, hasMoved: hasMoved || (isManual && search !== null) });
         if (search === null) {
