@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { Bbox } from '../map/geo';
-import { isSearchableZone } from './zone';
+import { parisCenter, toLngLat, type Bbox } from '../map/geo';
+import { isOpeningZone, isSearchableZone } from './zone';
 
 // Zones the Android emulator reported on a cold start (issue #286), rounded.
 /** The opening view on Paris, about 3 km across. */
@@ -14,6 +14,8 @@ const uninitialised: Bbox = {
   east: 8.437499917467193,
   north: 8.407168081956542,
 };
+
+const opening = toLngLat(parisCenter);
 
 describe('isSearchableZone', () => {
   it('takes the zone of a map on screen', () => {
@@ -46,5 +48,26 @@ describe('isSearchableZone', () => {
     expect(isSearchableZone({ ...paris, west: -181 })).toBe(false);
     expect(isSearchableZone({ ...paris, south: Number.NaN })).toBe(false);
     expect(isSearchableZone({ ...paris, east: Number.POSITIVE_INFINITY })).toBe(false);
+  });
+});
+
+describe('isOpeningZone', () => {
+  it('takes the zone that holds the centre the camera was put on', () => {
+    expect(isOpeningZone(paris, opening)).toBe(true);
+  });
+
+  it('refuses the zone at a latitude of 0, out of the view asked for', () => {
+    expect(isOpeningZone(parisOnEquator, opening)).toBe(false);
+  });
+
+  it('refuses a zone that does not hold the longitude asked for', () => {
+    expect(isOpeningZone({ ...paris, west: 2.36 }, opening)).toBe(false);
+  });
+
+  it('refuses an empty, uninitialised or unknown zone, even around the centre', () => {
+    const [lng, lat] = opening;
+    expect(isOpeningZone({ west: lng, south: lat, east: lng, north: lat }, opening)).toBe(false);
+    expect(isOpeningZone(uninitialised, [0, 0])).toBe(false);
+    expect(isOpeningZone(null, opening)).toBe(false);
   });
 });
