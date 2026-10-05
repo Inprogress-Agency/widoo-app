@@ -126,3 +126,8 @@ jobs:
       - name: Audit dependencies
         if: steps.detect.outputs.has_code == 'true'
         run: pnpm audit --audit-level=high
+
+      # Each id of auditConfig.ignoreGhsas still matches an advisory (#279): a stale one fails.
+      - name: Check audit exceptions
+        if: steps.detect.outputs.has_code == 'true'
+        run: bash scripts/check-audit-exceptions.sh
