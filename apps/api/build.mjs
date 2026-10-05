@@ -7,8 +7,13 @@ import { build } from 'esbuild';
 const { dependencies } = JSON.parse(await readFile('package.json', 'utf8'));
 
 await build({
-  // dist/migrate.js applies the migrations before a deployment (`node dist/migrate.js`).
-  entryPoints: { server: 'src/server.ts', migrate: 'src/migrate.ts' },
+  // dist/migrate.js applies the migrations before a deployment (`node dist/migrate.js`);
+  // dist/demo-seed.js loads the demo dataset on staging only (infra/gcp/demo-seed.sh).
+  entryPoints: {
+    server: 'src/server.ts',
+    migrate: 'src/migrate.ts',
+    'demo-seed': 'src/db/demo-seed-cli.ts',
+  },
   outdir: 'dist',
   bundle: true,
   platform: 'node',
