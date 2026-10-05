@@ -21,7 +21,7 @@ export function ReviewCard({
   texts: Messages['home'];
 }) {
   return (
-    <figure className="flex w-review flex-col rounded-section bg-bg px-16 pb-16 pt-16 shadow-sticker">
+    <figure className="flex w-review-phone flex-col rounded-section bg-bg px-18 pb-16 pt-18 shadow-sticker md:w-review-tablet xl:w-review">
       <div className="flex items-center justify-between">
         <span className="flex text-amber">
           <span className="sr-only">{fill(texts.ratingSpoken, { rating: review.rating })}</span>
@@ -36,7 +36,7 @@ export function ReviewCard({
         </span>
         <span className="text-label-strong text-muted">{texts.reviewSource[review.store]}</span>
       </div>
-      <blockquote className="mt-10 text-quote text-ink">« {review.text} »</blockquote>
+      <blockquote className="mt-10 text-quote-s text-ink xl:text-quote">« {review.text} »</blockquote>
       <figcaption className="mt-10 flex items-center gap-8">
         <span
           aria-hidden

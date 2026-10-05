@@ -145,6 +145,7 @@ module.exports = {
         'lead-xl': ['19px', { lineHeight: '29px', fontWeight: '500' }],
         // Cards laid on the plan of the hero: the quote of a review, the title of the sticker.
         quote: ['15px', { lineHeight: '22px', letterSpacing: '-0.15px', fontWeight: '700' }],
+        'quote-s': ['14px', { lineHeight: '20px', letterSpacing: '-0.14px', fontWeight: '700' }],
         'sticker-title': ['15px', { lineHeight: '20px', fontWeight: '800' }],
         // « widoo » of the logo in the header: 22/25, 24/28 on the computer, tighter by 3 % (source
         // of the mockups).
@@ -246,22 +247,22 @@ module.exports = {
         // Final banner on the phone (#238): its text under the W.
         250: '250px',
       },
-      // Hero: the stores as wide as each other, the review and the sticker laid on the plan.
+      // Hero: the review and the sticker laid on the plan.
       width: {
         'frame-column': '540px',
-        'store-badge-hero': '166px',
-        'store-badge-hero-phone': '148px',
-        // Final banner (#238): the stores, 150 px side by side on the phone, 169 px stacked from
-        // the tablet; its text on the tablet and the computer. À reporter dans tokens.json.
-        'store-badge-banner-phone': '150px',
-        'store-badge-banner': '169px',
+        // Final banner (#238): its text on the tablet and the computer. À reporter dans tokens.json.
         'banner-text-tablet': '360px',
         'banner-text': '520px',
+        // Review of the hero (E-21): 306 px on the phone, 280 on the tablet, 300 on the computer.
         review: '300px',
+        'review-tablet': '280px',
+        'review-phone': '306px',
         // « Télécharger l'app », the same width in every language so that the header never moves.
         'download-button': '198px',
         'download-button-l': '202px',
-        sticker: '210px',
+        // Sticker of the hero (E-21): 188 px on the tablet, 212 on the computer.
+        sticker: '212px',
+        'sticker-tablet': '188px',
         // « Comment ça marche » (#237): a step on the computer, the screenshots of the app in their
         // phone (computer, second step of the computer, tablet, phone). À reporter dans tokens.json.
         'how-step': '364px',
@@ -381,6 +382,7 @@ module.exports = {
         review: '-3deg',
         'review-phone': '-2deg',
         'review-back': '3deg',
+        'review-back-phone': '4deg',
         sticker: '4deg',
         // Screenshots of « Comment ça marche », one tilt per step (#237). À reporter dans tokens.json.
         'shot-1': '-2.5deg',
@@ -407,8 +409,10 @@ module.exports = {
         'plan-tablet': '410px',
         'plan-hero-phone': '495px',
         'plan-hero-tablet': '527px',
-        'sticker-photo': '118px',
-        'store-badge': '42px',
+        'sticker-photo': '124px',
+        'sticker-photo-tablet': '108px',
+        // Store badges: the same height for both, everywhere; 44 px on the phone (touch-min).
+        'store-badge': '48px',
         // Header of the site (E-21): 56 px on the phone, 72 on the tablet, 76 on the computer.
         header: '56px',
         'header-tablet': '72px',
