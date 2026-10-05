@@ -19,3 +19,21 @@ overrides:
 # Install scripts stay blocked but for these: Skia copies its prebuilt native libraries there.
 onlyBuiltDependencies:
   - '@shopify/react-native-skia'
+
+# Dated audit exception (#279): two high advisories with no patched version upstream, accepted on
+# 2026-10-05 (D-080): https://github.com/Inprogress-Agency/widoo-app/wiki/Securite-et-RGPD#risques-accept%C3%A9s
+# Neither package reaches what ships: absent from the iOS and Android bundles and from the API image.
+# Review on 2026-11-05, or as soon as a patched version is published: drop the id, rerun
+# `pnpm audit --audit-level=high`. https://github.com/Inprogress-Agency/widoo-app/issues/280
+# pnpm can neither scope an id to a dependency path nor date it: an ignored id stays ignored
+# wherever the package comes from, so the review checks the paths again.
+auditConfig:
+  ignoreGhsas:
+    # node-forge <=1.4.0, RSA PKCS#1 v1.5 signature check. Only through apps/mobile > expo >
+    # @expo/cli, which signs and checks its own manifests and verifies no external signature
+    # (no expo-updates, no code signing). Dev machines, CI and EAS builds only.
+    - GHSA-86w9-cpqp-85rv
+    # braces <=3.0.3, denial of service on deeply nested patterns. Through micromatch and
+    # chokidar (Metro, Tailwind, ESLint); the patterns come from the configuration of the repo.
+    # Dev machines, CI and EAS builds only; build stage of the API image, not its runtime.
+    - GHSA-vfj7-8cjw-p6xm
