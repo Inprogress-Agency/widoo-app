@@ -5,13 +5,18 @@
  * project. Production lives in another project (#246): it is refused even with the opt-in, and a
  * missing or unreadable project (a laptop, another host) is refused too.
  */
+import { and, eq, inArray, like, notExists, sql } from 'drizzle-orm';
 import type { Db } from './client';
-import { seed } from './seed';
+import { media, places, routes, steps, users } from './schema';
+import { demoRouteIds, seed, seedId } from './seed';
+import { demoDataset } from './seed/demo-routes';
+
+type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 
 /** The only project where the demo dataset may be written. Code, not configuration. */
 export const stagingProjectId = 'widoo-staging';
 export const demoSeedOptIn = { name: 'DEMO_SEED', value: 'staging' } as const;
-export const demoSeedActions = ['load'] as const;
+export const demoSeedActions = ['load', 'remove'] as const;
 export type DemoSeedAction = (typeof demoSeedActions)[number];
 
 /** Google Cloud project ID rules: 6 to 30 lowercase letters, digits and hyphens. */
@@ -52,7 +57,7 @@ export function demoSeedRefusal({ optIn, projectId }: DemoSeedTarget): string | 
     return `${name}=${value} is required: the demo dataset is only written on purpose`;
   }
   if (projectId === null) {
-    return `Google Cloud project unknown (no metadata server): staging only, refused`;
+    return 'Google Cloud project unknown (no metadata server): staging only, refused';
   }
   if (projectId !== stagingProjectId) {
     return `Google Cloud project ${projectId} is not ${stagingProjectId}: refused`;
@@ -60,9 +65,10 @@ export function demoSeedRefusal({ optIn, projectId }: DemoSeedTarget): string | 
   return null;
 }
 
-export type DemoSeedResult = { action: 'load'; routes: number };
+export type DemoSeedResult =
+  { action: 'load'; routes: number } | ({ action: 'remove' } & DemoRemoval);
 
-/** Loads the demo dataset after both guards; throws before any query otherwise. */
+/** Loads or removes the demo dataset after both guards; throws before any query otherwise. */
 export async function runDemoSeed(
   action: DemoSeedAction,
   target: DemoSeedTarget,
@@ -70,6 +76,71 @@ export async function runDemoSeed(
 ): Promise<DemoSeedResult> {
   const refusal = demoSeedRefusal(target);
   if (refusal !== null) throw new Error(`Demo dataset ${action}: ${refusal}`);
-  const { routeIds } = await seed(db);
-  return { action, routes: routeIds.length };
+  if (action === 'load') {
+    const { routeIds } = await seed(db);
+    return { action, routes: routeIds.length };
+  }
+  return { action, ...(await db.transaction(removeDemoDataset)) };
+}
+
+export interface DemoRemoval {
+  routes: number;
+  places: number;
+  /** Demo places still used by a step of another route, left in place. */
+  placesKept: number;
+  authors: number;
+}
+
+/**
+ * Deletes the demo dataset and nothing else, inside the caller's transaction: the ten routes
+ * (steps cascade) and their photos, the demo places no other route uses (hours cascade) and
+ * their photos, the two fictitious authors. Paris stays: other places may belong to it. A
+ * second run deletes nothing.
+ */
+export async function removeDemoDataset(tx: Tx): Promise<DemoRemoval> {
+  // Same lock as seed(): a load and a removal never interleave.
+  await tx.execute(sql`select pg_advisory_xact_lock(hashtext('widoo-seed'))`);
+  const placeIds = demoDataset.places.map((place) => seedId(`place:${place.key}`));
+  const authorIds = demoDataset.authors.map((author) => seedId(`user:${author.key}`));
+
+  await tx
+    .delete(media)
+    .where(and(eq(media.ownerType, 'route'), inArray(media.ownerId, demoRouteIds)));
+  const deletedRoutes = await tx
+    .delete(routes)
+    .where(inArray(routes.id, demoRouteIds))
+    .returning({ id: routes.id });
+
+  const deletedPlaces = await tx
+    .delete(places)
+    .where(
+      and(
+        inArray(places.id, placeIds),
+        notExists(tx.select().from(steps).where(eq(steps.placeId, places.id))),
+      ),
+    )
+    .returning({ id: places.id });
+  const deletedPlaceIds = deletedPlaces.map((place) => place.id);
+  if (deletedPlaceIds.length > 0) {
+    await tx
+      .delete(media)
+      .where(and(eq(media.ownerType, 'place'), inArray(media.ownerId, deletedPlaceIds)));
+  }
+  const [kept] = await tx
+    .select({ count: sql<number>`count(*)::int` })
+    .from(places)
+    .where(inArray(places.id, placeIds));
+
+  // The seed authors only: a fixed id and the fictitious uid no sign-in can produce.
+  const deletedAuthors = await tx
+    .delete(users)
+    .where(and(inArray(users.id, authorIds), like(users.firebaseUid, 'seed-%')))
+    .returning({ id: users.id });
+
+  return {
+    routes: deletedRoutes.length,
+    places: deletedPlaces.length,
+    placesKept: kept?.count ?? 0,
+    authors: deletedAuthors.length,
+  };
 }
