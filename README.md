@@ -115,6 +115,38 @@ Expo Go ne suffit plus : MMKV (consentement) est un module natif absent d'Expo G
 
 En développement, l'URL de l'API est l'adresse de la machine qui sert Metro, port 8080 (`src/api/api-url.ts`) ; `EXPO_PUBLIC_API_URL` dans `apps/mobile/.env.local` la remplace. Un build EAS lit `EXPO_PUBLIC_API_URL` dans les variables de son environnement EAS (`eas.json`). Les dossiers `ios/` et `android/` sont générés (`expo prebuild`) et jamais versionnés.
 
-Analytics : PostHog Cloud UE, seulement après « Accepter » sur la bannière de consentement (`src/analytics`). Seuls les builds `preview` et `production` (`EXPO_PUBLIC_APP_ENV`, posé par `eas.json`) envoient des événements, chacun dans son projet : « Widoo — staging » et « Widoo — production », avec la clé `EXPO_PUBLIC_POSTHOG_KEY` de l'environnement EAS du profil. En développement local, aucune clé PostHog : `EXPO_PUBLIC_POSTHOG_KEY` reste vide dans `.env.local`, et l'app ignore une clé présente, donc rien n'est envoyé ; la bannière s'affiche quand même. Pour la revoir, désinstaller l'app. Un événement se vérifie d'abord dans le journal local : `EXPO_PUBLIC_ANALYTICS_DEBUG=1` écrit chaque événement accepté dans le journal de Metro (`[analytics] <événement> <propriétés>`, nom et propriétés), seulement après consentement ; un événement hors du catalogue de `packages/shared` est refusé et signalé en erreur. Son arrivée réelle se vérifie ensuite sur un build `preview`, dans le projet « Widoo — staging ».
+Analytics : PostHog Cloud UE, seulement après « Accepter » sur la bannière de consentement (`src/analytics`). Seuls les builds `preview` et `production` (`EXPO_PUBLIC_APP_ENV`, posé par `eas.json`) envoient des événements, chacun dans son projet : « Widoo - Staging » et le projet de production, à créer ([#264](https://github.com/Inprogress-Agency/widoo-app/issues/264)), avec la clé `EXPO_PUBLIC_POSTHOG_KEY` de l'environnement EAS du profil. En développement local, aucune clé PostHog : `EXPO_PUBLIC_POSTHOG_KEY` reste vide dans `.env.local`, et l'app ignore une clé présente, donc rien n'est envoyé ; la bannière s'affiche quand même. Pour la revoir, désinstaller l'app. Un événement se vérifie d'abord dans le journal local : `EXPO_PUBLIC_ANALYTICS_DEBUG=1` écrit chaque événement accepté dans le journal de Metro (`[analytics] <événement> <propriétés>`, nom et propriétés), seulement après consentement ; un événement hors du catalogue de `packages/shared` est refusé et signalé en erreur. Son arrivée réelle se vérifie ensuite sur un build `preview`, dans le projet « Widoo - Staging ».
 
 Rapports de plantage : Sentry, avec ou sans consentement mais sans donnée utilisateur (`src/monitoring`, filtrage dans `packages/shared/src/monitoring.ts`). Sans `EXPO_PUBLIC_SENTRY_DSN`, rien n'est envoyé. L'envoi des source maps et symboles est coupé (`SENTRY_DISABLE_AUTO_UPLOAD=true` dans les scripts `ios` / `android` et dans `eas.json`) tant qu'aucun jeton Sentry n'est posé en secret EAS.
+
+### Builds EAS
+
+L'app est reliée au projet EAS `@inprogress-agency-team/widoo`, propriété de l'organisation Expo `inprogress-agency-team`, par `owner` et `extra.eas.projectId` dans `apps/mobile/app.json`. Ces deux valeurs sont publiques et versionnées ; `src/eas-project.test.ts` vérifie leur présence et que chaque profil lit l'environnement EAS de son nom. Les commandes `eas` qui écrivent (`init`, `env:create`, `build`, `credentials`) reviennent à Ilan ou Paul, et se lancent toujours depuis `apps/mobile` : à la racine, `eas init` crée un `app.json` parasite. `eas init` réécrit aussi `app.json` (permissions Android de localisation, `extra.router` vide, formatage) : n'en garder que `owner` et `extra.eas.projectId`, le reste est ajouté par les plugins `expo-location` et `expo-router` quand la configuration est évaluée.
+
+Profils de `apps/mobile/eas.json` : `development` (client de développement, distribution interne), `preview` (distribution interne, sur l'API de staging) et `production` (stores, numéro de build incrémenté par EAS, `appVersionSource: remote`). Chacun lit les variables de l'environnement EAS du même nom (champ `environment`) et pose lui-même `EXPO_PUBLIC_APP_ENV` et `SENTRY_DISABLE_AUTO_UPLOAD`.
+
+Variables par environnement EAS. Les noms seulement : aucune valeur dans le dépôt, les tickets ou les rapports.
+
+| Variable | `development` | `preview` | `production` | Rôle |
+|---|---|---|---|---|
+| `EXPO_PUBLIC_API_URL` | vide | API de staging (Cloud Run) | à poser : API de production | HTTPS obligatoire hors développement ; absente, un build `preview` ou `production` plante au démarrage |
+| `EXPO_PUBLIC_MAPBOX_TOKEN` | vide | jeton public `widoo-mobile` | à poser | jeton public (`pk.`) ; absent, un build `preview` ou `production` plante au démarrage |
+| `EXPO_PUBLIC_POSTHOG_KEY` | vide (D-059) | projet « Widoo - Staging » | à poser quand le projet de production existera ([#264](https://github.com/Inprogress-Agency/widoo-app/issues/264)) | ignorée hors `preview` et `production`, même présente |
+| `EXPO_PUBLIC_SENTRY_DSN` | vide | posée | à poser | absente : aucun rapport de plantage |
+| `EXPO_PUBLIC_APP_ENV` | `development` | `preview` | `production` | posée par `eas.json`, jamais dans EAS |
+| `EXPO_PUBLIC_ANALYTICS_DEBUG` | — | — | — | `apps/mobile/.env.local` seulement, lue en développement |
+
+`development` reste vide exprès : un client de développement reçoit son JavaScript du Metro local, qui lit `apps/mobile/.env.local` ; l'URL de l'API y est par défaut celle de la machine, et aucune clé d'analytics n'existe en développement (D-059). Une variable `EXPO_PUBLIC_*` est embarquée dans l'app et lisible par quiconque l'installe : elle se crée en visibilité « Plain text », jamais « Secret » ni « Sensitive », qui ne la protégeraient pas. Une vraie clé secrète (jeton Sentry d'envoi des symboles, par exemple) n'a jamais le préfixe `EXPO_PUBLIC_` et se crée en « Secret ».
+
+`RNMAPBOX_MAPS_DOWNLOAD_TOKEN` n'est plus utile : Mapbox ne demande plus de jeton pour télécharger son SDK, et le plugin de `@rnmapbox/maps` 10.3 ne s'en sert que s'il est posé (dépôt Maven sans authentification sinon). Il ne figure plus dans `.env.example` ni dans aucun environnement EAS.
+
+`expo-updates` n'est pas installé (son installation est un ticket à part de la Roadmap) : les champs `channel` de `preview` (`staging`) et `production` (`production`) sont sans effet sur l'app, et EAS n'y crée aucun canal. `eas build` affiche alors un avertissement, puis propose d'installer `expo-updates` et de configurer EAS Update : répondre non.
+
+Build `preview`, par Ilan ou Paul, depuis `apps/mobile` :
+
+```bash
+cd apps/mobile
+eas build --profile preview --platform android
+```
+
+Le premier build Android demande de générer le keystore, gardé par EAS (`credentialsSource: remote`). Le build `.apk` s'installe par le lien ou le QR code qu'EAS affiche. iOS attend le compte Apple Developer de l'agence : aucun build iOS installable pour l'instant. La base de staging n'a aucun parcours (`db:seed` est refusé avec `NODE_ENV=production`, celui de l'image de l'API) : un build `preview` montre une carte vide tant que le jeu de démonstration n'y est pas chargé.
