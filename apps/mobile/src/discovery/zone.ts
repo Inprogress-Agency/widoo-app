@@ -1,4 +1,4 @@
-import type { Bbox } from '../map/geo';
+import type { Bbox, LngLat } from '../map/geo';
 
 const isInRange = (value: number, limit: number) =>
   Number.isFinite(value) && value >= -limit && value <= limit;
@@ -23,4 +23,19 @@ export function isSearchableZone(bbox: Bbox | null | undefined): bbox is Bbox {
     Math.abs(west + east) / 2 < nullIslandTolerance &&
     Math.abs(south + north) / 2 < nullIslandTolerance;
   return isWithinWorld && west < east && south < north && !isUninitialised;
+}
+
+/**
+ * The view the map opens on: a searchable zone holding the centre its camera was put on. On
+ * Android the map settles once with the longitude and the zoom of that camera but a latitude of
+ * 0, just before the camera reaches it (rnmapbox/maps#4273): that zone is not the opening view.
+ */
+export function isOpeningZone(bbox: Bbox | null | undefined, [lng, lat]: LngLat): boolean {
+  return (
+    isSearchableZone(bbox) &&
+    lng >= bbox.west &&
+    lng <= bbox.east &&
+    lat >= bbox.south &&
+    lat <= bbox.north
+  );
 }

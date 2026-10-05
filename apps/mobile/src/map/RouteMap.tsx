@@ -25,6 +25,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useReducedMotion } from 'react-native-reanimated';
 import { colors } from '@widoo/tokens';
 import type { MapView } from '../discovery/store';
+import { isOpeningZone } from '../discovery/zone';
 import { formatDuration } from '../format/duration';
 import { clusterId, clusterPoints, clusterZoomStep } from './clusters';
 import { bboxCenter, initialSpanM, toBbox, toLngLat, zoomForSpan, type LngLat } from './geo';
@@ -118,7 +119,10 @@ export function RouteMap({
   const safeBottom = Platform.OS === 'ios' ? insets.bottom : 0;
   const camera = useRef<ComponentRef<typeof Mapbox.Camera>>(null);
   const map = useRef<ComponentRef<typeof Mapbox.MapView>>(null);
-  const isHome = useRef(false);
+  /** Where the camera was put once the map loaded; null before. */
+  const openingCenter = useRef<LngLat | null>(null);
+  /** The map has settled on its opening view. */
+  const isOpened = useRef(false);
   /** A gesture of the user moved the map since it last settled. */
   const isGestureMove = useRef(false);
   const zoom = useRef(0);
@@ -142,13 +146,23 @@ export function RouteMap({
 
   const handleMapIdle = useCallback(
     (state: MapState) => {
-      // The first view is the one the map opens on, never the view before it.
-      if (!isHome.current) {
+      // The native map leaves the zone out when it fails to compute it.
+      const { bounds } = state.properties as Partial<MapState['properties']>;
+      if (!bounds) {
         return;
       }
-      const { bounds } = state.properties;
-      zoom.current = state.properties.zoom;
       const bbox = toBbox({ ne: bounds.ne as LngLat, sw: bounds.sw as LngLat });
+      // The first view is the one the map opens on, holding the centre its camera was put on,
+      // never a view before it: on Android the map may still settle once on the way, at a
+      // latitude of 0 (#286). Once the camera is put, a gesture of the user opens the map too.
+      if (!isOpened.current) {
+        const center = openingCenter.current;
+        if (!center || (!isOpeningZone(bbox, center) && !isGestureMove.current)) {
+          return;
+        }
+        isOpened.current = true;
+      }
+      zoom.current = state.properties.zoom;
       onViewChange({ bbox, zoom: zoom.current }, isGestureMove.current);
       isGestureMove.current = false;
     },
@@ -339,11 +353,12 @@ export function RouteMap({
         attributionPosition={{ bottom: ornamentBottom, right: ornamentMargin }}
         onCameraChanged={handleCameraChanged}
         onMapIdle={handleMapIdle}
-        // Android drops the default camera when it loads a style given as JSON: the map is put
-        // back at its opening place once loaded, on both systems.
+        // Android drops the latitude of the default camera when it loads a style given as JSON
+        // (rnmapbox/maps#4273): the map is put back at its opening place once loaded, on both
+        // systems, and opens once it has settled there.
         onDidFinishLoadingMap={() => {
+          openingCenter.current = home.centerCoordinate;
           camera.current?.setCamera({ ...home, animationMode: 'none', animationDuration: 0 });
-          isHome.current = true;
         }}
         onPress={() => onSelect(null)}
       >
