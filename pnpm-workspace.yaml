@@ -27,6 +27,7 @@ onlyBuiltDependencies:
 # `pnpm audit --audit-level=high`. https://github.com/Inprogress-Agency/widoo-app/issues/280
 # pnpm can neither scope an id to a dependency path nor date it: an ignored id stays ignored
 # wherever the package comes from, so the review checks the paths again.
+# CI runs scripts/check-audit-exceptions.sh: it fails once an id no longer matches any advisory.
 auditConfig:
   ignoreGhsas:
     # node-forge <=1.4.0, RSA PKCS#1 v1.5 signature check. Only through apps/mobile > expo >
