@@ -15,9 +15,10 @@ export function ConsentBanner() {
   return status === undefined ? <ConsentPrompt /> : null;
 }
 
-// Share of the screen the banner may take: with very large text, the text scrolls and the
-// buttons stay visible.
-const MAX_HEIGHT_RATIO = 0.6;
+// Share of the screen the text may take: with very large text, it scrolls and the buttons stay
+// visible. The cap is on the text, not on the banner: the banner is as tall as its text and its
+// buttons, with nothing to shrink, so its buttons never spill out of it (#293).
+const TEXT_MAX_HEIGHT_RATIO = 0.4;
 
 function ConsentPrompt() {
   const { t } = useTranslation();
@@ -35,11 +36,16 @@ function ConsentPrompt() {
   return (
     <View
       accessibilityLiveRegion="polite"
-      className="mx-16 gap-12 self-stretch rounded-card bg-surface p-16"
-      // Height of the window, known at runtime.
-      style={{ maxHeight: height * MAX_HEIGHT_RATIO }}
+      // In front of the tab bar pill, drawn and touched first: the pill never covers the buttons,
+      // the only way out of the banner (#293).
+      className="z-10 mx-16 gap-12 self-stretch rounded-card bg-surface p-16"
     >
-      <ScrollView className="grow-0" contentContainerClassName="gap-12">
+      <ScrollView
+        className="grow-0"
+        contentContainerClassName="gap-12"
+        // Height of the window, known at runtime.
+        style={{ maxHeight: height * TEXT_MAX_HEIGHT_RATIO }}
+      >
         <Text variant="title-s" accessibilityRole="header">
           {title}
         </Text>
