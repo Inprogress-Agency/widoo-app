@@ -69,6 +69,17 @@ export function inZone(bbox: BBox): SQL {
   ]);
 }
 
+/** `\`, `%` and `_` stand for themselves in a pattern of `ILIKE`. */
+const likeEscaped = (text: string) => text.replace(/[\\%_]/g, '\\$&');
+
+/**
+ * Routes whose title holds the text, case aside (E-02, `ILIKE`), the text a bound parameter;
+ * every route without text.
+ */
+export function titleMatches(text: string | undefined): SQL {
+  return text === undefined ? sql`true` : sql`${routes.title} ilike ${`%${likeEscaped(text)}%`}`;
+}
+
 /** Surface of a zone in km², on a sphere: enough to tell a district from a region. */
 export function areaKm2({ west, south, east, north }: BBox): number {
   const radiusKm = 6371.0088;

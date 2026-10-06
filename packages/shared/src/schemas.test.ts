@@ -194,6 +194,13 @@ describe('RouteCard reason', () => {
 describe('RouteSearchQuery', () => {
   const bbox = '2.33,48.85,2.37,48.87';
 
+  it('takes a title text, trimmed, of 2 to 100 characters', () => {
+    expect(RouteSearchQuery.parse({ bbox, q: ' canal ' }).q).toBe('canal');
+    expect(RouteSearchQuery.safeParse({ bbox, q: 'c' }).success).toBe(false);
+    expect(RouteSearchQuery.safeParse({ bbox, q: 'c'.repeat(101) }).success).toBe(false);
+    expect(RouteCountQuery.parse({ bbox, q: 'canal' }).q).toBe('canal');
+  });
+
   it('parses the query string into typed values', () => {
     const query = { bbox, near: '48.86,2.35', moods: 'culture', audiences: ['couple', 'friends'] };
     expect(RouteSearchQuery.parse({ ...query, limit: '10' })).toEqual({

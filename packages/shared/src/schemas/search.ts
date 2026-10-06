@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { taxonomies } from '../taxonomies';
 import { Latitude, LatLng, Longitude } from './common';
+import { SearchText } from './geocode';
 import { RouteCard } from './route';
 
 export const routeSorts = ['recommended', 'distance', 'duration', 'rating'] as const;
@@ -54,6 +55,11 @@ const search = {
     .transform(([lat, lng]) => ({ lat, lng }))
     .optional(),
   ...filters,
+  /**
+   * Routes whose title holds the text, case aside (E-02, `ILIKE`): a zone of that search is never
+   * answered in clusters, its routes are listed.
+   */
+  q: SearchText.optional(),
   sort: z.enum(routeSorts).default('recommended'),
   /** Opaque, returned as `nextCursor`. */
   cursor: z.string().min(1).max(512).optional(),
@@ -67,7 +73,8 @@ const distanceNeedsNear = {
 };
 
 /**
- * Query string of `GET /routes/search` (wiki API): `bbox=w,s,e,n`, `near=lat,lng`, filter keys.
+ * Query string of `GET /routes/search` (wiki API): `bbox=w,s,e,n`, `near=lat,lng`, filter keys,
+ * `q` for a search by title.
  * Strict: an unknown key is refused rather than ignored, so a misspelled filter never answers
  * unfiltered results. The API reads `budgets[]=high` as `budgets=high` before this schema.
  */
