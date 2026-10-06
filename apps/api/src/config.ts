@@ -64,6 +64,26 @@ const Env = z.object({
         .optional(),
     ),
   /**
+   * Server token of Mapbox, for the geocoding of the search (E-02) only, never sent to the app.
+   * Empty or absent: a short local list of zones outside production, no zone in production.
+   */
+  MAPBOX_GEOCODING_TOKEN: z
+    .string()
+    .optional()
+    .transform((value) => value || undefined)
+    .pipe(
+      z
+        .string()
+        .regex(/^[A-Za-z0-9._-]{20,512}$/, 'Expected a Mapbox access token')
+        .optional(),
+    ),
+  /**
+   * `true`: zones asked of Mapbox as permanent results (`permanent=true`, billed apart), which
+   * its terms let the API keep, here 24 hours. `false`, the default: temporary results, kept by
+   * no one, so no cache (Mapbox › Storing geocoding results).
+   */
+  MAPBOX_GEOCODING_PERMANENT: z.enum(['true', 'false']).default('false'),
+  /**
    * `staging` or `production` on Cloud Run, where NODE_ENV is `production` for both; empty or
    * absent, the reports carry NODE_ENV.
    */
@@ -121,6 +141,8 @@ export const Config = ProductionEnv.transform((env) => ({
   sentryDsn: env.SENTRY_DSN,
   sentryEnvironment: env.SENTRY_ENVIRONMENT ?? env.NODE_ENV,
   internalToken: env.INTERNAL_TOKEN,
+  mapboxGeocodingToken: env.MAPBOX_GEOCODING_TOKEN,
+  isMapboxGeocodingPermanent: env.MAPBOX_GEOCODING_PERMANENT === 'true',
 }));
 export type Config = z.output<typeof Config>;
 
