@@ -61,7 +61,8 @@
           "motionUsagePermission": false
         }
       ],
-      "expo-image"
+      "expo-image",
+      "./plugins/withAndroidConfigChanges"
     ],
     "extra": {
       "eas": {
