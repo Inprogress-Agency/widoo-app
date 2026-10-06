@@ -52,6 +52,13 @@ describe('searchQueryString', () => {
     expect(query.get('sort')).toBe('rating');
   });
 
+  it('sends the title searched only when given', () => {
+    expect(new URLSearchParams(searchQueryString({ bbox, q: 'canal & co' })).get('q')).toBe(
+      'canal & co',
+    );
+    expect(new URLSearchParams(searchQueryString({ bbox })).has('q')).toBe(false);
+  });
+
   it('sends the page and the position only when given', () => {
     const query = new URLSearchParams(
       searchQueryString({ bbox, near: { lat: 48.86, lng: 2.35 }, cursor: 'abc', limit: 50 }),
@@ -134,5 +141,28 @@ describe('countRoutes', () => {
     const query = new URL(String(fetch.mock.calls[0]?.[0])).searchParams;
     expect(query.get('breakdown')).toBe('all_but_one');
     expect(query.getAll('durations')).toEqual(['weekend']);
+  });
+});
+
+describe('geocode', () => {
+  const zone = {
+    id: 'zone-fictive',
+    name: 'Quartier fictif',
+    kind: 'neighborhood',
+    area: 'Paris 10e',
+    center: { lat: 48.871, lng: 2.365 },
+    bbox,
+    routeCount: 4,
+  };
+
+  it('sends the text alone, encoded, without token', async () => {
+    const fetch = vi.fn<typeof globalThis.fetch>(
+      async () => new Response(JSON.stringify({ zones: [zone] }), { status: 200 }),
+    );
+    const getToken = vi.fn(async () => 'token-1');
+    const client = createApiClient({ baseUrl: 'http://10.0.2.2:8080', fetch, getToken });
+    expect(await client.geocode('Saint-Martin & co')).toEqual({ zones: [zone] });
+    expect(fetch.mock.calls[0]?.[0]).toBe('http://10.0.2.2:8080/v1/geocode?q=Saint-Martin+%26+co');
+    expect(getToken).not.toHaveBeenCalled();
   });
 });
