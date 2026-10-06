@@ -3,32 +3,68 @@ import { Pressable, View } from 'react-native';
 import { CountBadge } from '../ui/CountBadge';
 import { Icon, uiIcon } from '../ui/Icon';
 import { Text } from '../ui/Text';
+import { useIsLargeText } from '../ui/useIsLargeText';
 
 interface SearchPillProps {
   /** Active filters: the badge of the filters button. */
   filterCount: number;
   onOpenFilters: () => void;
+  /** The search of E-02, in the results sheet. */
+  onOpenSearch: () => void;
+  /** The zone chosen in the search, in bold with a cross; null around the user. */
+  zoneName?: string | null;
+  /** The cross: back around the user. */
+  onLeaveZone?: () => void;
 }
 
 /**
- * White search pill of the home (Ecrans › E-01), with the filters button inside on the right: a
- * light grey disc with the blue badge of the active filters, which opens the panel (E-03). The
- * field is its place only until the search of E-02 (#30): out of reach of screen readers.
+ * White search pill of the home (Ecrans › E-01): the way into the search (E-02), « Qu'est-ce
+ * qu'on fait aujourd'hui ? », shortened from 130 % of system text; once a zone is chosen, its name
+ * in bold and a cross that brings the map back around the user. The filters button inside on the
+ * right: a light grey disc with the blue badge of the active filters, which opens the panel
+ * (E-03).
  */
-export function SearchPill({ filterCount, onOpenFilters }: SearchPillProps) {
+export function SearchPill({
+  filterCount,
+  onOpenFilters,
+  onOpenSearch,
+  zoneName = null,
+  onLeaveZone,
+}: SearchPillProps) {
   const { t } = useTranslation();
+  const isLargeText = useIsLargeText();
   return (
-    <View className="min-h-button-l-h flex-row items-center gap-12 rounded-pill bg-bg py-6 pl-16 pr-6">
-      <View
-        className="flex-1 flex-row items-center gap-12"
-        importantForAccessibility="no-hide-descendants"
-        accessibilityElementsHidden
+    <View className="min-h-button-l-h flex-row items-center gap-8 rounded-pill bg-bg py-6 pl-16 pr-6">
+      <Pressable
+        accessibilityRole="search"
+        accessibilityLabel={
+          zoneName ? t('search.pillZone', { zone: zoneName }) : t('search.fieldLabel')
+        }
+        accessibilityHint={t('search.opens')}
+        onPress={onOpenSearch}
+        className="min-h-touch-min flex-1 flex-row items-center gap-12"
       >
         <Icon {...uiIcon('search')} size="icon-l" />
-        <Text variant="body" color="muted" className="shrink">
-          {t('filters.placeholder')}
-        </Text>
-      </View>
+        {zoneName ? (
+          <Text variant="item" className="shrink">
+            {zoneName}
+          </Text>
+        ) : (
+          <Text variant="body" color="muted" className="shrink">
+            {isLargeText ? t('filters.placeholderShort') : t('filters.placeholder')}
+          </Text>
+        )}
+      </Pressable>
+      {zoneName && onLeaveZone && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('search.leaveZone', { zone: zoneName })}
+          onPress={onLeaveZone}
+          className="size-touch-min items-center justify-center"
+        >
+          <Icon {...uiIcon('clear')} color="muted" />
+        </Pressable>
+      )}
       <FiltersButton count={filterCount} onPress={onOpenFilters} />
     </View>
   );

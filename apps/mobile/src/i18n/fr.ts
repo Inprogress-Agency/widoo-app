@@ -46,8 +46,9 @@ export const fr = {
   },
   // Search pill, quick chips and filters panel (E-01, E-03).
   filters: {
-    // The field itself comes with the search of E-02 (#30).
     placeholder: "Qu'est-ce qu'on fait aujourd'hui ?",
+    // From 130 % of system text (Ecrans › E-01, texte agrandi).
+    placeholderShort: "Qu'est-ce qu'on fait ?",
     button: 'Filtres',
     buttonActive_one: 'Filtres, {{count}} actif',
     buttonActive_other: 'Filtres, {{count}} actifs',
@@ -132,6 +133,22 @@ export const fr = {
     offline: 'Hors connexion · recherche indisponible',
     offlineHelp:
       'Effacez la saisie pour retrouver vos recherches récentes, disponibles sans réseau.',
+    // Read with the role « champ de recherche » (Ecrans › E-02, lecteur d'écran).
+    fieldLabel: 'Rechercher une zone ou un parcours',
+    pillZone: '{{zone}}, rechercher une autre zone ou un parcours',
+    opens: 'Ouvre la recherche',
+    leaveZone: 'Quitter {{zone}} et revenir autour de moi',
+    placeholder: 'Quartier, station ou parcours',
+    // From 130 % of system text (Ecrans › E-02, texte agrandi).
+    placeholderShort: 'Zone ou parcours',
+    clear: 'Effacer la recherche',
+    cancel: 'Annuler',
+    cancelLabel: 'Annuler la recherche',
+    loading: 'Recherche en cours',
+    // « 2 zones, 3 parcours », once both groups answered.
+    results: '{{zones}}, {{routes}}',
+    zoneCount_one: '{{count}} zone',
+    zoneCount_other: '{{count}} zones',
   },
   sheet: {
     label: 'Résultats',

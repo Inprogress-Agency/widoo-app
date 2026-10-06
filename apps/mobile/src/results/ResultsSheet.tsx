@@ -60,6 +60,8 @@ interface ResultsSheetProps {
   children?: ReactNode;
   /** The detent reached, and the height the sheet covers there, tab bar included. */
   onLevelChange?: (level: SheetLevel, height: number) => void;
+  /** A detent reached by the finger, never by a move of the app. */
+  onUserDetent?: (level: SheetLevel) => void;
 }
 
 /**
@@ -76,6 +78,7 @@ export function ResultsSheet({
   peek,
   children,
   onLevelChange,
+  onUserDetent,
 }: ResultsSheetProps) {
   const insets = useSafeAreaInsets();
   const barHeight = use(BottomTabBarHeightContext) ?? 0;
@@ -116,6 +119,7 @@ export function ResultsSheet({
     }
     if (appTarget.current === null) {
       haptic('sheetDetent');
+      onUserDetent?.(next);
     } else if (appTarget.current === index) {
       appTarget.current = null;
     }
@@ -163,10 +167,18 @@ export function ResultsSheet({
       // The sheet is not one element: the handle is its adjustable part, its content is read.
       accessible={false}
       backgroundComponent={SheetBackground}
+      // The field of the search (E-02) takes the sheet to full with the keyboard (M-04); the
+      // sheet stays there when the keyboard closes, for the results to be read.
+      keyboardBehavior="extend"
+      keyboardBlurBehavior="none"
+      android_keyboardInputMode="adjustResize"
     >
       <BottomSheetScrollView
         // Tab bar height measured at runtime: the end of the content scrolls above the bar.
         contentContainerStyle={{ paddingBottom: barHeight }}
+        // Scrolling hides the keyboard; a tap on a row reaches the row (Ecrans › E-02).
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
       >
         <View onLayout={(event) => setPeekHeight(event.nativeEvent.layout.height)}>
           <SheetHandle level={level} onLevel={moveTo} />
