@@ -15,6 +15,12 @@ ignoredOptionalDependencies:
 # ahead of the React of the app. The app is native only: no react-dom at all.
 overrides:
   react-dom: '-'
+  # source-map-js <1.2.2, high advisory GHSA-68fv-2mgg-jv7q (#297). Reached through
+  # @vitest/coverage-v8 > magicast (the path the audit reports), and through postcss and
+  # @eslint/css-tree: test, lint and build tooling only, absent from the app bundles and the API image.
+  # Drop this line once no dependency resolves source-map-js below 1.2.2 without it: check at
+  # each upgrade of @vitest/coverage-v8 and at the audit exception review (#280).
+  source-map-js@<1.2.2: ^1.2.2
 
 # Install scripts stay blocked but for these: Skia copies its prebuilt native libraries there.
 onlyBuiltDependencies:
