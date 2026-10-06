@@ -103,6 +103,8 @@ export const fr = {
   sheet: {
     label: 'Résultats',
     nearby: 'À proximité',
+    // A zone chosen in the search (Ecrans › E-01, zone choisie).
+    aroundZone: 'Autour de {{zone}}',
     count_one: '{{count}} parcours',
     count_other: '{{count}} parcours',
     inZone: '{{count}} · {{zone}}',

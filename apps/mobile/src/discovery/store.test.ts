@@ -329,3 +329,53 @@ describe('sort of « Voir tout »', () => {
     expect(store.getState().sort).toBe('rating');
   });
 });
+
+describe('zone chosen in the search (E-02)', () => {
+  // Fictitious zone.
+  const canal = {
+    id: 'zone-canal',
+    name: 'Canal fictif',
+    kind: 'neighborhood' as const,
+    area: 'Paris 10e',
+    center: { lat: 48.871, lng: 2.365 },
+    bbox: { west: 2.345, south: 48.857, east: 2.385, north: 48.885 },
+  };
+
+  it('opens and closes the search, leaving the selection', () => {
+    openedWith('a');
+    store.getState().select('a');
+    store.getState().openSearch();
+    expect(store.getState()).toMatchObject({ isSearchOpen: true, selectedRouteId: null });
+    store.getState().closeSearch();
+    expect(store.getState().isSearchOpen).toBe(false);
+  });
+
+  it('frames the zone and searches it, with the trigger geocode', () => {
+    openedWith('a');
+    store.getState().openSearch();
+    store.getState().chooseZone(canal, 14);
+    const state = store.getState();
+    const view = { bbox: canal.bbox, zoom: 14 };
+    expect(state).toMatchObject({ zone: canal, isSearchOpen: false, status: 'loading' });
+    expect(state.framing?.view).toEqual(view);
+    expect(state.search).toMatchObject({ view, trigger: 'geocode' });
+    // The map settling on the zone is not a move of the user.
+    store.getState().showView(moved, false);
+    expect(canSearchZone(store.getState())).toBe(false);
+  });
+
+  it('goes back around the user, and searches the view the map settles on', () => {
+    openedWith('a');
+    store.getState().chooseZone(canal, 14);
+    const zoneSearch = store.getState().search;
+    store.getState().leaveZone();
+    expect(store.getState()).toMatchObject({ zone: null, framing: { view: 'home' } });
+    expect(store.getState().search).toBe(zoneSearch);
+    store.getState().showView(home, false);
+    expect(store.getState().search).toMatchObject({ view: home, trigger: 'button' });
+    // Once only: a later view is not searched.
+    const back = store.getState().search;
+    store.getState().showView(moved, true);
+    expect(store.getState().search).toBe(back);
+  });
+});
