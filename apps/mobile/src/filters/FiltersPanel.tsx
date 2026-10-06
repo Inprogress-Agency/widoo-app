@@ -19,6 +19,7 @@ import { Icon, uiIcon } from '../ui/Icon';
 import { ModalSheetBackground, ModalSheetHandle, modalSheetBackdrop } from '../ui/ModalSheetParts';
 import { setModalSheetOpen } from '../ui/ModalSheetShield';
 import { timing } from '../ui/motion';
+import { ScrollEdgeFade, scrollEdgeHeight } from '../ui/ScrollEdgeFade';
 import { Text } from '../ui/Text';
 import { filterIcon, filterLabel, filterTint, spokenFilterLabel } from './filterChip';
 import { PanelFooter } from './PanelFooter';
@@ -96,7 +97,7 @@ export function FiltersPanel() {
 }
 
 interface PanelFooterSlotProps extends BottomSheetFooterProps {
-  /** Height of the bar stuck at the foot, so that the last group scrolls above it. */
+  /** Height of the bar stuck at the foot, so that the last group scrolls above it and its fade. */
   onHeight: (height: number) => void;
 }
 
@@ -171,13 +172,15 @@ function PanelContent({ draft, bottom }: { draft: SearchFilters; bottom: number 
           <Icon {...uiIcon('close')} />
         </Pressable>
       </View>
-      <BottomSheetScrollView contentContainerStyle={{ paddingBottom: bottom }}>
+      {/* The last group ends above the bar and its fade. */}
+      <BottomSheetScrollView contentContainerStyle={{ paddingBottom: bottom + scrollEdgeHeight }}>
         <View className="gap-24 px-16 py-20">
           {panelGroups.map((group) => (
             <FilterGroup key={group} group={group} draft={draft} />
           ))}
         </View>
       </BottomSheetScrollView>
+      <ScrollEdgeFade bottom={bottom} />
     </View>
   );
 }
