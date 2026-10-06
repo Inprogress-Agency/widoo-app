@@ -31,6 +31,24 @@ function platformTextStyle(variant: TextStyleToken) {
 }
 
 /**
+ * How far the text grows with the system text size (D-046): titles of `titleMinFontSize` points
+ * and more up to 1.2 times, as iOS and Android 14 do by themselves; dense components up to 1.3
+ * times; any other text follows the setting. The lower cap wins for a title in a dense component.
+ */
+export function maxFontSizeMultiplier(
+  variant: TextStyleToken,
+  isDense: boolean,
+): number | undefined {
+  const caps = [
+    ...(textStyles[variant].fontSize >= accessibility.titleMinFontSize
+      ? [accessibility.maxFontSizeMultiplierTitle]
+      : []),
+    ...(isDense ? [accessibility.maxFontSizeMultiplierDense] : []),
+  ];
+  return caps.length > 0 ? Math.min(...caps) : undefined;
+}
+
+/**
  * Every text of the app: a text style and a color of tokens.json, nothing written by hand.
  *
  * When the system text size changes with the app open, iOS draws the text larger but keeps its
@@ -42,7 +60,7 @@ export function Text({ variant, color = 'ink', isDense = false, style, ...props 
   return (
     <NativeText
       key={fontScale}
-      maxFontSizeMultiplier={isDense ? accessibility.maxFontSizeMultiplierDense : undefined}
+      maxFontSizeMultiplier={maxFontSizeMultiplier(variant, isDense)}
       style={[platformTextStyle(variant), { color: colors[color] }, style]}
       {...props}
     />
