@@ -100,6 +100,20 @@ export const fr = {
       },
     },
   },
+  // Search of zones and routes (E-02).
+  search: {
+    aroundMe: 'Autour de moi',
+    removeRecent: "Retirer {{zone}} de l'historique",
+    routeLabel: 'Parcours {{title}}',
+    routeRating: 'note {{value}} sur 5',
+    kind: {
+      neighborhood: 'Quartier',
+      district: 'Arrondissement',
+      postcode: 'Code postal',
+      city: 'Ville',
+      station: 'Station',
+    },
+  },
   sheet: {
     label: 'Résultats',
     nearby: 'À proximité',
