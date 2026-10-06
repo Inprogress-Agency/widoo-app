@@ -17,7 +17,10 @@ const icons: Record<string, UiIconKey> = {
 };
 
 interface TabBarProps extends BottomTabBarProps {
-  /** Floats with the bar, just above the pill, such as the consent banner. */
+  /**
+   * Floats with the bar, just above the pill, such as the consent banner. An accessory that
+   * must never be covered by the pill puts itself in front of it (`z-10`).
+   */
   accessory?: ReactNode;
 }
 
