@@ -1,8 +1,8 @@
 import type { LatLng, RouteCard, RouteCluster } from '@widoo/shared';
 import { size } from '@widoo/tokens';
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, View } from 'react-native';
+import { BackHandler, Keyboard, Pressable, View, useWindowDimensions } from 'react-native';
 import { analytics } from '../analytics';
 import { createCardViewTracker } from '../analytics/discovery';
 import { StatusMessage } from '../components/StatusMessage';
@@ -17,6 +17,13 @@ import type { SectionId } from '../discovery/sections';
 import { discoveryStore, useDiscovery } from '../discovery/useRouteSearch';
 import { useZoneCount } from '../discovery/useSectionList';
 import { formatDayAndTime } from '../format/date';
+import { zoomForBbox } from '../map/geo';
+import type { RecentZone } from '../search/recentZones';
+import { SearchField } from '../search/SearchField';
+import { SearchPanel } from '../search/SearchPanel';
+import { resultCounts } from '../search/textSearch';
+import { recentZones, useRecentZones } from '../search/useRecentZones';
+import { useTextSearch } from '../search/useTextSearch';
 import { Button } from '../ui/Button';
 import { Text } from '../ui/Text';
 import type { OpenSource } from './navigation';
@@ -58,7 +65,7 @@ export function DiscoverySheet({
   containerHeight,
   position,
   onEnableLocation,
-  search,
+  search: searchState,
   onOpenRoute,
   onOpenSection,
   onCoverChange,
@@ -75,6 +82,7 @@ export function DiscoverySheet({
   const selected = useDiscovery(selectedRoute);
   const zoneCount = useZoneCount();
   const level = useRef<SheetLevel>('rest');
+  const search = useSearchInSheet(sheet, level, onOpenRoute);
   /** Cards already reported as seen, for the results on screen: once each. */
   const cardViews = useRef(createCardViewTracker());
 
@@ -84,7 +92,7 @@ export function DiscoverySheet({
       sheet.current?.moveTo('rest');
     }
   }, [selected]);
-  const { status, isOnline, isEmpty, clusters, retry } = search;
+  const { status, isOnline, isEmpty, clusters, retry } = searchState;
   const isOffline = !isOnline || status === 'offline';
   const routes = results?.items ?? [];
 
@@ -110,7 +118,10 @@ export function DiscoverySheet({
 
   let peek: ReactNode;
   let content: ReactNode = null;
-  if (selected) {
+  if (search.isOpen) {
+    peek = search.field;
+    content = search.panel;
+  } else if (selected) {
     peek = (
       <RouteSummary
         key={selected.id}
@@ -187,9 +198,10 @@ export function DiscoverySheet({
         level.current = next;
         onCoverChange?.(height);
       }}
+      onUserDetent={search.onUserDetent}
       peek={
         <>
-          {banner}
+          {!search.isOpen && banner}
           {peek}
         </>
       }
@@ -218,4 +230,108 @@ function SeeAllLink({ onPress }: { onPress: () => void }) {
       </Text>
     </Pressable>
   );
+}
+
+/**
+ * The search of E-02 in the sheet: opened from the pill, the sheet rises to full with the
+ * keyboard, the field and its results in place of the sections; « Annuler », Android's back, or
+ * the sheet dragged down closes it and the sheet goes back where it was. A zone chosen enters the
+ * recent zones, and the sheet goes back to rest while the map frames it.
+ */
+function useSearchInSheet(
+  sheet: RefObject<ResultsSheetMethods | null>,
+  level: RefObject<SheetLevel>,
+  onOpenRoute: (route: RouteCard, source: OpenSource) => void,
+) {
+  const { t } = useTranslation();
+  const { width } = useWindowDimensions();
+  const isOpen = useDiscovery((state) => state.isSearchOpen);
+  const closeSearch = useDiscovery((state) => state.closeSearch);
+  const chooseZone = useDiscovery((state) => state.chooseZone);
+  const leaveZone = useDiscovery((state) => state.leaveZone);
+  const recent = useRecentZones();
+  const [text, setText] = useState('');
+  const { input, view, retryZones, retryRoutes } = useTextSearch(isOpen ? text : '');
+  /** Where the sheet was when the search opened. */
+  const before = useRef<SheetLevel>('rest');
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+    before.current = level.current;
+    sheet.current?.moveTo('full');
+  }, [isOpen, sheet, level]);
+
+  const close = (to: SheetLevel) => {
+    Keyboard.dismiss();
+    setText('');
+    closeSearch();
+    sheet.current?.moveTo(to);
+  };
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      close(before.current);
+      return true;
+    });
+    return () => subscription.remove();
+  });
+
+  const choose = (zone: RecentZone) => {
+    recentZones.add(zone);
+    close('rest');
+    chooseZone(zone, zoomForBbox(zone.bbox, width));
+  };
+  const counts = resultCounts(input);
+  return {
+    isOpen,
+    onUserDetent: (next: SheetLevel) => {
+      // Dragged down by the user: the search closes where the sheet stops.
+      if (isOpen && next !== 'full') {
+        Keyboard.dismiss();
+        setText('');
+        closeSearch();
+      }
+    },
+    field: (
+      <SearchField
+        value={text}
+        onChangeText={setText}
+        onCancel={() => close(before.current)}
+        isLoading={view.kind !== 'offline' && 'isLoading' in view && view.isLoading}
+        resultsAnnouncement={
+          counts &&
+          t('search.results', {
+            zones: t('search.zoneCount', { count: counts.zones }),
+            routes: t('sheet.count', { count: counts.routes }),
+          })
+        }
+      />
+    ),
+    panel: (
+      <SearchPanel
+        text={input.text}
+        view={view}
+        input={input}
+        recentZones={recent}
+        onChooseZone={choose}
+        onRemoveRecent={recentZones.remove}
+        onClearRecent={recentZones.clear}
+        onAroundMe={() => {
+          close('rest');
+          leaveZone();
+        }}
+        onOpenRoute={(route) => {
+          Keyboard.dismiss();
+          onOpenRoute(route, 'card');
+        }}
+        retryZones={retryZones}
+        retryRoutes={retryRoutes}
+      />
+    ),
+  };
 }

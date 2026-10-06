@@ -46,6 +46,7 @@ export default function HomeScreen() {
   const select = useDiscovery((state) => state.select);
   const filterCount = useDiscovery((state) => activeFilterCount(state.filters));
   const openFilters = useDiscovery((state) => state.openFilters);
+  const openSearch = useDiscovery((state) => state.openSearch);
   const insets = useSafeAreaInsets();
 
   if (location.status === 'pending') {
@@ -94,7 +95,13 @@ export default function HomeScreen() {
             style={{ paddingTop: insets.top + spacing['space-8'] }}
           >
             <View className="px-16">
-              <SearchPill filterCount={filterCount} onOpenFilters={openFilters} />
+              <SearchPill
+                filterCount={filterCount}
+                onOpenFilters={openFilters}
+                onOpenSearch={openSearch}
+                zoneName={chosenZone?.name ?? null}
+                onLeaveZone={leaveZone}
+              />
             </View>
             <QuickChips />
           </View>
