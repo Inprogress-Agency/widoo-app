@@ -39,7 +39,8 @@ export const searchRoutesPlugin: FastifyPluginAsyncZod = async (app) => {
     },
     async (request) => {
       const query = request.query;
-      if (areaKm2(query.bbox) > (await clusterAreaKm2())) {
+      // A search by title lists its routes, whatever the size of the zone (E-02).
+      if (query.q === undefined && areaKm2(query.bbox) > (await clusterAreaKm2())) {
         return { items: [], nextCursor: null, clusters: await clusterRoutes(app.db, query) };
       }
       const page =

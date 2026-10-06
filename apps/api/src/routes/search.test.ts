@@ -513,3 +513,31 @@ describe('search query validation', () => {
     }
   });
 });
+
+describe('GET /v1/routes/search?q= on the seed (E-02)', () => {
+  it('finds the routes whose title holds the text, case aside', async () => {
+    const lower = await search(`${allParis}&q=canal&limit=50`);
+    const upper = await search(`${allParis}&q=CANAL&limit=50`);
+    expect(demoIdsOf(lower)).toEqual([demo('canal-saint-martin-a-velo')]);
+    expect(demoIdsOf(upper)).toEqual(demoIdsOf(lower));
+    expect(lower.items.every((item) => /canal/i.test(item.title))).toBe(true);
+  });
+
+  it('lists the routes of a zone too large to list, rather than its clusters', async () => {
+    const { items, clusters } = await search(`bbox=1.4,48.1,3.6,49.3&q=marais&limit=50`);
+    expect(clusters).toBeNull();
+    expect(demoIdsOf({ items, nextCursor: null, clusters })).toHaveLength(2);
+  });
+
+  it('reads % and _ as themselves', async () => {
+    expect((await search(`${allParis}&q=${encodeURIComponent('%%')}`)).items).toEqual([]);
+    expect((await search(`${allParis}&q=__`)).items).toEqual([]);
+  });
+
+  it('counts the routes of the text', async () => {
+    const { count: all } = await count(`${allParis}&q=marais`);
+    const { count: food } = await count(`${allParis}&q=marais&moods=food`);
+    expect(all).toBeGreaterThanOrEqual(2);
+    expect(food).toBeLessThan(all);
+  });
+});

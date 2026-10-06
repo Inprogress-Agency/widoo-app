@@ -16,7 +16,7 @@ import type { BBox } from '../db/geography';
 import { ratingOf } from '../db/route-stats';
 import { routes } from '../db/schema';
 import { decodeCursor, encodeCursor, type SortKeyValue } from './cursor';
-import { activeFilters, allOf, inZone } from './filters';
+import { activeFilters, allOf, inZone, titleMatches } from './filters';
 import { after, keyColumn, orderBy, sortKeys, type KeysetSort, type SortKey } from './sort';
 
 /**
@@ -126,9 +126,14 @@ function keyValuesOf(row: CardRow, count: number): SortKeyValue[] {
   });
 }
 
-/** Where clause of a search: the zone and every active filter group. */
-export function searchWhere(query: Pick<RouteSearchQuery, 'bbox' | RouteFilterGroup>) {
-  return allOf([inZone(query.bbox), ...Object.values(activeFilters(query))]);
+/** The routes of the zone, and of the title searched if any: what the filters apply to. */
+function zoneWhere(query: Pick<RouteSearchQuery, 'bbox' | 'q'>) {
+  return allOf([inZone(query.bbox), titleMatches(query.q)]);
+}
+
+/** Where clause of a search: the zone, the title searched and every active filter group. */
+export function searchWhere(query: Pick<RouteSearchQuery, 'bbox' | 'q' | RouteFilterGroup>) {
+  return allOf([zoneWhere(query), ...Object.values(activeFilters(query))]);
 }
 
 /** Card fields of the route `r`, after `cardJoins`. */
@@ -257,7 +262,7 @@ export function countSql(query: RouteCountQuery): SQL {
     return sql`(count(*) filter (where ${allOf(others)}))::int as ${sql.raw(`"${group}"`)}`;
   });
   const all = sql`(count(*) filter (where ${allOf(Object.values(filters))}))::int as count`;
-  return sql`select ${sql.join([all, ...without], sql`, `)} from ${routes} where ${inZone(query.bbox)}`;
+  return sql`select ${sql.join([all, ...without], sql`, `)} from ${routes} where ${zoneWhere(query)}`;
 }
 
 /** Number of routes of the search, and without each active group on `all_but_one`. */
