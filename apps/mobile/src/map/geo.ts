@@ -97,3 +97,13 @@ export function distanceBetweenM(from: LatLng, to: LatLng): number {
     Math.cos(toRadians(from.lat)) * Math.cos(toRadians(to.lat)) * Math.sin(dLng / 2) ** 2;
   return 2 * earthRadiusM * Math.asin(Math.min(1, Math.sqrt(a)));
 }
+
+/**
+ * Mapbox zoom level at which the width of `bbox` fills `widthPts` points: a zone chosen in the
+ * search, framed whole across the screen (Ecrans › E-02, zone choisie).
+ */
+export function zoomForBbox(bbox: Bbox, widthPts: number): number {
+  const [lng, lat] = bboxCenter(bbox);
+  const spanM = distanceBetweenM({ lat, lng: bbox.west }, { lat, lng: bbox.east });
+  return zoomForSpan({ lat, lng }, spanM, widthPts);
+}

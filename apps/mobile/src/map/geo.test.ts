@@ -6,6 +6,7 @@ import {
   parisCenter,
   scaleBbox,
   toBbox,
+  zoomForBbox,
   zoomForSpan,
 } from './geo';
 
@@ -30,6 +31,19 @@ describe('toBbox', () => {
       east: 2.37,
       north: 48.88,
     });
+  });
+});
+
+describe('zoomForBbox', () => {
+  it('frames the width of a zone of 3 km as the home opens on it', () => {
+    const half = 1500 / (111_195 * Math.cos((parisCenter.lat * Math.PI) / 180));
+    const bbox = {
+      west: parisCenter.lng - half,
+      south: parisCenter.lat - 0.01,
+      east: parisCenter.lng + half,
+      north: parisCenter.lat + 0.01,
+    };
+    expect(zoomForBbox(bbox, 402)).toBeCloseTo(zoomForSpan(parisCenter, 3000, 402), 2);
   });
 });
 
