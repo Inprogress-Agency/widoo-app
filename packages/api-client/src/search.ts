@@ -16,12 +16,13 @@ export type RouteSearchParams = Pick<RouteSearchQuery, 'bbox'> &
  * What the app asks of `GET /v1/routes/search/count`: the zone and the filters of a search, and
  * `breakdown=all_but_one` for the count without each active group (E-03 zero result).
  */
-export type RouteCountParams = Pick<RouteSearchParams, 'bbox' | RouteFilterGroup> &
+export type RouteCountParams = Pick<RouteSearchParams, 'bbox' | 'q' | RouteFilterGroup> &
   Pick<RouteCountQuery, 'breakdown'>;
 
 /**
  * Query string of the search, as the API reads it: `bbox=w,s,e,n`, `near=lat,lng`, a list filter
- * as its key repeated (`moods=food&moods=nature`). Empty filters are left out.
+ * as its key repeated (`moods=food&moods=nature`), `q` the title searched. Empty filters are left
+ * out.
  */
 export function searchQueryString(params: RouteSearchParams): string {
   const { west, south, east, north } = params.bbox;
@@ -33,6 +34,9 @@ export function searchQueryString(params: RouteSearchParams): string {
     for (const value of params[group] ?? []) {
       query.append(group, value);
     }
+  }
+  if (params.q) {
+    query.set('q', params.q);
   }
   if (params.sort) {
     query.set('sort', params.sort);

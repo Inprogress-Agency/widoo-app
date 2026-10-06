@@ -1,4 +1,11 @@
-import { AppConfig, Me, RouteCount, RouteSearchResult, type UpdateMe } from '@widoo/shared';
+import {
+  AppConfig,
+  GeocodeResult,
+  Me,
+  RouteCount,
+  RouteSearchResult,
+  type UpdateMe,
+} from '@widoo/shared';
 import {
   countQueryString,
   searchQueryString,
@@ -50,6 +57,18 @@ export function createApiClient(options: ApiClientOptions) {
         method: 'GET',
         path: `/v1/routes/search/count?${countQueryString(params)}`,
         schema: RouteCount,
+        signal,
+      }),
+
+    /**
+     * `GET /v1/geocode`: the zones of a text typed in the search (E-02), each with its number of
+     * routes and the box to search. Public: sent without token, the text and nothing else.
+     */
+    geocode: (text: string, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/geocode?${new URLSearchParams({ q: text }).toString()}`,
+        schema: GeocodeResult,
         signal,
       }),
 
