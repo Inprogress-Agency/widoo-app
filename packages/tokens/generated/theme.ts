@@ -1060,7 +1060,10 @@ export const accessibility = {
     "pastille « Couverture » des photos du parcours (D-051)",
     "idées à toucher de « À prévoir » (D-051)",
     "pastille « Suggéré » de la fenêtre du trajet (D-051)"
-  ]
+  ],
+  "referenceFontScale": 1.353,
+  "maxFontSizeMultiplierTitle": 1.2,
+  "titleMinFontSize": 22
 } as const;
 
 /** Toast colors and states (D-025). */

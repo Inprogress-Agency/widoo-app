@@ -114,6 +114,11 @@ export const tokensSchema = z.object({
       maxFontSizeMultiplierDense: z.number(),
       reflowFontScale: z.number(),
       denseComponents: z.array(z.string()),
+      /** Largest standard system text size, the one the recette simulates (D-046). */
+      referenceFontScale: z.number(),
+      /** Text styles of `titleMinFontSize` points and more grow up to this multiplier (D-046). */
+      maxFontSizeMultiplierTitle: z.number(),
+      titleMinFontSize: z.number(),
     }),
     motion: z.object({
       durationsMs: z.record(z.string(), z.number()),
