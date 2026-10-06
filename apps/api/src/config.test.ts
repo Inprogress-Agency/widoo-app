@@ -21,7 +21,23 @@ describe('loadConfig', () => {
       sentryDsn: undefined,
       sentryEnvironment: 'development',
       internalToken: undefined,
+      mapboxGeocodingToken: undefined,
+      isMapboxGeocodingPermanent: false,
     });
+  });
+
+  it('reads the Mapbox geocoding token and mode, never echoing a refused token', () => {
+    const load = (env: Record<string, string>) => loadConfig({ DATABASE_URL: databaseUrl, ...env });
+    const token = 'sk.fictitious-mapbox-token-0123456789';
+    expect(load({ MAPBOX_GEOCODING_TOKEN: token })).toMatchObject({
+      mapboxGeocodingToken: token,
+      isMapboxGeocodingPermanent: false,
+    });
+    expect(load({ MAPBOX_GEOCODING_TOKEN: '' }).mapboxGeocodingToken).toBeUndefined();
+    expect(load({ MAPBOX_GEOCODING_PERMANENT: 'true' }).isMapboxGeocodingPermanent).toBe(true);
+    expect(() => load({ MAPBOX_GEOCODING_PERMANENT: 'yes' })).toThrow(/MAPBOX_GEOCODING_PERMANENT/);
+    expect(() => load({ MAPBOX_GEOCODING_TOKEN: `${token} x` })).toThrow(/MAPBOX_GEOCODING_TOKEN/);
+    expect(() => load({ MAPBOX_GEOCODING_TOKEN: `${token} x` })).not.toThrow(token);
   });
 
   it('reads the internal service token, an empty one meaning none', () => {

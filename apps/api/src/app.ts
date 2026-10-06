@@ -1,4 +1,4 @@
-import Fastify, { LogController } from 'fastify';
+import Fastify, { LogController, type FastifyBaseLogger } from 'fastify';
 import {
   serializerCompiler,
   validatorCompiler,
@@ -11,9 +11,13 @@ import type { Config } from './config';
 import { createDb, createSql } from './db/client';
 import { registerDocs } from './docs';
 import { registerErrorHandling } from './errors';
+import type { Geocoder } from './geocode/geocoder';
+import { localGeocoder } from './geocode/local';
+import { createMapboxGeocoder } from './geocode/mapbox';
 import { loggerOptions, requestIdOf, type LogStream } from './logger';
 import { parseQueryString } from './query-string';
 import { configRoutes } from './routes/config';
+import { geocodeRoutes } from './routes/geocode';
 import { healthRoutes } from './routes/health';
 import { defaultInternalJobs, internalRoutes, type InternalJobs } from './routes/internal';
 import { meRoutes } from './routes/me';
@@ -26,6 +30,8 @@ export type BuildAppOptions = {
   tokenVerifier?: TokenVerifier;
   /** Tests only: replaces the jobs of the internal routes. Refused in production. */
   internalJobs?: InternalJobs;
+  /** Tests only: replaces the geocoder of the search. Refused in production. */
+  geocoder?: Geocoder;
 };
 
 /** Firebase unless a verifier is injected; fails at startup rather than on the first request. */
@@ -42,11 +48,35 @@ function tokenVerifierOf(config: Config, injected: TokenVerifier | undefined): T
   return createFirebaseVerifier(config.firebaseProjectId);
 }
 
+/**
+ * Mapbox with the server token; without it, the local zones outside production, and no geocoder
+ * in production, where the search answers 503 rather than inventing zones.
+ */
+function geocoderOf(config: Config, log: FastifyBaseLogger): Geocoder | null {
+  if (config.mapboxGeocodingToken) {
+    return createMapboxGeocoder({
+      token: config.mapboxGeocodingToken,
+      isPermanent: config.isMapboxGeocodingPermanent,
+      // The source and the status only: the URL holds the token and the text typed.
+      onFailure: (failure) => log.warn({ geocoding: failure }, 'geocoding source failed'),
+    });
+  }
+  if (config.isProduction) {
+    log.warn('MAPBOX_GEOCODING_TOKEN is not set: GET /v1/geocode answers 503');
+    return null;
+  }
+  log.warn('MAPBOX_GEOCODING_TOKEN is not set: GET /v1/geocode answers local zones');
+  return localGeocoder;
+}
+
 /** Builds the API without listening, so that tests drive it with `app.inject()`. */
 export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   const tokenVerifier = tokenVerifierOf(config, options.tokenVerifier);
   if (options.internalJobs && config.isProduction) {
     throw new Error('Injected internal jobs are refused in production');
+  }
+  if (options.geocoder && config.isProduction) {
+    throw new Error('An injected geocoder is refused in production');
   }
   const app = Fastify({
     logger: loggerOptions(config.logLevel, options.logStream),
@@ -80,6 +110,11 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   await app.register(configRoutes, { prefix: '/v1', minAppVersion: config.minAppVersion });
   await app.register(meRoutes, { prefix: '/v1' });
   await app.register(searchRoutesPlugin, { prefix: '/v1' });
+  await app.register(geocodeRoutes, {
+    prefix: '/v1',
+    geocoder: options.geocoder ?? geocoderOf(config, app.log),
+    isCacheable: config.isMapboxGeocodingPermanent,
+  });
   if (config.internalToken) {
     await app.register(internalRoutes, {
       prefix: '/v1',
