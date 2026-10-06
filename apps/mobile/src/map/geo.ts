@@ -14,6 +14,12 @@ export type Bbox = RouteSearchQuery['bbox'];
 /** Paris centre, at the Hôtel de Ville: the map opens there without the user's position. */
 export const parisCenter: LatLng = { lat: 48.8566, lng: 2.3522 };
 
+/**
+ * Paris and its suburbs, where Widoo opens: the zone of a search by title (E-02), which looks for
+ * routes beyond the map on screen.
+ */
+export const parisRegionBbox: Bbox = { west: 1.45, south: 48.12, east: 3.56, north: 49.24 };
+
 /** The home map opens on about 3 km around its centre (Ecrans › E-01). */
 export const initialSpanM = 3000;
 
