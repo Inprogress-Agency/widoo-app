@@ -68,6 +68,7 @@ export function DiscoverySheet({
   const results = useDiscovery((state) => state.results);
   const resultsAt = useDiscovery((state) => state.resultsAt);
   const filterCount = useDiscovery((state) => activeFilterCount(state.filters));
+  const chosenZone = useDiscovery((state) => state.zone);
   const widenZone = useDiscovery((state) => state.widenZone);
   const clearFilters = useDiscovery((state) => state.clearFilters);
   const focus = useDiscovery((state) => state.focus);
@@ -144,7 +145,8 @@ export function DiscoverySheet({
   } else {
     // Over one page of results, the count of the zone; the listed routes until it comes.
     const count = t('sheet.count', { count: zoneCount ?? routes.length });
-    const zone = position ? zoneName(routes, position) : t('sheet.paris');
+    // A zone chosen in the search names the section: « Autour de Canal Saint-Martin » (E-01).
+    const zone = chosenZone ? null : position ? zoneName(routes, position) : t('sheet.paris');
     // « 9 parcours · 3 filtres » once filters apply (Ecrans › E-01, filtres appliqués).
     const filters = t('sheet.filterCount', { count: filterCount });
     const subtitle =
@@ -155,7 +157,7 @@ export function DiscoverySheet({
           : count;
     peek = (
       <SheetHeader
-        title={t('sheet.nearby')}
+        title={chosenZone ? t('sheet.aroundZone', { zone: chosenZone.name }) : t('sheet.nearby')}
         subtitle={subtitle}
         action={<SeeAllLink onPress={() => onOpenSection('nearby')} />}
       />

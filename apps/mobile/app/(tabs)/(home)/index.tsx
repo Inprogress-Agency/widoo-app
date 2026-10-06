@@ -41,6 +41,8 @@ export default function HomeScreen() {
   const framing = useDiscovery((state) => state.framing);
   const showView = useDiscovery((state) => state.showView);
   const searchZone = useDiscovery((state) => state.searchZone);
+  const chosenZone = useDiscovery((state) => state.zone);
+  const leaveZone = useDiscovery((state) => state.leaveZone);
   const select = useDiscovery((state) => state.select);
   const filterCount = useDiscovery((state) => activeFilterCount(state.filters));
   const openFilters = useDiscovery((state) => state.openFilters);
@@ -82,6 +84,8 @@ export default function HomeScreen() {
             // Over an empty zone, the message offers to widen it; offline, nothing can be searched:
             // no recentre (Ecrans › E-01).
             hasRecenter={!isEmpty && !isOffline}
+            // Recentring leaves a zone chosen in the search, and searches around the user again.
+            onRecenter={chosenZone ? leaveZone : undefined}
           />
           {/* Over the map; the sheet covers them when it rises to full (E-04). */}
           <View

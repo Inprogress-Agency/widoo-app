@@ -24,7 +24,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useReducedMotion } from 'react-native-reanimated';
 import { colors } from '@widoo/tokens';
-import type { MapView } from '../discovery/store';
+import type { Framing, MapView } from '../discovery/store';
 import { isOpeningZone } from '../discovery/zone';
 import { formatDuration } from '../format/duration';
 import { clusterId, clusterPoints, clusterZoomStep } from './clusters';
@@ -62,8 +62,11 @@ interface RouteMapProps {
    * moved it (a pan or a zoom) rather than the app.
    */
   onViewChange: (view: MapView, isManual: boolean) => void;
-  /** A view the app asks for, such as the widened zone: the camera goes there when `id` changes. */
-  framing: { id: number; view: MapView } | null;
+  /**
+   * A view the app asks for, such as the widened zone, a zone chosen in the search, or the opening
+   * view (`home`): the camera goes there when `id` changes.
+   */
+  framing: Framing | null;
   selectedRoute: RouteCard | null;
   /** The card the user scrolled to in the sheet: the map comes round to its start, enlarged. */
   focusedRoute?: RouteCard | null;
@@ -80,6 +83,11 @@ interface RouteMapProps {
   searchControl?: ReactNode;
   /** The recentre button, hidden over the message of an empty zone (Ecrans › E-01). */
   hasRecenter?: boolean;
+  /**
+   * The recentre button, when it does more than move the camera: a zone chosen in the search is
+   * left (Ecrans › E-01, recentrer), through a `home` framing.
+   */
+  onRecenter?: () => void;
 }
 
 /**
@@ -103,6 +111,7 @@ export function RouteMap({
   onOpenRoute,
   searchControl,
   hasRecenter = true,
+  onRecenter,
 }: RouteMapProps) {
   const { t } = useTranslation();
   const { fontScale, width } = useWindowDimensions();
@@ -126,6 +135,8 @@ export function RouteMap({
   /** A gesture of the user moved the map since it last settled. */
   const isGestureMove = useRef(false);
   const zoom = useRef(0);
+  /** The last view the map settled on, told to `onViewChange`. */
+  const lastView = useRef<MapView | null>(null);
   const label = durationLabel(fontScale);
   const sharedImages = useMemo(() => sharedMarkerImages(label.pillHeight), [label.pillHeight]);
   const photoImages = usePhotoMarkerImages(routes);
@@ -163,7 +174,8 @@ export function RouteMap({
         isOpened.current = true;
       }
       zoom.current = state.properties.zoom;
-      onViewChange({ bbox, zoom: zoom.current }, isGestureMove.current);
+      lastView.current = { bbox, zoom: zoom.current };
+      onViewChange(lastView.current, isGestureMove.current);
       isGestureMove.current = false;
     },
     [onViewChange],
@@ -185,6 +197,27 @@ export function RouteMap({
     zoomLevel: zoomForSpan(center, initialSpanM, width),
   };
 
+  /**
+   * Back to the opening view. A camera already there does not move, and the map does not settle
+   * again: the view it shows is told as is, so that its search still runs.
+   */
+  const goHome = useEffectEvent(() => {
+    camera.current?.setCamera({ ...home, ...cameraAnimationOf(isReducedMotion) });
+    const view = lastView.current;
+    if (!view) {
+      return;
+    }
+    const [lng, lat] = bboxCenter(view.bbox);
+    const [homeLng, homeLat] = home.centerCoordinate;
+    const isHome =
+      Math.abs(lng - homeLng) < 1e-5 &&
+      Math.abs(lat - homeLat) < 1e-5 &&
+      Math.abs(view.zoom - home.zoomLevel) < 1e-2;
+    if (isHome) {
+      onViewChange(view, false);
+    }
+  });
+
   // A framing is followed once, when it is asked for.
   const framedId = useRef<number | null>(null);
   useEffect(() => {
@@ -192,6 +225,10 @@ export function RouteMap({
       return;
     }
     framedId.current = framing.id;
+    if (framing.view === 'home') {
+      goHome();
+      return;
+    }
     camera.current?.setCamera({
       centerCoordinate: bboxCenter(framing.view.bbox),
       zoomLevel: framing.view.zoom,
@@ -219,6 +256,10 @@ export function RouteMap({
   }, [focusedRoute, selectedRoute, bottomInset, isReducedMotion]);
 
   const recenter = () => {
+    if (onRecenter) {
+      onRecenter();
+      return;
+    }
     camera.current?.setCamera({ ...home, ...cameraAnimation });
   };
 

@@ -9,6 +9,7 @@ import {
 } from '@widoo/shared';
 import { createStore } from 'zustand/vanilla';
 import { scaleBbox, type Bbox } from '../map/geo';
+import type { RecentZone } from '../search/recentZones';
 import { filterResults, removeGroup, toggleFilter, type Filter } from './filters';
 import { isSearchableZone } from './zone';
 
@@ -40,6 +41,15 @@ export interface ZoneSearch {
 /** `offline`: the search waits for the network; the last results known stay on screen. */
 export type SearchStatus = 'idle' | 'loading' | 'success' | 'error' | 'offline';
 
+/** A zone chosen in the search (E-02): the map frames it, the pill and the sheet name it. */
+export type ChosenZone = RecentZone;
+
+/**
+ * A view the app asks the map to show, once: a zone, such as the widened one or a zone chosen in
+ * the search, or `home` for the view the map opened on, around the user or Paris.
+ */
+export type Framing = { id: number; view: MapView } | { id: number; view: 'home' };
+
 /** Results kept from an earlier session, with the time they were fetched. */
 export interface CachedResults {
   result: RouteSearchResult;
@@ -69,8 +79,14 @@ export interface DiscoveryState {
   selectedRouteId: string | null;
   /** The card the user scrolled to in the sheet: the map comes round to its start (E-04). */
   focusedRouteId: string | null;
-  /** A view the app asks the map to show, such as the widened zone; `id` changes each time. */
-  framing: { id: number; view: MapView } | null;
+  /** A view the app asks the map to show; `id` changes each time. */
+  framing: Framing | null;
+  /** The zone chosen in the search, whose routes the results are; null around the user. */
+  zone: ChosenZone | null;
+  /** The search of E-02 is open in the sheet, at its full detent. */
+  isSearchOpen: boolean;
+  /** The next view the map settles on is searched, with this trigger: back around the user. */
+  pendingTrigger: SearchTrigger | null;
   /** Sort of the « Voir tout » lists, kept for the session (Ecrans › E-04, sheet de tri). */
   sort: RouteSort;
 }
@@ -113,6 +129,17 @@ export interface DiscoveryActions {
   /** The leading card of the carousel after a scroll of the user. */
   focus: (routeId: string) => void;
   setSort: (sort: RouteSort) => void;
+  /** The pill of the home: the search opens in the sheet, no route selected. */
+  openSearch: () => void;
+  /** « Annuler »: the search closes, nothing changed. */
+  closeSearch: () => void;
+  /**
+   * A zone of the search, or a recent one: the search closes, the map frames the zone at `zoom`
+   * and its routes are searched (`map_search_zone` with `geocode`).
+   */
+  chooseZone: (zone: ChosenZone, zoom: number) => void;
+  /** The cross of the pill, or the recentre button: back around the user, searched again. */
+  leaveZone: () => void;
 }
 
 export type DiscoveryStore = DiscoveryState & DiscoveryActions;
@@ -131,6 +158,9 @@ export const initialDiscoveryState: DiscoveryState = {
   focusedRouteId: null,
   framing: null,
   sort: 'recommended',
+  zone: null,
+  isSearchOpen: false,
+  pendingTrigger: null,
 };
 
 /** Number of active filters, the N of « Retirer les N filtres ». */
@@ -197,10 +227,12 @@ export function createDiscoveryStore() {
         if (!isSearchableZone(view.bbox)) {
           return;
         }
-        const { search, hasMoved } = get();
-        set({ view, hasMoved: hasMoved || (isManual && search !== null) });
+        const { search, hasMoved, pendingTrigger } = get();
+        set({ view, hasMoved: hasMoved || (isManual && search !== null), pendingTrigger: null });
         if (search === null) {
           startSearch(view, 'initial');
+        } else if (pendingTrigger) {
+          startSearch(view, pendingTrigger);
         }
       },
       searchZone: (trigger) => {
@@ -299,6 +331,24 @@ export function createDiscoveryStore() {
       select: (routeId) => set({ selectedRouteId: routeId }),
       focus: (routeId) => set({ focusedRouteId: routeId }),
       setSort: (sort) => set({ sort }),
+      openSearch: () => set({ isSearchOpen: true, selectedRouteId: null }),
+      closeSearch: () => set({ isSearchOpen: false }),
+      chooseZone: (zone, zoom) => {
+        const view = { bbox: zone.bbox, zoom };
+        lastId += 1;
+        set({
+          zone,
+          isSearchOpen: false,
+          selectedRouteId: null,
+          view,
+          framing: { id: lastId, view },
+        });
+        startSearch(view, 'geocode');
+      },
+      leaveZone: () => {
+        lastId += 1;
+        set({ zone: null, framing: { id: lastId, view: 'home' }, pendingTrigger: 'button' });
+      },
     };
   });
 }
