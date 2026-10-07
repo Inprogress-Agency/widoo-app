@@ -8,7 +8,7 @@ source ./common.sh
 parse_args "$@"
 
 announce \
-  "creates the network $NETWORK, the Cloud SQL instance $SQL_INSTANCE ($SQL_TIER, private IP only, daily backups, PITR 7 days; about 15 minutes), the database $DB_NAME, the user $DB_USER and the secrets database-url and sentry-dsn" \
+  "creates the network $NETWORK, the Cloud SQL instance $SQL_INSTANCE ($SQL_TIER, private IP only, daily backups, PITR 7 days; about 15 minutes), the database $DB_NAME, the user $DB_USER, the secrets database-url, sentry-dsn and mapbox-geocoding-token (the last two without a value), and read access to them for the service, to database-url only for the migration job" \
   "the instance has deletion protection: gcloud sql instances patch $SQL_INSTANCE --no-deletion-protection, then delete; a deleted instance loses its data and backups"
 
 step 'Network'
@@ -49,7 +49,9 @@ fi
 
 step 'Secrets'
 # Values stay in the region. SENTRY_DSN is optional: the API sends no report without it.
-for secret in database-url sentry-dsn; do
+# MAPBOX_GEOCODING_TOKEN, a server token typed by hand (infra/README.md): without it, the API on
+# Cloud Run offers no zone to the search.
+for secret in database-url sentry-dsn mapbox-geocoding-token; do
   if ! exists gcloud secrets describe "$secret"; then
     run gcloud secrets create "$secret" --replication-policy=user-managed --locations="$REGION"
   fi
@@ -61,6 +63,8 @@ grant_secret() {
 grant_secret database-url "$RUNTIME_SA"
 grant_secret database-url "$MIGRATION_SA"
 grant_secret sentry-dsn "$RUNTIME_SA"
+# The service only: the migration job never geocodes.
+grant_secret mapbox-geocoding-token "$RUNTIME_SA"
 
 step "User $DB_USER and secret database-url"
 # Built-in users belong to cloudsqlsuperuser, which may create the postgis and pg_trgm extensions
