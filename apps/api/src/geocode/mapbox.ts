@@ -7,7 +7,7 @@
  */
 import { createTtlCache } from './cache';
 import { GeocoderUnavailable, MAX_ZONES, textKey, type Geocoder, type ZoneHit } from './geocoder';
-import { stationsOfSearchBox, ZONE_TYPES, zonesOfGeocoding } from './mapbox-answers';
+import { namesText, stationsOfSearchBox, ZONE_TYPES, zonesOfGeocoding } from './mapbox-answers';
 const GEOCODING_URL = 'https://api.mapbox.com/search/geocode/v6/forward';
 const SEARCH_BOX_URL = 'https://api.mapbox.com/search/searchbox/v1/forward';
 
@@ -20,6 +20,12 @@ const ZONE_CACHE_MAX_ENTRIES = 5000;
 
 /** Paris, where Widoo opens: the bias of the results, the user's position is never sent. */
 const PROXIMITY = '2.3522,48.8566';
+
+/**
+ * Île-de-France, where the routes are: Mapbox answers no zone outside it, so that « République »
+ * is not a district of Nantes (`west,south,east,north`).
+ */
+const SEARCH_AREA = '1.45,48.12,3.56,49.24';
 
 /** Why a source failed, as it may be logged: never its URL, which holds the token and the text. */
 export type UpstreamFailure = {
@@ -79,7 +85,7 @@ export function createMapboxGeocoder(options: MapboxGeocoderOptions): Geocoder {
     }
   }
 
-  const common = { country: 'fr', language: 'fr', proximity: PROXIMITY };
+  const common = { country: 'fr', language: 'fr', proximity: PROXIMITY, bbox: SEARCH_AREA };
 
   async function zones(text: string): Promise<ZoneHit[]> {
     const key = textKey(text);
@@ -129,6 +135,7 @@ export function createMapboxGeocoder(options: MapboxGeocoderOptions): Geocoder {
       ];
       const seen = new Set<string>();
       return found
+        .filter((zone) => namesText(zone.name, text))
         .filter((zone) => !seen.has(zone.id) && Boolean(seen.add(zone.id)))
         .slice(0, MAX_ZONES);
     },

@@ -60,6 +60,16 @@ describe('GET /v1/geocode', () => {
     expect(response.headers['cache-control']).toBe('no-store');
   });
 
+  it('puts the zones with routes first, the others in the order of the source', async () => {
+    const reversed = await buildApp(testConfig(), {
+      geocoder: { find: async () => [offshore, montmartre] },
+    });
+    const response = await reversed.inject({ url: '/v1/geocode?q=Montmartre' });
+    await reversed.close();
+    const { zones } = GeocodeResult.parse(response.json());
+    expect(zones.map((zone) => zone.id)).toEqual(['test-montmartre', 'test-offshore']);
+  });
+
   it.each([
     ['a single character', 'q=a'],
     ['no text', ''],

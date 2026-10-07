@@ -1,4 +1,4 @@
-// Answers in the shape of the Mapbox APIs, with fictitious ids.
+// Answers in the shape of the Mapbox APIs, as they came on 2026-10-07, with fictitious ids.
 export const token = 'sk.fictitious-mapbox-token-0123456789';
 export const neighborhood = {
   properties: {
@@ -7,14 +7,18 @@ export const neighborhood = {
     name: 'Montmartre',
     coordinates: { longitude: 2.3431, latitude: 48.8867 },
     bbox: [2.3305, 48.8805, 2.3485, 48.8925],
-    context: { locality: { name: 'Paris 18e Arrondissement' }, place: { name: 'Paris' } },
+    context: {
+      postcode: { name: '75018' },
+      locality: { name: '18e arrondissement' },
+      place: { name: 'Paris' },
+    },
   },
 };
 export const district = {
   properties: {
     mapbox_id: 'geo-paris-11',
     feature_type: 'locality',
-    name: 'Paris 11e Arrondissement',
+    name: '11e arrondissement',
     coordinates: { longitude: 2.3796, latitude: 48.8592 },
     bbox: [2.3637, 48.8487, 2.3984, 48.8713],
     context: { place: { name: 'Paris' } },
@@ -34,8 +38,9 @@ export const station = {
     feature_type: 'poi',
     name: 'République',
     coordinates: { longitude: 2.3637, latitude: 48.8675 },
-    poi_category_ids: ['transportation', 'subway_station'],
-    context: { locality: { name: 'Paris 10e Arrondissement' } },
+    poi_category_ids: ['light_rail_station', 'railway_station', 'transportation'],
+    maki: 'rail-light',
+    context: { postcode: { name: '75003' }, place: { name: 'Paris' } },
   },
 };
 export const cafe = {
@@ -48,3 +53,34 @@ export const cafe = {
     maki: 'cafe',
   },
 };
+export const busStop = {
+  properties: {
+    mapbox_id: 'poi-bus',
+    feature_type: 'poi',
+    name: 'République',
+    coordinates: { longitude: 2.363, latitude: 48.867 },
+    poi_category_ids: ['bus_stop', 'transportation'],
+    maki: 'bus',
+  },
+};
+/** What Mapbox answers to « 12 rue de Rivoli » and to « Tour Eiffel »: zones of other names. */
+export const looseMatches = [
+  {
+    properties: {
+      mapbox_id: 'geo-tivoli',
+      feature_type: 'neighborhood',
+      name: 'Le Tivoli',
+      coordinates: { longitude: 2.3, latitude: 48.9 },
+      context: { place: { name: 'Ville fictive' } },
+    },
+  },
+  {
+    properties: {
+      mapbox_id: 'geo-eiffel',
+      feature_type: 'neighborhood',
+      name: 'Eiffel',
+      coordinates: { longitude: 2.29, latitude: 48.89 },
+      context: { place: { name: 'Ville fictive' } },
+    },
+  },
+];
