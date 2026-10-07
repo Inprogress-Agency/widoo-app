@@ -35,11 +35,15 @@ cd infra/gcp
 ./2-database.sh            # 15 minutes environ : création de Cloud SQL
 # Facultatif, avant l'étape 3 : DSN du projet Sentry de l'API (région UE), saisi sans écho
 read -rs dsn && printf '%s' "$dsn" | gcloud secrets versions add sentry-dsn --data-file=- --project=widoo-staging
+# Avant l'étape 3 : jeton Mapbox serveur du géocodage de la recherche (E-02), saisi sans écho
+read -rs token && printf '%s' "$token" | gcloud secrets versions add mapbox-geocoding-token --data-file=- --project=widoo-staging
 ./3-run.sh --dry-run
 ./3-run.sh                 # 2 minutes environ
 ```
 
 Sans valeur dans `sentry-dsn`, le service démarre sans envoyer de rapports d'erreur. Relancer `3-run.sh` une fois le DSN ajouté.
+
+Le jeton de `mapbox-geocoding-token` est un jeton Mapbox **serveur**, dédié à l'API (`widoo-api-geocoding` en staging), avec les scopes publics seulement : jamais le jeton public de l'app (`EXPO_PUBLIC_MAPBOX_TOKEN`), qui est lisible dans l'application. Il ne passe que par la saisie masquée ci-dessus : ni en argument de commande, ni dans un fichier, ni dans un message. Sans valeur, l'API ne propose aucune zone : `GET /v1/geocode` répond 503 sur Cloud Run, où `NODE_ENV` vaut `production` ; hors production (poste local, tests), une courte liste locale de zones de Paris répond. `3-run.sh` le signale ; le relancer une fois le jeton saisi.
 
 Si une commande échoue juste après une création, c'est la propagation IAM (jusqu'à une minute) : relancer le même script.
 
@@ -71,20 +75,31 @@ Rotation du mot de passe : désactiver la version active de `database-url` (`gcl
 | Réglage | Valeur | Pourquoi |
 |---|---|---|
 | Accès | public (`allUsers` invoker) ; routes privées protégées par les jetons Firebase | l'app appelle l'API sans identité Google |
-| Réseau | sortie VPC directe sur `widoo-run`, trafic privé seulement | joint Cloud SQL sans connecteur Serverless VPC Access (deux VM au minimum, 10 € par mois environ) ; Firebase et Sentry sortent par Internet sans Cloud NAT |
+| Réseau | sortie VPC directe sur `widoo-run`, trafic privé seulement | joint Cloud SQL sans connecteur Serverless VPC Access (deux VM au minimum, 10 € par mois environ) ; Firebase, Sentry et Mapbox sortent par Internet sans Cloud NAT |
 | Sondes | démarrage TCP sur 8080, pas de sonde de vivacité | `/v1/health` répond 503 quand la base tombe : une sonde HTTP ferait redémarrer les instances en boucle |
 | Instances | 0 à 2, 1 vCPU, 512 Mio, `cpu-boost` | scale à zéro ; plafond de coût et de connexions |
 | `FIREBASE_PROJECT_ID` | `widoo-staging` | obligatoire au démarrage ; jetons du projet Firebase de staging seulement |
 | `SENTRY_ENVIRONMENT` | `staging` | sinon `NODE_ENV`, qui vaut `production` dans l'image |
 | `TRUST_PROXY` | `linklocal` | adresse du frontal Cloud Run, à confirmer au premier déploiement |
 | `CORS_ORIGINS` | vide | pas d'admin web en staging pour l'instant |
-| Secrets | `DATABASE_URL`, `SENTRY_DSN` depuis Secret Manager | jamais en clair dans la configuration |
+| `MAPBOX_GEOCODING_PERMANENT` | `false` | valeur par défaut de l'API : résultats temporaires, que Mapbox interdit de garder, donc pas de cache ; variable ordinaire, pas un secret ; la valeur attend la décision sur le cache ([#306](https://github.com/Inprogress-Agency/widoo-app/issues/306)) |
+| Secrets | `DATABASE_URL`, `SENTRY_DSN`, `MAPBOX_GEOCODING_TOKEN` depuis Secret Manager | jamais en clair dans la configuration ; `SENTRY_DSN` et `MAPBOX_GEOCODING_TOKEN` passés seulement si leur secret a une valeur |
 
 Le job `widoo-api-migrate` lance `node --enable-source-maps dist/migrate.js` sur la même image, dans le même réseau, sans nouvelle tentative et avec 10 minutes au plus.
 
 Les deux ressources sont créées avec les images d'exemple de Google (`hello`, `job`). Le premier run du workflow les remplace par l'image de l'API. Relancé, `3-run.sh` met à jour la configuration et garde l'image déployée ; chaque mise à jour crée une révision.
 
-Pas de secret Mapbox serveur : l'API n'appelle pas encore Mapbox. Le secret sera créé avec le ticket qui appellera Directions ou Geocoding depuis l'API. Pas de clé Firebase non plus (voir Droits).
+Le secret `mapbox-geocoding-token` ne sert qu'au géocodage de la recherche ([#30](https://github.com/Inprogress-Agency/widoo-app/issues/30)) : seul le service le lit, le job de migration ne le reçoit pas. `--update-secrets` ajoute ou remplace les entrées nommées et garde les autres : un secret absent de la commande reste monté s'il l'était. Pas de clé Firebase (voir Droits).
+
+Rotation du jeton Mapbox, sans coupure :
+
+1. créer un nouveau jeton serveur chez Mapbox, scopes publics seulement ;
+2. l'ajouter comme nouvelle version par la saisie masquée de la mise en place (`read -rs token && printf '%s' "$token" | gcloud secrets versions add mapbox-geocoding-token …`) ;
+3. créer une révision du service, qui lit `latest` : relancer `3-run.sh`, ou `gcloud run services update widoo-api --region=europe-west9 --project=widoo-staging --update-secrets=MAPBOX_GEOCODING_TOKEN=mapbox-geocoding-token:latest`, puis vérifier une recherche (« Montmartre » renvoie une zone) ;
+4. désactiver l'ancienne version : `gcloud secrets versions disable <ancienne version> --secret=mapbox-geocoding-token --project=widoo-staging` ;
+5. révoquer l'ancien jeton chez Mapbox.
+
+Retour arrière avant l'étape 5 : `gcloud secrets versions enable` sur l'ancienne version, `disable` sur la nouvelle, puis une nouvelle révision.
 
 ## Droits (IAM)
 
@@ -92,7 +107,7 @@ Aucun rôle au niveau du projet, aucune clé de compte de service : chaque rôle
 
 | Compte | Rôle | Sur | Pour |
 |---|---|---|---|
-| `widoo-api-run` (service) | Secret Manager Secret Accessor | secrets `database-url`, `sentry-dsn` | lire sa configuration |
+| `widoo-api-run` (service) | Secret Manager Secret Accessor | secrets `database-url`, `sentry-dsn`, `mapbox-geocoding-token` | lire sa configuration |
 | `widoo-api-migrate` (job) | Secret Manager Secret Accessor | secret `database-url` | appliquer les migrations |
 | `widoo-deployer` (GitHub) | Artifact Registry Writer | dépôt `widoo` | pousser l'image |
 | | Cloud Run Developer | service `widoo-api`, job `widoo-api-migrate` | déployer, lancer la migration |
