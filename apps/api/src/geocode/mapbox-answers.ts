@@ -57,8 +57,28 @@ const SearchBoxFeature = z.object({
 
 const Features = z.object({ features: z.array(z.unknown()) });
 
-/** « Paris 11e Arrondissement » → « Paris 11e ». */
+/** « 11e arrondissement » (the locality Mapbox gives in Paris) → « 11e ». */
 const shortArea = (name: string) => name.replace(/\s+arrondissement$/i, '').trim();
+
+/** An arrondissement of Paris from its postcode, 75001 to 75020 (75116 is the 16e). */
+function parisDistrictOf(postcode: string | undefined): string | null {
+  const match = postcode?.match(/^75(?:0(\d{2})|1(16))$/);
+  const number = Number(match?.[1] ?? match?.[2]?.slice(1));
+  if (!match || number < 1 || number > 20) {
+    return null;
+  }
+  return `Paris ${number === 1 ? '1er' : `${number}e`}`;
+}
+
+/** « Paris 18e »: the city and the arrondissement, from the locality or else the postcode. */
+function districtArea(context: Context): string | null {
+  const locality = context?.locality?.name;
+  const place = context?.place?.name;
+  if (locality && /arrondissement/i.test(locality)) {
+    return place ? `${place} ${shortArea(locality)}` : shortArea(locality);
+  }
+  return place === 'Paris' ? parisDistrictOf(context?.postcode?.name) : null;
+}
 
 /** Kind of zone of a feature type of the Geocoding API. */
 function kindOf(featureType: z.infer<typeof GeocodingFeature>['properties']['feature_type']) {
@@ -83,12 +103,11 @@ type Context = z.infer<typeof Context>;
 
 /** Where a zone lies: its district, else its city, else its region. */
 function areaOf(kind: GeocodeZoneKind, context: Context): string | null {
-  const locality = context?.locality?.name;
-  const place = context?.place?.name;
+  const place = context?.place?.name ?? null;
   if (kind === 'district' || kind === 'city') {
-    return kind === 'district' ? (place ?? null) : (context?.region?.name ?? null);
+    return kind === 'district' ? place : (context?.region?.name ?? null);
   }
-  return locality ? shortArea(locality) : (place ?? null);
+  return districtArea(context) ?? place;
 }
 
 /** Zones of a Geocoding API answer; a feature of another shape is dropped. */
@@ -105,7 +124,10 @@ export function zonesOfGeocoding(body: unknown): ZoneHit[] {
     return [
       {
         id: p.mapbox_id,
-        name: kind === 'district' ? shortArea(p.name) : p.name,
+        name:
+          kind === 'district' && p.context?.place?.name
+            ? `${p.context.place.name} ${shortArea(p.name)}`
+            : p.name,
         kind,
         area: areaOf(kind, p.context),
         center: { lat: p.coordinates.latitude, lng: p.coordinates.longitude },
@@ -140,4 +162,26 @@ export function stationsOfSearchBox(body: unknown): ZoneHit[] {
       },
     ];
   });
+}
+
+/** Words of a name or a text, case, accents and « St » aside: « Canal St. Martin » → canal, saint, martin. */
+function wordsOf(text: string): string[] {
+  const abbreviations: Record<string, string> = { st: 'saint', ste: 'sainte' };
+  return text
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLocaleLowerCase('fr')
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter(Boolean)
+    .map((word) => abbreviations[word] ?? word);
+}
+
+/**
+ * The zone is named by the text: each word typed starts a word of its name. Mapbox matches
+ * loosely, « 12 rue de Rivoli » giving « Le Tivoli » and « Tour Eiffel » the neighbourhood
+ * « Eiffel » of Levallois: an address or a point of interest then proposes no zone (D-010).
+ */
+export function namesText(name: string, text: string): boolean {
+  const nameWords = wordsOf(name);
+  return wordsOf(text).every((typed) => nameWords.some((word) => word.startsWith(typed)));
 }

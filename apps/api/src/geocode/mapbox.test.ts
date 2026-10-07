@@ -1,7 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
 import { GeocoderUnavailable } from './geocoder';
 import { createMapboxGeocoder, ZONE_CACHE_TTL_MS, type UpstreamFailure } from './mapbox';
-import { address, cafe, district, neighborhood, station, token } from './mapbox.fixtures';
+import {
+  address,
+  cafe,
+  district,
+  looseMatches,
+  neighborhood,
+  station,
+  token,
+} from './mapbox.fixtures';
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
@@ -25,21 +33,19 @@ const both = {
 };
 
 describe('createMapboxGeocoder', () => {
-  it('asks both APIs for France in French, biased on Paris, with zone types only', async () => {
+  it('asks both APIs for Île-de-France in French, biased on Paris, with zone types only', async () => {
     const mapbox = fakeMapbox(both);
     const geocoder = createMapboxGeocoder({ token, isPermanent: false, fetch: mapbox.fetch });
     const zones = await geocoder.find('République');
-    expect(zones.map((zone) => zone.id)).toEqual([
-      'geo-montmartre',
-      'geo-paris-11',
-      'poi-republique',
-    ]);
+    // The zones whose name the text does not hold are dropped: the station alone is left.
+    expect(zones.map((zone) => zone.id)).toEqual(['poi-republique']);
     const [geocoding, searchBox] = mapbox.urls;
     expect(Object.fromEntries(geocoding?.searchParams ?? [])).toEqual({
       q: 'République',
       country: 'fr',
       language: 'fr',
       proximity: '2.3522,48.8566',
+      bbox: '1.45,48.12,3.56,49.24',
       types: 'neighborhood,locality,postcode,place',
       limit: '5',
       autocomplete: 'true',
@@ -47,6 +53,17 @@ describe('createMapboxGeocoder', () => {
     });
     expect(searchBox?.searchParams.get('types')).toBe('poi');
     expect(searchBox?.searchParams.get('country')).toBe('fr');
+    expect(searchBox?.searchParams.get('bbox')).toBe('1.45,48.12,3.56,49.24');
+  });
+
+  it('proposes no zone for an address or a point of interest that Mapbox matched loosely', async () => {
+    const mapbox = fakeMapbox({
+      geocoding: () => json({ features: looseMatches }),
+      searchBox: () => json({ features: [cafe] }),
+    });
+    const geocoder = createMapboxGeocoder({ token, isPermanent: false, fetch: mapbox.fetch });
+    expect(await geocoder.find('12 rue de Rivoli')).toEqual([]);
+    expect(await geocoder.find('Tour Eiffel')).toEqual([]);
   });
 
   it('keeps nothing of temporary results', async () => {
@@ -91,7 +108,7 @@ describe('createMapboxGeocoder', () => {
       onFailure: (failure) => failures.push(failure),
     });
     const zones = await geocoder.find('Montmartre');
-    expect(zones.map((zone) => zone.kind)).toEqual(['neighborhood', 'district']);
+    expect(zones.map((zone) => zone.id)).toEqual(['geo-montmartre']);
     expect(failures).toEqual([{ source: 'search_box', status: 403 }]);
     expect(JSON.stringify(failures)).not.toContain(token);
   });

@@ -68,7 +68,10 @@ export const geocodeRoutes: FastifyPluginAsyncZod<GeocodeRoutesOptions> = async 
           return { ...hit, bbox, routeCount: count };
         }),
       );
-      return { zones };
+      // Zones with routes first, each group in the order of Mapbox (a stable sort).
+      return {
+        zones: zones.toSorted((a, b) => Number(b.routeCount > 0) - Number(a.routeCount > 0)),
+      };
     },
   );
 };

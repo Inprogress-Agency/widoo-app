@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { stationsOfSearchBox, zonesOfGeocoding } from './mapbox-answers';
-import { address, cafe, district, neighborhood, station } from './mapbox.fixtures';
+import { namesText, stationsOfSearchBox, zonesOfGeocoding } from './mapbox-answers';
+import { address, busStop, cafe, district, neighborhood, station } from './mapbox.fixtures';
 
 describe('zonesOfGeocoding', () => {
   it('reads neighbourhoods and districts, and drops an address', () => {
@@ -26,16 +26,35 @@ describe('zonesOfGeocoding', () => {
 });
 
 describe('stationsOfSearchBox', () => {
-  it('keeps the stations only: a café is a point of interest, not a zone', () => {
-    expect(stationsOfSearchBox({ features: [station, cafe] })).toEqual([
+  it('keeps the rail stations only: a café or a bus stop is not a zone', () => {
+    expect(stationsOfSearchBox({ features: [station, cafe, busStop] })).toEqual([
       {
         id: 'poi-republique',
         name: 'République',
         kind: 'station',
-        area: 'Paris 10e',
+        // No locality on a station: its arrondissement comes from its postcode.
+        area: 'Paris 3e',
         center: { lat: 48.8675, lng: 2.3637 },
         envelope: null,
       },
     ]);
+  });
+});
+
+describe('namesText', () => {
+  it.each([
+    ['Montmartre', 'montm'],
+    ['Canal St. Martin', 'Canal Saint-Martin'],
+    ['République', 'republique'],
+    ['75011', '75011'],
+  ])('« %s » is named by « %s »', (name, text) => {
+    expect(namesText(name, text)).toBe(true);
+  });
+
+  it.each([
+    ['Le Tivoli', '12 rue de Rivoli'],
+    ['Eiffel', 'Tour Eiffel'],
+  ])('« %s » is not named by « %s »', (name, text) => {
+    expect(namesText(name, text)).toBe(false);
   });
 });
