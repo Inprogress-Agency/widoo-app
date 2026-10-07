@@ -21,6 +21,11 @@ overrides:
   # Drop this line once no dependency resolves source-map-js below 1.2.2 without it: check at
   # each upgrade of @vitest/coverage-v8 and at the audit exception review (#280).
   source-map-js@<1.2.2: ^1.2.2
+  # shell-quote <1.11.0, critical advisory GHSA-pqg4-j6r4-53mv (#312). Reached through
+  # react-native > react-devtools-core only: React Native debug tooling, absent from the app
+  # bundles and the API image. Drop this line once react-native resolves shell-quote 1.11.0 or
+  # later without it: check at each upgrade of react-native and at the audit exception review (#280).
+  shell-quote@<1.11.0: ^1.11.0
 
 # Install scripts stay blocked but for these: Skia copies its prebuilt native libraries there.
 onlyBuiltDependencies:
