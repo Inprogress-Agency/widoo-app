@@ -13,6 +13,9 @@ parse_args "$@"
 : "${TRUST_PROXY:=linklocal}"
 # Browser origins of the admin; none in staging yet.
 : "${CORS_ORIGINS:=}"
+# false, the default of the API: temporary geocoding results, which Mapbox forbids caching, so no
+# cache. Not a secret. Its value waits for the decision on the geocoding cache (#306).
+: "${MAPBOX_GEOCODING_PERMANENT:=false}"
 
 announce \
   "creates or updates the public service $SERVICE and the job $MIGRATION_JOB; each update of the service creates a revision that receives the traffic" \
@@ -22,12 +25,31 @@ network=(--network="$NETWORK" --subnet="$SUBNET" --vpc-egress=private-ranges-onl
 # Separator | instead of the comma, which lists of origins or proxies contain.
 env_vars="^|^FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID|SENTRY_ENVIRONMENT=$ENVIRONMENT"
 env_vars+="|TRUST_PROXY=$TRUST_PROXY|CORS_ORIGINS=$CORS_ORIGINS"
-secrets=DATABASE_URL=database-url:latest
-if has_secret_value sentry-dsn; then
-  secrets+=,SENTRY_DSN=sentry-dsn:latest
-else
-  echo 'sentry-dsn has no value: no error report. Run this script again once it is set.'
-fi
+env_vars+="|MAPBOX_GEOCODING_PERMANENT=$MAPBOX_GEOCODING_PERMANENT"
+
+# Secrets of the service, one VARIABLE=secret:latest entry each. --update-secrets adds or
+# replaces these entries and keeps the others: a secret left out here stays mounted if it was.
+secrets=(DATABASE_URL=database-url:latest)
+# Adds the entry when the secret has a value, otherwise says what the API does without it.
+# --dry-run calls no gcloud, so it cannot tell: it shows the entry and says so.
+optional_secret() {
+  local variable=$1 secret=$2 without=$3
+  if has_secret_value "$secret"; then
+    secrets+=("$variable=$secret:latest")
+  elif [[ $DRY_RUN == true ]]; then
+    secrets+=("$variable=$secret:latest")
+    echo "(dry run: $variable is passed only if $secret has a value; without it, $without)"
+  else
+    echo "$secret has no value: $without. Run this script again once it is set."
+  fi
+}
+optional_secret SENTRY_DSN sentry-dsn 'no error report'
+optional_secret MAPBOX_GEOCODING_TOKEN mapbox-geocoding-token \
+  "the API offers no zone to the search in $ENVIRONMENT"
+secrets_arg=$(
+  IFS=,
+  echo "${secrets[*]}"
+)
 
 step "Service $SERVICE"
 # TCP startup probe and no liveness probe: /v1/health answers 503 while the database is down,
@@ -37,7 +59,7 @@ service=(--region="$REGION" --service-account="$RUNTIME_SA" "${network[@]}"
   --execution-environment=gen2 --cpu=1 --memory=512Mi --cpu-boost --concurrency=80
   --timeout=60s --min-instances=0 --max-instances=2
   --startup-probe=tcpSocket.port=8080,periodSeconds=5,timeoutSeconds=5,failureThreshold=12
-  --update-env-vars="$env_vars" --update-secrets="$secrets")
+  --update-env-vars="$env_vars" --update-secrets="$secrets_arg")
 if exists gcloud run services describe "$SERVICE" --region="$REGION"; then
   run gcloud run services update "$SERVICE" "${service[@]}"
 else
