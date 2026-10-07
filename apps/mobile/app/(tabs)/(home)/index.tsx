@@ -17,8 +17,10 @@ import { useUserLocation } from '../../../src/location/useUserLocation';
 import { parisCenter } from '../../../src/map/geo';
 import { SearchingPill, SearchZoneButton } from '../../../src/map/MapControls';
 import { RouteMap } from '../../../src/map/RouteMap';
+import { CoveredBySheet } from '../../../src/results/CoveredBySheet';
 import { DiscoverySheet } from '../../../src/results/DiscoverySheet';
 import { openRoute, openSection } from '../../../src/results/navigation';
+import type { SheetLevel } from '../../../src/results/sheet';
 import { ModalSheetShield } from '../../../src/ui/ModalSheetShield';
 
 /**
@@ -35,6 +37,7 @@ export default function HomeScreen() {
   const { routes, clusters, status, isEmpty, isOnline } = search;
   const [height, setHeight] = useState(0);
   const [sheetCover, setSheetCover] = useState<number | undefined>(undefined);
+  const [sheetLevel, setSheetLevel] = useState<SheetLevel>('rest');
   const route = useDiscovery(selectedRoute);
   const focused = useDiscovery(focusedRoute);
   const isSearchable = useDiscovery(canSearchZone);
@@ -63,48 +66,51 @@ export default function HomeScreen() {
           className="flex-1 bg-surface"
           onLayout={(event) => setHeight(event.nativeEvent.layout.height)}
         >
-          <RouteMap
-            routes={routes}
-            clusters={clusters}
-            center={position ?? parisCenter}
-            hasPosition={position !== null}
-            onViewChange={showView}
-            framing={framing}
-            selectedRoute={route}
-            focusedRoute={focused}
-            bottomInset={sheetCover}
-            onSelect={(next) => select(next?.id ?? null)}
-            onOpenRoute={(next, position) => openRoute(next, 'marker', position)}
-            searchControl={
-              isSearchable ? (
-                <SearchZoneButton onPress={() => searchZone('button')} />
-              ) : (
-                <SearchingPill isSearching={status === 'loading' && route === null} />
-              )
-            }
-            // Over an empty zone, the message offers to widen it; offline, nothing can be searched:
-            // no recentre (Ecrans › E-01).
-            hasRecenter={!isEmpty && !isOffline}
-            // Recentring leaves a zone chosen in the search, and searches around the user again.
-            onRecenter={chosenZone ? leaveZone : undefined}
-          />
-          {/* Over the map; the sheet covers them when it rises to full (E-04). */}
-          <View
-            pointerEvents="box-none"
-            className="absolute w-full gap-8"
-            style={{ paddingTop: insets.top + spacing['space-8'] }}
-          >
-            <View className="px-16">
-              <SearchPill
-                filterCount={filterCount}
-                onOpenFilters={openFilters}
-                onOpenSearch={openSearch}
-                zoneName={chosenZone?.name ?? null}
-                onLeaveZone={leaveZone}
-              />
+          {/* Under the sheet at full, out of reach of screen readers (E-04). */}
+          <CoveredBySheet level={sheetLevel}>
+            <RouteMap
+              routes={routes}
+              clusters={clusters}
+              center={position ?? parisCenter}
+              hasPosition={position !== null}
+              onViewChange={showView}
+              framing={framing}
+              selectedRoute={route}
+              focusedRoute={focused}
+              bottomInset={sheetCover}
+              onSelect={(next) => select(next?.id ?? null)}
+              onOpenRoute={(next, position) => openRoute(next, 'marker', position)}
+              searchControl={
+                isSearchable ? (
+                  <SearchZoneButton onPress={() => searchZone('button')} />
+                ) : (
+                  <SearchingPill isSearching={status === 'loading' && route === null} />
+                )
+              }
+              // Over an empty zone, the message offers to widen it; offline, nothing can be searched:
+              // no recentre (Ecrans › E-01).
+              hasRecenter={!isEmpty && !isOffline}
+              // Recentring leaves a zone chosen in the search, and searches around the user again.
+              onRecenter={chosenZone ? leaveZone : undefined}
+            />
+            {/* Over the map; the sheet covers them when it rises to full (E-04). */}
+            <View
+              pointerEvents="box-none"
+              className="absolute w-full gap-8"
+              style={{ paddingTop: insets.top + spacing['space-8'] }}
+            >
+              <View className="px-16">
+                <SearchPill
+                  filterCount={filterCount}
+                  onOpenFilters={openFilters}
+                  onOpenSearch={openSearch}
+                  zoneName={chosenZone?.name ?? null}
+                  onLeaveZone={leaveZone}
+                />
+              </View>
+              <QuickChips />
             </View>
-            <QuickChips />
-          </View>
+          </CoveredBySheet>
           {height > 0 && (
             <DiscoverySheet
               containerHeight={height}
@@ -113,7 +119,10 @@ export default function HomeScreen() {
               search={search}
               onOpenRoute={openRoute}
               onOpenSection={openSection}
-              onCoverChange={setSheetCover}
+              onCoverChange={(cover, level) => {
+                setSheetCover(cover);
+                setSheetLevel(level);
+              }}
             />
           )}
         </View>

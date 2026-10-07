@@ -53,7 +53,7 @@ interface DiscoverySheetProps {
   /** « Voir tout » of a section. */
   onOpenSection: (section: SectionId) => void;
   /** The detent reached, and the height the sheet covers at the foot of the map, bar included. */
-  onCoverChange?: (height: number) => void;
+  onCoverChange?: (height: number, level: SheetLevel) => void;
 }
 
 /**
@@ -196,7 +196,7 @@ export function DiscoverySheet({
       containerHeight={containerHeight}
       onLevelChange={(next, height) => {
         level.current = next;
-        onCoverChange?.(height);
+        onCoverChange?.(height, next);
       }}
       onUserDetent={search.onUserDetent}
       peek={
