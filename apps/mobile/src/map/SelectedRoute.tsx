@@ -71,6 +71,8 @@ interface SelectedRouteProps {
   /** « Voir plus », with the step the tooltip points at, from 1. */
   onOpen: (position: number) => void;
   onClose: () => void;
+  /** Height of the tooltip of the start as laid out; that of a tapped step is not told. */
+  onStartTooltipHeight?: (height: number) => void;
 }
 
 /**
@@ -87,6 +89,7 @@ export function SelectedRoute({
   screenXOf,
   onOpen,
   onClose,
+  onStartTooltipHeight,
 }: SelectedRouteProps) {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
@@ -176,6 +179,7 @@ export function SelectedRoute({
             arrowAt={tapped?.anchor ?? tooltipAnchor}
             onOpen={() => onOpen(tooltipIndex + 1)}
             onClose={onClose}
+            onHeightChange={tapped ? undefined : onStartTooltipHeight}
           />
         </Mapbox.MarkerView>
       )}

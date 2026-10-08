@@ -74,6 +74,11 @@ interface RouteMapProps {
    * focused start stays above it. Without it, the sheet at rest above the bar.
    */
   bottomInset?: number;
+  /**
+   * Height the bar at the top covers on the map, status bar, search pill and quick chips, as laid
+   * out: the tooltip of a selected route never hangs under it. 0 without a bar or before its layout.
+   */
+  topInset?: number;
   /** A marker, or null for a tap elsewhere on the map. */
   onSelect: (route: RouteCard | null) => void;
   /** « Voir plus » of the tooltip: the route sheet (E-05), at the step it points at, from 1. */
@@ -106,6 +111,7 @@ export function RouteMap({
   selectedRoute,
   focusedRoute = null,
   bottomInset: sheetCover,
+  topInset = 0,
   onSelect,
   onOpenRoute,
   searchControl,
@@ -116,6 +122,12 @@ export function RouteMap({
   const { fontScale, width } = useWindowDimensions();
   const [viewport, setViewport] = useState({ width: 0, height: 0 });
   const [tooltipAnchor, setTooltipAnchor] = useState(0.5);
+  /**
+   * Height of the tooltip of the start, measured once shown: the last one until the next. Kept
+   * out of the state: on Android, rendering the map again during its first camera move left the
+   * camera in place.
+   */
+  const tooltipHeight = useRef(0);
   const isReducedMotion = useReducedMotion();
   // The map runs under the floating tab bar; nothing it shows may sit behind the bar.
   const tabBarHeight = use(BottomTabBarHeightContext) ?? 0;
@@ -256,9 +268,22 @@ export function RouteMap({
     });
   }, [focusedRoute, selectedRoute, bottomInset, isReducedMotion]);
 
+  const framePadding = (sheetCover: number) =>
+    routeFramePadding({
+      viewportHeight: viewport.height,
+      tabBarHeight,
+      sheetCover,
+      topBarHeight: topInset,
+      tooltipHeight: tooltipHeight.current,
+    });
+  /** What a framing depends on: framed again only when it changes. */
+  const frameKey = (route: RouteCard, sheetCover: number) =>
+    `${route.id}:${sheetCover}:${framePadding(sheetCover).top}`;
+
   /**
-   * The route fills the lower half of the map, its tooltip the upper half, above the room kept
-   * for the results sheet and its step dots whole; the tooltip slides sideways to stay on screen.
+   * The route fills the lower half of the map, its tooltip the upper half under the bar at the
+   * top, above the room kept for the results sheet and its step dots whole; the tooltip slides
+   * sideways to stay on screen.
    */
   const frameRoute = (route: RouteCard, sheetCover: number) => {
     const frame = selectionFrame(route);
@@ -266,11 +291,7 @@ export function RouteMap({
     if (!frame || !start) {
       return false;
     }
-    const padding = routeFramePadding({
-      viewportHeight: viewport.height,
-      tabBarHeight,
-      sheetCover,
-    });
+    const padding = framePadding(sheetCover);
     camera.current?.setCamera({
       ...('bounds' in frame ? { bounds: frame.bounds } : { centerCoordinate: frame.center }),
       padding: {
@@ -295,29 +316,37 @@ export function RouteMap({
     return true;
   };
 
-  /** Where the route was framed last, route and sheet height: framed again only on a change. */
+  /** Where the route was framed last, `frameKey`: framed again only on a change. */
   const framedFor = useRef('');
   const selectRoute = (route: RouteCard) => {
     if (frameRoute(route, restCover)) {
-      framedFor.current = `${route.id}:${restCover}`;
+      framedFor.current = frameKey(route, restCover);
       onSelect(route);
     }
   };
 
   // The summary of the route in the sheet at rest is taller than the rest detent: once the sheet
-  // has settled around it, the route is framed again above it, never under half the map.
-  const reframe = useEffectEvent((route: RouteCard, bottom: number) => {
-    const key = `${route.id}:${bottom}`;
+  // has settled around it, the route is framed again above it, never under half the map. So too
+  // once its tooltip is measured, or the bar at the top laid out again.
+  const frameAgain = (route: RouteCard, bottom: number) => {
+    const key = frameKey(route, bottom);
     if (bottom <= viewport.height / 2 && key !== framedFor.current) {
       framedFor.current = key;
       frameRoute(route, bottom);
     }
-  });
+  };
+  const reframe = useEffectEvent(frameAgain);
   useEffect(() => {
     if (selectedRoute) {
       reframe(selectedRoute, bottomInset);
     }
-  }, [selectedRoute, bottomInset]);
+  }, [selectedRoute, bottomInset, topInset]);
+  const handleStartTooltipHeight = (height: number) => {
+    tooltipHeight.current = height;
+    if (selectedRoute) {
+      frameAgain(selectedRoute, bottomInset);
+    }
+  };
 
   /** Where a point of the map is on the screen, in points, across; the map fills the width. */
   const screenXOf = useCallback(async (location: LngLat) => {
@@ -493,6 +522,7 @@ export function RouteMap({
             screenXOf={screenXOf}
             onOpen={(position) => onOpenRoute(selectedRoute, position)}
             onClose={() => onSelect(null)}
+            onStartTooltipHeight={handleStartTooltipHeight}
           />
         )}
       </Mapbox.MapView>
