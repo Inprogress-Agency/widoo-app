@@ -36,6 +36,7 @@ export default function HomeScreen() {
   const search = useRouteSearch();
   const { routes, clusters, status, isEmpty, isOnline } = search;
   const [height, setHeight] = useState(0);
+  const [topBarHeight, setTopBarHeight] = useState(0);
   const [sheetCover, setSheetCover] = useState<number | undefined>(undefined);
   const [sheetLevel, setSheetLevel] = useState<SheetLevel>('rest');
   const route = useDiscovery(selectedRoute);
@@ -78,6 +79,7 @@ export default function HomeScreen() {
               selectedRoute={route}
               focusedRoute={focused}
               bottomInset={sheetCover}
+              topInset={topBarHeight}
               onSelect={(next) => select(next?.id ?? null)}
               onOpenRoute={(next, position) => openRoute(next, 'marker', position)}
               searchControl={
@@ -98,6 +100,8 @@ export default function HomeScreen() {
               pointerEvents="box-none"
               className="absolute w-full gap-8"
               style={{ paddingTop: insets.top + spacing['space-8'] }}
+              // Its height as laid out, larger text included: the map frames a route under it.
+              onLayout={({ nativeEvent: { layout } }) => setTopBarHeight(layout.y + layout.height)}
             >
               <View className="px-16">
                 <SearchPill

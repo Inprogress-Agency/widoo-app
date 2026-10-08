@@ -23,6 +23,8 @@ interface RouteTooltipProps {
   arrowAt: number;
   onOpen: () => void;
   onClose: () => void;
+  /** Its height as laid out, arrow and gap to the dot included: the map frames the route with it. */
+  onHeightChange?: (height: number) => void;
 }
 
 /**
@@ -39,6 +41,7 @@ export function RouteTooltip({
   arrowAt,
   onOpen,
   onClose,
+  onHeightChange,
 }: RouteTooltipProps) {
   const { t } = useTranslation();
   const isLargeText = useIsLargeText();
@@ -72,7 +75,11 @@ export function RouteTooltip({
       });
 
   return (
-    <Animated.View style={fade} className="w-tooltip-min-w">
+    <Animated.View
+      style={fade}
+      className="w-tooltip-min-w"
+      onLayout={(event) => onHeightChange?.(event.nativeEvent.layout.height)}
+    >
       <View
         onAccessibilityEscape={onClose}
         className="gap-12 self-stretch rounded-block bg-surface-strong p-16"
