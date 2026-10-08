@@ -1,4 +1,4 @@
-import type { AnalyticsEvents, AnalyticsFilters } from '@widoo/shared';
+import type { AnalyticsEvents, AnalyticsFilters, DiscoverySection, RouteSort } from '@widoo/shared';
 import type { FiltersSource, SearchFilters } from '../discovery/store';
 
 /**
@@ -87,12 +87,27 @@ export function createCardViewTracker() {
   };
 }
 
-/** `route_opened`: the route and where it was opened from. */
+/**
+ * `route_opened`: the route and where it was opened from; `stepIndex`, from 0, only when the
+ * sheet opens at a step tapped on the map (#153).
+ */
 export function routeOpenedEvent(
   route: { id: string },
   source: AnalyticsEvents['route_opened']['source'],
+  stepIndex?: number,
 ): AnalyticsEvents['route_opened'] {
-  return { route_id: route.id, source };
+  return stepIndex === undefined
+    ? { route_id: route.id, source }
+    : { route_id: route.id, source, step_index: stepIndex };
+}
+
+/** `list_sorted` for a sort chosen in « Trier par » of the list; null when the sort shown stays. */
+export function listSortedEvent(
+  section: DiscoverySection,
+  previous: RouteSort,
+  next: RouteSort,
+): AnalyticsEvents['list_sorted'] | null {
+  return next === previous ? null : { section, sort: next, previous_sort: previous };
 }
 
 type AppStateStatus = 'active' | 'background' | 'inactive' | 'unknown' | 'extension';

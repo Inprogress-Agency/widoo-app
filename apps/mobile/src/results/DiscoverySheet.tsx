@@ -13,7 +13,7 @@ import {
   selectedRoute,
   type SearchStatus,
 } from '../discovery/store';
-import type { SectionId } from '../discovery/sections';
+import { effectiveSort, type SectionId } from '../discovery/sections';
 import { discoveryStore, useDiscovery } from '../discovery/useRouteSearch';
 import { useZoneCount } from '../discovery/useSectionList';
 import { formatDayAndTime } from '../format/date';
@@ -26,7 +26,7 @@ import { recentZones, useRecentZones } from '../search/useRecentZones';
 import { useTextSearch } from '../search/useTextSearch';
 import { Button } from '../ui/Button';
 import { Text } from '../ui/Text';
-import type { OpenSource } from './navigation';
+import type { OpenSource, SectionOpening } from './navigation';
 import { ResultsSheet, type ResultsSheetMethods } from './ResultsSheet';
 import { RouteCarousel, SkeletonCarousel } from './RouteCarousel';
 import { RouteSummary, RouteSummaryMore } from './RouteSummary';
@@ -50,8 +50,8 @@ interface DiscoverySheetProps {
     retry: () => void;
   };
   onOpenRoute: (route: RouteCard, source: OpenSource) => void;
-  /** « Voir tout » of a section. */
-  onOpenSection: (section: SectionId) => void;
+  /** « Voir tout » of a section, from the detent of the sheet, with the sort and the count shown. */
+  onOpenSection: (section: SectionId, from: SectionOpening) => void;
   /** The detent reached, and the height the sheet covers at the foot of the map, bar included. */
   onCoverChange?: (height: number, level: SheetLevel) => void;
 }
@@ -81,6 +81,7 @@ export function DiscoverySheet({
   const focus = useDiscovery((state) => state.focus);
   const selected = useDiscovery(selectedRoute);
   const zoneCount = useZoneCount();
+  const sort = useDiscovery((state) => effectiveSort(state.sort, position !== null));
   const level = useRef<SheetLevel>('rest');
   const search = useSearchInSheet(sheet, level, onOpenRoute);
   /** Cards already reported as seen, for the results on screen: once each. */
@@ -155,7 +156,8 @@ export function DiscoverySheet({
     peek = message(<ZoomInMessage count={resultsCount(results)} />);
   } else {
     // Over one page of results, the count of the zone; the listed routes until it comes.
-    const count = t('sheet.count', { count: zoneCount ?? routes.length });
+    const shownCount = zoneCount ?? routes.length;
+    const count = t('sheet.count', { count: shownCount });
     // A zone chosen in the search names the section: « Autour de Canal Saint-Martin » (E-01).
     const zone = chosenZone ? null : position ? zoneName(routes, position) : t('sheet.paris');
     // « 9 parcours · 3 filtres » once filters apply (Ecrans › E-01, filtres appliqués).
@@ -170,7 +172,17 @@ export function DiscoverySheet({
       <SheetHeader
         title={chosenZone ? t('sheet.aroundZone', { zone: chosenZone.name }) : t('sheet.nearby')}
         subtitle={subtitle}
-        action={<SeeAllLink onPress={() => onOpenSection('nearby')} />}
+        action={
+          <SeeAllLink
+            onPress={() =>
+              onOpenSection(section, {
+                sheet_level: level.current,
+                sort,
+                results_count: shownCount,
+              })
+            }
+          />
+        }
       />
     );
     content = (
@@ -182,7 +194,7 @@ export function DiscoverySheet({
         onVisible={(visible) => {
           // The results of the store, not of this render: the carousel may call an older handler.
           const current = discoveryStore.getState().results;
-          const context = { section: 'nearby', sheet_level: level.current } as const;
+          const context = { section, sheet_level: level.current };
           for (const view of cardViews.current(current, visible, context)) {
             analytics.track('result_card_viewed', view);
           }
@@ -211,6 +223,9 @@ export function DiscoverySheet({
     </ResultsSheet>
   );
 }
+
+/** The only section of the sheet for now (Ecrans › E-01): « À proximité ». */
+const section: SectionId = 'nearby';
 
 // The link text is shorter than a finger: its hit slop brings it to 44 points.
 const linkHitSlop = size['touch-min'] / 4;

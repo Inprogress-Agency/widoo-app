@@ -38,7 +38,7 @@ import { mapOverlayLayout, ornamentMargin } from './ornaments';
 import { routeFramePadding } from './routeFrame';
 import { SelectedRoute } from './SelectedRoute';
 import { labelFont, mapStyleJson } from './style';
-import { screenXOnFit, tooltipAnchorX } from './tooltip';
+import { screenXOnFit, tooltipAnchorX, type TooltipStep } from './tooltip';
 
 /**
  * Camera moves take `map` (500 ms) with Mapbox easeTo, and jump with « Réduire les animations »
@@ -81,8 +81,8 @@ interface RouteMapProps {
   topInset?: number;
   /** A marker, or null for a tap elsewhere on the map. */
   onSelect: (route: RouteCard | null) => void;
-  /** « Voir plus » of the tooltip: the route sheet (E-05), at the step it points at, from 1. */
-  onOpenRoute: (route: RouteCard, position: number) => void;
+  /** « Voir plus » of the tooltip: the route sheet (E-05), at the step it points at. */
+  onOpenRoute: (route: RouteCard, step: TooltipStep) => void;
   /** « Rechercher dans cette zone », or the pill of a search on its way. */
   searchControl?: ReactNode;
   /** The recentre button, hidden over the message of an empty zone (Ecrans › E-01). */
@@ -520,7 +520,7 @@ export function RouteMap({
             route={selectedRoute}
             tooltipAnchor={tooltipAnchor}
             screenXOf={screenXOf}
-            onOpen={(position) => onOpenRoute(selectedRoute, position)}
+            onOpen={(step) => onOpenRoute(selectedRoute, step)}
             onClose={() => onSelect(null)}
             onStartTooltipHeight={handleStartTooltipHeight}
           />

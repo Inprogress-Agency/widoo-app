@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { analytics } from '../analytics';
 import { routeOpenedEvent } from '../analytics/discovery';
 import type { SectionId } from '../discovery/sections';
+import type { TooltipStep } from '../map/tooltip';
 
 export type OpenSource = AnalyticsEvents['route_opened']['source'];
 
@@ -18,15 +19,23 @@ export function routeHref(route: Pick<RouteCard, 'id'>, step?: number) {
 }
 
 /**
- * The route sheet (E-05), provisional until #37, at `step` if given; `route_opened` tells where it
- * was opened from.
+ * The route sheet (E-05), provisional until #37, at the step of a tooltip if given;
+ * `route_opened` tells where it was opened from, and the step, from 0, when the user tapped it.
  */
-export function openRoute(route: RouteCard, source: OpenSource, step?: number) {
-  analytics.track('route_opened', routeOpenedEvent(route, source));
-  router.push(routeHref(route, step));
+export function openRoute(route: RouteCard, source: OpenSource, step?: TooltipStep) {
+  const stepIndex = step?.isTapped ? step.position - 1 : undefined;
+  analytics.track('route_opened', routeOpenedEvent(route, source, stepIndex));
+  router.push(routeHref(route, step?.position));
 }
 
-/** « Voir tout » of a section of the sheet (E-04), pushed on the home stack (M-03). */
-export function openSection(section: SectionId) {
+/** Where « Voir tout » is tapped from: the detent, the sort of the list, the count shown. */
+export type SectionOpening = Omit<AnalyticsEvents['section_opened'], 'section'>;
+
+/**
+ * « Voir tout » of a section of the sheet (E-04), pushed on the home stack (M-03):
+ * `section_opened` with the detent it was tapped from, the sort of the list and the count shown.
+ */
+export function openSection(section: SectionId, from: SectionOpening) {
+  analytics.track('section_opened', { section, ...from });
   router.push({ pathname: '/section/[id]', params: { id: section } });
 }
