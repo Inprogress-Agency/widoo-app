@@ -6,6 +6,16 @@ import {
   type AnalyticsEventArgs,
   type AnalyticsEventName,
 } from './analytics';
+import { discoverySections } from './sections';
+
+const noFilters = {
+  audiences: [],
+  moods: [],
+  conditions: [],
+  durations: [],
+  budgets: [],
+  transports: [],
+};
 
 // Checked by `tsc`: each `@ts-expect-error` fails the typecheck if the call becomes valid.
 const track: <E extends AnalyticsEventName>(
@@ -37,6 +47,8 @@ describe('AnalyticsEventArgs', () => {
     track('screen_viewed', {});
     // @ts-expect-error the list view and its switch are gone (Ecrans › E-01)
     track('view_switched', { to: 'list' });
+    // @ts-expect-error the weather banner is gone (D-010, D-067)
+    track('weather_banner_shown', { condition: 'rainy' });
   });
 });
 
@@ -79,6 +91,7 @@ describe('checkAnalyticsEvent', () => {
       checkAnalyticsEvent('result_card_viewed', {
         route_id: 'route-1',
         position: -1,
+        section: 'nearby',
         sheet_level: 'rest',
       }).success,
     ).toBe(false);
@@ -146,5 +159,156 @@ describe('events of D-023, D-029 and D-033', () => {
 
   it('are in the catalog', () => {
     expect(Object.keys(analyticsEvents)).toEqual(expect.arrayContaining(Object.keys(valid)));
+  });
+});
+
+describe('events of the discovery (D-067)', () => {
+  const route_id = 'route-1';
+  const valid: [AnalyticsEventName, unknown][] = [
+    ['result_card_viewed', { route_id, position: 0, section: 'nearby', sheet_level: 'rest' }],
+    ['result_card_viewed', { route_id, position: 3, section: 'weather', sheet_level: 'full' }],
+    [
+      'result_card_viewed',
+      { route_id, position: 12, section: 'nearby', sheet_level: 'list', sort: 'distance' },
+    ],
+    [
+      'section_opened',
+      { section: 'nearby', sheet_level: 'half', sort: 'recommended', results_count: 9 },
+    ],
+    [
+      'section_opened',
+      { section: 'weather', sheet_level: 'rest', sort: 'rating', results_count: 0 },
+    ],
+    ['list_sorted', { section: 'signature', sort: 'duration', previous_sort: 'recommended' }],
+    ['route_opened', { route_id, source: 'marker', step_index: 0 }],
+    ['route_opened', { route_id, source: 'marker', step_index: 2 }],
+    ['filters_applied', { ...noFilters, results_count: 4, source: 'panel' }],
+  ];
+  const invalid: [string, AnalyticsEventName, unknown][] = [
+    [
+      'an unknown section',
+      'section_opened',
+      {
+        section: 'popular',
+        sheet_level: 'half',
+        sort: 'recommended',
+        results_count: 9,
+      },
+    ],
+    [
+      'the list as the detent of « Voir tout »',
+      'section_opened',
+      {
+        section: 'nearby',
+        sheet_level: 'list',
+        sort: 'recommended',
+        results_count: 9,
+      },
+    ],
+    [
+      'an unknown property',
+      'section_opened',
+      {
+        section: 'nearby',
+        sheet_level: 'half',
+        sort: 'recommended',
+        results_count: 9,
+        zone: 'République',
+      },
+    ],
+    [
+      'a missing count',
+      'section_opened',
+      {
+        section: 'nearby',
+        sheet_level: 'half',
+        sort: 'recommended',
+      },
+    ],
+    [
+      'an unknown sort',
+      'list_sorted',
+      { section: 'nearby', sort: 'price', previous_sort: 'rating' },
+    ],
+    [
+      'the same sort',
+      'list_sorted',
+      { section: 'nearby', sort: 'rating', previous_sort: 'rating' },
+    ],
+    [
+      'an unknown property',
+      'list_sorted',
+      {
+        section: 'nearby',
+        sort: 'rating',
+        previous_sort: 'distance',
+        position: { lat: 48.8566, lng: 2.3522 },
+      },
+    ],
+    [
+      'a card without its section',
+      'result_card_viewed',
+      { route_id, position: 0, sheet_level: 'rest' },
+    ],
+    [
+      'a sort outside the list',
+      'result_card_viewed',
+      {
+        route_id,
+        position: 0,
+        section: 'nearby',
+        sheet_level: 'half',
+        sort: 'rating',
+      },
+    ],
+    [
+      'a card of the list without its sort',
+      'result_card_viewed',
+      {
+        route_id,
+        position: 0,
+        section: 'nearby',
+        sheet_level: 'list',
+      },
+    ],
+    [
+      'an unknown property',
+      'result_card_viewed',
+      {
+        route_id,
+        position: 0,
+        section: 'nearby',
+        sheet_level: 'rest',
+        zoom: 14,
+      },
+    ],
+    ['a step from -1', 'route_opened', { route_id, source: 'marker', step_index: -1 }],
+    ['an unknown property', 'route_opened', { route_id, source: 'marker', step_id: 'step-1' }],
+    [
+      'the weather source',
+      'filters_applied',
+      { ...noFilters, results_count: 4, source: 'weather' },
+    ],
+  ];
+
+  it.each(valid)('accepts %s with %o', (name, properties) => {
+    expect(checkAnalyticsEvent(name, properties)).toEqual({ success: true, properties });
+  });
+
+  it.each(invalid)('refuses %s in %s', (_, name, properties) => {
+    expect(checkAnalyticsEvent(name, properties).success).toBe(false);
+  });
+
+  it('no longer has the events of the weather banner', () => {
+    for (const name of ['weather_banner_shown', 'weather_banner_tapped']) {
+      expect(checkAnalyticsEvent(name, { condition: 'rainy' })).toEqual({
+        success: false,
+        error: `Unknown analytics event: ${name}`,
+      });
+    }
+  });
+
+  it('sends the section keys of packages/shared', () => {
+    expect(discoverySections).toEqual(['nearby', 'weather', 'signature']);
   });
 });

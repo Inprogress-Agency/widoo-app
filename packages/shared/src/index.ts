@@ -1,4 +1,5 @@
 export * from './analytics';
+export * from './sections';
 export { assertNever } from './assert-never';
 export { budgetSumEur, displayedBudgetEur } from './budget';
 export { matchesFilters, type RouteFilters } from './filters';
