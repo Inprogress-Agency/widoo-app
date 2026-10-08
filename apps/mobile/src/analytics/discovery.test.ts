@@ -5,6 +5,7 @@ import {
   createCardViewTracker,
   filtersAppliedEvent,
   filtersEvent,
+  listSortedEvent,
   mapSearchZoneEvent,
   newCardViews,
   routeOpenedEvent,
@@ -100,6 +101,44 @@ describe('routeOpenedEvent', () => {
     const event = routeOpenedEvent({ id: 'route-1' }, source);
     expect(event).toEqual({ route_id: 'route-1', source });
     expectInCatalog('route_opened', event);
+  });
+
+  it('tells the step, from 0, of a sheet opened at a tapped step', () => {
+    for (const stepIndex of [0, 2]) {
+      const event = routeOpenedEvent({ id: 'route-1' }, 'marker', stepIndex);
+      expect(event).toEqual({ route_id: 'route-1', source: 'marker', step_index: stepIndex });
+      expectInCatalog('route_opened', event);
+    }
+  });
+});
+
+describe('cards of the list', () => {
+  it('report the list, its sort and their position from 0', () => {
+    const track = createCardViewTracker();
+    const list = { section: 'nearby', sheet_level: 'list', sort: 'rating' } as const;
+    const views = track('zone-1:rating', [{ route: { id: 'a' }, index: 0 }], list);
+    expect(views).toEqual([
+      { route_id: 'a', position: 0, section: 'nearby', sheet_level: 'list', sort: 'rating' },
+    ]);
+    expectInCatalog('result_card_viewed', views[0] ?? {});
+    expect(track('zone-1:rating', [{ route: { id: 'a' }, index: 0 }], list)).toEqual([]);
+    expect(
+      track('zone-1:duration', [{ route: { id: 'a' }, index: 3 }], { ...list, sort: 'duration' }),
+    ).toEqual([
+      { route_id: 'a', position: 3, section: 'nearby', sheet_level: 'list', sort: 'duration' },
+    ]);
+  });
+});
+
+describe('listSortedEvent', () => {
+  it('tells the new sort and the previous one', () => {
+    const event = listSortedEvent('nearby', 'recommended', 'duration');
+    expect(event).toEqual({ section: 'nearby', sort: 'duration', previous_sort: 'recommended' });
+    expectInCatalog('list_sorted', event ?? {});
+  });
+
+  it('sends nothing when the sort does not change', () => {
+    expect(listSortedEvent('nearby', 'rating', 'rating')).toBeNull();
   });
 });
 

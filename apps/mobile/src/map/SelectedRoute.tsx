@@ -10,7 +10,7 @@ import type { LngLat } from './geo';
 import { routePath, routeStops, type Stop } from './markers';
 import { RouteTooltip } from './RouteTooltip';
 import { stepLine } from './stepLine';
-import { tooltipAnchorX } from './tooltip';
+import { tooltipAnchorX, type TooltipStep } from './tooltip';
 
 const fadeTransition = { duration: motion.durations.fade, delay: 0 };
 // A fade, kept with « Réduire les animations » (D-030).
@@ -68,8 +68,8 @@ interface SelectedRouteProps {
    * itself there.
    */
   screenXOf: (location: LngLat) => Promise<number>;
-  /** « Voir plus », with the step the tooltip points at, from 1. */
-  onOpen: (position: number) => void;
+  /** « Voir plus », with the step the tooltip points at, from 1, and whether it was tapped. */
+  onOpen: (step: TooltipStep) => void;
   onClose: () => void;
   /** Height of the tooltip of the start as laid out; that of a tapped step is not told. */
   onStartTooltipHeight?: (height: number) => void;
@@ -177,7 +177,7 @@ export function SelectedRoute({
             isLocked={route.isLocked}
             position={tooltipIndex + 1}
             arrowAt={tapped?.anchor ?? tooltipAnchor}
-            onOpen={() => onOpen(tooltipIndex + 1)}
+            onOpen={() => onOpen({ position: tooltipIndex + 1, isTapped: tapped !== null })}
             onClose={onClose}
             onHeightChange={tapped ? undefined : onStartTooltipHeight}
           />

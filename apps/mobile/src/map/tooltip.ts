@@ -1,6 +1,14 @@
 import type { LatLng } from '@widoo/shared';
 import type { Bounds } from './geo';
 
+/** The step a tooltip of the map points at when « Voir plus » is tapped (Ecrans › E-04). */
+export interface TooltipStep {
+  /** From 1, as the sheet shows it. */
+  position: number;
+  /** Tapped by the user, rather than the start the tooltip opens on. */
+  isTapped: boolean;
+}
+
 export interface Padding {
   top: number;
   right: number;

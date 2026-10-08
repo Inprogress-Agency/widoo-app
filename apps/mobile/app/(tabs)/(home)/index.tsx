@@ -81,7 +81,7 @@ export default function HomeScreen() {
               bottomInset={sheetCover}
               topInset={topBarHeight}
               onSelect={(next) => select(next?.id ?? null)}
-              onOpenRoute={(next, position) => openRoute(next, 'marker', position)}
+              onOpenRoute={(next, step) => openRoute(next, 'marker', step)}
               searchControl={
                 isSearchable ? (
                   <SearchZoneButton onPress={() => searchZone('button')} />
