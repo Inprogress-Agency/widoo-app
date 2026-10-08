@@ -34,6 +34,7 @@ import { RecenterButton } from './MapControls';
 import { sharedMarkerImages, usePhotoMarkerImages } from './markerImages';
 import { routeMarkers, selectionFrame } from './markers';
 import { durationLabel, labelPillImage, photoOffsetY, rimWidth } from './markerShape';
+import { mapOverlayLayout, ornamentMargin } from './ornaments';
 import { routeFramePadding } from './routeFrame';
 import { SelectedRoute } from './SelectedRoute';
 import { labelFont, mapStyleJson } from './style';
@@ -47,9 +48,6 @@ const cameraAnimationOf = (isReducedMotion: boolean) => ({
   animationMode: isReducedMotion ? ('none' as const) : ('easeTo' as const),
   animationDuration: isReducedMotion ? 0 : motion.durations.map,
 });
-
-/** Map ornaments (Mapbox logo and attribution, required) sit in the margin of the screen. */
-const ornamentMargin = spacing['space-8'];
 
 interface RouteMapProps {
   routes: readonly RouteCard[];
@@ -184,13 +182,15 @@ export function RouteMap({
 
   const cameraAnimation = cameraAnimationOf(isReducedMotion);
 
-  // The controls and the map ornaments (Mapbox logo and attribution, required) sit just above
-  // the results sheet, as high as it rises up to half the map; beyond, they stay under it.
-  const isSheetLow = bottomInset <= viewport.height / 2;
-  const sheetTop = isSheetLow ? bottomInset : restCover;
-  const ornamentBottom = sheetTop + ornamentMargin - safeBottom;
-  // The controls clear the attribution button, a touch target in the corner below them.
-  const controlsBottom = sheetTop + ornamentMargin + size['touch-min'] + spacing['space-8'];
+  // The Mapbox logo and attribution follow the sheet while the map shows above it; the controls
+  // sit above the attribution, up to half the map.
+  const { ornamentBottom, controlsBottom } = mapOverlayLayout({
+    viewportHeight: viewport.height,
+    topInset: insets.top,
+    sheetCover: bottomInset,
+    restCover,
+    safeBottom,
+  });
 
   // About 3 km across the screen (Ecrans › E-01).
   const home = {
@@ -508,7 +508,7 @@ export function RouteMap({
         pointerEvents="none"
         style={StyleSheet.absoluteFill}
       />
-      {isSheetLow && (
+      {controlsBottom !== null && (
         <View
           pointerEvents="box-none"
           className="flex-row items-end gap-8 px-16"
