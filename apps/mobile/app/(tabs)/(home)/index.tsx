@@ -90,8 +90,8 @@ export default function HomeScreen() {
               // Over an empty zone, the message offers to widen it; offline, nothing can be searched:
               // no recentre (Ecrans › E-01).
               hasRecenter={!isEmpty && !isOffline}
-              // Recentring leaves a zone chosen in the search, and searches around the user again.
-              onRecenter={chosenZone ? leaveZone : undefined}
+              // Recentring searches around the user again, leaving a zone chosen in the search.
+              onRecenter={leaveZone}
             />
             {/* Over the map; the sheet covers them when it rises to full (E-04). */}
             <View
