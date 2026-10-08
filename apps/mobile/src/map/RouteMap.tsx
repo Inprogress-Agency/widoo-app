@@ -34,6 +34,7 @@ import { RecenterButton } from './MapControls';
 import { sharedMarkerImages, usePhotoMarkerImages } from './markerImages';
 import { routeMarkers, selectionFrame } from './markers';
 import { durationLabel, labelPillImage, photoOffsetY, rimWidth } from './markerShape';
+import { routeFramePadding } from './routeFrame';
 import { SelectedRoute } from './SelectedRoute';
 import { labelFont, mapStyleJson } from './style';
 import { screenXOnFit, tooltipAnchorX } from './tooltip';
@@ -257,20 +258,19 @@ export function RouteMap({
 
   /**
    * The route fills the lower half of the map, its tooltip the upper half, above the room kept
-   * for the results sheet; the tooltip slides sideways to stay on screen.
+   * for the results sheet and its step dots whole; the tooltip slides sideways to stay on screen.
    */
-  const frameRoute = (route: RouteCard, bottom: number) => {
+  const frameRoute = (route: RouteCard, sheetCover: number) => {
     const frame = selectionFrame(route);
     const start = route.steps[0];
     if (!frame || !start) {
       return false;
     }
-    const padding = {
-      top: (viewport.height - tabBarHeight) / 2,
-      right: spacing['space-32'],
-      bottom,
-      left: spacing['space-32'],
-    };
+    const padding = routeFramePadding({
+      viewportHeight: viewport.height,
+      tabBarHeight,
+      sheetCover,
+    });
     camera.current?.setCamera({
       ...('bounds' in frame ? { bounds: frame.bounds } : { centerCoordinate: frame.center }),
       padding: {
