@@ -46,6 +46,9 @@ export function filtersAppliedEvent(
 
 type CardView = AnalyticsEvents['result_card_viewed'];
 
+/** Where the cards are seen: their section, the detent of the sheet or the list and its sort. */
+export type CardViewContext = Omit<CardView, 'route_id' | 'position'>;
+
 /**
  * `result_card_viewed` for the cards that came into view and were not seen yet among the results
  * on screen; `seen` keeps them, so that each card counts once per results.
@@ -53,13 +56,13 @@ type CardView = AnalyticsEvents['result_card_viewed'];
 export function newCardViews(
   visible: readonly { route: { id: string }; index: number }[],
   seen: Set<string>,
-  sheetLevel: CardView['sheet_level'],
+  context: CardViewContext,
 ): CardView[] {
   const views: CardView[] = [];
   for (const { route, index } of visible) {
     if (!seen.has(route.id)) {
       seen.add(route.id);
-      views.push({ route_id: route.id, position: index, sheet_level: sheetLevel });
+      views.push({ route_id: route.id, position: index, ...context });
     }
   }
   return views;
@@ -75,12 +78,12 @@ export function createCardViewTracker() {
   return (
     results: unknown,
     visible: readonly { route: { id: string }; index: number }[],
-    sheetLevel: CardView['sheet_level'],
+    context: CardViewContext,
   ): CardView[] => {
     if (!current || current.results !== results) {
       current = { results, seen: new Set() };
     }
-    return newCardViews(visible, current.seen, sheetLevel);
+    return newCardViews(visible, current.seen, context);
   };
 }
 

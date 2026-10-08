@@ -182,7 +182,8 @@ export function DiscoverySheet({
         onVisible={(visible) => {
           // The results of the store, not of this render: the carousel may call an older handler.
           const current = discoveryStore.getState().results;
-          for (const view of cardViews.current(current, visible, level.current)) {
+          const context = { section: 'nearby', sheet_level: level.current } as const;
+          for (const view of cardViews.current(current, visible, context)) {
             analytics.track('result_card_viewed', view);
           }
         }}

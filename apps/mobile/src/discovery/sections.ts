@@ -1,13 +1,20 @@
-import type { LatLng, RouteCard, RouteSearchResult, RouteSort } from '@widoo/shared';
+import type {
+  DiscoverySection,
+  LatLng,
+  RouteCard,
+  RouteSearchResult,
+  RouteSort,
+} from '@widoo/shared';
 import { distanceBetweenM, type Bbox } from '../map/geo';
 import type { SearchStatus } from './store';
 
 /**
  * Sections of the results sheet (Ecrans › E-01, E-04), each with its carousel and its « Voir
  * tout » list. « À proximité » only for now: the weather section waits for the forecast (#31),
- * « Les Signature Widoo » for a search that filters them (#63).
+ * « Les Signature Widoo » for a search that filters them (#63). Their keys are those of the
+ * analytics, in packages/shared.
  */
-export const sectionIds = ['nearby'] as const;
+export const sectionIds = ['nearby'] as const satisfies readonly DiscoverySection[];
 export type SectionId = (typeof sectionIds)[number];
 
 export function isSectionId(value: unknown): value is SectionId {

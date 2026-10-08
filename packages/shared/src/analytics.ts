@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { routeSorts } from './schemas/search';
+import { discoverySections } from './sections';
 import { taxonomies } from './taxonomies';
 
 /**
@@ -46,8 +48,11 @@ const purchase = z.strictObject({ plan: z.enum(['monthly', 'annual']) });
 const createSaved = z.strictObject({ steps_count: count, warnings_count: count });
 const bookingProvider = z.enum(taxonomies.bookingProviders);
 const none = z.strictObject({});
-const weatherBanner = z.strictObject({ condition: z.string() });
 const routeOnly = z.strictObject(route);
+const section = z.enum(discoverySections);
+const sort = z.enum(routeSorts);
+/** Detents of the results sheet (E-04). */
+const sheetLevel = z.enum(['rest', 'half', 'full']);
 
 export const analyticsEvents = {
   // Discovery
@@ -57,24 +62,49 @@ export const analyticsEvents = {
     results_count: count,
     trigger: z.enum(['initial', 'button', 'geocode']),
   }),
+  /** The weather applies no filter (D-010, D-067): no `weather` source. */
   filters_applied: z.strictObject({
     ...filters,
     results_count: count,
-    source: z.enum(['chip', 'panel', 'weather']),
+    source: z.enum(['chip', 'panel']),
   }),
   filters_no_results: z.strictObject(filters),
-  weather_banner_shown: weatherBanner,
-  weather_banner_tapped: weatherBanner,
   search_text: z.strictObject({ kind: z.enum(['geo', 'route']), has_result: z.boolean() }),
-  /** `position` from 0 in the carousel; `sheet_level` the detent of the sheet (E-04). */
-  result_card_viewed: z.strictObject({
-    ...route,
-    position: count,
-    sheet_level: z.enum(['rest', 'half', 'full']),
+  /**
+   * Once per card and per results shown (D-067). `position` from 0 in the carousel or the list;
+   * `sheet_level` the detent of the sheet, `list` in « Voir tout », where `sort` is the sort shown.
+   */
+  result_card_viewed: z
+    .strictObject({
+      ...route,
+      position: count,
+      section,
+      sheet_level: z.enum([...sheetLevel.options, 'list']),
+      sort: sort.optional(),
+    })
+    .refine((view) => (view.sort !== undefined) === (view.sheet_level === 'list'), {
+      path: ['sort'],
+      message: 'sort in the list only',
+    }),
+  /** « Voir tout » of a section (E-04): the detent it is tapped from, the sort the list opens in. */
+  section_opened: z.strictObject({
+    section,
+    sheet_level: sheetLevel,
+    sort,
+    results_count: count,
   }),
+  /** A sort chosen in « Trier par » of the list, only when it changes (D-067). */
+  list_sorted: z
+    .strictObject({ section, sort, previous_sort: sort })
+    .refine((change) => change.sort !== change.previous_sort, {
+      path: ['sort'],
+      message: 'the sort did not change',
+    }),
+  /** `step_index`, from 0, only when the sheet opens at a step tapped on the map (#153). */
   route_opened: z.strictObject({
     ...route,
     source: z.enum(['marker', 'card', 'link', 'favorites', 'planned']),
+    step_index: count.optional(),
   }),
   route_scrolled: z.strictObject({
     ...route,

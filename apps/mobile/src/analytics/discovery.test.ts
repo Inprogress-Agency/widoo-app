@@ -66,13 +66,14 @@ describe('newCardViews', () => {
 
   it('reports each card once, with its position and the detent of the sheet', () => {
     const seen = new Set<string>();
-    const first = newCardViews([card('a', 0), card('b', 1)], seen, 'rest');
+    const rest = { section: 'nearby', sheet_level: 'rest' } as const;
+    const first = newCardViews([card('a', 0), card('b', 1)], seen, rest);
     expect(first).toEqual([
-      { route_id: 'a', position: 0, sheet_level: 'rest' },
-      { route_id: 'b', position: 1, sheet_level: 'rest' },
+      { route_id: 'a', position: 0, section: 'nearby', sheet_level: 'rest' },
+      { route_id: 'b', position: 1, section: 'nearby', sheet_level: 'rest' },
     ]);
-    const next = newCardViews([card('b', 1), card('c', 2)], seen, 'half');
-    expect(next).toEqual([{ route_id: 'c', position: 2, sheet_level: 'half' }]);
+    const next = newCardViews([card('b', 1), card('c', 2)], seen, { ...rest, sheet_level: 'half' });
+    expect(next).toEqual([{ route_id: 'c', position: 2, section: 'nearby', sheet_level: 'half' }]);
     for (const view of [...first, ...next]) {
       expectInCatalog('result_card_viewed', view);
     }
@@ -84,10 +85,12 @@ describe('createCardViewTracker', () => {
     const track = createCardViewTracker();
     const first = { items: ['a', 'b'] };
     const next = { items: ['b'] };
-    expect(track(first, [{ route: { id: 'b' }, index: 1 }], 'rest')).toHaveLength(1);
-    expect(track(first, [{ route: { id: 'b' }, index: 1 }], 'half')).toEqual([]);
-    expect(track(next, [{ route: { id: 'b' }, index: 0 }], 'rest')).toEqual([
-      { route_id: 'b', position: 0, sheet_level: 'rest' },
+    const rest = { section: 'nearby', sheet_level: 'rest' } as const;
+    const half = { ...rest, sheet_level: 'half' } as const;
+    expect(track(first, [{ route: { id: 'b' }, index: 1 }], rest)).toHaveLength(1);
+    expect(track(first, [{ route: { id: 'b' }, index: 1 }], half)).toEqual([]);
+    expect(track(next, [{ route: { id: 'b' }, index: 0 }], rest)).toEqual([
+      { route_id: 'b', position: 0, section: 'nearby', sheet_level: 'rest' },
     ]);
   });
 });
