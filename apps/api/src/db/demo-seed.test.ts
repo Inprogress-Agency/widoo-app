@@ -160,10 +160,19 @@ describe('removeDemoDataset', () => {
 
   class RolledBack extends Error {}
   type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
-  /** Other test files read the demo dataset at the same time: the removal is never committed. */
+  /**
+   * Other test files read the demo dataset at the same time: the removal is never committed.
+   * They also add and delete routes on demo places (search.test.ts, search-access.test.ts),
+   * outside the seed lock. Which demo places a removal keeps depends on those steps, and each
+   * query of a read committed transaction sees the latest commits: the table of steps is frozen
+   * until the rollback, so that every assertion reads the state the removal worked on (#330).
+   * The seed lock comes first, as in seed(), so a seed holding it never waits for this one.
+   */
   const inRolledBackTransaction = (run: (tx: Tx) => Promise<void>) =>
     expect(
       app.db.transaction(async (tx) => {
+        await tx.execute(sql`select pg_advisory_xact_lock(hashtext('widoo-seed'))`);
+        await tx.execute(sql`lock table ${steps} in share mode`);
         await run(tx);
         throw new RolledBack();
       }),
