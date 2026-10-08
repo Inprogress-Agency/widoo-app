@@ -138,7 +138,11 @@ export interface DiscoveryActions {
    * and its routes are searched (`map_search_zone` with `geocode`).
    */
   chooseZone: (zone: ChosenZone, zoom: number) => void;
-  /** The cross of the pill, or the recentre button: back around the user, searched again. */
+  /**
+   * The cross of the pill, « Autour de moi » or the recentre button: back around the user, whose
+   * zone is searched as soon as the map settles there, with the active filters, never through
+   * « Rechercher dans cette zone » (Ecrans › E-01, D-071). A zone chosen in the search is left.
+   */
   leaveZone: () => void;
 }
 
@@ -347,7 +351,13 @@ export function createDiscoveryStore() {
       },
       leaveZone: () => {
         lastId += 1;
-        set({ zone: null, framing: { id: lastId, view: 'home' }, pendingTrigger: 'button' });
+        // The move back is the app's, not the user's: the button gives way to the search.
+        set({
+          zone: null,
+          framing: { id: lastId, view: 'home' },
+          pendingTrigger: 'button',
+          hasMoved: false,
+        });
       },
     };
   });

@@ -379,3 +379,65 @@ describe('zone chosen in the search (E-02)', () => {
     expect(store.getState().search).toBe(back);
   });
 });
+
+describe('recentre (Ecrans › E-01, D-071)', () => {
+  // Fictitious zone.
+  const canal = {
+    id: 'zone-canal',
+    name: 'Canal fictif',
+    kind: 'neighborhood' as const,
+    area: 'Paris 10e',
+    center: { lat: 48.871, lng: 2.365 },
+    bbox: { west: 2.345, south: 48.857, east: 2.385, north: 48.885 },
+  };
+
+  it('searches around the user again after a search elsewhere, with no button on the way', () => {
+    openedWith('a');
+    store.getState().showView(moved, true);
+    store.getState().searchZone('button');
+    store.getState().receive(searchId(), listed('far'));
+    store.getState().leaveZone();
+    expect(store.getState().framing?.view).toBe('home');
+    expect(canSearchZone(store.getState())).toBe(false);
+    store.getState().showView(home, false);
+    const state = store.getState();
+    expect(state.search).toMatchObject({ view: home, trigger: 'button' });
+    expect(canSearchZone(state)).toBe(false);
+    expect(state.receive(searchId(), listed('a'))).toBe(true);
+    expect(store.getState().results?.items.map((r) => r.id)).toEqual(['a']);
+  });
+
+  it('searches at once after a move without a search, never offering the button', () => {
+    openedWith('a');
+    store.getState().showView(moved, true);
+    expect(canSearchZone(store.getState())).toBe(true);
+    store.getState().leaveZone();
+    expect(canSearchZone(store.getState())).toBe(false);
+    store.getState().showView(home, false);
+    expect(store.getState().search).toMatchObject({ view: home, trigger: 'button' });
+    expect(canSearchZone(store.getState())).toBe(false);
+  });
+
+  it('leaves a zone chosen in the search', () => {
+    openedWith('a');
+    store.getState().chooseZone(canal, 14);
+    store.getState().receive(searchId(), listed('canal'));
+    store.getState().leaveZone();
+    expect(store.getState().zone).toBeNull();
+    store.getState().showView(home, false);
+    expect(store.getState().search).toMatchObject({ view: home, trigger: 'button' });
+  });
+
+  it('keeps the active filters', () => {
+    openedWith('a');
+    store.getState().toggleFilter({ group: 'moods', value: 'food' });
+    store.getState().receive(searchId(), listed('a'));
+    store.getState().showView(moved, true);
+    store.getState().searchZone('button');
+    store.getState().leaveZone();
+    store.getState().showView(home, false);
+    const state = store.getState();
+    expect(state.filters).toEqual({ moods: ['food'] });
+    expect(state.search).toMatchObject({ view: home, filters: { moods: ['food'] } });
+  });
+});

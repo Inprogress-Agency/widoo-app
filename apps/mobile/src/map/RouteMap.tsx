@@ -84,10 +84,10 @@ interface RouteMapProps {
   /** The recentre button, hidden over the message of an empty zone (Ecrans › E-01). */
   hasRecenter?: boolean;
   /**
-   * The recentre button, when it does more than move the camera: a zone chosen in the search is
-   * left (Ecrans › E-01, recentrer), through a `home` framing.
+   * The recentre button: the app asks for a `home` framing, and the view the map settles on is
+   * searched at once (Ecrans › E-01, recentrer, D-071).
    */
-  onRecenter?: () => void;
+  onRecenter: () => void;
 }
 
 /**
@@ -254,14 +254,6 @@ export function RouteMap({
       ...cameraAnimationOf(isReducedMotion),
     });
   }, [focusedRoute, selectedRoute, bottomInset, isReducedMotion]);
-
-  const recenter = () => {
-    if (onRecenter) {
-      onRecenter();
-      return;
-    }
-    camera.current?.setCamera({ ...home, ...cameraAnimation });
-  };
 
   /**
    * The route fills the lower half of the map, its tooltip the upper half, above the room kept
@@ -527,7 +519,7 @@ export function RouteMap({
             {searchControl}
           </View>
           {/* Hidden while a route is selected (Ecrans › E-04). */}
-          {hasRecenter && !selectedRoute && <RecenterButton onPress={recenter} />}
+          {hasRecenter && !selectedRoute && <RecenterButton onPress={onRecenter} />}
         </View>
       )}
     </View>
