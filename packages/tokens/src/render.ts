@@ -178,6 +178,13 @@ export function renderThemeModule(tokens: Tokens, theme: Theme = buildTheme(toke
       comment: 'Immersive page of the route in progress and mini player (E-07, D-029).',
     },
     {
+      name: 'mapTooltip',
+      value: mappings.mapTooltip,
+      comment:
+        'Ink tooltip of the map (E-04, D-041): as wide as its title on one line, from minWidth to maxWidthRatio of the screen.',
+      satisfies: '{ minWidth: SizeToken; maxWidthRatio: number; screenMarginPx: number }',
+    },
+    {
       name: 'motion',
       value: mappings.motion,
       comment:
