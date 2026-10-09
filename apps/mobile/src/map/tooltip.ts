@@ -1,4 +1,5 @@
 import type { LatLng } from '@widoo/shared';
+import { mapTooltip, size } from '@widoo/tokens';
 import type { Bounds } from './geo';
 
 /** The step a tooltip of the map points at when « Voir plus » is tapped (Ecrans › E-04). */
@@ -59,6 +60,32 @@ export function screenPointOnFit(
 }
 
 /**
+ * Width of the tooltip of the map (D-041): that of its title row on one line, `titleRowWidth`,
+ * plus `padding` on each side, from `tooltip-min-w` up to `mapTooltip.maxWidthRatio` of the
+ * screen, beyond which the title wraps. At large text, where it holds only the name and the
+ * rating, it takes the widest (Ecrans › E-04, Texte agrandi). Null before the title is measured.
+ */
+export function tooltipWidth(
+  titleRowWidth: number | null,
+  {
+    screenWidth,
+    padding,
+    isLargeText,
+  }: { screenWidth: number; padding: number; isLargeText: boolean },
+): number | null {
+  const minWidth = size[mapTooltip.minWidth];
+  const maxWidth = Math.max(minWidth, Math.floor(screenWidth * mapTooltip.maxWidthRatio));
+  if (isLargeText) {
+    return maxWidth;
+  }
+  if (titleRowWidth === null) {
+    return null;
+  }
+  // Rounded up: a title a fraction of a point too wide would pass on a second line.
+  return Math.min(Math.max(Math.ceil(titleRowWidth + 2 * padding), minWidth), maxWidth);
+}
+
+/**
  * Where the tooltip hangs from its anchor, from 0 (left edge) to 1 (right edge): centred on the
  * point when it can, shifted so that it stays `margin` away from the screen edges otherwise.
  * Its arrow keeps pointing at the start.
@@ -74,6 +101,39 @@ export function tooltipAnchorX(
   const leftmost = (pointX - (screenWidth - margin - tooltipWidth)) / tooltipWidth;
   const rightmost = (pointX - margin) / tooltipWidth;
   return Math.min(Math.max(0.5, leftmost), rightmost, 1);
+}
+
+/** Where a tooltip hangs from its step: across, from 0 to 1, and on which side. */
+export interface TooltipPlacement {
+  anchor: number;
+  side: TooltipSide;
+}
+
+/**
+ * Placement of a tooltip `width` by `height` on its step (Ecrans › E-04): centred on it, or
+ * shifted to stay `mapTooltip.screenMarginPx` from the screen edges, the arrow on the step; on the
+ * side `tooltipSide` picks, among the `others` step dots, above `roomBottom`.
+ */
+export function tooltipPlacement(
+  step: ScreenPoint,
+  others: readonly ScreenPoint[],
+  {
+    screenWidth,
+    width,
+    height,
+    dotRadius,
+    roomBottom,
+  }: { screenWidth: number; width: number; height: number; dotRadius: number; roomBottom: number },
+): TooltipPlacement {
+  const anchor = tooltipAnchorX(step.x, {
+    screenWidth,
+    tooltipWidth: width,
+    margin: mapTooltip.screenMarginPx,
+  });
+  return {
+    anchor,
+    side: tooltipSide(step, others, { width, height, anchor, dotRadius, roomBottom }),
+  };
 }
 
 /** Above its step, the arrow at the bottom, or below it, the arrow at the top (Ecrans › E-04). */
