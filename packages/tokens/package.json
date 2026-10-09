@@ -25,7 +25,7 @@
     "phosphor-react-native": "3.0.6"
   },
   "devDependencies": {
-    "@types/node": "^22.20.4",
+    "@types/node": "^26.6.4",
     "phosphor-react-native": "3.0.6",
     "tsx": "^4.23.15",
     "zod": "^4.6.5"
