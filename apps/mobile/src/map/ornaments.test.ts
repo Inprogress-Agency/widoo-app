@@ -2,8 +2,15 @@ import { size } from '@widoo/tokens';
 import { describe, expect, it } from 'vitest';
 import { mapOverlayLayout, ornamentMargin } from './ornaments';
 
-// iPhone 17 Pro: 874 points high, status bar 62, tab bar and rest detent 218, half at 296.
-const screen = { viewportHeight: 874, topInset: 62, restCover: 218, safeBottom: 34 };
+// iPhone 17 Pro: 874 points high, status bar 62, top bar down to 176, tab bar and rest detent
+// 218, half at 296.
+const screen = {
+  viewportHeight: 874,
+  topInset: 62,
+  topBarBottom: 176,
+  restCover: 218,
+  safeBottom: 34,
+};
 const rest = mapOverlayLayout({ ...screen, sheetCover: 218 });
 const half = mapOverlayLayout({ ...screen, sheetCover: 874 - 296 });
 const full = mapOverlayLayout({ ...screen, sheetCover: 874 - 62 });
@@ -34,6 +41,18 @@ describe('mapOverlayLayout', () => {
   it('leaves the ornaments at rest when the sheet covers the map', () => {
     expect(full.ornamentBottom).toBe(rest.ornamentBottom);
     expect(full.controlsBottom).toBeNull();
+  });
+
+  it('keeps the controls over an empty zone whose message raises the sheet past half the map', () => {
+    // At 150 % text, the message of an empty zone sets the rest detent 410 points from the top.
+    const layout = mapOverlayLayout({ ...screen, topBarBottom: 210, sheetCover: 874 - 410 });
+    expect(layout.controlsBottom).not.toBeNull();
+    expect((layout.controlsBottom ?? 0) + size['touch-min']).toBeLessThanOrEqual(874 - 210);
+  });
+
+  it('hides the controls when no row of them fits under the top bar', () => {
+    const layout = mapOverlayLayout({ ...screen, topBarBottom: 330, sheetCover: 874 - 410 });
+    expect(layout.controlsBottom).toBeNull();
   });
 
   it('counts from the edge of the view without a safe area, as on Android', () => {

@@ -208,10 +208,11 @@ export function RouteMap({
   const cameraAnimation = cameraAnimationOf(isReducedMotion);
 
   // The Mapbox logo and attribution follow the sheet while the map shows above it; the controls
-  // sit above the attribution, up to half the map.
+  // sit above the attribution, under the half detent, as long as they fit under the top bar.
   const { ornamentBottom, controlsBottom } = mapOverlayLayout({
     viewportHeight: viewport.height,
     topInset: insets.top,
+    topBarBottom: topInset,
     sheetCover: bottomInset,
     restCover,
     safeBottom,
