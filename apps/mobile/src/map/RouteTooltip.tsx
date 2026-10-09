@@ -12,6 +12,7 @@ import { Rating } from '../ui/Rating';
 import { Text } from '../ui/Text';
 import { useIsLargeText } from '../ui/useIsLargeText';
 import { stepLine } from './stepLine';
+import type { TooltipSide } from './tooltip';
 
 interface RouteTooltipProps {
   route: RouteCard;
@@ -21,6 +22,8 @@ interface RouteTooltipProps {
   position: number;
   /** Position of the arrow along the tooltip, from 0 to 1: it points at the step. */
   arrowAt: number;
+  /** Above its step, the arrow at the bottom, or below it, the arrow at the top (D-084). */
+  side?: TooltipSide;
   onOpen: () => void;
   onClose: () => void;
   /** Its height as laid out, arrow and gap to the dot included: the map frames the route with it. */
@@ -32,13 +35,15 @@ interface RouteTooltipProps {
  * title and rating, the step (place name, then « Étape i/n · category · duration »), « Voir
  * plus ». Locked, the step line becomes « Parcours Premium » and the number of steps. It fades
  * in, with or without « Réduire les animations », and takes the screen reader focus as a dialog;
- * the escape gesture closes it. From 130 % of text, only the title and the rating remain.
+ * the escape gesture closes it. From 130 % of text, only the title and the rating remain. Below its
+ * step, the arrow points up at it.
  */
 export function RouteTooltip({
   route,
   isLocked,
   position,
   arrowAt,
+  side = 'above',
   onOpen,
   onClose,
   onHeightChange,
@@ -74,12 +79,27 @@ export function RouteTooltip({
         step: line?.spoken,
       });
 
+  // Centred on its share of the width: the arrow points at the step, half under the tooltip.
+  const arrowView = (
+    <View
+      pointerEvents="none"
+      className={`${side === 'above' ? '-mt-6' : '-mb-6'} size-12 rotate-45 bg-surface-strong`}
+      style={{ marginLeft: arrowAt * size['tooltip-min-w'] - spacing['space-12'] / 2 }}
+    />
+  );
+  // The tooltip points at the step dot, tapped and so at its active size, not into it. The gap
+  // and the arrow let a tap through to the steps under them.
+  const gap = <View pointerEvents="none" style={{ height: size['step-dot-active'] / 2 }} />;
+
   return (
     <Animated.View
       style={fade}
+      pointerEvents="box-none"
       className="w-tooltip-min-w"
       onLayout={(event) => onHeightChange?.(event.nativeEvent.layout.height)}
     >
+      {side === 'below' && gap}
+      {side === 'below' && arrowView}
       <View
         onAccessibilityEscape={onClose}
         className="gap-12 self-stretch rounded-block bg-surface-strong p-16"
@@ -144,13 +164,8 @@ export function RouteTooltip({
         </View>
         <Button label={t('map.tooltip.more')} variant="inverse" isFullWidth onPress={onOpen} />
       </View>
-      <View
-        className="-mt-6 size-12 rotate-45 bg-surface-strong"
-        // Centred on its share of the width: the arrow points at the step.
-        style={{ marginLeft: arrowAt * size['tooltip-min-w'] - spacing['space-12'] / 2 }}
-      />
-      {/* The tooltip points at the step dot, tapped and so at its active size, not into it. */}
-      <View style={{ height: size['step-dot-active'] / 2 }} />
+      {side === 'above' && arrowView}
+      {side === 'above' && gap}
     </Animated.View>
   );
 }

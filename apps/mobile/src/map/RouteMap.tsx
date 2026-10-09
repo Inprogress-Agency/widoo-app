@@ -38,7 +38,14 @@ import { mapOverlayLayout, ornamentMargin } from './ornaments';
 import { routeFramePadding } from './routeFrame';
 import { SelectedRoute } from './SelectedRoute';
 import { labelFont, mapStyleJson } from './style';
-import { screenXOnFit, tooltipAnchorX, type ScreenPoint, type TooltipStep } from './tooltip';
+import {
+  screenPointOnFit,
+  tooltipAnchorX,
+  tooltipSide,
+  type ScreenPoint,
+  type TooltipSide,
+  type TooltipStep,
+} from './tooltip';
 
 /** The markers of the other routes fade out and back with a selection, `fade` (D-071). */
 const markerFade = { duration: motion.durations.fade, delay: 0 };
@@ -124,7 +131,10 @@ export function RouteMap({
   const { t } = useTranslation();
   const { fontScale, width } = useWindowDimensions();
   const [viewport, setViewport] = useState({ width: 0, height: 0 });
-  const [tooltipAnchor, setTooltipAnchor] = useState(0.5);
+  const [startTooltip, setStartTooltip] = useState<{ anchor: number; side: TooltipSide }>({
+    anchor: 0.5,
+    side: 'above',
+  });
   /**
    * Height of the tooltip of the start, measured once shown: the last one until the next. Kept
    * out of the state: on Android, rendering the map again during its first camera move left the
@@ -305,17 +315,31 @@ export function RouteMap({
       },
       ...cameraAnimation,
     });
-    const startX =
+    // Where the steps land once framed: the tooltip of the start slides sideways to stay on
+    // screen, and passes below the start rather than cover another step (D-084).
+    const points =
       'bounds' in frame
-        ? screenXOnFit(start.location, frame.bounds, { ...viewport, padding })
-        : viewport.width / 2;
-    setTooltipAnchor(
-      tooltipAnchorX(startX, {
-        screenWidth: viewport.width,
-        tooltipWidth: size['tooltip-min-w'],
-        margin: spacing['space-16'],
-      }),
-    );
+        ? route.steps.map((step) =>
+            screenPointOnFit(step.location, frame.bounds, { ...viewport, padding }),
+          )
+        : [{ x: viewport.width / 2, y: viewport.height / 2 }];
+    const [startPoint, ...others] = points;
+    const anchor = tooltipAnchorX(startPoint?.x ?? viewport.width / 2, {
+      screenWidth: viewport.width,
+      tooltipWidth: size['tooltip-min-w'],
+      margin: spacing['space-16'],
+    });
+    const side =
+      startPoint && !route.isLocked
+        ? tooltipSide(startPoint, others, {
+            width: size['tooltip-min-w'],
+            height: tooltipHeight.current,
+            anchor,
+            dotRadius: size['step-dot'] / 2,
+            roomBottom: viewport.height - sheetCover,
+          })
+        : 'above';
+    setStartTooltip({ anchor, side });
     return true;
   };
 
@@ -537,7 +561,9 @@ export function RouteMap({
           <SelectedRoute
             key={selectedRoute.id}
             route={selectedRoute}
-            tooltipAnchor={tooltipAnchor}
+            tooltipAnchor={startTooltip.anchor}
+            tooltipSide={startTooltip.side}
+            roomBottom={viewport.height - bottomInset}
             screenPointOf={screenPointOf}
             onOpen={(step) => onOpenRoute(selectedRoute, step)}
             onClose={() => onSelect(null)}
