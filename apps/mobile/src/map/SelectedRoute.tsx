@@ -1,6 +1,6 @@
 import type { RouteCard } from '@widoo/shared';
 import { colors, motion, size, spacing } from '@widoo/tokens';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, useWindowDimensions, type GestureResponderEvent } from 'react-native';
 import Animated, { FadeIn, ReduceMotion } from 'react-native-reanimated';
@@ -11,7 +11,13 @@ import { routePath, routeStops, type Stop } from './markers';
 import { RouteTooltip } from './RouteTooltip';
 import { stepLine } from './stepLine';
 import { nearestStep } from './stepTouch';
-import { tooltipAnchorX, type ScreenPoint, type TooltipStep } from './tooltip';
+import {
+  tooltipAnchorX,
+  tooltipSide,
+  type ScreenPoint,
+  type TooltipSide,
+  type TooltipStep,
+} from './tooltip';
 
 const fadeTransition = { duration: motion.durations.fade, delay: 0 };
 // A fade, kept with « Réduire les animations » (D-030).
@@ -62,12 +68,17 @@ function StepPin({ stop, label, isActive, onTap }: StepPinProps) {
 interface TappedStep {
   index: number;
   anchor: number;
+  side: TooltipSide;
 }
 
 interface SelectedRouteProps {
   route: RouteCard;
   /** Where the tooltip hangs from the start, from 0 (left edge) to 1 (right edge). */
   tooltipAnchor: number;
+  /** Side of the start the tooltip hangs on. */
+  tooltipSide: TooltipSide;
+  /** Top of the results sheet on the screen: a tooltip below its step stays above it. */
+  roomBottom: number;
   /**
    * Position of a point on the screen, from the map: a view on the map cannot measure itself
    * there.
@@ -84,14 +95,17 @@ interface SelectedRouteProps {
  * The selected route on the map (Ecrans › E-04): blue path, step dots by family and one tooltip,
  * on the start until the user taps a step, all fading in. Each tap moves the tooltip to its step,
  * which fades in there anew (M-07), and draws that step at 34 points, the others at 28; the route
- * stays selected. Close steps stay apart (D-084): a tap goes to the step closest to the finger.
- * A locked card keeps only its start, as the ink dot with the crown, not tappable. The dots of
- * this one route are views on the map, never those of every route. Mounted again for each
- * route, so that each selection fades in anew.
+ * stays selected. Close steps stay apart (D-084): a tap goes to the step closest to the finger,
+ * and a tooltip passes below its step rather than cover another one. A locked card keeps only
+ * its start, as the ink dot with the crown, not tappable. The dots of this one route are views
+ * on the map, never those of every route. Mounted again for each route, so that each selection
+ * fades in anew.
  */
 export function SelectedRoute({
   route,
   tooltipAnchor,
+  tooltipSide: startSide,
+  roomBottom,
   screenPointOf,
   onOpen,
   onClose,
@@ -101,6 +115,8 @@ export function SelectedRoute({
   const { width } = useWindowDimensions();
   const isFadedIn = useIsFadedIn();
   const [tapped, setTapped] = useState<TappedStep | null>(null);
+  /** Height of the last tooltip laid out, that of the start first: the next one is alike. */
+  const tooltipHeight = useRef(0);
   const path = routePath(route);
   const stops = routeStops(route);
   const tooltipIndex = tapped?.index ?? 0;
@@ -128,7 +144,7 @@ export function SelectedRoute({
     const chosen = closest === null ? index : (known[closest]?.at ?? index);
     const point = points[chosen];
     if (!point) {
-      setTapped({ index, anchor: 0.5 });
+      setTapped({ index, anchor: 0.5, side: 'above' });
       return;
     }
     // The tooltip slides sideways to stay on screen, as over the start.
@@ -137,7 +153,15 @@ export function SelectedRoute({
       tooltipWidth: size['tooltip-min-w'],
       margin: spacing['space-16'],
     });
-    setTapped({ index: chosen, anchor });
+    const others = known.filter(({ at }) => at !== chosen).map(({ point: other }) => other);
+    const side = tooltipSide(point, others, {
+      width: size['tooltip-min-w'],
+      height: tooltipHeight.current,
+      anchor,
+      dotRadius: size['step-dot'] / 2,
+      roomBottom,
+    });
+    setTapped({ index: chosen, anchor, side });
   };
 
   const renderStop = (stop: Stop, index: number) => {
@@ -173,6 +197,14 @@ export function SelectedRoute({
     drawOrder.push(0);
   }
 
+  const side = tapped?.side ?? startSide;
+  const handleTooltipHeight = (height: number) => {
+    tooltipHeight.current = height;
+    if (!tapped) {
+      onStartTooltipHeight?.(height);
+    }
+  };
+
   return (
     <>
       {path && (
@@ -197,10 +229,10 @@ export function SelectedRoute({
       })}
       {tooltipStop && (
         <Mapbox.MarkerView
-          // Mounted again on each step, so that the tooltip fades in from its new anchor (M-07).
-          key={`tooltip-${tooltipIndex}`}
+          // Mounted again on each step or side, so that it fades in from its new anchor (M-07).
+          key={`tooltip-${tooltipIndex}-${side}`}
           coordinate={tooltipStop.location}
-          anchor={{ x: tapped?.anchor ?? tooltipAnchor, y: 1 }}
+          anchor={{ x: tapped?.anchor ?? tooltipAnchor, y: side === 'above' ? 1 : 0 }}
           allowOverlap
           allowOverlapWithPuck
         >
@@ -209,9 +241,10 @@ export function SelectedRoute({
             isLocked={route.isLocked}
             position={tooltipIndex + 1}
             arrowAt={tapped?.anchor ?? tooltipAnchor}
+            side={side}
             onOpen={() => onOpen({ position: tooltipIndex + 1, isTapped: tapped !== null })}
             onClose={onClose}
-            onHeightChange={tapped ? undefined : onStartTooltipHeight}
+            onHeightChange={handleTooltipHeight}
           />
         </Mapbox.MarkerView>
       )}
