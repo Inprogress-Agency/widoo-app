@@ -36,7 +36,11 @@ function checkKeys(taxonomy: Taxonomy, record: Record<string, unknown>, where: s
   );
 }
 
-type TokenCheck = (group: 'colors' | 'radius' | 'shadow', name: string, where: string) => string;
+type TokenCheck = (
+  group: 'colors' | 'radius' | 'shadow' | 'size',
+  name: string,
+  where: string,
+) => string;
 
 /** Returns the name after checking that the theme has this token. */
 function tokenCheck(theme: Theme): TokenCheck {
@@ -250,7 +254,7 @@ function buildMotion({
   };
 }
 
-/** Interface icons, badges, toast, immersive page, accessibility and motion. */
+/** Interface icons, badges, toast, immersive page, map tooltip, accessibility and motion. */
 function buildInterface(mappings: Mappings, theme: Theme, token: TokenCheck) {
   const uiIcons = Object.fromEntries(
     Object.entries(mappings.uiIcons).map(([key, value]) => [key, parseUiIcon(value, theme.colors)]),
@@ -300,6 +304,8 @@ function buildInterface(mappings: Mappings, theme: Theme, token: TokenCheck) {
   token('radius', miniPlayer.radius, 'immersive.miniPlayer');
   token('shadow', miniPlayer.shadow, 'immersive.miniPlayer');
   token('shadow', toast.shadow, 'toast');
+  const { mapTooltip } = mappings;
+  token('size', mapTooltip.minWidth, 'mapTooltip.minWidth');
 
   return {
     uiIcons,
@@ -308,6 +314,7 @@ function buildInterface(mappings: Mappings, theme: Theme, token: TokenCheck) {
     accessibility: mappings.accessibility,
     toast,
     immersive,
+    mapTooltip,
     motion: buildMotion(mappings.motion),
     firstLaunch: mappings.firstLaunch,
   };

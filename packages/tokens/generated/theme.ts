@@ -1128,6 +1128,13 @@ export const immersive = {
   }
 } as const;
 
+/** Ink tooltip of the map (E-04, D-041): as wide as its title on one line, from minWidth to maxWidthRatio of the screen. */
+export const mapTooltip = {
+  "minWidth": "tooltip-min-w",
+  "maxWidthRatio": 0.8,
+  "screenMarginPx": 16
+} as const satisfies { minWidth: SizeToken; maxWidthRatio: number; screenMarginPx: number };
+
 /** Durations (ms), cubic-bezier curves, gesture spring, press feedback and haptics (D-030). */
 export const motion = {
   "durations": {

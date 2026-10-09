@@ -206,6 +206,13 @@ describe('buildMappings', () => {
       }),
       'filterIcons.budget: missing low, medium, high',
     ],
+    [
+      'a minimum width of the map tooltip that is not a size token',
+      withMappings((copy) => {
+        copy.mapTooltip.minWidth = 'tooltip-w';
+      }),
+      'mapTooltip.minWidth: unknown token « tooltip-w » in size',
+    ],
   ])('refuses %s', (_case, changed, message) => {
     expect(() => buildMappings(changed, theme)).toThrow(message);
   });
