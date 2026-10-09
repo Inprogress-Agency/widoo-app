@@ -29,6 +29,13 @@ import { isOpeningZone } from '../discovery/zone';
 import { formatDuration } from '../format/duration';
 import { clusterId, clusterPoints, clusterZoomStep } from './clusters';
 import { bboxCenter, initialSpanM, toBbox, toLngLat, zoomForSpan, type LngLat } from './geo';
+import {
+  cameraPaddingOf,
+  isSamePadding,
+  isSettledOn,
+  noPadding,
+  visibleZonePadding,
+} from './homeFrame';
 import { Mapbox } from './mapbox';
 import { RecenterButton } from './MapControls';
 import { sharedMarkerImages, usePhotoMarkerImages } from './markerImages';
@@ -42,6 +49,7 @@ import {
   screenPointOnFit,
   tooltipAnchorX,
   tooltipSide,
+  type Padding,
   type ScreenPoint,
   type TooltipSide,
   type TooltipStep,
@@ -161,6 +169,13 @@ export function RouteMap({
   const zoom = useRef(0);
   /** The last view the map settled on, told to `onViewChange`. */
   const lastView = useRef<MapView | null>(null);
+  /** Centre of the camera when the map last settled, that of its padded view. */
+  const lastCenter = useRef<LngLat | null>(null);
+  /**
+   * Padding of the last opening view put, the camera untouched since: it follows the sheet and
+   * the bar at the top until a gesture of the user or another camera move. Null otherwise.
+   */
+  const heldHome = useRef<Padding | null>(null);
   const label = durationLabel(fontScale);
   const sharedImages = useMemo(() => sharedMarkerImages(label.pillHeight), [label.pillHeight]);
   const photoImages = usePhotoMarkerImages(routes);
@@ -176,6 +191,7 @@ export function RouteMap({
   const handleCameraChanged = useCallback((state: MapState) => {
     if (state.gestures.isGestureActive) {
       isGestureMove.current = true;
+      heldHome.current = null;
     }
   }, []);
 
@@ -198,6 +214,7 @@ export function RouteMap({
         isOpened.current = true;
       }
       zoom.current = state.properties.zoom;
+      lastCenter.current = state.properties.center as LngLat;
       lastView.current = { bbox, zoom: zoom.current };
       onViewChange(lastView.current, isGestureMove.current);
       isGestureMove.current = false;
@@ -224,26 +241,50 @@ export function RouteMap({
     zoomLevel: zoomForSpan(center, initialSpanM, width),
   };
 
+  /** The opening view centred in the map left in sight, above the sheet and under the bar. */
+  const homePadding = () =>
+    visibleZonePadding({
+      viewportHeight: viewport.height,
+      topBarHeight: topInset,
+      sheetCover: bottomInset,
+    });
+  const putHome = (padding: Padding, animation: ReturnType<typeof cameraAnimationOf>) => {
+    camera.current?.setCamera({ ...home, padding: cameraPaddingOf(padding), ...animation });
+    heldHome.current = padding;
+  };
+
   /**
    * Back to the opening view. A camera already there does not move, and the map does not settle
    * again: the view it shows is told as is, so that its search still runs.
    */
   const goHome = useEffectEvent(() => {
-    camera.current?.setCamera({ ...home, ...cameraAnimationOf(isReducedMotion) });
+    const padding = homePadding() ?? noPadding;
+    const held = heldHome.current;
+    const isStill = held !== null && isSamePadding(held, padding);
+    putHome(padding, cameraAnimationOf(isReducedMotion));
     const view = lastView.current;
-    if (!view) {
+    const settledCenter = lastCenter.current;
+    if (!view || !settledCenter) {
       return;
     }
-    const [lng, lat] = bboxCenter(view.bbox);
-    const [homeLng, homeLat] = home.centerCoordinate;
-    const isHome =
-      Math.abs(lng - homeLng) < 1e-5 &&
-      Math.abs(lat - homeLat) < 1e-5 &&
-      Math.abs(view.zoom - home.zoomLevel) < 1e-2;
-    if (isHome) {
+    if (isStill && isSettledOn({ center: settledCenter, zoom: view.zoom }, home)) {
       onViewChange(view, false);
     }
   });
+
+  // The opening view stays centred in the map left in sight when the sheet changes detent or
+  // height after it, such as the rest detent around a message, or the bar at the top its layout;
+  // with the map under the sheet, it waits for the sheet to come down.
+  const followHome = useEffectEvent(() => {
+    const held = heldHome.current;
+    const padding = homePadding();
+    if (held && padding && !selectedRoute && !isSamePadding(held, padding)) {
+      putHome(padding, cameraAnimationOf(isReducedMotion));
+    }
+  });
+  useEffect(() => {
+    followHome();
+  }, [bottomInset, topInset, viewport.height]);
 
   // A framing is followed once, when it is asked for.
   const framedId = useRef<number | null>(null);
@@ -256,9 +297,12 @@ export function RouteMap({
       goHome();
       return;
     }
+    heldHome.current = null;
+    // The zone asked for fills the map view: no padding is kept from the camera before.
     camera.current?.setCamera({
       centerCoordinate: bboxCenter(framing.view.bbox),
       zoomLevel: framing.view.zoom,
+      padding: cameraPaddingOf(noPadding),
       ...cameraAnimationOf(isReducedMotion),
     });
   }, [framing, isReducedMotion]);
@@ -275,6 +319,7 @@ export function RouteMap({
     if (!start || selectedRoute) {
       return;
     }
+    heldHome.current = null;
     camera.current?.setCamera({
       centerCoordinate: toLngLat(start),
       padding: { paddingTop: 0, paddingRight: 0, paddingBottom: bottomInset, paddingLeft: 0 },
@@ -306,6 +351,7 @@ export function RouteMap({
       return false;
     }
     const padding = framePadding(sheetCover);
+    heldHome.current = null;
     camera.current?.setCamera({
       ...('bounds' in frame ? { bounds: frame.bounds } : { centerCoordinate: frame.center }),
       padding: {
@@ -394,6 +440,7 @@ export function RouteMap({
    */
   const zoomOnCluster = (cluster: RouteCluster) => {
     isGestureMove.current = true;
+    heldHome.current = null;
     camera.current?.setCamera({
       centerCoordinate: toLngLat(cluster.center),
       zoomLevel: zoom.current + clusterZoomStep,
@@ -449,7 +496,7 @@ export function RouteMap({
         // systems, and opens once it has settled there.
         onDidFinishLoadingMap={() => {
           openingCenter.current = home.centerCoordinate;
-          camera.current?.setCamera({ ...home, animationMode: 'none', animationDuration: 0 });
+          putHome(homePadding() ?? noPadding, { animationMode: 'none', animationDuration: 0 });
         }}
         onPress={() => onSelect(null)}
       >
