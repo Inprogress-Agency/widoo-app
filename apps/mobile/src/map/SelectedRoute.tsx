@@ -118,7 +118,13 @@ export function SelectedRoute({
     const step = route.steps[index];
     const category = stop.category;
     return (
-      <Mapbox.MarkerView key={stop.key} coordinate={stop.location} allowOverlap>
+      // Shown over the user's position too: a step next to the user stays on the map.
+      <Mapbox.MarkerView
+        key={stop.key}
+        coordinate={stop.location}
+        allowOverlap
+        allowOverlapWithPuck
+      >
         {category && step ? (
           <StepPin
             stop={{ ...stop, category }}
