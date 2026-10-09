@@ -35,6 +35,11 @@ $(issue 915 open type:feature 1 true)
 $(issue 916 open type:feature,status:blocked 0)
 $(issue 917 open type:feature 0)
 $(issue 918 open type:bug 3)
+$(issue 920 open type:feature 1)
+$(issue 921 open type:feature,status:blocked 0)
+$(issue 922 open type:feature 0)
+$(issue 923 open type:chore,human,status:ready 2)
+$(issue 924 open type:feature,status:ready 1)
 EOF
 )
 # Colonnes : sans Bloqués, comme le Project aujourd'hui, puis avec.
@@ -52,6 +57,10 @@ $(item 914 "À déployer")
 $(item 915 Prêts)
 $(item 916 Terminés)
 $(item 918 Prêts)
+$(item 920 Cadrage)
+$(item 921 Cadrage)
+$(item 922 Prêts)
+$(item 923 Prêts)
 EOF
 )
 without_blocked='["Cadrage","Prêts","En cours","À review","À déployer","Terminés"]'
@@ -66,18 +75,24 @@ row() { awk -F'\t' -v n="$2" '$2 == n { print $1 " " $3 " → " $4 " | " $5 " " 
 
 echo "sync-status-labels.sh — étiquettes"
 plan=$(plan_with "$with_blocked")
-check "#901 sans étiquette ni bloqueur : prêt" "$(row "$plan" 901)" "set - → status:ready | move Cadrage → Prêts"
 check "#902 déjà prêt, déjà en Prêts : rien" "$(row "$plan" 902)" "same status:ready → status:ready | same Prêts → Prêts"
 check "#903 prêt mais deux bloqueurs ouverts : bloqué" "$(row "$plan" 903)" "set status:ready → status:blocked | move Prêts → Bloqués"
 check "#904 bloqué sans bloqueur ouvert : prêt, colonne vide" "$(row "$plan" 904)" "set status:blocked → status:ready | move - → Prêts"
 check "#905 bloqué avec bloqueur : colonne seule corrigée" "$(row "$plan" 905)" "same status:blocked → status:blocked | move Prêts → Bloqués"
 check "#906 les deux étiquettes : une seule reste" "$(row "$plan" 906)" "set status:ready,status:blocked → status:ready | same Prêts → Prêts"
 check "#916 rouvert depuis Terminés : replacé" "$(row "$plan" 916)" "set status:blocked → status:ready | move Terminés → Prêts"
-check "#917 hors du Project : étiquette seule" "$(row "$plan" 917)" "set - → status:ready | no-item - → Prêts"
-check "#918 bug bloqué, Prêts : bloqué" "$(row "$plan" 918)" "set - → status:blocked | move Prêts → Bloqués"
-for n in 907 908 909 910 911; do
-  check "#$n hors règle (epic, design, needs-design, inbox, fermé) : absent du plan" "$(row "$plan" "$n")" ""
+check "#924 étiqueté, hors du Project : étiquette seule" "$(row "$plan" 924)" "set status:ready → status:blocked | no-item - → Bloqués"
+for n in 907 908 909 910 911 923; do
+  check "#$n hors règle (epic, design, needs-design, inbox, fermé, human) : absent du plan" "$(row "$plan" "$n")" ""
 done
+
+echo "sync-status-labels.sh — première étiquette : jamais tant que le ticket n'est pas sorti du Cadrage"
+check "#901 sans étiquette, en Cadrage : laissé au MANAGER" "$(row "$plan" 901)" "skip - → status:ready | skip Cadrage → Prêts"
+check "#920 sans étiquette, bloqué, en Cadrage : laissé" "$(row "$plan" 920)" "skip - → status:blocked | skip Cadrage → Bloqués"
+check "#917 sans étiquette, hors du Project : laissé" "$(row "$plan" 917)" "skip - → status:ready | skip - → Prêts"
+check "#922 sans étiquette, sorti en Prêts : prêt" "$(row "$plan" 922)" "set - → status:ready | same Prêts → Prêts"
+check "#918 bug sans étiquette, en Prêts, bloqué : bloqué" "$(row "$plan" 918)" "set - → status:blocked | move Prêts → Bloqués"
+check "#921 déjà étiqueté, en Cadrage, bloqueurs fermés : prêt" "$(row "$plan" 921)" "set status:blocked → status:ready | move Cadrage → Prêts"
 
 echo "sync-status-labels.sh — tickets en développement, jamais touchés"
 check "#912 En cours" "$(row "$plan" 912)" "keep status:ready → status:blocked | keep En cours → Bloqués"
@@ -88,9 +103,10 @@ check "#915 branche ou PR ouverte, même en Prêts" "$(row "$plan" 915)" "keep -
 echo "sync-status-labels.sh — Project sans colonne Bloqués, puis illisible"
 plan=$(plan_with "$without_blocked")
 check "#903 bloqué, colonne Bloqués absente : signalé" "$(row "$plan" 903)" "set status:ready → status:blocked | no-column Prêts → Bloqués"
-check "#901 prêt : déplacé quand même" "$(row "$plan" 901)" "set - → status:ready | move Cadrage → Prêts"
+check "#921 prêt : déplacé quand même" "$(row "$plan" 921)" "set status:blocked → status:ready | move Cadrage → Prêts"
 plan=$(plan_with none)
-check "#901 sans PROJECT_TOKEN : étiquette seule" "$(row "$plan" 901)" "set - → status:ready | no-project - → Prêts"
+check "#922 sans PROJECT_TOKEN : colonne inconnue, pas de première étiquette" "$(row "$plan" 922)" "skip - → status:ready | skip - → Prêts"
+check "#921 sans PROJECT_TOKEN : étiquette déjà posée, tenue à jour" "$(row "$plan" 921)" "set status:blocked → status:ready | no-project - → Prêts"
 check "#912 sans Project : protégé seulement par branche ou PR" "$(row "$plan" 912)" "set status:ready → status:blocked | no-project - → Bloqués"
 check "#915 sans Project : protégé par sa branche" "$(row "$plan" 915)" "keep - → status:blocked | keep - → Bloqués"
 
@@ -101,8 +117,9 @@ check "doublon retiré, voulu gardé" "$(label_edit_args status:ready,status:blo
 
 echo "sync-status-labels.sh — journal"
 summary=$(plan_with "$without_blocked" | status_summary simulation Org/repo "")
-# 7 changements et 4 conservés ; #905, déjà bloqué, n'attend que la colonne Bloqués.
-check "lignes du journal" "$(grep -c '^| \[#' <<<"$summary")" "11"
+# 8 changements et 4 conservés ; #905, déjà bloqué, n'attend que la colonne Bloqués.
+check "lignes du journal" "$(grep -c '^| \[#' <<<"$summary")" "12"
+check "tickets laissés au MANAGER comptés (#901, #917, #920)" "$(grep -c '^> 3 ticket(s) sans étiquette de statut, pas sorti(s) du Cadrage' <<<"$summary")" "1"
 check "lien du ticket" "$(grep -c '\[#903\](https://github.com/Org/repo/issues/903)' <<<"$summary")" "1"
 check "colonne absente signalée" "$(grep -c 'Colonne « Bloqués » absente du Project' <<<"$summary")" "1"
 check "conservés listés" "$(grep -c '^| \[#91[2-5]\]' <<<"$summary")" "4"
@@ -125,12 +142,16 @@ cat >"$tmp/items.json" <<'EOF'
   {"id": "I_DRAFT", "status": "Prêts", "content": {"type": "DraftIssue", "title": "brouillon"}},
   {"id": "I_902", "status": "Prêts", "content": {"type": "Issue", "number": 902, "repository": "Org/repo"}},
   {"id": "I_903", "status": "Prêts", "content": {"type": "Issue", "number": 903, "repository": "Org/repo"}},
+  {"id": "I_904", "status": "Cadrage", "content": {"type": "Issue", "number": 904, "repository": "Org/repo"}},
+  {"id": "I_905", "status": "Prêts", "content": {"type": "Issue", "number": 905, "repository": "Org/repo"}},
   {"id": "I_912", "status": "En cours", "content": {"type": "Issue", "number": 912, "repository": "Org/repo"}}]}
 EOF
 cat >"$tmp/issues.json" <<'EOF'
-[{"number": 901, "title": "Sans étiquette", "state": "open", "labels": [{"name": "type:feature"}], "issue_dependencies_summary": {"blocked_by": 0, "total_blocked_by": 3}},
+[{"number": 901, "title": "Bloqué, bloqueurs fermés, en Cadrage", "state": "open", "labels": [{"name": "type:feature"}, {"name": "status:blocked"}], "issue_dependencies_summary": {"blocked_by": 0, "total_blocked_by": 3}},
  {"number": 902, "title": "Déjà prêt", "state": "open", "labels": [{"name": "status:ready"}], "issue_dependencies_summary": {"blocked_by": 0}},
  {"number": 903, "title": "Prêt mais bloqué", "state": "open", "labels": [{"name": "status:ready"}], "issue_dependencies_summary": {"blocked_by": 2}},
+ {"number": 904, "title": "Sans étiquette, en Cadrage", "state": "open", "labels": [{"name": "type:feature"}], "issue_dependencies_summary": {"blocked_by": 0}},
+ {"number": 905, "title": "Tâche humaine", "state": "open", "labels": [{"name": "human"}, {"name": "status:ready"}], "issue_dependencies_summary": {"blocked_by": 2}},
  {"number": 912, "title": "En cours, sans branche poussée", "state": "open", "labels": [{"name": "status:ready"}], "issue_dependencies_summary": {"blocked_by": 1}},
  {"number": 915, "title": "Branche poussée", "state": "open", "labels": [], "issue_dependencies_summary": {"blocked_by": 1}},
  {"number": 919, "title": "Fermé par une PR ouverte", "state": "open", "labels": [], "issue_dependencies_summary": {"blocked_by": 0}},
@@ -165,17 +186,18 @@ run_main() { # $@ = arguments de main ; code de sortie dans $status, sortie, éc
 echo "sync-status-labels.sh — main, gh simulé"
 PROJECT_TOKEN=project-token run_main
 check "réussite" "$status" "0"
-check "écritures, chacune avec son jeton" "$(cat "$tmp/writes")" "[gh-token] issue edit 901 -R Org/repo --add-label status:ready
+check "écritures, chacune avec son jeton" "$(cat "$tmp/writes")" "[gh-token] issue edit 901 -R Org/repo --add-label status:ready --remove-label status:blocked
 [project-token] project item-edit --project-id P_1 --id I_901 --field-id F_STATUS --single-select-option-id O_PRETS
 [gh-token] issue edit 903 -R Org/repo --add-label status:blocked --remove-label status:ready
 [project-token] project item-edit --project-id P_1 --id I_903 --field-id F_STATUS --single-select-option-id O_BLOQUES"
-check "journal : la PR écartée, 6 tickets examinés" "$(grep -c '^6 ticket(s) examiné(s) : 2 étiquette(s) changée(s)' "$tmp/summary")" "1"
+check "journal : PR et tâche humaine écartées, 7 tickets examinés" "$(grep -c '^7 ticket(s) examiné(s) : 2 étiquette(s) changée(s)' "$tmp/summary")" "1"
+check "journal : #904 laissé au MANAGER" "$(grep -c '^> 1 ticket(s) sans étiquette de statut' "$tmp/summary")" "1"
 check "journal : mode appliqué" "$(grep -c '(appliqué)' "$tmp/summary")" "1"
 PROJECT_TOKEN=project-token run_main --dry-run
 check "simulation : aucune écriture" "$status $(cat "$tmp/writes")" "0 "
 check "simulation : écritures annoncées" "$(grep -c '^+ ' "$tmp/out")" "4"
 PROJECT_TOKEN="" run_main
-check "sans PROJECT_TOKEN : labels seuls, #912 sans branche touché" "$(cut -d' ' -f1-4 "$tmp/writes" | paste -sd' ' -)" "[gh-token] issue edit 901 [gh-token] issue edit 903 [gh-token] issue edit 912"
+check "sans PROJECT_TOKEN : labels déjà posés seuls, #912 sans branche touché, #904 laissé" "$(cut -d' ' -f1-4 "$tmp/writes" | paste -sd' ' -)" "[gh-token] issue edit 901 [gh-token] issue edit 903 [gh-token] issue edit 912"
 check "sans PROJECT_TOKEN : signalé" "$(grep -c 'secret PROJECT_TOKEN absent' "$tmp/summary")" "1"
 echo '{"items": [{"id": "I_OTHER", "status": "Cadrage", "content": {"type": "Issue", "number": 902, "repository": "Org/other"}}]}' >"$tmp/items.json"
 PROJECT_TOKEN=project-token run_main
