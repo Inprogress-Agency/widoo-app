@@ -137,6 +137,12 @@ export const tokensSchema = z.object({
      * First launch (E-18, D-060): the launch screen stays until the map is ready, `maxMs` at most.
      * The gradient of the W of the logo also paints the « Par Widoo » avatar (D-071).
      */
+    /** Ink tooltip of the map (E-04, D-041): from its minimum width to a share of the screen. */
+    mapTooltip: z.object({
+      minWidth: z.string(),
+      maxWidthRatio: z.number().gt(0).lte(1),
+      screenMarginPx: z.number(),
+    }),
     firstLaunch: z.object({
       logo: z.object({ stroke: z.object({ gradient: z.tuple([color, color]) }) }),
       splash: z.object({ fadeOutMs: z.number().int(), maxMs: z.number().int() }),
