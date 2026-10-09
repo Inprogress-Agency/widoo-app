@@ -165,7 +165,11 @@ export function ResultsSheet({
       failOffsetX={directionDecision}
       handleComponent={null}
       // The sheet is not one element: the handle is its adjustable part, its content is read.
+      // Without a label and a role of null, the library gives its content view « Bottom Sheet »
+      // and « adjustable », which TalkBack reads in English despite `accessible={false}`.
       accessible={false}
+      accessibilityLabel={null}
+      accessibilityRole={null}
       backgroundComponent={SheetBackground}
       // The field of the search (E-02) takes the sheet to full with the keyboard (M-04); the
       // sheet stays there when the keyboard closes, for the results to be read.
