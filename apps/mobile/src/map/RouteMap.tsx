@@ -45,7 +45,13 @@ import { mapOverlayLayout, ornamentMargin } from './ornaments';
 import { routeFramePadding } from './routeFrame';
 import { SelectedRoute } from './SelectedRoute';
 import { labelFont, mapStyleJson } from './style';
-import { screenPointOnFit, type Padding, type ScreenPoint, type TooltipStep } from './tooltip';
+import {
+  cameraOnFit,
+  screenPointOnFit,
+  type Padding,
+  type ScreenPoint,
+  type TooltipStep,
+} from './tooltip';
 
 /** The markers of the other routes fade out and back with a selection, `fade` (D-071). */
 const markerFade = { duration: motion.durations.fade, delay: 0 };
@@ -351,14 +357,14 @@ export function RouteMap({
     }
     const padding = framePadding(sheetCover);
     heldHome.current = null;
+    // A centre and a zoom rather than the bounds, which the native map fits with the padding it
+    // already has on top of this one (#305).
+    const fit = 'bounds' in frame ? cameraOnFit(frame.bounds, { ...viewport, padding }) : null;
     camera.current?.setCamera({
-      ...('bounds' in frame ? { bounds: frame.bounds } : { centerCoordinate: frame.center }),
-      padding: {
-        paddingTop: padding.top,
-        paddingRight: padding.right,
-        paddingBottom: padding.bottom,
-        paddingLeft: padding.left,
-      },
+      ...(fit ?? {
+        centerCoordinate: 'bounds' in frame ? bboxCenter(toBbox(frame.bounds)) : frame.center,
+      }),
+      padding: cameraPaddingOf(padding),
       ...cameraAnimation,
     });
     // Where the steps land once framed: the tooltip of the start is placed from them.
