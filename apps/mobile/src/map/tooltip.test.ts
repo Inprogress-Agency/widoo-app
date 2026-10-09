@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Bounds } from './geo';
-import { screenPointOnFit, tooltipAnchorX, tooltipSide } from './tooltip';
+import { cameraOnFit, screenPointOnFit, tooltipAnchorX, tooltipSide } from './tooltip';
 
 const padding = { top: 300, right: 32, bottom: 120, left: 32 };
 
@@ -35,6 +35,64 @@ describe('screenPointOnFit', () => {
       x: 200,
       y: 490,
     });
+  });
+});
+
+describe('cameraOnFit', () => {
+  const mercatorX = (lng: number) => (lng + 180) / 360;
+
+  it('zooms so that the tighter side of the bounds fills the room left by the padding', () => {
+    // A wide route: its width fills the 336 points between the side paddings.
+    const bounds: Bounds = { ne: [2.4, 48.86], sw: [2.3, 48.85] };
+    const camera = cameraOnFit(bounds, { width: 400, height: 800, padding });
+    const worldWidth = 512 * 2 ** (camera?.zoomLevel ?? 0);
+    expect(worldWidth * (mercatorX(2.4) - mercatorX(2.3))).toBeCloseTo(336, 6);
+  });
+
+  it('centres the camera on the middle of the bounds, in the projection of the map', () => {
+    const bounds: Bounds = { ne: [2.35, 48.9], sw: [2.34, 48.8] };
+    const camera = cameraOnFit(bounds, { width: 400, height: 800, padding });
+    const [lng, lat] = camera?.centerCoordinate ?? [0, 0];
+    expect(lng).toBeCloseTo(2.345, 9);
+    // North of the arithmetic mean: Mercator stretches the north.
+    expect(lat).toBeGreaterThan(48.85);
+    expect(lat).toBeLessThan(48.851);
+  });
+
+  it('puts each step where screenPointOnFit expects it, the padding of the camera given', () => {
+    const mercatorY = (lat: number) => {
+      const rad = (lat * Math.PI) / 180;
+      return (1 - Math.log(Math.tan(rad) + 1 / Math.cos(rad)) / Math.PI) / 2;
+    };
+    const bounds: Bounds = { ne: [2.36, 48.87], sw: [2.32, 48.84] };
+    const viewport = {
+      width: 411,
+      height: 914,
+      padding: { top: 413, right: 32, bottom: 398, left: 32 },
+    };
+    const camera = cameraOnFit(bounds, viewport);
+    const [centreLng, centreLat] = camera?.centerCoordinate ?? [0, 0];
+    const worldWidth = 512 * 2 ** (camera?.zoomLevel ?? 0);
+    // The map puts its centre in the middle of the padded room.
+    const room = { x: 32 + (411 - 64) / 2, y: 413 + (914 - 413 - 398) / 2 };
+    const step = { lat: 48.86, lng: 2.33 };
+    const expected = screenPointOnFit(step, bounds, viewport);
+    expect(room.x + (mercatorX(step.lng) - mercatorX(centreLng)) * worldWidth).toBeCloseTo(
+      expected.x,
+      6,
+    );
+    expect(room.y + (mercatorY(step.lat) - mercatorY(centreLat)) * worldWidth).toBeCloseTo(
+      expected.y,
+      6,
+    );
+  });
+
+  it('gives no camera for a single point or a room without height', () => {
+    const point: Bounds = { ne: [2.34, 48.86], sw: [2.34, 48.86] };
+    expect(cameraOnFit(point, { width: 400, height: 800, padding })).toBeNull();
+    const bounds: Bounds = { ne: [2.4, 48.86], sw: [2.3, 48.85] };
+    const closed = { ...padding, top: 400, bottom: 400 };
+    expect(cameraOnFit(bounds, { width: 400, height: 800, padding: closed })).toBeNull();
   });
 });
 

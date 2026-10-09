@@ -1,5 +1,5 @@
 import type { LatLng } from '@widoo/shared';
-import type { Bounds } from './geo';
+import type { Bounds, LngLat } from './geo';
 
 /** The step a tooltip of the map points at when « Voir plus » is tapped (Ecrans › E-04). */
 export interface TooltipStep {
@@ -22,6 +22,11 @@ const mercatorY = (lat: number) => {
   const rad = (lat * Math.PI) / 180;
   return (1 - Math.log(Math.tan(rad) + 1 / Math.cos(rad)) / Math.PI) / 2;
 };
+const longitudeOf = (x: number) => x * 360 - 180;
+const latitudeOf = (y: number) => (Math.atan(Math.sinh(Math.PI * (1 - 2 * y))) * 180) / Math.PI;
+
+/** Width of the world at zoom 0, in points: the Mapbox tile size (`geo.ts`). */
+const worldSizeAtZoomZero = 512;
 
 /** A point on the screen, in points from the top left corner of the map. */
 export interface ScreenPoint {
@@ -29,32 +34,72 @@ export interface ScreenPoint {
   y: number;
 }
 
+/** A map `width` by `height` wide, and the padding of the camera around the zone it frames. */
+export interface FitViewport {
+  width: number;
+  height: number;
+  padding: Padding;
+}
+
 /**
- * Where a point is on the screen, in points, once the camera fits `bounds` in a map `width` by
- * `height` wide with `padding`: the fit keeps the scale of the tighter side and centres the
- * bounds in the room left by the padding.
+ * How the camera fits `bounds` in the viewport: the scale of the tighter side, in points per
+ * world width, infinite for a single point, and the centre of the bounds, put in the middle of
+ * the room left by the padding.
  */
-export function screenPointOnFit(
-  point: LatLng,
-  bounds: Bounds,
-  { width, height, padding }: { width: number; height: number; padding: Padding },
-): ScreenPoint {
+function fitOf(bounds: Bounds, { width, height, padding }: FitViewport) {
   const [east, north] = bounds.ne;
   const [west, south] = bounds.sw;
   const roomWidth = width - padding.left - padding.right;
   const roomHeight = height - padding.top - padding.bottom;
   const spanX = mercatorX(east) - mercatorX(west);
   const spanY = mercatorY(south) - mercatorY(north);
-  const scale = Math.min(
-    spanX > 0 ? roomWidth / spanX : Infinity,
-    spanY > 0 ? roomHeight / spanY : Infinity,
-  );
-  const centreX = (mercatorX(east) + mercatorX(west)) / 2;
-  const centreY = (mercatorY(south) + mercatorY(north)) / 2;
+  return {
+    scale: Math.min(
+      spanX > 0 ? roomWidth / spanX : Infinity,
+      spanY > 0 ? roomHeight / spanY : Infinity,
+    ),
+    centreX: (mercatorX(east) + mercatorX(west)) / 2,
+    centreY: (mercatorY(south) + mercatorY(north)) / 2,
+    room: { x: padding.left + roomWidth / 2, y: padding.top + roomHeight / 2 },
+  };
+}
+
+/**
+ * Where a point is on the screen, in points, once the camera fits `bounds` in a map `width` by
+ * `height` wide with `padding` (`cameraOnFit`): the fit keeps the scale of the tighter side and
+ * centres the bounds in the room left by the padding.
+ */
+export function screenPointOnFit(
+  point: LatLng,
+  bounds: Bounds,
+  viewport: FitViewport,
+): ScreenPoint {
+  const { scale, centreX, centreY, room } = fitOf(bounds, viewport);
   const isScaled = Number.isFinite(scale);
   return {
-    x: padding.left + roomWidth / 2 + (isScaled ? (mercatorX(point.lng) - centreX) * scale : 0),
-    y: padding.top + roomHeight / 2 + (isScaled ? (mercatorY(point.lat) - centreY) * scale : 0),
+    x: room.x + (isScaled ? (mercatorX(point.lng) - centreX) * scale : 0),
+    y: room.y + (isScaled ? (mercatorY(point.lat) - centreY) * scale : 0),
+  };
+}
+
+/**
+ * Centre and zoom of the camera that fits `bounds` in the room left by the padding, as
+ * `screenPointOnFit` places the points; null for a single point, which has no zoom of its own.
+ * The camera takes them with the padding rather than the bounds: fitting bounds, the native map
+ * adds the padding the camera already has to the one given, on Android at least (#305), and the
+ * route lands elsewhere than the tooltip and the frame expect.
+ */
+export function cameraOnFit(
+  bounds: Bounds,
+  viewport: FitViewport,
+): { centerCoordinate: LngLat; zoomLevel: number } | null {
+  const { scale, centreX, centreY } = fitOf(bounds, viewport);
+  if (!Number.isFinite(scale) || scale <= 0) {
+    return null;
+  }
+  return {
+    centerCoordinate: [longitudeOf(centreX), latitudeOf(centreY)],
+    zoomLevel: Math.log2(scale / worldSizeAtZoomZero),
   };
 }
 
