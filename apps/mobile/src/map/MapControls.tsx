@@ -26,12 +26,16 @@ const pillFade = FadeIn.duration(motion.durations.fade).reduceMotion(ReduceMotio
 
 /**
  * White pill « Rechercher dans cette zone », after a move of the map: the search runs only when
- * it is pressed (Filtres-et-Recherche › Recherche par zone). Its label wraps at large text.
+ * it is pressed (Filtres-et-Recherche › Recherche par zone). A dense component: its label is
+ * capped at 1.3 times and wraps within the column of the pill rather than spill over the
+ * recenter button (#328).
  */
 export function SearchZoneButton({ onPress }: { onPress: () => void }) {
   const { t } = useTranslation();
   return (
-    <Animated.View entering={pillFade}>
+    // Centred in its column, the pill takes the width of its label: bounded by the column, the
+    // label shrinks and wraps.
+    <Animated.View entering={pillFade} className="max-w-full">
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t('map.searchZone')}
@@ -39,7 +43,7 @@ export function SearchZoneButton({ onPress }: { onPress: () => void }) {
         className="min-h-disc flex-row items-center gap-8 rounded-pill bg-bg px-16 py-10"
       >
         <Icon {...uiIcon('refresh')} color="blue" />
-        <Text variant="body-medium" className="shrink">
+        <Text variant="body-medium" isDense className="shrink">
           {t('map.searchZone')}
         </Text>
       </Pressable>
@@ -65,7 +69,7 @@ function useIsLasting(isOn: boolean, delayMs: number): boolean {
 
 /**
  * The pill of a search on its way, in place of the button: a ring and « Recherche… », after
- * 300 ms only, read out by screen readers.
+ * 300 ms only, read out by screen readers. Dense and bounded by its column, as the button.
  */
 export function SearchingPill({ isSearching }: { isSearching: boolean }) {
   const { t } = useTranslation();
@@ -88,10 +92,10 @@ export function SearchingPill({ isSearching }: { isSearching: boolean }) {
       accessibilityLabel={label}
       accessibilityLiveRegion="polite"
       accessibilityState={{ busy: true }}
-      className="min-h-disc flex-row items-center gap-8 rounded-pill bg-bg px-16 py-10"
+      className="min-h-disc max-w-full flex-row items-center gap-8 rounded-pill bg-bg px-16 py-10"
     >
       <ActivityIndicator color={colors.blue} />
-      <Text variant="body-medium" color="muted" className="shrink">
+      <Text variant="body-medium" color="muted" isDense className="shrink">
         {label}
       </Text>
     </Animated.View>
