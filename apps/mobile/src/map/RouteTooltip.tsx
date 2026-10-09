@@ -2,7 +2,7 @@ import type { RouteCard } from '@widoo/shared';
 import { size, spacing } from '@widoo/tokens';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AccessibilityInfo, Image, View, findNodeHandle } from 'react-native';
+import { AccessibilityInfo, Image, View, findNodeHandle, useWindowDimensions } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { formatDuration } from '../format/duration';
 import { Button } from '../ui/Button';
@@ -22,12 +22,16 @@ interface RouteTooltipProps {
   position: number;
   /** Position of the arrow along the tooltip, from 0 to 1: it points at the step. */
   arrowAt: number;
+  /** Its width (`tooltipWidth`); null until its title is measured, when it waits unseen. */
+  width: number | null;
+  /** Width of its title row laid out on one line, the rating included: its width follows it. */
+  onTitleRowWidth: (width: number) => void;
   /** Above its step, the arrow at the bottom, or below it, the arrow at the top (D-084). */
   side?: TooltipSide;
   onOpen: () => void;
   onClose: () => void;
   /** Its height as laid out, arrow and gap to the dot included: the map frames the route with it. */
-  onHeightChange?: (height: number) => void;
+  onHeightChange: (height: number) => void;
 }
 
 /**
@@ -35,14 +39,17 @@ interface RouteTooltipProps {
  * title and rating, the step (place name, then « Étape i/n · category · duration »), « Voir
  * plus ». Locked, the step line becomes « Parcours Premium » and the number of steps. It fades
  * in, with or without « Réduire les animations », and takes the screen reader focus as a dialog;
- * the escape gesture closes it. From 130 % of text, only the title and the rating remain. Below its
- * step, the arrow points up at it.
+ * the escape gesture closes it. From 130 % of text, only the title, on two lines at most, and the
+ * rating remain. Below its step, the arrow points up at it. Its title row is laid out once more
+ * on one line, unseen, for its width to follow it (D-041); it shows once its width is known.
  */
 export function RouteTooltip({
   route,
   isLocked,
   position,
   arrowAt,
+  width,
+  onTitleRowWidth,
   side = 'above',
   onOpen,
   onClose,
@@ -50,17 +57,22 @@ export function RouteTooltip({
 }: RouteTooltipProps) {
   const { t } = useTranslation();
   const isLargeText = useIsLargeText();
+  const { width: screenWidth } = useWindowDimensions();
+  const isShown = width !== null;
   const summary = useRef<View>(null);
   const opacity = useSharedValue(0);
   const fade = useAnimatedStyle(() => ({ opacity: opacity.get() }));
 
   useEffect(() => {
+    if (!isShown) {
+      return;
+    }
     opacity.set(withTiming(1, timing('fade', 'fade')));
     const node = findNodeHandle(summary.current);
     if (node !== null) {
       AccessibilityInfo.setAccessibilityFocus(node);
     }
-  }, [opacity]);
+  }, [opacity, isShown]);
 
   // A locked card carries its start alone: the count comes from the card, not its pins.
   const { stepCount } = route;
@@ -84,20 +96,50 @@ export function RouteTooltip({
     <View
       pointerEvents="none"
       className={`${side === 'above' ? '-mt-6' : '-mb-6'} size-12 rotate-45 bg-surface-strong`}
-      style={{ marginLeft: arrowAt * size['tooltip-min-w'] - spacing['space-12'] / 2 }}
+      style={{ marginLeft: arrowAt * (width ?? 0) - spacing['space-12'] / 2 }}
     />
   );
   // The tooltip points at the step dot, tapped and so at its active size, not into it. The gap
   // and the arrow let a tap through to the steps under them.
   const gap = <View pointerEvents="none" style={{ height: size['step-dot-active'] / 2 }} />;
 
+  // The title and the rating on one line, in a row as wide as the screen, never seen nor read.
+  const titleRow = (
+    <View
+      pointerEvents="none"
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      className="absolute opacity-0"
+      // Width of the screen, measured at runtime.
+      style={{ width: screenWidth }}
+    >
+      <View
+        className="flex-row items-start gap-8 self-start"
+        onLayout={(event) => onTitleRowWidth(event.nativeEvent.layout.width)}
+      >
+        <Text variant="title-s" numberOfLines={1}>
+          {route.title}
+        </Text>
+        <Rating rating={route.rating} variant="number-m" />
+      </View>
+    </View>
+  );
+
+  if (!isShown) {
+    return (
+      <View pointerEvents="none" style={{ width: size['tooltip-min-w'] }}>
+        {titleRow}
+      </View>
+    );
+  }
+
   return (
     <Animated.View
-      style={fade}
+      style={[fade, { width }]}
       pointerEvents="box-none"
-      className="w-tooltip-min-w"
-      onLayout={(event) => onHeightChange?.(event.nativeEvent.layout.height)}
+      onLayout={(event) => onHeightChange(event.nativeEvent.layout.height)}
     >
+      {titleRow}
       {side === 'below' && gap}
       {side === 'below' && arrowView}
       <View
@@ -116,8 +158,8 @@ export function RouteTooltip({
             <Text
               variant="title-s"
               color="on-strong"
-              // Two lines at most, but never cut at large text sizes: it is then all the tooltip.
-              numberOfLines={isLargeText ? undefined : 2}
+              // Two lines at most, at large text sizes too, the tooltip then at its widest (D-041).
+              numberOfLines={2}
               className={isLargeText ? undefined : 'flex-1'}
             >
               {route.title}

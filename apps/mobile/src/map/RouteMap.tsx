@@ -1,6 +1,6 @@
 import type { MapState } from '@rnmapbox/maps';
 import type { LatLng, RouteCard, RouteCluster } from '@widoo/shared';
-import { motion, size, spacing } from '@widoo/tokens';
+import { motion, size } from '@widoo/tokens';
 import { BottomTabBarHeightContext } from 'expo-router/tabs';
 import {
   use,
@@ -45,15 +45,7 @@ import { mapOverlayLayout, ornamentMargin } from './ornaments';
 import { routeFramePadding } from './routeFrame';
 import { SelectedRoute } from './SelectedRoute';
 import { labelFont, mapStyleJson } from './style';
-import {
-  screenPointOnFit,
-  tooltipAnchorX,
-  tooltipSide,
-  type Padding,
-  type ScreenPoint,
-  type TooltipSide,
-  type TooltipStep,
-} from './tooltip';
+import { screenPointOnFit, type Padding, type ScreenPoint, type TooltipStep } from './tooltip';
 
 /** The markers of the other routes fade out and back with a selection, `fade` (D-071). */
 const markerFade = { duration: motion.durations.fade, delay: 0 };
@@ -139,10 +131,8 @@ export function RouteMap({
   const { t } = useTranslation();
   const { fontScale, width } = useWindowDimensions();
   const [viewport, setViewport] = useState({ width: 0, height: 0 });
-  const [startTooltip, setStartTooltip] = useState<{ anchor: number; side: TooltipSide }>({
-    anchor: 0.5,
-    side: 'above',
-  });
+  /** Where the steps of the selected route land once framed, the start first. */
+  const [framedPoints, setFramedPoints] = useState<readonly ScreenPoint[]>([]);
   /**
    * Height of the tooltip of the start, measured once shown: the last one until the next. Kept
    * out of the state: on Android, rendering the map again during its first camera move left the
@@ -362,31 +352,14 @@ export function RouteMap({
       },
       ...cameraAnimation,
     });
-    // Where the steps land once framed: the tooltip of the start slides sideways to stay on
-    // screen, and passes below the start rather than cover another step (D-084).
+    // Where the steps land once framed: the tooltip of the start is placed from them.
     const points =
       'bounds' in frame
         ? route.steps.map((step) =>
             screenPointOnFit(step.location, frame.bounds, { ...viewport, padding }),
           )
         : [{ x: viewport.width / 2, y: viewport.height / 2 }];
-    const [startPoint, ...others] = points;
-    const anchor = tooltipAnchorX(startPoint?.x ?? viewport.width / 2, {
-      screenWidth: viewport.width,
-      tooltipWidth: size['tooltip-min-w'],
-      margin: spacing['space-16'],
-    });
-    const side =
-      startPoint && !route.isLocked
-        ? tooltipSide(startPoint, others, {
-            width: size['tooltip-min-w'],
-            height: tooltipHeight.current,
-            anchor,
-            dotRadius: size['step-dot'] / 2,
-            roomBottom: viewport.height - sheetCover,
-          })
-        : 'above';
-    setStartTooltip({ anchor, side });
+    setFramedPoints(points);
     return true;
   };
 
@@ -609,8 +582,7 @@ export function RouteMap({
           <SelectedRoute
             key={selectedRoute.id}
             route={selectedRoute}
-            tooltipAnchor={startTooltip.anchor}
-            tooltipSide={startTooltip.side}
+            framedPoints={framedPoints}
             roomBottom={viewport.height - bottomInset}
             screenPointOf={screenPointOf}
             onOpen={(step) => onOpenRoute(selectedRoute, step)}

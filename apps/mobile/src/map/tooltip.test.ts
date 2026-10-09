@@ -1,6 +1,13 @@
+import { mapTooltip, size } from '@widoo/tokens';
 import { describe, expect, it } from 'vitest';
 import type { Bounds } from './geo';
-import { screenPointOnFit, tooltipAnchorX, tooltipSide } from './tooltip';
+import {
+  screenPointOnFit,
+  tooltipAnchorX,
+  tooltipPlacement,
+  tooltipSide,
+  tooltipWidth,
+} from './tooltip';
 
 const padding = { top: 300, right: 32, bottom: 120, left: 32 };
 
@@ -35,6 +42,62 @@ describe('screenPointOnFit', () => {
       x: 200,
       y: 490,
     });
+  });
+});
+
+describe('tooltipWidth', () => {
+  // iPhone of the wiki, 390 wide: 312 at most (D-041).
+  const at = { screenWidth: 390, padding: 16, isLargeText: false };
+
+  it('takes the width of its title row on one line, its padding included', () => {
+    // « Montmartre sans les touristes » holds on one line at 288 (D-041).
+    expect(tooltipWidth(256, at)).toBe(288);
+  });
+
+  it('never goes under its minimum width, a short title centred in it', () => {
+    expect(size[mapTooltip.minWidth]).toBe(260);
+    expect(tooltipWidth(120, at)).toBe(260);
+  });
+
+  it('stops at 80 % of the screen, the title wrapping beyond', () => {
+    expect(tooltipWidth(400, at)).toBe(312);
+    expect(tooltipWidth(400, { ...at, screenWidth: 412 })).toBe(329);
+  });
+
+  it('rounds up, so that a title a fraction too wide does not wrap', () => {
+    expect(tooltipWidth(250.3, at)).toBe(283);
+  });
+
+  it('takes its widest at large text, measured or not', () => {
+    expect(tooltipWidth(null, { ...at, isLargeText: true })).toBe(312);
+    expect(tooltipWidth(120, { ...at, isLargeText: true })).toBe(312);
+  });
+
+  it('waits for its title to be measured otherwise', () => {
+    expect(tooltipWidth(null, at)).toBeNull();
+  });
+
+  it('keeps its minimum width on a screen too narrow for it', () => {
+    expect(tooltipWidth(400, { ...at, screenWidth: 300 })).toBe(260);
+  });
+});
+
+describe('tooltipPlacement', () => {
+  const layout = { screenWidth: 400, height: 180, dotRadius: 14, roomBottom: 700 };
+
+  it('keeps a wide tooltip on screen, its arrow on the step', () => {
+    const { anchor } = tooltipPlacement({ x: 360, y: 400 }, [], { ...layout, width: 320 });
+    // Its right edge 16 from the screen edge, its left edge on screen.
+    expect(360 + (1 - anchor) * 320).toBeCloseTo(400 - mapTooltip.screenMarginPx, 6);
+    expect(360 - anchor * 320).toBeGreaterThanOrEqual(0);
+  });
+
+  it('passes below its step when, at its width, it would cover another one above', () => {
+    // 150 left of the step: under a tooltip 320 wide centred on it, beyond one 260 wide.
+    const other = { x: 50, y: 330 };
+    const step = { x: 200, y: 400 };
+    expect(tooltipPlacement(step, [other], { ...layout, width: 320 }).side).toBe('below');
+    expect(tooltipPlacement(step, [other], { ...layout, width: 260 }).side).toBe('above');
   });
 });
 
