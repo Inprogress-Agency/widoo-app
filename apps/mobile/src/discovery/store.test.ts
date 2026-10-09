@@ -2,6 +2,7 @@ import type { RouteCard, RouteSearchResult } from '@widoo/shared';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
   activeFilterCount,
+  canRecenter,
   canSearchZone,
   createDiscoveryStore,
   focusedRoute,
@@ -48,6 +49,15 @@ const listed = (...ids: string[]): RouteSearchResult => ({
 
 const home: MapView = { bbox: { west: 2.33, south: 48.85, east: 2.37, north: 48.87 }, zoom: 13 };
 const moved: MapView = { bbox: { west: 2.35, south: 48.86, east: 2.39, north: 48.88 }, zoom: 13 };
+// Fictitious zone of the search (E-02).
+const canal = {
+  id: 'zone-canal',
+  name: 'Canal fictif',
+  kind: 'neighborhood' as const,
+  area: 'Paris 10e',
+  center: { lat: 48.871, lng: 2.365 },
+  bbox: { west: 2.345, south: 48.857, east: 2.385, north: 48.885 },
+};
 
 let store: ReturnType<typeof createDiscoveryStore>;
 
@@ -331,16 +341,6 @@ describe('sort of « Voir tout »', () => {
 });
 
 describe('zone chosen in the search (E-02)', () => {
-  // Fictitious zone.
-  const canal = {
-    id: 'zone-canal',
-    name: 'Canal fictif',
-    kind: 'neighborhood' as const,
-    area: 'Paris 10e',
-    center: { lat: 48.871, lng: 2.365 },
-    bbox: { west: 2.345, south: 48.857, east: 2.385, north: 48.885 },
-  };
-
   it('opens and closes the search, leaving the selection', () => {
     openedWith('a');
     store.getState().select('a');
@@ -381,16 +381,6 @@ describe('zone chosen in the search (E-02)', () => {
 });
 
 describe('recentre (Ecrans › E-01, D-071)', () => {
-  // Fictitious zone.
-  const canal = {
-    id: 'zone-canal',
-    name: 'Canal fictif',
-    kind: 'neighborhood' as const,
-    area: 'Paris 10e',
-    center: { lat: 48.871, lng: 2.365 },
-    bbox: { west: 2.345, south: 48.857, east: 2.385, north: 48.885 },
-  };
-
   it('searches around the user again after a search elsewhere, with no button on the way', () => {
     openedWith('a');
     store.getState().showView(moved, true);
@@ -439,5 +429,73 @@ describe('recentre (Ecrans › E-01, D-071)', () => {
     const state = store.getState();
     expect(state.filters).toEqual({ moods: ['food'] });
     expect(state.search).toMatchObject({ view: home, filters: { moods: ['food'] } });
+  });
+});
+
+describe('recentre button', () => {
+  beforeEach(() => {
+    store = createDiscoveryStore();
+  });
+
+  it('stays through a search that finds no route, without blinking', () => {
+    openedWith('a');
+    const shown = [canRecenter(store.getState())];
+    store.getState().showView(moved, true);
+    shown.push(canRecenter(store.getState()));
+    store.getState().searchZone('button');
+    expect(store.getState().status).toBe('loading');
+    shown.push(canRecenter(store.getState()));
+    store.getState().receive(searchId(), listed());
+    expect(resultsCount(store.getState().results ?? listed('x'))).toBe(0);
+    shown.push(canRecenter(store.getState()));
+    expect(shown).toEqual([true, true, true, true]);
+  });
+
+  it('stays before the first answer, and after a failed search', () => {
+    expect(canRecenter(store.getState())).toBe(true);
+    store.getState().showView(home, false);
+    expect(canRecenter(store.getState())).toBe(true);
+    store.getState().fail(searchId());
+    expect(store.getState().status).toBe('error');
+    expect(canRecenter(store.getState())).toBe(true);
+  });
+
+  it('stays offline, with or without results kept', () => {
+    store.getState().showView(home, false);
+    store.getState().goOffline(searchId(), null);
+    expect(store.getState()).toMatchObject({ status: 'offline', results: null });
+    expect(canRecenter(store.getState())).toBe(true);
+    store.getState().receive(searchId(), listed('a'));
+    store.getState().searchZone('button');
+    store.getState().goOffline(searchId(), null);
+    expect(store.getState().results?.items.map((item) => item.id)).toEqual(['a']);
+    expect(canRecenter(store.getState())).toBe(true);
+  });
+
+  it('stays over a zone chosen in the search', () => {
+    openedWith('a');
+    store.getState().chooseZone(canal, 14);
+    expect(canRecenter(store.getState())).toBe(true);
+    store.getState().receive(searchId(), listed());
+    expect(canRecenter(store.getState())).toBe(true);
+  });
+
+  it('hides while a route is selected, with the button of the zone', () => {
+    openedWith('a');
+    store.getState().showView(moved, true);
+    store.getState().select('a');
+    expect(canRecenter(store.getState())).toBe(false);
+    expect(canSearchZone(store.getState())).toBe(false);
+    store.getState().select(null);
+    expect(canRecenter(store.getState())).toBe(true);
+    expect(canSearchZone(store.getState())).toBe(true);
+  });
+
+  it('leaves only « Rechercher dans cette zone » to the network', () => {
+    openedWith('a');
+    store.getState().showView(moved, true);
+    expect(canSearchZone(store.getState(), true)).toBe(true);
+    expect(canSearchZone(store.getState(), false)).toBe(false);
+    expect(canRecenter(store.getState())).toBe(true);
   });
 });

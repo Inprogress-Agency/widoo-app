@@ -95,7 +95,7 @@ interface RouteMapProps {
   onOpenRoute: (route: RouteCard, step: TooltipStep) => void;
   /** « Rechercher dans cette zone », or the pill of a search on its way. */
   searchControl?: ReactNode;
-  /** The recentre button, hidden over the message of an empty zone (Ecrans › E-01). */
+  /** The recentre button, in every state of the map but a selection (Ecrans › E-01, D-082). */
   hasRecenter?: boolean;
   /**
    * The recentre button: the app asks for a `home` framing, and the view the map settles on is
