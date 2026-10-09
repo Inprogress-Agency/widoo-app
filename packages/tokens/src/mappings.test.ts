@@ -131,6 +131,10 @@ describe('buildMappings', () => {
     expect(mappings.firstLaunch.splash).toEqual({ fadeOutMs: 200, maxMs: 2000 });
   });
 
+  it('reads the gradient of the W of the logo, for the « Par Widoo » avatar (D-071)', () => {
+    expect(mappings.firstLaunch.logo.stroke.gradient).toEqual(['#FAF9F6', '#BFD7EA']);
+  });
+
   it('reads the press feedback and the haptics of D-030', () => {
     expect(mappings.motion.press).toEqual({
       filledVeil: { color: 'ink', opacity: 0.08 },
