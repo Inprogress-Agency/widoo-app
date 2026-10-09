@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
-import type { RouteCard, RouteSearchResult } from '@widoo/shared';
+import type { LatLng, RouteCard, RouteSearchResult } from '@widoo/shared';
 import { analytics } from '../analytics';
 import { api } from '../api/client';
 import { discoveryStore } from '../discovery/useRouteSearch';
@@ -77,11 +77,11 @@ function showZone(ids: string[]) {
   });
 }
 
-function renderList() {
+function renderList(position: LatLng | null = null) {
   return renderWithQueries(
     <SectionList
       section="nearby"
-      position={null}
+      position={position}
       onEnableLocation={() => {}}
       onBack={() => {}}
       onOpenRoute={() => {}}
@@ -92,10 +92,14 @@ function renderList() {
 const eventsNamed = (name: string) =>
   track.mock.calls.filter(([event]) => event === name).map(([, properties]) => properties);
 
-async function chooseSort(label: string) {
+async function openSort() {
   // The pinned bar may be drawn twice by FlashList: in the list and as its sticky header.
   const [pill] = screen.getAllByLabelText(/^Trier par, /);
   await fireEvent.press(pill ?? screen.getByLabelText(/^Trier par, /));
+}
+
+async function chooseSort(label: string) {
+  await openSort();
   await fireEvent.press(screen.getByRole('radio', { name: new RegExp(`^${label}, `) }));
   // The mock of the sheet never tells its dismissal: the screen comes back by hand.
   await act(async () => {
@@ -149,5 +153,29 @@ describe('SectionList analytics', () => {
       { route_id: 'a', position: 0, section: 'nearby', sheet_level: 'list', sort: 'recommended' },
       { route_id: 'b', position: 1, section: 'nearby', sheet_level: 'list', sort: 'recommended' },
     ]);
+  });
+});
+
+describe('SectionList sort sheet', () => {
+  beforeEach(() => {
+    resetDiscovery();
+  });
+
+  it('describes Recommandé without proximity when there is no position (D-071)', async () => {
+    showZone(['a']);
+    await renderList(null);
+    await openSort();
+    expect(
+      screen.getByRole('radio', { name: 'Recommandé, Qualité et contexte du moment' }),
+    ).toBeTruthy();
+  });
+
+  it('describes Recommandé with proximity around the user', async () => {
+    showZone(['a']);
+    await renderList({ lat: 48.8674, lng: 2.3636 });
+    await openSort();
+    expect(
+      screen.getByRole('radio', { name: 'Recommandé, Proximité, qualité et contexte du moment' }),
+    ).toBeTruthy();
   });
 });
