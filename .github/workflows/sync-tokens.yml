@@ -1,7 +1,8 @@
 name: Sync design tokens
 
 # Copie de tokens.json alignée sur le wiki (#139) : si le wiki a changé, ouvre ou met à jour la PR
-# « chore(tokens): synchroniser tokens.json vX depuis le wiki », thème et preset régénérés.
+# « chore(tokens): synchroniser tokens.json vX depuis le wiki », thème, preset et carte d'icônes
+# régénérés.
 on:
   schedule:
     - cron: '17 * * * *'
@@ -88,7 +89,7 @@ jobs:
           git switch --quiet -c "$BRANCH"
           git add packages/tokens
           git commit --quiet -m "chore(tokens): sync tokens.json v${version} from the wiki" \
-            -m "Copied from the wiki (design/design-system/tokens.json) by sync-tokens.yml; theme and Tailwind preset regenerated."
+            -m "Copied from the wiki (design/design-system/tokens.json) by sync-tokens.yml; theme, Tailwind preset and icon map regenerated."
 
           # Branche du robot, reconstruite depuis main à chaque version, comme celles de Dependabot.
           if git fetch --quiet --depth=1 origin "$BRANCH" 2>/dev/null \
@@ -105,7 +106,7 @@ jobs:
           cat > "$body" <<'EOF'
           ## Résultat et problème
 
-          La copie de `tokens.json` du dépôt diffère du wiki ([design/design-system/tokens.json](https://github.com/Inprogress-Agency/widoo-app/wiki/Direction-Artistique), version @VERSION@). Cette PR, ouverte par l'action « sync-tokens », la remplace par celle du wiki et régénère le thème et le preset Tailwind. Fichiers générés uniquement (`packages/tokens/generated/`).
+          La copie de `tokens.json` du dépôt diffère du wiki ([design/design-system/tokens.json](https://github.com/Inprogress-Agency/widoo-app/wiki/Direction-Artistique), version @VERSION@). Cette PR, ouverte par l'action « sync-tokens », la remplace par celle du wiki et régénère le thème (`theme.ts`), le preset Tailwind (`tailwind-preset.cjs`) et la carte d'icônes (`icons.ts`). Fichiers générés uniquement (`packages/tokens/generated/`).
 
           Refs #139
           Écrans : aucun
