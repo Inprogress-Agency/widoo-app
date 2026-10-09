@@ -199,6 +199,8 @@ export const fr = {
     recommended: {
       label: 'Recommandé',
       description: 'Proximité, qualité et contexte du moment',
+      // Without a position, the recommendation has no distance part (D-071).
+      descriptionWithoutPosition: 'Qualité et contexte du moment',
     },
     distance: { label: 'Distance', description: 'Du plus proche au plus loin' },
     duration: { label: 'Durée', description: 'Du plus court au plus long' },

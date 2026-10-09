@@ -181,7 +181,10 @@ export function SectionList({
         options={listSorts.map((value) => ({
           value,
           label: t(`sort.${value}.label`),
-          description: t(`sort.${value}.description`),
+          description:
+            value === 'recommended' && !position
+              ? t('sort.recommended.descriptionWithoutPosition')
+              : t(`sort.${value}.description`),
           unavailable:
             value === 'distance' && !position
               ? { label: t('sort.enableLocation'), onPress: onEnableLocation }
