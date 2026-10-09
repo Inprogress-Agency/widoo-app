@@ -38,7 +38,7 @@ import { mapOverlayLayout, ornamentMargin } from './ornaments';
 import { routeFramePadding } from './routeFrame';
 import { SelectedRoute } from './SelectedRoute';
 import { labelFont, mapStyleJson } from './style';
-import { screenXOnFit, tooltipAnchorX, type TooltipStep } from './tooltip';
+import { screenXOnFit, tooltipAnchorX, type ScreenPoint, type TooltipStep } from './tooltip';
 
 /** The markers of the other routes fade out and back with a selection, `fade` (D-071). */
 const markerFade = { duration: motion.durations.fade, delay: 0 };
@@ -351,13 +351,13 @@ export function RouteMap({
     }
   };
 
-  /** Where a point of the map is on the screen, in points, across; the map fills the width. */
-  const screenXOf = useCallback(async (location: LngLat) => {
+  /** Where a point of the map is on the screen, in points; the map fills its view. */
+  const screenPointOf = useCallback(async (location: LngLat): Promise<ScreenPoint> => {
     const point = await map.current?.getPointInView(location);
     if (!point) {
       throw new Error('The map is not laid out yet');
     }
-    return point[0] ?? 0;
+    return { x: point[0] ?? 0, y: point[1] ?? 0 };
   }, []);
 
   const routeOf = (id: unknown) => routes.find((route) => route.id === id);
@@ -538,7 +538,7 @@ export function RouteMap({
             key={selectedRoute.id}
             route={selectedRoute}
             tooltipAnchor={tooltipAnchor}
-            screenXOf={screenXOf}
+            screenPointOf={screenPointOf}
             onOpen={(step) => onOpenRoute(selectedRoute, step)}
             onClose={() => onSelect(null)}
             onStartTooltipHeight={handleStartTooltipHeight}

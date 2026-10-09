@@ -16,6 +16,12 @@ export interface Padding {
   left: number;
 }
 
+/** A point on the screen, in points from the top left corner of the map. */
+export interface ScreenPoint {
+  x: number;
+  y: number;
+}
+
 /** Web Mercator, as Mapbox projects: x and y from 0 to 1 across the world. */
 const mercatorX = (lng: number) => (lng + 180) / 360;
 const mercatorY = (lat: number) => {
