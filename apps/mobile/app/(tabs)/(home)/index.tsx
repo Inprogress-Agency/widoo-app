@@ -4,6 +4,7 @@ import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   activeFilterCount,
+  canRecenter,
   canSearchZone,
   focusedRoute,
   selectedRoute,
@@ -35,14 +36,15 @@ export default function HomeScreen() {
   // The home is ready once its map shows, at its centre (E-18: the launch screen until then).
   useReleaseSplash(location.status !== 'pending');
   const search = useRouteSearch();
-  const { routes, clusters, status, isEmpty, isOnline } = search;
+  const { routes, clusters, status, isOnline } = search;
   const [height, setHeight] = useState(0);
   const [topBarHeight, setTopBarHeight] = useState(0);
   const [sheetCover, setSheetCover] = useState<number | undefined>(undefined);
   const [sheetLevel, setSheetLevel] = useState<SheetLevel>('rest');
   const route = useDiscovery(selectedRoute);
   const focused = useDiscovery(focusedRoute);
-  const isSearchable = useDiscovery(canSearchZone);
+  const isSearchable = useDiscovery((state) => canSearchZone(state, isOnline));
+  const isRecenterShown = useDiscovery(canRecenter);
   const framing = useDiscovery((state) => state.framing);
   const showView = useDiscovery((state) => state.showView);
   const searchZone = useDiscovery((state) => state.searchZone);
@@ -61,7 +63,6 @@ export default function HomeScreen() {
     return <View className="flex-1 bg-surface" />;
   }
   const position = location.status === 'granted' ? location.position : null;
-  const isOffline = !isOnline || status === 'offline';
   return (
     <>
       <ModalSheetShield className="flex-1">
@@ -91,9 +92,8 @@ export default function HomeScreen() {
                   <SearchingPill isSearching={status === 'loading' && route === null} />
                 )
               }
-              // Over an empty zone, the message offers to widen it; offline, nothing can be searched:
-              // no recentre (Ecrans › E-01).
-              hasRecenter={!isEmpty && !isOffline}
+              // In every state of the map, but over a selected route (Ecrans › E-01, D-082).
+              hasRecenter={isRecenterShown}
               // Recentring searches around the user again, leaving a zone chosen in the search.
               onRecenter={leaveZone}
             />

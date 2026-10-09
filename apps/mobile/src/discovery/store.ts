@@ -191,16 +191,27 @@ export function selectedRoute(state: DiscoveryState): RouteCard | null {
 
 /**
  * « Rechercher dans cette zone »: after a manual move, or after a failed search so that the zone
- * can be searched again; never over a selected route (E-04), nor offline (E-01).
+ * can be searched again; never over a selected route (E-04), nor offline, whether a search found
+ * no network or the device has none (E-01, D-082).
  */
-export function canSearchZone(state: DiscoveryState): boolean {
+export function canSearchZone(state: DiscoveryState, isOnline = true): boolean {
   const isOffered = state.hasMoved || state.status === 'error';
   return (
     isOffered &&
+    isOnline &&
     state.search !== null &&
     state.selectedRouteId === null &&
     state.status !== 'offline'
   );
+}
+
+/**
+ * The recentre button: in every state the map shows, with or without results, while a search
+ * loads, offline or without a position, so that it never blinks on the way to an empty zone;
+ * hidden only while a route is selected (Ecrans › E-01, D-082; E-04).
+ */
+export function canRecenter(state: DiscoveryState): boolean {
+  return selectedRoute(state) === null;
 }
 
 /**
