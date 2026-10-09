@@ -46,13 +46,13 @@ jobs:
           echo "Jeton TOKENS_SYNC_TOKEN valide${expiration:+, expire le $expiration}."
 
       # Aucun jeton dans le dépôt cloné : l'installation des dépendances ne peut pas le lire.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm
