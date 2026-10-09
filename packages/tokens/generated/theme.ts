@@ -1224,6 +1224,14 @@ export const motion = {
 
 /** First launch (E-18, D-060): the launch screen fades out once the map is ready, maxMs at most. */
 export const firstLaunch = {
+  "logo": {
+    "stroke": {
+      "gradient": [
+        "#FAF9F6",
+        "#BFD7EA"
+      ]
+    }
+  },
   "splash": {
     "fadeOutMs": 200,
     "maxMs": 2000
