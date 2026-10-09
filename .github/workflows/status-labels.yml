@@ -1,7 +1,8 @@
 name: Status labels
 
-# status:ready ou status:blocked sur chaque ticket ouvert hors epic, design, needs-design et Inbox,
-# selon ses bloqueurs ouverts, et colonne Prêts ou Bloqués du Project : scripts/sync-status-labels.sh.
+# status:ready ou status:blocked sur chaque ticket ouvert hors epic, design, needs-design, Inbox et
+# tâche humaine, selon ses bloqueurs ouverts, et colonne Prêts ou Bloqués du Project. Jamais de
+# première étiquette sur un ticket encore en Cadrage : scripts/sync-status-labels.sh.
 # Chaque passage recalcule tous les tickets : un événement manqué est rattrapé au suivant.
 on:
   # Pas d'événement de workflow pour l'ajout ou le retrait d'une dépendance : la fermeture d'un
@@ -34,7 +35,7 @@ jobs:
     if: >-
       github.event_name != 'issues'
       || (github.event.action != 'labeled' && github.event.action != 'unlabeled')
-      || contains(fromJSON('["status:ready", "status:blocked", "type:epic", "type:design", "needs-design", "inbox"]'), github.event.label.name)
+      || contains(fromJSON('["status:ready", "status:blocked", "type:epic", "type:design", "needs-design", "inbox", "human"]'), github.event.label.name)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
