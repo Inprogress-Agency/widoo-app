@@ -43,13 +43,15 @@ jobs:
         with:
           persist-credentials: false
 
-      # PROJECT_TOKEN (jeton d'Ilan : Projects en lecture et écriture sur l'organisation, Issues en
-      # lecture sur widoo-app) : colonnes lues et rangées. Absent : labels seuls, et un ticket en
-      # développement n'est reconnu qu'à sa branche issue/N-… ou à sa PR ouverte.
+      # Jeton du Project : le secret PROJECT_TOKEN s'il existe, sinon TOKENS_SYNC_TOKEN, le jeton
+      # d'Ilan « widoo-sync-tokens », qui porte aussi Projects en lecture et écriture sur
+      # l'organisation et Issues en lecture sur widoo-app. Colonnes lues et rangées. Sans jeton :
+      # labels déjà posés seuls, et un ticket en développement n'est reconnu qu'à sa branche
+      # issue/N-… ou à sa PR ouverte. Le script ne s'en sert que pour les appels gh project.
       - name: Sync labels and columns
         env:
           GH_TOKEN: ${{ github.token }}
-          PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN || secrets.TOKENS_SYNC_TOKEN }}
           REPO: ${{ github.repository }}
           DRY_RUN: ${{ inputs.dry_run }}
         run: scripts/sync-status-labels.sh
