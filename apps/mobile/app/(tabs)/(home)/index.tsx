@@ -8,6 +8,7 @@ import {
   focusedRoute,
   selectedRoute,
 } from '../../../src/discovery/store';
+import { useBackClosesSelection } from '../../../src/discovery/useBackClosesSelection';
 import { useDiscovery, useRouteSearch } from '../../../src/discovery/useRouteSearch';
 import { FiltersPanel } from '../../../src/filters/FiltersPanel';
 import { QuickChips } from '../../../src/filters/QuickChips';
@@ -52,6 +53,7 @@ export default function HomeScreen() {
   const openFilters = useDiscovery((state) => state.openFilters);
   const openSearch = useDiscovery((state) => state.openSearch);
   const insets = useSafeAreaInsets();
+  useBackClosesSelection();
 
   if (location.status === 'pending') {
     // The permission dialog, or the last known position, is a moment away: the map waits for
