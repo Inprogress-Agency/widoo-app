@@ -40,6 +40,9 @@ import { SelectedRoute } from './SelectedRoute';
 import { labelFont, mapStyleJson } from './style';
 import { screenXOnFit, tooltipAnchorX, type TooltipStep } from './tooltip';
 
+/** The markers of the other routes fade out and back with a selection, `fade` (D-071). */
+const markerFade = { duration: motion.durations.fade, delay: 0 };
+
 /**
  * Camera moves take `map` (500 ms) with Mapbox easeTo, and jump with « Réduire les animations »
  * (D-030).
@@ -375,9 +378,9 @@ export function RouteMap({
   const clusterOf = (id: unknown) => clusters?.find((cluster) => clusterId(cluster) === id);
 
   // Screen readers reach the markers and the clusters as actions of the map, in the order of
-  // the results.
+  // the results; not the markers hidden while a route is selected.
   const markerActions = [
-    ...routes.map((route) => ({
+    ...(selectedRoute ? [] : routes).map((route) => ({
       name: route.id,
       label: t('map.marker', {
         title: route.title,
@@ -399,6 +402,7 @@ export function RouteMap({
       zoomOnCluster(cluster);
     }
   };
+  const markerOpacity = selectedRoute ? 0 : 1;
   const clusteredCount = clusters?.reduce((count, cluster) => count + cluster.count, 0);
 
   return (
@@ -431,13 +435,22 @@ export function RouteMap({
           id="route-markers"
           shape={markers}
           onPress={(event) => {
+            // The other markers are hidden while a route is selected: a tap there is a tap
+            // elsewhere on the map (D-071).
+            if (selectedRoute) {
+              onSelect(null);
+              return;
+            }
             const route = routeOf(event.features[0]?.properties?.routeId);
             if (route) {
               selectRoute(route);
             }
           }}
         >
-          {/* The selected route gives way to its tooltip and its steps. */}
+          {/*
+            The selected route gives way to its tooltip and its steps; the other markers fade out
+            while it is selected, so as not to cover its path, and back after (D-071).
+          */}
           <Mapbox.SymbolLayer
             id="route-marker-photos"
             filter={['!=', ['get', 'routeId'], selectedRoute?.id ?? '']}
@@ -453,6 +466,8 @@ export function RouteMap({
               iconAnchor: 'bottom',
               iconOffset: [0, photoOffsetY(label.pillHeight)],
               iconAllowOverlap: true,
+              iconOpacity: markerOpacity,
+              iconOpacityTransition: markerFade,
               symbolZOrder: 'viewport-y',
             }}
           />
@@ -477,6 +492,10 @@ export function RouteMap({
               iconTextFit: 'width',
               iconTextFitPadding: [0, label.paddingX, 0, label.paddingX],
               iconAllowOverlap: true,
+              iconOpacity: markerOpacity,
+              iconOpacityTransition: markerFade,
+              textOpacity: markerOpacity,
+              textOpacityTransition: markerFade,
               symbolZOrder: 'viewport-y',
             }}
           />
