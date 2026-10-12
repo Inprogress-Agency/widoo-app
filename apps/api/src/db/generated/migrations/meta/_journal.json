@@ -113,6 +113,13 @@
       "when": 1792121438641,
       "tag": "0015_add_admin_actions",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1792121607808,
+      "tag": "0016_add_moderation_actions",
+      "breakpoints": true
     }
   ]
 }
