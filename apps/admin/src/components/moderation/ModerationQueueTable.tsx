@@ -24,7 +24,8 @@ type ModerationQueueTableProps = {
   sort: { column: ModerationColumn; direction: SortDirection };
   onSort: (column: ModerationColumn) => void;
   /** True for a route that has been waiting for more than 72 hours. */
-  isLate: (item: ModerationQueueItem) => boolean;
+  isLate: (item: ModerationQueueItem) => boolean; /** Opens the moderation sheet of a route. */
+  onOpen: (item: ModerationQueueItem) => void;
 };
 
 const texts = messages.moderation;
@@ -37,6 +38,7 @@ export function ModerationQueueTable({
   sort,
   onSort,
   isLate,
+  onOpen,
 }: ModerationQueueTableProps) {
   const renderSortableHeader = (column: ModerationColumn, label: string, className?: string) => {
     const direction = sort.column === column ? sort.direction : null;
@@ -68,7 +70,7 @@ export function ModerationQueueTable({
           <TableSkeleton rows={8} columns={columnCount} label={messages.list.loading} />
         ) : (
           items.map((item) => (
-            <TableRow key={item.id}>
+            <TableRow key={item.id} onOpen={() => onOpen(item)}>
               <TableCell className="py-8">
                 <span className="flex flex-col">
                   <span className="text-control">{item.title}</span>
