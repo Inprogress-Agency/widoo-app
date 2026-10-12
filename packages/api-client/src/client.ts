@@ -1,4 +1,5 @@
 import {
+  AdminCounters,
   AppConfig,
   GeocodeResult,
   LegalDocument,
@@ -352,6 +353,19 @@ export function createApiClient(options: ApiClientOptions) {
     /** `GET /v1/me/export`: every data of the account, for the file of E-19 › Confidentialité. */
     exportMyData: (signal?: AbortSignal) =>
       request({ method: 'GET', path: '/v1/me/export', schema: MyDataExport, auth: true, signal }),
+
+    /**
+     * `GET /v1/admin/counters`: what waits in each section of the admin the caller opens. Team
+     * only: 403 for any other account, and without a second factor (`mfa_required`).
+     */
+    getAdminCounters: (signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: '/v1/admin/counters',
+        schema: AdminCounters,
+        auth: true,
+        signal,
+      }),
 
     /** `DELETE /v1/me`: anonymizes the account; its token is refused afterwards. */
     deleteMe: () => requestEmpty({ method: 'DELETE', path: '/v1/me', auth: true }),

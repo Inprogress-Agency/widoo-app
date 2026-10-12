@@ -31,6 +31,7 @@ export function createFirebaseVerifier(projectId: string): TokenVerifier {
           emailVerified: decoded.email_verified === true,
           name: typeof decoded.name === 'string' ? decoded.name : null,
           signInProvider: decoded.firebase.sign_in_provider,
+          secondFactor: decoded.firebase.sign_in_second_factor ?? null,
           authTime: new Date(decoded.auth_time * 1000),
         };
       } catch (error) {

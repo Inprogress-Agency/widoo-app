@@ -178,6 +178,19 @@ describe('requireAuth', () => {
     expect(response.statusCode).toBe(500);
     expect(response.body).not.toContain('fictitious outage');
   });
+
+  it('answers 403 account_suspended to a suspended account', async () => {
+    const { uid, headers } = signIn();
+    await app.inject({ url: '/v1/test/private', headers });
+    await app.db
+      .update(users)
+      .set({ suspendedAt: new Date(), suspensionReason: 'Test' })
+      .where(eq(users.firebaseUid, uid));
+
+    const response = await app.inject({ url: '/v1/test/private', headers });
+    expect(response.statusCode).toBe(403);
+    expect(ApiError.parse(response.json()).code).toBe('account_suspended');
+  });
 });
 
 describe('optionalAuth', () => {

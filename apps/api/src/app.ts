@@ -18,6 +18,7 @@ import { localGeocoder } from './geocode/local';
 import { createMapboxGeocoder } from './geocode/mapbox';
 import { loggerOptions, requestIdOf, type LogStream } from './logger';
 import { parseQueryString } from './query-string';
+import { adminRoutes } from './routes/admin';
 import { configRoutes } from './routes/config';
 import { editorRoutes } from './routes/editor';
 import { geocodeRoutes } from './routes/geocode';
@@ -132,7 +133,7 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   app.addHook('onClose', async () => {
     await sql.end({ timeout: 5 });
   });
-  registerAuth(app, tokenVerifier);
+  registerAuth(app, tokenVerifier, { isSecondFactorRequired: !config.usesAuthEmulator });
 
   if (!config.isProduction) {
     await registerDocs(app);
@@ -144,6 +145,7 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   await app.register(meRoutes, { prefix: '/v1' });
   await app.register(meExportRoutes, { prefix: '/v1' });
   await app.register(plannedRoutesPlugin, { prefix: '/v1' });
+  await app.register(adminRoutes, { prefix: '/v1' });
   await app.register(searchRoutesPlugin, { prefix: '/v1' });
   await app.register(routeRatingsPlugin, { prefix: '/v1' });
   await app.register(routeSheetRoutes, {
