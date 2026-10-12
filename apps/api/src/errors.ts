@@ -20,14 +20,16 @@ const codeByStatus: Partial<Record<number, ApiErrorCode>> = {
 /**
  * A client error the handler sends as is: `statusCode`, its `ApiError` code and `message`
  * (400 is `validation_error`). `code` replaces the code of the status when the wiki names a
- * finer one (`mfa_required`, `account_suspended`).
+ * finer one (`mfa_required`, `account_suspended`); `details` goes to the body as it is, so it
+ * only ever holds what the caller may read.
  */
 export function httpError(
   statusCode: 400 | 401 | 403 | 404 | 409,
   message: string,
   code?: ApiErrorCode,
+  details?: Record<string, unknown>,
 ) {
-  return Object.assign(new Error(message), { statusCode, apiCode: code });
+  return Object.assign(new Error(message), { statusCode, apiCode: code, apiDetails: details });
 }
 
 /**
@@ -55,6 +57,12 @@ export function loggableError(error: Error): Error {
 function apiCodeOf(error: object): ApiErrorCode | undefined {
   const code = 'apiCode' in error ? error.apiCode : undefined;
   return apiErrorCodes.find((known) => known === code);
+}
+
+/** The details given to `httpError`, as the `details` of the body. */
+function apiDetailsOf(error: object): Pick<ApiError, 'details'> {
+  const details = 'apiDetails' in error ? error.apiDetails : undefined;
+  return details && typeof details === 'object' ? { details: { ...details } } : {};
 }
 
 /**
@@ -85,6 +93,7 @@ export function registerErrorHandling(app: FastifyInstance): void {
       const body: ApiError = {
         code: apiCodeOf(error) ?? codeByStatus[status] ?? 'validation_error',
         message: error.message,
+        ...apiDetailsOf(error),
       };
       return reply.status(status).send(body);
     }
