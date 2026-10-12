@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatFullDate, formatRelativeDate } from './dates';
+import { formatDuration, formatFullDate, formatRelativeDate, formatWaitingTime } from './dates';
 
 const now = new Date('2026-10-12T10:00:00Z');
 const ago = (ms: number) => new Date(now.getTime() - ms);
@@ -28,5 +28,28 @@ describe('formatFullDate', () => {
   it('writes the day and the time of Paris', () => {
     // 06:12 UTC is 08:12 in Paris in October (UTC+2).
     expect(formatFullDate(new Date('2026-10-08T06:12:00Z'))).toBe('jeudi 8 octobre à 8:12');
+  });
+});
+
+describe('formatWaitingTime', () => {
+  it.each([
+    [20 * minute, '20 min'],
+    [9 * hour, '9 h'],
+    [day + 22 * hour, '1 j 22 h'],
+    [3 * day + 4 * hour + 10 * minute, '3 j 4 h'],
+    [2 * day, '2 j'],
+  ])('says %i ms of waiting as « %s »', (elapsed, expected) => {
+    expect(formatWaitingTime(ago(elapsed), now)).toBe(expected);
+  });
+});
+
+describe('formatDuration', () => {
+  it.each([
+    [45, '45 min'],
+    [420, '7 h'],
+    [270, '4 h 30'],
+    [185, '3 h 05'],
+  ])('says %i minutes as « %s »', (minutes, expected) => {
+    expect(formatDuration(minutes)).toBe(expected);
   });
 });

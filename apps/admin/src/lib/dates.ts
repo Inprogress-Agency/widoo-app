@@ -43,3 +43,31 @@ export function formatRelativeDate(date: Date, now = new Date()): string {
 export function formatFullDate(date: Date): string {
   return fullDate.format(date);
 }
+
+/**
+ * How long something has been waiting, as a queue shows it: « 20 min », « 9 h », « 1 j 22 h »,
+ * « 3 j 4 h ».
+ */
+export function formatWaitingTime(since: Date, now = new Date()): string {
+  const elapsed = Math.max(0, now.getTime() - since.getTime());
+  if (elapsed < hour) {
+    return `${Math.floor(elapsed / minute)} min`;
+  }
+  const hours = Math.floor((elapsed % day) / hour);
+  if (elapsed < day) {
+    return `${hours} h`;
+  }
+  const days = Math.floor(elapsed / day);
+  return hours > 0 ? `${days} j ${hours} h` : `${days} j`;
+}
+
+/** A duration in minutes as a route shows it: « 45 min », « 7 h », « 4 h 30 ». */
+export function formatDuration(minutes: number): string {
+  if (minutes < 60) {
+    return `${minutes} min`;
+  }
+  const rest = minutes % 60;
+  return rest > 0
+    ? `${Math.floor(minutes / 60)} h ${String(rest).padStart(2, '0')}`
+    : `${minutes / 60} h`;
+}
