@@ -13,14 +13,16 @@ type AdminShellProps = {
 /** Frame of every page of the admin: navigation on the left, header, then the page. */
 export function AdminShell({ sidebar, title, account, children }: AdminShellProps) {
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen overflow-hidden">
       {sidebar}
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex h-header shrink-0 items-center justify-between gap-16 border-b border-border px-24">
           <h1 className="min-w-0 truncate text-title-l">{title}</h1>
           {account}
         </header>
-        <main className="flex-1 overflow-y-auto p-24">{children}</main>
+        {/* `relative`: what is hidden for screen readers only (`sr-only`) is positioned inside the
+            scrolling area, not under the page, which would let the whole window scroll. */}
+        <main className="relative flex-1 overflow-y-auto p-24">{children}</main>
       </div>
     </div>
   );
