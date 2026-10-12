@@ -1,3 +1,5 @@
+import { adminLateAfterHours } from '@widoo/shared';
+
 // Wiki Admin-Web › Modèles communs: relative up to 7 days, then absolute; Paris time.
 const timeZone = 'Europe/Paris';
 const minute = 60_000;
@@ -70,4 +72,9 @@ export function formatDuration(minutes: number): string {
   return rest > 0
     ? `${Math.floor(minutes / 60)} h ${String(rest).padStart(2, '0')}`
     : `${minutes / 60} h`;
+}
+
+/** True when something has been waiting since `since` for more than 72 hours (wiki Admin-Web). */
+export function isWaitingLate(since: Date, now = new Date()): boolean {
+  return now.getTime() - since.getTime() > adminLateAfterHours * hour;
 }

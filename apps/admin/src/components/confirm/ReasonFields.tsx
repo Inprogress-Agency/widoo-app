@@ -12,6 +12,9 @@ type ReasonFieldsProps = {
   onReasonCodeChange: (code: string) => void;
   detail: string;
   onDetailChange: (detail: string) => void;
+  /** Label and help of the detail when it is not a note for the team: a message to an author. */
+  detailLabel?: string;
+  detailHint?: string;
 };
 
 /**
@@ -25,6 +28,8 @@ export function ReasonFields({
   onReasonCodeChange,
   detail,
   onDetailChange,
+  detailLabel = messages.confirm.detail,
+  detailHint = messages.confirm.detailHint,
 }: ReasonFieldsProps) {
   const texts = messages.confirm;
   return (
@@ -46,10 +51,11 @@ export function ReasonFields({
           ))}
         </Select>
       </Field>
-      <Field label={texts.detail} htmlFor={`${id}-detail`} isRequired hint={texts.detailHint}>
+      <Field label={detailLabel} htmlFor={`${id}-detail`} isRequired hint={detailHint}>
         <Textarea
           id={`${id}-detail`}
           required
+          maxLength={1000}
           aria-describedby={`${id}-detail-hint`}
           value={detail}
           onChange={(event) => onDetailChange(event.target.value)}
