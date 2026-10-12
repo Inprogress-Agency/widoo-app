@@ -23,11 +23,16 @@ type ConfirmDialogProps = {
   confirmLabel: string;
   /** The action is running: the buttons wait for its answer. */
   isBusy?: boolean;
+  /**
+   * `destructive` (default): the red button of an action that removes or refuses. `primary`: an
+   * action that asks for a text without destroying anything (a message to an author).
+   */
+  confirmVariant?: 'destructive' | 'primary';
 };
 
 /**
- * Confirmation of a destructive action (wiki Ecrans › Admin web, « Confirmation »): a window on
- * a veil, the only place where a button is red. Its fields are a form: required ones block the
+ * Confirmation of an action that needs a reason or a message (wiki Ecrans › Admin web,
+ * « Confirmation »): a window on a veil, the only place where a button is red. Its fields are a form: required ones block the
  * confirmation by themselves.
  */
 export function ConfirmDialog({
@@ -41,6 +46,7 @@ export function ConfirmDialog({
   closeLabel,
   confirmLabel,
   isBusy = false,
+  confirmVariant = 'destructive',
 }: ConfirmDialogProps) {
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -70,7 +76,7 @@ export function ConfirmDialog({
               <Button variant="secondary" onClick={onCancel}>
                 {cancelLabel}
               </Button>
-              <Button type="submit" variant="destructive" disabled={isBusy}>
+              <Button type="submit" variant={confirmVariant} disabled={isBusy}>
                 {confirmLabel}
               </Button>
             </div>
