@@ -3,6 +3,7 @@ import {
   ApiError,
   ModerationDecision,
   ModerationQueue,
+  ModerationRouteDetail,
   type RouteStatus,
   type UserRole,
 } from '@widoo/shared';
@@ -287,5 +288,60 @@ describe('decisions', () => {
     expect(history).toHaveLength(1);
     const journal = await app.db.select().from(adminActions).where(eq(adminActions.targetId, id));
     expect(journal).toHaveLength(1);
+  });
+});
+
+describe('GET /v1/admin/routes/:id', () => {
+  const sheet = (headers: Record<string, string>, id: string) =>
+    app.inject({ url: `/v1/admin/routes/${id}`, headers });
+
+  it('gives the route as it will be published, its author and its place in the queue', async () => {
+    const moderator = await signIn('moderator');
+    const id = await addRoute('pending', 200, 'Fiche');
+
+    const response = await sheet(moderator.headers, id);
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['cache-control']).toBe('no-store');
+    const route = ModerationRouteDetail.parse(response.json());
+    expect(route).toMatchObject({
+      id,
+      status: 'pending',
+      isRevision: false,
+      author: { id: authorId, firstName: 'Camille', isCertified: false },
+    });
+    expect(route.title).toContain('Fiche');
+    expect(route.premiumMinSteps).toBe(4);
+    expect(route.revisionChanges).toEqual([]);
+    expect(route.author?.reportsReceivedCount).toBe(0);
+    expect(route.isPremiumComputed).toBe(route.steps.length >= 4);
+    expect(route.queue?.position).toBeGreaterThanOrEqual(1);
+    expect(route.queue?.total).toBeGreaterThanOrEqual(route.queue?.position ?? 0);
+  });
+
+  it('keeps the history of the decisions, the most recent first', async () => {
+    const moderator = await signIn('moderator');
+    const id = await addRoute('pending');
+    await decide(moderator.headers, id, 'reject', refusal);
+
+    const route = ModerationRouteDetail.parse((await sheet(moderator.headers, id)).json());
+    expect(route.status).toBe('rejected');
+    expect(route.queue).toBeNull();
+    expect(route.history).toMatchObject([{ action: 'reject', ...refusal }]);
+  });
+
+  it('counts what the author already published and was refused', async () => {
+    const moderator = await signIn('moderator');
+    const id = await addRoute('pending');
+    const { author } = ModerationRouteDetail.parse((await sheet(moderator.headers, id)).json());
+    expect(author?.publishedRouteCount).toBeGreaterThanOrEqual(1);
+    expect(author?.rejectedRouteCount).toBeGreaterThanOrEqual(1);
+  });
+
+  it('answers 404 for a route that does not exist, and 403 to an editor', async () => {
+    const moderator = await signIn('moderator');
+    const editor = await signIn('editor');
+    const id = await addRoute('pending');
+    expect((await sheet(moderator.headers, uuidv7())).statusCode).toBe(404);
+    expect((await sheet(editor.headers, id)).statusCode).toBe(403);
   });
 });

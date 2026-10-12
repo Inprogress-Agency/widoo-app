@@ -2,6 +2,7 @@ import {
   ModerationDecision,
   ModerationQueue,
   ModerationQueueQuery,
+  ModerationRouteDetail,
   RejectionBody,
   RequestChangesBody,
 } from '@widoo/shared';
@@ -10,6 +11,7 @@ import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { httpError } from '../errors';
 import { decideRoute } from '../moderation/decisions';
+import { readModerationRoute } from '../moderation/detail';
 import { readModerationQueue } from '../moderation/queue';
 
 const security = [{ firebaseIdToken: [] }];
@@ -47,6 +49,26 @@ export const adminModerationRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (request) => readModerationQueue(app.db, request.query),
+  );
+
+  app.get(
+    '/admin/routes/:id',
+    {
+      schema: {
+        tags,
+        summary: 'Moderation sheet of a route',
+        security,
+        params: RouteParams,
+        response: { 200: ModerationRouteDetail },
+      },
+    },
+    async (request) => {
+      const route = await readModerationRoute(app.db, request.params.id);
+      if (!route) {
+        throw httpError(404, 'Route not found');
+      }
+      return route;
+    },
   );
 
   app.post(
