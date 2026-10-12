@@ -11,9 +11,11 @@ export {
 } from './components/DropdownMenu';
 export { Field } from './components/Field';
 export { FilterChip } from './components/FilterChip';
+export { FilterMenu, type FilterMenuOption } from './components/FilterMenu';
 export { Input, Label } from './components/Input';
 export { Notice } from './components/Notice';
 export { Pagination } from './components/Pagination';
+export { SearchInput } from './components/SearchInput';
 export { Select } from './components/Select';
 export { SortableColumnHeader, type SortDirection } from './components/SortableColumnHeader';
 export { StatusBadge } from './components/StatusBadge';
