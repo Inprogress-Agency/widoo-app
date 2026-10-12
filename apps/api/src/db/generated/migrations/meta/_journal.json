@@ -120,6 +120,13 @@
       "when": 1792411544768,
       "tag": "0016_add_route_unpublished_at",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792468952015,
+      "tag": "0017_add_admin_actions",
+      "breakpoints": true
     }
   ]
 }

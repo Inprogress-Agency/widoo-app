@@ -195,6 +195,9 @@ export const users = pgTable(
     createdAt: createdAt(),
     /** Soft delete, then purge (wiki Securite-et-RGPD). */
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
+    /** Set by the team (A-06): the account is refused everywhere, its routes stay published. */
+    suspendedAt: timestamp('suspended_at', { withTimezone: true }),
+    suspensionReason: text('suspension_reason'),
   },
   (t) => [
     uniqueIndex('users_firebase_uid_active_idx')
@@ -679,6 +682,34 @@ export const routeUnlocks = pgTable(
   (t) => [
     primaryKey({ name: 'route_unlocks_pkey', columns: [t.userId, t.routeId] }),
     index('route_unlocks_route_idx').on(t.routeId),
+  ],
+);
+
+/**
+ * Journal of every write made from the admin (A-12, D-085): who, what, on what, the state before
+ * and after, and why. Rows are only ever inserted. `moderation_actions` stays the history of a
+ * route; this one covers every kind of target.
+ */
+export const adminActions = pgTable(
+  'admin_actions',
+  {
+    id: id(),
+    /** Kept when the account of the actor is purged: the journal outlives it. */
+    actorId: uuid('actor_id').references(() => users.id, { onDelete: 'set null' }),
+    /** Stable name of the action: `route.publish`, `place.close`, `user.suspend`... */
+    action: text('action').notNull(),
+    /** Kind of the target (`route`, `place`, `user`, `setting`...) and its identifier. */
+    targetType: text('target_type').notNull(),
+    targetId: text('target_id').notNull(),
+    before: jsonb('before'),
+    after: jsonb('after'),
+    reason: text('reason'),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index('admin_actions_created_at_idx').on(t.createdAt),
+    index('admin_actions_target_idx').on(t.targetType, t.targetId),
+    index('admin_actions_actor_idx').on(t.actorId),
   ],
 );
 
