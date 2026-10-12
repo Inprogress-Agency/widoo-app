@@ -30,6 +30,11 @@ const roles: Record<TeamRole, string> = {
   admin: 'Admin',
 };
 
+/** Title of a page when it differs from the entry of its section in the navigation. */
+const pageTitles: Partial<Record<AdminSection, string>> = {
+  moderation: 'File de modération',
+};
+
 /**
  * Where « Reconnectez-vous pour revenir… » sends back, after « revenir » (A-01, session expirée).
  */
@@ -61,6 +66,7 @@ const counted: Record<CountedAdminSection, (count: number) => string> = {
 export const messages = {
   app: { name: 'Widoo', product: 'Admin', title: 'Admin Widoo' },
   sections,
+  pageTitles,
   roles,
   shell: {
     navigation: 'Navigation principale',
@@ -149,12 +155,52 @@ export const messages = {
     close: 'Fermer',
   },
   list: {
+    range: (first: number, last: number, total: number) => `${first} à ${last} sur ${total}`,
     loading: 'Chargement de la liste',
     pages: 'Pages de la liste',
     previous: 'Précédent',
     next: 'Suivant',
     error: "La liste n'a pas pu être chargée.",
     retry: 'Réessayer',
+  },
+  moderation: {
+    search: 'Rechercher un titre ou un auteur',
+    total: (count: number) => `${count} parcours`,
+    filters: {
+      label: 'Filtres de la file',
+      pending: 'En relecture',
+      changesRequested: 'Modifications demandées',
+      late: 'Plus de 72 h',
+      revisions: 'Révisions',
+      city: 'Ville',
+    },
+    columns: {
+      route: 'Parcours',
+      author: 'Auteur',
+      city: 'Ville',
+      content: 'Contenu',
+      warnings: 'Alertes',
+      unverified: 'Non vérifiés',
+      waiting: 'En file',
+    },
+    firstSubmission: 'Première soumission',
+    revision: 'Révision',
+    toFix: 'À corriger',
+    certified: 'créateur certifié',
+    noAuthor: 'Compte supprimé',
+    content: (steps: number, duration: string | null) =>
+      `${steps} ${steps > 1 ? 'étapes' : 'étape'}${duration ? `, ${duration}` : ''}`,
+    warnings: (count: number) => (count > 1 ? `${count} alertes` : '1 alerte'),
+    noWarning: 'Aucune',
+    unverified: (count: number) => (count > 1 ? `${count} lieux` : '1 lieu'),
+    noUnverified: 'Aucun',
+    late: 'en retard',
+    empty: {
+      title: 'La file est vide',
+      text: 'Aucun parcours à relire pour le moment.',
+      filteredTitle: 'Aucun parcours ne correspond',
+      filteredText: 'Modifiez la recherche ou les filtres.',
+    },
   },
   notFound: {
     title: 'Page introuvable',
