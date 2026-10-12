@@ -11,6 +11,10 @@ export const apiErrorCodes = [
   'coherence_blocked',
   'quota_exceeded',
   'premium_required',
+  /** 403 on `/admin/*`: the session was opened without a second factor (D-087). */
+  'mfa_required',
+  /** 403 everywhere: the account was suspended by the team (wiki Admin-Web › A-06). */
+  'account_suspended',
   'internal_error',
 ] as const;
 
