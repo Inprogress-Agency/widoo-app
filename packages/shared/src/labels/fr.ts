@@ -97,4 +97,13 @@ export const fr = {
     activity: 'Activité',
     other: 'Autre',
   },
+  rejectionReasons: {
+    not_a_route: 'Pas un vrai parcours',
+    place_invalid: 'Lieu invalide',
+    description_insufficient: 'Description insuffisante',
+    photos_invalid: 'Photos non conformes',
+    promotional: 'Contenu promotionnel',
+    policy_violation: 'Contenu interdit',
+    duplicate: 'Doublon',
+  },
 } as const satisfies TaxonomyLabels;
