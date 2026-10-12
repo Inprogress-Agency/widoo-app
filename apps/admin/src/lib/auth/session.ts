@@ -1,3 +1,4 @@
+import { ApiRequestError } from '@widoo/api-client';
 import { isTeamRole, type Me, type TeamRole } from '@widoo/shared';
 
 /** The member of the team who is signed in, as the shell shows it. */
@@ -38,13 +39,18 @@ export function sessionOfAccount(account: Pick<Me, 'firstName' | 'email' | 'role
 }
 
 /**
- * Reads the account of the person who just signed in and decides its session. An API that does
- * not answer, or answers anything unexpected, lets nobody in.
+ * Reads the account of the person who just signed in and decides its session. A suspended
+ * account is refused by the API itself (403 `account_suspended`). An API that does not answer,
+ * or answers anything unexpected, lets nobody in.
  */
 export async function readSession(api: { getMe: () => Promise<Me> }): Promise<Session> {
   try {
     return sessionOfAccount(await api.getMe());
-  } catch {
+  } catch (error) {
+    if (error instanceof ApiRequestError && error.code === 'account_suspended') {
+      // The API tells nothing of a suspended account, its address included.
+      return { status: 'signedOut', refusal: { reason: 'suspended', email: null } };
+    }
     return { status: 'unavailable' };
   }
 }

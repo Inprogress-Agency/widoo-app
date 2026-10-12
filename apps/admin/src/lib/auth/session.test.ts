@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ApiRequestError } from '@widoo/api-client';
 import type { Me } from '@widoo/shared';
 import { readSession, sessionOfAccount } from './session';
 
@@ -35,6 +36,17 @@ describe('readSession', () => {
     await expect(readSession({ getMe: async () => me('user') })).resolves.toMatchObject({
       status: 'signedOut',
       refusal: { reason: 'noAccess' },
+    });
+  });
+
+  it('refuses the account the API says is suspended', async () => {
+    const getMe = async () => {
+      const body = { code: 'account_suspended' as const, message: 'Account suspended' };
+      throw new ApiRequestError('http', 403, body);
+    };
+    await expect(readSession({ getMe })).resolves.toEqual({
+      status: 'signedOut',
+      refusal: { reason: 'suspended', email: null },
     });
   });
 
