@@ -22,10 +22,15 @@ const codeByStatus: Partial<Record<number, ApiErrorCode>> = {
 
 /**
  * A client error the handler sends as is: `statusCode`, its `ApiError` code and `message`
- * (400 is `validation_error`).
+ * (400 is `validation_error`). `code` replaces the code of the status when the wiki names a
+ * finer one (`mfa_required`, `account_suspended`).
  */
-export function httpError(statusCode: 400 | 401 | 403 | 404 | 409, message: string) {
-  return Object.assign(new Error(message), { statusCode });
+export function httpError(
+  statusCode: 400 | 401 | 403 | 404 | 409,
+  message: string,
+  code?: ApiErrorCode,
+) {
+  return Object.assign(new Error(message), { statusCode, apiCode: code });
 }
 
 /**

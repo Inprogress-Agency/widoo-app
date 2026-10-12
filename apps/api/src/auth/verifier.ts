@@ -10,6 +10,11 @@ export type VerifiedIdentity = {
   /** `firebase.sign_in_provider`: `apple.com`, `google.com`, `password`, `anonymous`... */
   signInProvider: string;
   /**
+   * `firebase.sign_in_second_factor` (`totp`, `phone`): the second factor this session was opened
+   * with, null without one. The admin requires one (D-087).
+   */
+  secondFactor: string | null;
+  /**
    * `auth_time`: when the user signed in, kept by every refresh of the token. A session opened
    * before the deletion of the account is refused; a later sign-in gets a new account (D-027).
    */
