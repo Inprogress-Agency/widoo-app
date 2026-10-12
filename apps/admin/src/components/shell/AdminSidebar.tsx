@@ -1,5 +1,5 @@
 import { messages } from '@/messages/fr';
-import { SidebarSimpleIcon } from '@phosphor-icons/react';
+import { SidebarSimpleIcon } from '@phosphor-icons/react/dist/ssr';
 import { cn } from '@widoo/ui';
 import type { AdminSection } from '@widoo/shared';
 import Link from 'next/link';
