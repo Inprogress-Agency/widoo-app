@@ -110,6 +110,22 @@ export const messages = {
     },
     retry: 'Réessayer',
   },
+  confirm: {
+    reason: 'Motif',
+    chooseReason: 'Choisir un motif',
+    detail: 'Précision',
+    detailHint: "Gardée dans le journal, visible par l'équipe.",
+    cancel: 'Annuler',
+    close: 'Fermer',
+  },
+  list: {
+    loading: 'Chargement de la liste',
+    pages: 'Pages de la liste',
+    previous: 'Précédent',
+    next: 'Suivant',
+    error: "La liste n'a pas pu être chargée.",
+    retry: 'Réessayer',
+  },
   notFound: {
     title: 'Page introuvable',
     text: "Cette adresse n'existe pas dans l'admin.",
