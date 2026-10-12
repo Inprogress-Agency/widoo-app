@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { formatDuration, formatFullDate, formatRelativeDate, formatWaitingTime } from './dates';
+import {
+  formatDuration,
+  formatFullDate,
+  formatRelativeDate,
+  formatWaitingTime,
+  isWaitingLate,
+} from './dates';
 
 const now = new Date('2026-10-12T10:00:00Z');
 const ago = (ms: number) => new Date(now.getTime() - ms);
@@ -51,5 +57,12 @@ describe('formatDuration', () => {
     [185, '3 h 05'],
   ])('says %i minutes as « %s »', (minutes, expected) => {
     expect(formatDuration(minutes)).toBe(expected);
+  });
+});
+
+describe('isWaitingLate', () => {
+  it('is late after 72 hours, not before', () => {
+    expect(isWaitingLate(ago(72 * hour + minute), now)).toBe(true);
+    expect(isWaitingLate(ago(71 * hour), now)).toBe(false);
   });
 });
