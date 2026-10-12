@@ -6,6 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  InitialAvatar,
 } from '@widoo/ui';
 
 type AccountMenuProps = {
@@ -25,12 +26,7 @@ export function AccountMenu({ name, email, roleLabel, onSignOut }: AccountMenuPr
         aria-label={`${messages.shell.account} : ${name}, ${roleLabel}`}
         className="flex min-h-touch-min shrink-0 items-center gap-10 rounded-pill bg-secondary py-4 pl-6 pr-12 text-left"
       >
-        <span
-          aria-hidden
-          className="flex size-avatar-m items-center justify-center rounded-pill bg-blue-soft text-label-strong text-blue-ink"
-        >
-          {name.charAt(0).toUpperCase()}
-        </span>
+        <InitialAvatar name={name} />
         {/* Below 640 px the initial alone: the name and the role stay in the label and the menu. */}
         <span className="hidden flex-col sm:flex">
           <span className="text-control">{name}</span>
