@@ -1,3 +1,4 @@
+export * from './admin-sections';
 export * from './analytics';
 export * from './app-version';
 export { arrondissementLabel } from './arrondissement';
