@@ -17,6 +17,7 @@ import { createMapboxGeocoder } from './geocode/mapbox';
 import { loggerOptions, requestIdOf, type LogStream } from './logger';
 import { parseQueryString } from './query-string';
 import { adminRoutes } from './routes/admin';
+import { adminModerationRoutes } from './routes/admin-moderation';
 import { configRoutes } from './routes/config';
 import { geocodeRoutes } from './routes/geocode';
 import { healthRoutes } from './routes/health';
@@ -111,6 +112,7 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   await app.register(configRoutes, { prefix: '/v1', minAppVersion: config.minAppVersion });
   await app.register(meRoutes, { prefix: '/v1' });
   await app.register(adminRoutes, { prefix: '/v1' });
+  await app.register(adminModerationRoutes, { prefix: '/v1' });
   await app.register(searchRoutesPlugin, { prefix: '/v1' });
   await app.register(geocodeRoutes, {
     prefix: '/v1',
