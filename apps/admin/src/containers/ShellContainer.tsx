@@ -5,11 +5,18 @@ import { AdminShell } from '@/components/shell/AdminShell';
 import { AdminSidebar, type SidebarEntry } from '@/components/shell/AdminSidebar';
 import { PageMessage } from '@/components/states/PageMessage';
 import { navigationFor, sectionOfPath, sectionPaths } from '@/config/navigation';
+import { useAdminCounters } from '@/hooks/useAdminCounters';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useSession } from '@/hooks/useSession';
+import { counterLabel } from '@/lib/counter-label';
 import { signInPathFor } from '@/lib/return-path';
 import { messages } from '@/messages/fr';
-import type { AdminSection } from '@widoo/shared';
+import {
+  countedAdminSections,
+  type AdminCounters,
+  type AdminSection,
+  type CountedAdminSection,
+} from '@widoo/shared';
 import { Button, TooltipProvider } from '@widoo/ui';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
@@ -17,11 +24,26 @@ import { useEffect, useState, type ReactNode } from 'react';
 // Wiki Ecrans › Admin web, « Navigation »: the full menu from 1 280 px, its icons below.
 const fullMenuQuery = '(min-width: 1280px)';
 
-const entryOf = (section: AdminSection): SidebarEntry => ({
-  section,
-  href: sectionPaths[section],
-  label: messages.sections[section],
-});
+const isCounted = (section: AdminSection): section is CountedAdminSection =>
+  countedAdminSections.some((counted) => counted === section);
+
+/** The entry of a section, with its counter when something waits there. */
+function entryOf(section: AdminSection, counters: AdminCounters): SidebarEntry {
+  const counter = isCounted(section) ? counters[section] : undefined;
+  return {
+    section,
+    href: sectionPaths[section],
+    label: messages.sections[section],
+    counter:
+      isCounted(section) && counter && counter.count > 0
+        ? {
+            count: counter.count,
+            isLate: counter.lateCount > 0,
+            label: counterLabel(section, counter),
+          }
+        : undefined,
+  };
+}
 
 /**
  * The shell around every page of the admin: only for a member of the team, with the navigation
@@ -33,6 +55,7 @@ export function ShellContainer({ children }: { children: ReactNode }) {
   const { session, signOut, retry } = useSession();
   const hasRoomForFullMenu = useMediaQuery(fullMenuQuery);
   const [isMenuReduced, setIsMenuReduced] = useState(false);
+  const counters = useAdminCounters(session.status === 'signedIn');
 
   useEffect(() => {
     if (session.status === 'signedOut') {
@@ -58,7 +81,7 @@ export function ShellContainer({ children }: { children: ReactNode }) {
   const groups = navigationFor(member.role).map((group) => ({
     id: group.id,
     label: messages.shell.groups[group.id],
-    entries: group.sections.map(entryOf),
+    entries: group.sections.map((section) => entryOf(section, counters)),
   }));
 
   return (
@@ -67,7 +90,7 @@ export function ShellContainer({ children }: { children: ReactNode }) {
         title={activeSection ? messages.sections[activeSection] : messages.notFound.title}
         sidebar={
           <AdminSidebar
-            home={entryOf('dashboard')}
+            home={entryOf('dashboard', counters)}
             groups={groups}
             activeSection={activeSection}
             isIconOnly={!hasRoomForFullMenu || isMenuReduced}

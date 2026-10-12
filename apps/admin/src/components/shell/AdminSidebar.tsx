@@ -4,10 +4,15 @@ import { cn } from '@widoo/ui';
 import type { AdminSection } from '@widoo/shared';
 import Link from 'next/link';
 import { sectionIcons } from './section-icons';
-import { SidebarLink } from './SidebarLink';
+import { SidebarLink, type SidebarCounter } from './SidebarLink';
 import { WidooLogo } from './WidooLogo';
 
-export type SidebarEntry = { section: AdminSection; href: string; label: string };
+export type SidebarEntry = {
+  section: AdminSection;
+  href: string;
+  label: string;
+  counter?: SidebarCounter;
+};
 export type SidebarGroup = { id: string; label: string; entries: SidebarEntry[] };
 
 type AdminSidebarProps = {
@@ -38,6 +43,7 @@ export function AdminSidebar({
         icon={sectionIcons[entry.section]}
         isActive={entry.section === activeSection}
         isIconOnly={isIconOnly}
+        counter={entry.counter}
       />
     </li>
   );

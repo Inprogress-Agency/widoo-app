@@ -1,4 +1,4 @@
-import type { AdminSection, TeamRole } from '@widoo/shared';
+import type { AdminSection, CountedAdminSection, TeamRole } from '@widoo/shared';
 import type { NavigationGroupId } from '@/config/navigation';
 
 const sections: Record<AdminSection, string> = {
@@ -48,6 +48,15 @@ const returnTargets: Record<AdminSection, string> = {
   actionLog: 'au journal',
 };
 
+/** What a counter of the navigation counts, said in full for screen readers and tooltips. */
+const counted: Record<CountedAdminSection, (count: number) => string> = {
+  moderation: (count) => `${count} parcours à relire`,
+  reports: (count) => (count > 1 ? `${count} signalements ouverts` : '1 signalement ouvert'),
+  support: (count) => (count > 1 ? `${count} messages à traiter` : '1 message à traiter'),
+  aiDrafts: (count) => (count > 1 ? `${count} brouillons à relire` : '1 brouillon à relire'),
+  translations: (count) => (count > 1 ? `${count} traductions en échec` : '1 traduction en échec'),
+};
+
 /** Texts of the admin. French only (wiki Admin-Web › Principes). */
 export const messages = {
   app: { name: 'Widoo', product: 'Admin', title: 'Admin Widoo' },
@@ -61,6 +70,9 @@ export const messages = {
     account: 'Compte',
     signOut: 'Se déconnecter',
     loading: 'Chargement…',
+    counted,
+    /** After what is counted: « …, dont 2 en retard ». */
+    lateAmong: (lateCount: number) => `, dont ${lateCount} en retard`,
   },
   signIn: {
     title: "Connexion à l'admin Widoo",
