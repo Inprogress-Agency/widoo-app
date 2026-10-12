@@ -87,7 +87,11 @@ export function ShellContainer({ children }: { children: ReactNode }) {
   return (
     <TooltipProvider delayDuration={200}>
       <AdminShell
-        title={activeSection ? messages.sections[activeSection] : messages.notFound.title}
+        title={
+          activeSection
+            ? (messages.pageTitles[activeSection] ?? messages.sections[activeSection])
+            : messages.notFound.title
+        }
         sidebar={
           <AdminSidebar
             home={entryOf('dashboard', counters)}
