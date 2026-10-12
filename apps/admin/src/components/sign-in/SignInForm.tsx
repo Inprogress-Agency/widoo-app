@@ -1,5 +1,5 @@
 import { messages } from '@/messages/fr';
-import { EnvelopeSimpleIcon } from '@phosphor-icons/react';
+import { EnvelopeSimpleIcon } from '@phosphor-icons/react/dist/ssr';
 import { Button, Input, Label } from '@widoo/ui';
 import Image from 'next/image';
 import type { FormEvent, ReactNode } from 'react';

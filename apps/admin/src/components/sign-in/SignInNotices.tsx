@@ -1,7 +1,7 @@
 import type { SignInFailure } from '@/lib/auth/auth-client';
 import type { SignInRefusal } from '@/lib/auth/session';
 import { messages } from '@/messages/fr';
-import { InfoIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { InfoIcon, WarningCircleIcon } from '@phosphor-icons/react/dist/ssr';
 import { Notice } from '@widoo/ui';
 import type { AdminSection } from '@widoo/shared';
 
