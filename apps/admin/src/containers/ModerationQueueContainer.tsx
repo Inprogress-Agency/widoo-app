@@ -5,6 +5,7 @@ import {
   type ModerationFilterChoice,
 } from '@/components/moderation/ModerationQueueFilters';
 import { ModerationQueueTable } from '@/components/moderation/ModerationQueueTable';
+import { sheetPathOf } from '@/components/moderation/sheet/SheetNavigation';
 import { PageMessage } from '@/components/states/PageMessage';
 import {
   onFilterValue,
@@ -17,13 +18,14 @@ import { useDebouncedCallback } from '@/hooks/useDebouncedCallback';
 import { useListQuery } from '@/hooks/useListQuery';
 import { useRemoteData } from '@/hooks/useRemoteData';
 import { getSessionClients } from '@/lib/auth/clients';
+import { isWaitingLate } from '@/lib/dates';
 import { serializeListQuery } from '@/lib/list-query';
 import { messages } from '@/messages/fr';
-import { adminLateAfterHours, type ModerationQueueItem } from '@widoo/shared';
+import type { ModerationQueueItem } from '@widoo/shared';
 import { Button, Pagination, SearchInput } from '@widoo/ui';
+import { useRouter } from 'next/navigation';
 
 const searchDelayMs = 300;
-const lateAfterMs = adminLateAfterHours * 60 * 60 * 1000;
 
 /** The filter of the address and its value behind each chip. */
 const filterOfChoice: Record<ModerationFilterChoice, [ModerationFilter, string]> = {
@@ -33,14 +35,14 @@ const filterOfChoice: Record<ModerationFilterChoice, [ModerationFilter, string]>
   revisions: ['revision', onFilterValue],
 };
 
-const isLate = (item: ModerationQueueItem) =>
-  Date.now() - new Date(item.waitingSince).getTime() > lateAfterMs;
+const isLate = (item: ModerationQueueItem) => isWaitingLate(new Date(item.waitingSince));
 
 /**
  * A-02, the moderation queue: reads the page the address asks for, and writes the search, the
  * filters, the sort and the page back to the address.
  */
 export function ModerationQueueContainer() {
+  const router = useRouter();
   const { query, handleSearch, handleFilter, handleSort, handlePage } =
     useListQuery(moderationListOptions);
   const queue = useRemoteData(serializeListQuery(query, moderationListOptions), (signal) =>
@@ -82,6 +84,7 @@ export function ModerationQueueContainer() {
         sort={query.sort}
         onSort={handleSort}
         isLate={isLate}
+        onOpen={(item) => router.push(sheetPathOf(item.id))}
       />
     );
   };
