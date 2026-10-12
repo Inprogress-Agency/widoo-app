@@ -119,8 +119,17 @@ jobs:
         if: steps.detect.outputs.has_code == 'true'
         run: pnpm test -- --coverage
 
+      # The admin writes its environment in the pages at build time (apps/admin/.env.example):
+      # the example values, which only exist in the local Auth emulator, are enough to compile.
+      # None is a secret. NODE_ENV: `next build` expects production, not the `test` of the job.
       - name: Build API and admin
         if: steps.detect.outputs.has_code == 'true'
+        env:
+          NODE_ENV: production
+          NEXT_PUBLIC_API_URL: http://localhost:8080
+          NEXT_PUBLIC_FIREBASE_API_KEY: demo-key
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: demo-widoo.firebaseapp.com
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: demo-widoo
         run: pnpm --filter api --filter admin build
 
       - name: Audit dependencies
