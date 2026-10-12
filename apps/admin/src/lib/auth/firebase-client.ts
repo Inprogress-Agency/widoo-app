@@ -1,5 +1,5 @@
 import { returnParam } from '@/lib/return-path';
-import { FirebaseError, initializeApp } from 'firebase/app';
+import { FirebaseError, initializeApp } from '@firebase/app';
 import {
   connectAuthEmulator,
   getAuth,
@@ -10,7 +10,7 @@ import {
   signInWithEmailLink,
   signInWithPopup,
   signOut,
-} from 'firebase/auth';
+} from '@firebase/auth';
 import { SignInError, type AuthClient, type SignInFailure } from './auth-client';
 
 export type FirebaseSettings = {
