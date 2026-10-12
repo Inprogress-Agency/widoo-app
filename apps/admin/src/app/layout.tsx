@@ -1,6 +1,7 @@
 import './globals.css';
 import { SessionProvider } from '@/lib/auth/SessionProvider';
 import { messages } from '@/messages/fr';
+import { Toaster } from '@widoo/ui';
 import type { Metadata } from 'next';
 import { Plus_Jakarta_Sans } from 'next/font/google';
 import type { ReactNode } from 'react';
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="fr" className={jakarta.variable} suppressHydrationWarning>
       <body className="bg-background font-sans text-body-s text-foreground antialiased">
         <SessionProvider>{children}</SessionProvider>
+        <Toaster />
       </body>
     </html>
   );
