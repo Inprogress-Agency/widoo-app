@@ -16,6 +16,8 @@ export const apiErrorCodes = [
   'mfa_required',
   /** 403 everywhere: the account was suspended by the team (wiki Admin-Web › A-06). */
   'account_suspended',
+  /** 409 on a moderation decision: another member of the team decided first (D-087). */
+  'already_decided',
   'internal_error',
 ] as const;
 
