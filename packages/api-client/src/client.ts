@@ -1,4 +1,5 @@
 import {
+  ModerationRouteDetail,
   ModerationQueue,
   ModerationDecision,
   AdminCounters,
@@ -416,6 +417,16 @@ export function createApiClient(options: ApiClientOptions) {
         body,
         schema: ModerationDecision,
         auth: true,
+      }),
+
+    /** `GET /v1/admin/routes/:id`: the moderation sheet of a route (A-02). 404 when unknown. */
+    getModerationRoute: (routeId: string, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/admin/routes/${routeId}`,
+        schema: ModerationRouteDetail,
+        auth: true,
+        signal,
       }),
 
     /** `DELETE /v1/me`: anonymizes the account; its token is refused afterwards. */
