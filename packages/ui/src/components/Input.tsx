@@ -1,5 +1,6 @@
 import type { ComponentProps } from 'react';
 import { cn } from '../lib/cn';
+import { fieldControlClasses } from '../lib/field-control';
 
 /** Text field of 40 px (wiki Ecrans › Admin web, « Formes et tailles »); 44 px with `large`. */
 export function Input({
@@ -9,11 +10,7 @@ export function Input({
 }: ComponentProps<'input'> & { large?: boolean }) {
   return (
     <input
-      className={cn(
-        'w-full rounded-thumb border border-input bg-background px-12 text-body-s text-foreground placeholder:text-muted-foreground disabled:opacity-50',
-        large ? 'min-h-touch-min' : 'min-h-field',
-        className,
-      )}
+      className={cn(fieldControlClasses, large ? 'min-h-touch-min' : 'min-h-field', className)}
       {...props}
     />
   );

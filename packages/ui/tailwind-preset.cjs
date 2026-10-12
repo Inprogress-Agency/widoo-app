@@ -52,12 +52,14 @@ const focusRing = ({ addBase, theme }) =>
   });
 
 /**
- * States that Radix writes as data attributes, as variants: `highlighted:` for the entry of a
+ * States that Radix and ARIA write as attributes, as variants: `highlighted:` for the entry of a
  * menu under the pointer or the keyboard, `state-open:` for an open trigger.
  */
 const radixStates = ({ addVariant }) => {
   addVariant('highlighted', '&[data-highlighted]');
   addVariant('state-open', '&[data-state="open"]');
+  // A field whose value is refused (`aria-invalid`), and a pressed toggle (`aria-pressed`).
+  addVariant('invalid', '&[aria-invalid="true"]');
 };
 
 /**
@@ -80,13 +82,19 @@ module.exports = {
       // Sizes of the admin drawn on the reference boards (wiki Ecrans › Admin web, « Formes et
       // tailles », « Navigation », « En-tête », A-01) and missing from tokens.json: to move there
       // (DESIGN), then remove from here.
-      height: { header: '64px', screen: '100dvh' },
-      minHeight: { field: '40px', screen: '100dvh' },
+      height: { header: '64px', screen: '100dvh', fit: 'fit-content' },
+      minHeight: { 0: '0px', field: '40px', screen: '100dvh', textarea: '72px' },
+      // Zero, for what is pinned to an edge (`inset-0`): tokens.json starts at 4 px.
+      spacing: { 0: '0px' },
       minWidth: { 0: '0px' },
-      width: { sidebar: '248px', 'sidebar-icons': '72px' },
-      maxWidth: { 'sign-in': '440px' },
+      width: { sidebar: '248px', 'sidebar-icons': '72px', 'detail-panel': '400px' },
+      maxWidth: { 'sign-in': '440px', dialog: '520px' },
       // Text of a button of 36 px and of a navigation entry: `body-s` in 700.
-      fontSize: { control: ['14px', { lineHeight: '20px', fontWeight: '700' }] },
+      fontSize: {
+        control: ['14px', { lineHeight: '20px', fontWeight: '700' }],
+        // Header of a table column and text of a badge: 12/16 in 600.
+        'column-head': ['12px', { lineHeight: '16px', fontWeight: '600' }],
+      },
       // What floats above the content (menu, tooltip, toast): the only shadow of tokens.json
       // (`shadow-tabbar`), which the preset of the tokens does not expose yet.
       boxShadow: { floating: '0 8px 24px rgba(20, 23, 31, 0.10)' },
