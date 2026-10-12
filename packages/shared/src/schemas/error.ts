@@ -12,6 +12,10 @@ export const apiErrorCodes = [
   'premium_required',
   /** 410 of a withdrawn route, with `details.removedAt` (`RouteRemovedDetails`). */
   'route_removed',
+  /** 403 on `/admin/*`: the session was opened without a second factor (D-087). */
+  'mfa_required',
+  /** 403 everywhere: the account was suspended by the team (wiki Admin-Web › A-06). */
+  'account_suspended',
   'internal_error',
 ] as const;
 
