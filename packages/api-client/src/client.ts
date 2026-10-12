@@ -5,6 +5,7 @@ import {
   Me,
   ModerationDecision,
   ModerationQueue,
+  ModerationRouteDetail,
   RouteCount,
   RouteSearchResult,
   type RejectionBody,
@@ -97,6 +98,16 @@ export function createApiClient(options: ApiClientOptions) {
         method: 'GET',
         path: `/v1/admin/moderation?${moderationQueryString(params)}`,
         schema: ModerationQueue,
+        auth: true,
+        signal,
+      }),
+
+    /** `GET /v1/admin/routes/:id`: the moderation sheet of a route (A-02). 404 when unknown. */
+    getModerationRoute: (routeId: string, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/admin/routes/${routeId}`,
+        schema: ModerationRouteDetail,
         auth: true,
         signal,
       }),
