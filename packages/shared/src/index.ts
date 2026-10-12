@@ -1,3 +1,4 @@
+export * from './admin-sections';
 export * from './analytics';
 export * from './sections';
 export { assertNever } from './assert-never';
