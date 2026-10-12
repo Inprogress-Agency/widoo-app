@@ -1,4 +1,5 @@
 export { Button, type ButtonProps } from './components/Button';
+export { CountBadge } from './components/CountBadge';
 export {
   DropdownMenu,
   DropdownMenuContent,
