@@ -52,7 +52,7 @@ export function AdminSidebar({
     <nav
       aria-label={messages.shell.navigation}
       className={cn(
-        'flex h-full shrink-0 flex-col gap-16 overflow-y-auto bg-sidebar p-10',
+        'relative flex h-full shrink-0 flex-col gap-16 overflow-y-auto bg-sidebar p-10',
         isIconOnly ? 'w-sidebar-icons' : 'w-sidebar',
       )}
     >
