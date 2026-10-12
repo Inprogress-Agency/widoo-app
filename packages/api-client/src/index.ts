@@ -11,3 +11,4 @@ export type {
 export type { PlannedListParams } from './planned';
 export type { MyRoutesParams } from './my-routes';
 export type { PublicProfileAnswer } from './profile';
+export type { ModerationQueueParams } from './moderation';
