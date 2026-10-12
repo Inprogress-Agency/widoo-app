@@ -13,7 +13,7 @@ ignoredOptionalDependencies:
 
 # Optional peer of @rnmapbox/maps (its web build): alone, pnpm would install the latest react-dom,
 # ahead of the React of the app. The peer is dropped there, not in the whole workspace: the site
-# (apps/web) is a web app and declares its own react-dom, pinned to the React of the app, and pnpm
+# (apps/web) and the admin (apps/admin) are web apps and declare their own react-dom, and pnpm
 # links that one version wherever a peer asks for react-dom.
 overrides:
   '@rnmapbox/maps>react-dom': '-'
