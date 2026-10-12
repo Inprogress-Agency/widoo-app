@@ -9,6 +9,13 @@ export type VerifiedIdentity = {
   name: string | null;
   /** `firebase.sign_in_provider`: `apple.com`, `google.com`, `password`, `anonymous`... */
   signInProvider: string;
+  /**
+   * `firebase.sign_in_second_factor` (`totp`, `phone`): the second factor this session was opened
+   * with, null without one. The admin requires one (D-087).
+   */
+  secondFactor: string | null;
+  /** `auth_time`: when the person last signed in; a token refresh does not move it. */
+  authTime: Date;
 };
 
 /**

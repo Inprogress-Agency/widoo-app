@@ -9,7 +9,10 @@ import { InvalidTokenError, type TokenVerifier, type VerifiedIdentity } from './
 export class TestTokenVerifier implements TokenVerifier {
   readonly #identities = new Map<string, VerifiedIdentity>();
 
-  /** A token for a new identity (unique `uid`, Google, no e-mail unless given). */
+  /**
+   * A token for a new identity (unique `uid`, Google, signed in now without second factor, no
+   * e-mail unless given).
+   */
   issue(identity: Partial<VerifiedIdentity> = {}): { token: string; uid: string } {
     const token = `test-token-${randomUUID()}`;
     const verified: VerifiedIdentity = {
@@ -18,6 +21,8 @@ export class TestTokenVerifier implements TokenVerifier {
       emailVerified: false,
       name: null,
       signInProvider: 'google.com',
+      secondFactor: null,
+      authTime: new Date(),
       ...identity,
     };
     this.#identities.set(token, verified);

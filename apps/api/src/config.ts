@@ -138,6 +138,11 @@ export const Config = ProductionEnv.transform((env) => ({
   trustedProxies: env.TRUST_PROXY,
   rateLimitMax: env.RATE_LIMIT_MAX,
   firebaseProjectId: env.FIREBASE_PROJECT_ID,
+  /**
+   * The local Auth emulator signs the tokens (never in production, refused above). It has no
+   * TOTP second factor, so the admin routes cannot ask for one there.
+   */
+  usesAuthEmulator: Boolean(env.FIREBASE_AUTH_EMULATOR_HOST),
   sentryDsn: env.SENTRY_DSN,
   sentryEnvironment: env.SENTRY_ENVIRONMENT ?? env.NODE_ENV,
   internalToken: env.INTERNAL_TOKEN,

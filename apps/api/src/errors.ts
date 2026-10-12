@@ -1,4 +1,9 @@
-import type { ApiError, ApiErrorCode, ValidationIssue } from '@widoo/shared';
+import {
+  apiErrorCodes,
+  type ApiError,
+  type ApiErrorCode,
+  type ValidationIssue,
+} from '@widoo/shared';
 import { DrizzleQueryError } from 'drizzle-orm';
 import type { FastifyError, FastifyInstance } from 'fastify';
 import { hasZodFastifySchemaValidationErrors } from 'fastify-type-provider-zod';
@@ -14,10 +19,15 @@ const codeByStatus: Partial<Record<number, ApiErrorCode>> = {
 
 /**
  * A client error the handler sends as is: `statusCode`, its `ApiError` code and `message`
- * (400 is `validation_error`).
+ * (400 is `validation_error`). `code` replaces the code of the status when the wiki names a
+ * finer one (`mfa_required`, `account_suspended`).
  */
-export function httpError(statusCode: 400 | 401 | 403 | 404 | 409, message: string) {
-  return Object.assign(new Error(message), { statusCode });
+export function httpError(
+  statusCode: 400 | 401 | 403 | 404 | 409,
+  message: string,
+  code?: ApiErrorCode,
+) {
+  return Object.assign(new Error(message), { statusCode, apiCode: code });
 }
 
 /**
@@ -39,6 +49,12 @@ export function loggableError(error: Error): Error {
   const frames = (error.stack ?? '').split('\n').filter((line) => /^\s+at /.test(line));
   safe.stack = [`${safe.name}: ${safe.message}`, ...frames].join('\n');
   return safe;
+}
+
+/** The code given to `httpError`, never one written by a library on its own errors. */
+function apiCodeOf(error: object): ApiErrorCode | undefined {
+  const code = 'apiCode' in error ? error.apiCode : undefined;
+  return apiErrorCodes.find((known) => known === code);
 }
 
 /**
@@ -67,7 +83,7 @@ export function registerErrorHandling(app: FastifyInstance): void {
     if (status >= 400 && status < 500) {
       // Other client errors raised by Fastify (malformed JSON, body too large...) are validation errors.
       const body: ApiError = {
-        code: codeByStatus[status] ?? 'validation_error',
+        code: apiCodeOf(error) ?? codeByStatus[status] ?? 'validation_error',
         message: error.message,
       };
       return reply.status(status).send(body);

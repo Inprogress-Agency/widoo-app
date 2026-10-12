@@ -1,4 +1,5 @@
 import {
+  AdminCounters,
   AppConfig,
   GeocodeResult,
   Me,
@@ -69,6 +70,19 @@ export function createApiClient(options: ApiClientOptions) {
         method: 'GET',
         path: `/v1/geocode?${new URLSearchParams({ q: text }).toString()}`,
         schema: GeocodeResult,
+        signal,
+      }),
+
+    /**
+     * `GET /v1/admin/counters`: what waits in each section of the admin the caller opens. Team
+     * only: 403 for any other account, and without a second factor (`mfa_required`).
+     */
+    getAdminCounters: (signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: '/v1/admin/counters',
+        schema: AdminCounters,
+        auth: true,
         signal,
       }),
 

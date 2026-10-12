@@ -18,6 +18,7 @@ describe('loadConfig', () => {
       trustedProxies: [],
       rateLimitMax: 1000,
       firebaseProjectId: undefined,
+      usesAuthEmulator: false,
       sentryDsn: undefined,
       sentryEnvironment: 'development',
       internalToken: undefined,
