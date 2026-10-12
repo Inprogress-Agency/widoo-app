@@ -59,6 +59,16 @@ export const taxonomies = {
   userRoles: ['user', 'editor', 'moderator', 'admin'],
   plans: ['free', 'premium'],
   bookingProviders: ['restaurant', 'ticketing', 'activity', 'other'],
+  /** Codified reasons of a refusal in moderation (wiki Creation-et-Moderation, D-087). */
+  rejectionReasons: [
+    'not_a_route',
+    'place_invalid',
+    'description_insufficient',
+    'photos_invalid',
+    'promotional',
+    'policy_violation',
+    'duplicate',
+  ],
 } as const;
 
 export type Taxonomy = keyof typeof taxonomies;
@@ -78,3 +88,4 @@ export type SignalReason = TaxonomyValue<'signalReasons'>;
 export type UserRole = TaxonomyValue<'userRoles'>;
 export type Plan = TaxonomyValue<'plans'>;
 export type BookingProvider = TaxonomyValue<'bookingProviders'>;
+export type RejectionReason = TaxonomyValue<'rejectionReasons'>;
