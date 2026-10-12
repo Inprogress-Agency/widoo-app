@@ -1,5 +1,5 @@
 import { messages } from '@/messages/fr';
-import { CaretDownIcon, SignOutIcon } from '@phosphor-icons/react';
+import { CaretDownIcon, SignOutIcon } from '@phosphor-icons/react/dist/ssr';
 import {
   DropdownMenu,
   DropdownMenuContent,
