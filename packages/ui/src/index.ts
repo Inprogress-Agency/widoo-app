@@ -1,4 +1,5 @@
 export { Button, type ButtonProps } from './components/Button';
+export { Checkbox } from './components/Checkbox';
 export { ConfirmDialog } from './components/ConfirmDialog';
 export { CountBadge } from './components/CountBadge';
 export { DetailPanel } from './components/DetailPanel';
@@ -12,6 +13,7 @@ export {
 export { Field } from './components/Field';
 export { FilterChip } from './components/FilterChip';
 export { FilterMenu, type FilterMenuOption } from './components/FilterMenu';
+export { InitialAvatar } from './components/InitialAvatar';
 export { Input, Label } from './components/Input';
 export { Notice } from './components/Notice';
 export { Pagination } from './components/Pagination';

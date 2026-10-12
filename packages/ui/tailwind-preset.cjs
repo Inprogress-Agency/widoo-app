@@ -87,8 +87,15 @@ module.exports = {
       // Zero, for what is pinned to an edge (`inset-0`): tokens.json starts at 4 px.
       spacing: { 0: '0px' },
       minWidth: { 0: '0px' },
-      width: { sidebar: '248px', 'sidebar-icons': '72px', 'detail-panel': '400px' },
+      width: {
+        sidebar: '248px',
+        'sidebar-icons': '72px',
+        'detail-panel': '400px',
+        decision: '320px',
+      },
       maxWidth: { 'sign-in': '440px', dialog: '520px' },
+      // A change of a revision on the moderation sheet: its subject, then what changed.
+      gridTemplateColumns: { change: '150px 1fr' },
       // Text of a button of 36 px and of a navigation entry: `body-s` in 700.
       fontSize: {
         control: ['14px', { lineHeight: '20px', fontWeight: '700' }],
