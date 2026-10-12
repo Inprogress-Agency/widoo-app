@@ -168,6 +168,9 @@ describe('exportUserData', () => {
       'user_featured_routes.user_id',
     ];
     const setAside = [
+      // Journal of the writes of the team, kept when an account is purged (A-12): the work of a
+      // member of the team, not data of the person.
+      'admin_actions.actor_id',
       // Photos of the caller's routes and steps are exported with them.
       'media.uploaded_by',
       // Places belong to the shared catalog, not to the person who added them.
