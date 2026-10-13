@@ -4,8 +4,9 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { testConfig } from '../test-config';
 import type { BBox } from './geography';
-import { media, placeHours, places, routes, steps, users } from './schema';
+import { anecdoteQuestions, media, placeHours, places, routes, steps, users } from './schema';
 import { demoRouteIds, seed, seedId } from './seed';
+import { anecdoteQuestionsAtLaunch } from './seed/anecdote-questions';
 import { assumedZeros, demoDataset } from './seed/demo-routes';
 
 // The CI database is migrated but not seeded: the test seeds it, which is idempotent.
@@ -173,6 +174,27 @@ describe('seed', () => {
     expect(before.steps).toHaveLength(
       demoDataset.routes.reduce((sum, route) => sum + route.steps.length, 0),
     );
+  });
+
+  it('holds the eight questions of migration 0004, and keeps a label the team edited', async () => {
+    const questions = () =>
+      app.db.select().from(anecdoteQuestions).orderBy(anecdoteQuestions.position);
+    expect(await questions()).toEqual(
+      anecdoteQuestionsAtLaunch.map((question) => ({ ...question, isActive: true })),
+    );
+
+    const workCafe = eq(anecdoteQuestions.key, 'work_cafe');
+    await app.db.update(anecdoteQuestions).set({ label: 'Mon café préféré' }).where(workCafe);
+    try {
+      await seed(app.db);
+      const [edited] = await app.db.select().from(anecdoteQuestions).where(workCafe);
+      expect(edited?.label).toBe('Mon café préféré');
+    } finally {
+      await app.db
+        .update(anecdoteQuestions)
+        .set({ label: 'Mon café pour lire ou travailler' })
+        .where(workCafe);
+    }
   });
 
   it('lets the database refuse a mood outside the taxonomy', async () => {

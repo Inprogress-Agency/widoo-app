@@ -1,16 +1,30 @@
 /**
  * Demo data for local development and the tests: the city of Paris and the ten demo routes of
  * `seed/demo-routes.json`, with their places, authors, steps and photos. No real person appears.
+ * Also the anecdote questions and the certification thresholds, inserted when missing only: a
+ * label or a threshold changed by the team survives a second run.
  *
  * Idempotent: every row has a fixed id and fixed timestamps, so a second run leaves the database
  * identical, and an edited JSON is applied on the next run. Places, routes and authors are
  * upserted; the hours, steps and photos of the seed places and routes are rewritten.
  */
+import { certificationSettingKeys, defaultCertificationThresholds } from '@widoo/shared';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { stableRecommendationOf } from '../recommendation/stable';
 import type { Db } from './client';
 import { envelopeOf } from './geography';
-import { cities, media, placeHours, places, routes, steps, users } from './schema';
+import {
+  anecdoteQuestions,
+  cities,
+  media,
+  placeHours,
+  places,
+  routes,
+  settings,
+  steps,
+  users,
+} from './schema';
+import { anecdoteQuestionsAtLaunch } from './seed/anecdote-questions';
 import { bucketsOf, demoDataset, paris, type DemoPlace, type DemoRoute } from './seed/demo-routes';
 import { namedUuidv7 } from './uuid';
 
@@ -43,11 +57,21 @@ export async function seed(db: Db): Promise<{ cityId: string; routeIds: string[]
     await tx.delete(routes).where(eq(routes.id, legacyRouteId));
     await tx.delete(places).where(inArray(places.id, legacyPlaceIds));
 
+    await seedProfileReferences(tx);
     await seedAuthors(tx);
     await seedPlaces(tx, city.id);
     await seedRoutes(tx, city.id);
     return { cityId: city.id, routeIds: demoRouteIds };
   });
+}
+
+async function seedProfileReferences(tx: Tx) {
+  await tx.insert(anecdoteQuestions).values(anecdoteQuestionsAtLaunch).onConflictDoNothing();
+  const thresholds = Object.entries(certificationSettingKeys).map(([criterion, key]) => ({
+    key,
+    value: defaultCertificationThresholds[criterion as keyof typeof certificationSettingKeys],
+  }));
+  await tx.insert(settings).values(thresholds).onConflictDoNothing();
 }
 
 async function seedAuthors(tx: Tx) {
