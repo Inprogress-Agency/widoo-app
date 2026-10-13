@@ -33,6 +33,7 @@ export * from './schemas/me';
 export * from './schemas/moderation';
 export * from './schemas/place';
 export * from './schemas/planned';
+export * from './schemas/place-import';
 export * from './schemas/profile';
 export * from './schemas/public-profile';
 export * from './schemas/rating';
