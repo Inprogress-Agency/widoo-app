@@ -1,7 +1,7 @@
-import { sectionPaths } from '@/config/navigation';
+import { catalogPaths } from '@/components/catalog/CatalogTabs';
 import { redirect } from 'next/navigation';
 
-/** A-04 opens on its routes; the places join them under their own address. */
+/** A-04 opens on its places; its routes are the second tab. */
 export default function CatalogPage() {
-  redirect(`${sectionPaths.catalog}/parcours`);
+  redirect(catalogPaths.places);
 }
