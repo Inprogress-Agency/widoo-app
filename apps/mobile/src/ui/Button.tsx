@@ -1,6 +1,7 @@
-import { colors, motion, type ColorToken } from '@widoo/tokens';
+import { colors, motion, type ColorToken, type UiIconKey } from '@widoo/tokens';
 import { Pressable, StyleSheet } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { Icon, uiIcon } from './Icon';
 import { timing } from './motion';
 import { Text } from './Text';
 
@@ -10,11 +11,14 @@ type Variant = 'primary' | 'secondary' | 'premium' | 'inverse';
 // Premium » (D-014), secondary the warm grey « Programmer », inverse the white « Voir plus » of
 // the map tooltip, on ink.
 const variants = {
-  primary: { className: 'bg-blue', label: 'on-blue' },
-  secondary: { className: 'bg-surface', label: 'ink' },
-  premium: { className: 'bg-surface-strong', label: 'on-strong' },
-  inverse: { className: 'bg-bg', label: 'ink' },
-} as const satisfies Record<Variant, { className: string; label: ColorToken }>;
+  primary: { className: 'bg-blue', label: 'on-blue', disabledLabel: 'blue-soft' },
+  secondary: { className: 'bg-surface', label: 'ink', disabledLabel: 'muted' },
+  premium: { className: 'bg-surface-strong', label: 'on-strong', disabledLabel: 'on-strong-muted' },
+  inverse: { className: 'bg-bg', label: 'ink', disabledLabel: 'muted' },
+} as const satisfies Record<
+  Variant,
+  { className: string; label: ColorToken; disabledLabel: ColorToken }
+>;
 
 interface ButtonProps {
   label: string;
@@ -24,6 +28,11 @@ interface ButtonProps {
   isDense?: boolean;
   /** As wide as its container, such as « Voir plus » in the map tooltip. */
   isFullWidth?: boolean;
+  /** Interface icon before the label, decorative: the clock of « Programmer » (E-05). */
+  icon?: UiIconKey;
+  /** What the screen where it leads is not built yet: dimmed label, announced « estompé ». */
+  isDisabled?: boolean;
+  accessibilityHint?: string;
 }
 
 /**
@@ -36,7 +45,12 @@ export function Button({
   variant = 'primary',
   isDense = false,
   isFullWidth = false,
+  icon,
+  isDisabled = false,
+  accessibilityHint,
 }: ButtonProps) {
+  const variantStyle = variants[variant];
+  const labelColor = isDisabled ? variantStyle.disabledLabel : variantStyle.label;
   const pressed = useSharedValue(0);
   const veil = useAnimatedStyle(() => ({
     opacity: pressed.get() * motion.press.filledVeil.opacity,
@@ -45,6 +59,9 @@ export function Button({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
+      accessibilityHint={accessibilityHint}
+      accessibilityState={{ disabled: isDisabled }}
+      disabled={isDisabled}
       onPress={onPress}
       onPressIn={() => {
         pressed.set(withTiming(1, timing('press', 'fade')));
@@ -52,19 +69,18 @@ export function Button({
       onPressOut={() => {
         pressed.set(withTiming(0, timing('pressRelease', 'fade')));
       }}
-      className={`min-h-button-h justify-center overflow-hidden rounded-pill px-24 py-12 ${isFullWidth ? 'self-stretch' : 'self-center'} ${variants[variant].className}`}
+      // As wide as its container, its label centred: a narrower padding keeps it on one line in
+      // half a bar at large text sizes (Ecrans › E-05, barre collée).
+      className={`min-h-button-h flex-row items-center justify-center gap-6 overflow-hidden rounded-pill py-12 ${isFullWidth ? 'self-stretch px-12' : 'self-center px-24'} ${variantStyle.className}`}
     >
       {/* Animated style: out of NativeWind's reach, values from the generated theme. */}
       <Animated.View
         pointerEvents="none"
         style={[StyleSheet.absoluteFill, { backgroundColor: colors.ink }, veil]}
       />
-      <Text
-        variant="button"
-        color={variants[variant].label}
-        isDense={isDense}
-        className="text-center"
-      >
+      {/* An icon with its own color keeps it: the gold crown of « Débloquer avec Premium ». */}
+      {icon && <Icon {...uiIcon(icon)} size="icon-m" color={uiIcon(icon).color ?? labelColor} />}
+      <Text variant="button" color={labelColor} isDense={isDense} className="shrink text-center">
         {label}
       </Text>
     </Pressable>
