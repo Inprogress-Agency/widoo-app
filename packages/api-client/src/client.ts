@@ -1,4 +1,6 @@
 import {
+  CatalogRoutes,
+  CatalogRouteAction,
   ModerationRouteDetail,
   ModerationQueue,
   ModerationDecision,
@@ -27,6 +29,8 @@ import {
   type UpdatePlannedRoute,
   type RejectionBody,
   type RequestChangesBody,
+  type CatalogRoutesQuery,
+  type RepublishBody,
 } from '@widoo/shared';
 import { plannedPath, plannedQueryString, type PlannedListParams } from './planned';
 import {
@@ -39,6 +43,7 @@ import { isProfileUnavailable, publicProfilePath, type PublicProfileAnswer } fro
 import { removedOf, routePath, type GetRouteOptions, type RouteSheetAnswer } from './route';
 import { createTransport, type ApiClientOptions } from './transport';
 import { moderationQueryString, type ModerationQueueParams } from './moderation';
+import { catalogQueryString } from './catalog';
 
 /**
  * Typed client of the API, one method per route, answers validated by the `shared` schemas.
@@ -308,6 +313,38 @@ export function createApiClient(options: ApiClientOptions) {
         schema: ModerationRouteDetail,
         auth: true,
         signal,
+      }),
+
+    /**
+     * `GET /v1/admin/routes`: a page of the routes of the catalog (A-04), whatever their status.
+     * An editor receives the routes of the team only.
+     */
+    getCatalogRoutes: (params: Partial<CatalogRoutesQuery>, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/admin/routes?${catalogQueryString(params)}`,
+        schema: CatalogRoutes,
+        auth: true,
+        signal,
+      }),
+
+    /** `POST /v1/admin/routes/:id/republish`: puts an unpublished route back online. Admins. */
+    republishRoute: (routeId: string, body: RepublishBody) =>
+      request({
+        method: 'POST',
+        path: `/v1/admin/routes/${routeId}/republish`,
+        body,
+        schema: CatalogRouteAction,
+        auth: true,
+      }),
+
+    /** `POST /v1/admin/routes/:id/reassign`: hands a route over to the Widoo team. Admins. */
+    reassignRoute: (routeId: string) =>
+      request({
+        method: 'POST',
+        path: `/v1/admin/routes/${routeId}/reassign`,
+        schema: CatalogRouteAction,
+        auth: true,
       }),
 
     /** `DELETE /v1/me`: anonymizes the account; its token is refused afterwards. */
