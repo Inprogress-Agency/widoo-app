@@ -48,12 +48,18 @@ describe('decideRouting', () => {
   it('serves any other path in the language of the browser, address unchanged', () => {
     expect(decideRouting({ ...request, pathname: '/nothing', acceptLanguage: 'en' })).toEqual({
       kind: 'rewrite',
-      pathname: '/en/nothing',
+      location: '/en/nothing',
     });
     expect(decideRouting({ ...request, pathname: '/french' })).toEqual({
       kind: 'rewrite',
-      pathname: '/fr/french',
+      location: '/fr/french',
     });
+  });
+
+  it('keeps the query of a path served without a language prefix', () => {
+    expect(
+      decideRouting({ ...request, pathname: '/r/abc', search: '?token=t0k3n&src=qr' }),
+    ).toEqual({ kind: 'rewrite', location: '/fr/r/abc?token=t0k3n&src=qr' });
   });
 
   it('does not take a path that only starts like a language for a prefix', () => {
