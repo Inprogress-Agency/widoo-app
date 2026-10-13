@@ -15,6 +15,7 @@ import { PageMessage } from '@/components/states/PageMessage';
 import { sectionPaths } from '@/config/navigation';
 import { useCatalogRouteActions } from '@/hooks/useCatalogRouteActions';
 import { useRemoteData } from '@/hooks/useRemoteData';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useSession } from '@/hooks/useSession';
 import { getSessionClients } from '@/lib/auth/clients';
 import { isRejectionReason } from '@/lib/rejection-reason';
@@ -33,6 +34,7 @@ type OpenDialog = 'unpublish' | 'republish' | 'reassign' | null;
  */
 export function CatalogRouteSheetContainer({ routeId }: { routeId: string }) {
   const { session } = useSession();
+  const isAdmin = useIsAdmin();
   const sheet = useRemoteData(routeId, (signal) =>
     getSessionClients().api.getModerationRoute(routeId, signal),
   );
@@ -63,7 +65,6 @@ export function CatalogRouteSheetContainer({ routeId }: { routeId: string }) {
   }
 
   const route = sheet.data;
-  const isAdmin = session.status === 'signedIn' && session.member.role === 'admin';
   const isOnline = route.status === 'published' || route.status === 'needs_fix';
   const handleOpen = (dialog: OpenDialog) => {
     setMessage('');
