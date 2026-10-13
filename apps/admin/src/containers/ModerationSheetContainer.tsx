@@ -106,7 +106,7 @@ export function ModerationSheetContainer({ routeId }: { routeId: string }) {
         <aside className="flex w-full shrink-0 flex-col gap-16 lg:w-decision">
           {publishedTo ? (
             <PublishedPanel
-              publishedBy={route.history[0]?.actorFirstName ?? null}
+              publishedBy={route.history[0]?.actorName ?? null}
               onNext={() => router.push(publishedTo.nextPath)}
               onBackToCatalog={() => router.push(sectionPaths.catalog)}
             />

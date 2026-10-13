@@ -16,7 +16,7 @@ export function HistoryCard({ history }: { history: ModerationHistoryEntry[] }) 
           {history.map((entry) => (
             <li key={entry.createdAt} className="flex flex-col gap-4 text-body-s">
               <span className="font-bold">
-                {texts.by(texts.actions[entry.action], entry.actorFirstName)}
+                {texts.by(texts.actions[entry.action], entry.actorName)}
               </span>
               <span className="text-label text-muted-foreground">
                 {formatRelativeDate(new Date(entry.createdAt))}
