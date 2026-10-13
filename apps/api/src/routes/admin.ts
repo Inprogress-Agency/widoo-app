@@ -1,6 +1,7 @@
-import { AdminCounters } from '@widoo/shared';
+import { AdminCounters, AdminStats } from '@widoo/shared';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { readAdminCounters } from '../admin/counters';
+import { readAdminStats } from '../admin/stats';
 import { httpError } from '../errors';
 
 const security = [{ firebaseIdToken: [] }];
@@ -31,6 +32,25 @@ export const adminRoutes: FastifyPluginAsyncZod = async (app) => {
         throw httpError(401, 'Missing bearer token');
       }
       return readAdminCounters(app.db, request.user.role);
+    },
+  );
+
+  app.get(
+    '/admin/stats',
+    {
+      onRequest: app.requireAdminSection('dashboard'),
+      schema: {
+        tags: ['admin'],
+        summary: 'Figures of the dashboard',
+        security,
+        response: { 200: AdminStats },
+      },
+    },
+    async (request) => {
+      if (!request.user) {
+        throw httpError(401, 'Missing bearer token');
+      }
+      return readAdminStats(app.db, request.user.role);
     },
   );
 };
