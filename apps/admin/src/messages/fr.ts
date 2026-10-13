@@ -1,4 +1,4 @@
-import type { AdminSection, CountedAdminSection, TeamRole } from '@widoo/shared';
+import type { AdminSection, CountedAdminSection, RouteStatus, TeamRole } from '@widoo/shared';
 import type { NavigationGroupId } from '@/config/navigation';
 
 const sections: Record<AdminSection, string> = {
@@ -73,12 +73,25 @@ const counted: Record<CountedAdminSection, (count: number) => string> = {
   translations: (count) => (count > 1 ? `${count} traductions en échec` : '1 traduction en échec'),
 };
 
+/** Status of a route as the team reads it, shorter than the labels of the app. */
+const routeStatuses: Record<RouteStatus, string> = {
+  draft: 'Brouillon',
+  private: 'Privé',
+  pending: 'En relecture',
+  changes_requested: 'À corriger',
+  published: 'Publié',
+  needs_fix: 'À corriger',
+  rejected: 'Refusé',
+  unpublished: 'Retiré',
+};
+
 /** Texts of the admin. French only (wiki Admin-Web › Principes). */
 export const messages = {
   app: { name: 'Widoo', product: 'Admin', title: 'Admin Widoo' },
   sections,
   pageTitles,
   roles,
+  routeStatuses,
   shell: {
     navigation: 'Navigation principale',
     groups: navigationGroups,
@@ -215,6 +228,66 @@ export const messages = {
       unlocks: 'Déblocages',
     },
   },
+  catalog: {
+    routes: {
+      search: 'Rechercher un titre ou un auteur',
+      total: (count: number) => `${count} parcours`,
+      filters: {
+        label: 'Filtres des parcours',
+        status: 'Statut',
+        access: 'Accès',
+      },
+      columns: {
+        route: 'Parcours',
+        author: 'Auteur',
+        city: 'Ville',
+        status: 'Statut',
+        access: 'Accès',
+        rating: 'Note',
+        updated: 'Modifié',
+      },
+      team: 'Équipe Widoo',
+      access: { free: 'Gratuit', premium: 'Premium' },
+      rating: (average: number, count: number) =>
+        `${average.toLocaleString('fr-FR', { maximumFractionDigits: 1 })} (${count} avis)`,
+      noRating: 'Pas encore noté',
+      empty: { title: 'Aucun parcours', text: 'Aucun parcours ne correspond à cette recherche.' },
+      sheet: {
+        back: 'Parcours du catalogue',
+        actions: 'Actions',
+        unpublish: 'Dépublier',
+        republish: 'Republier',
+        reassign: "Réassigner à l'équipe Widoo",
+        alreadyTeam: "Ce parcours est déjà un parcours de l'équipe Widoo.",
+        noAction: "Aucune action n'est possible sur ce parcours dans son statut actuel.",
+      },
+      unpublishDialog: {
+        title: 'Dépublier ce parcours ?',
+        description:
+          "Le parcours n'est plus visible dans l'app. L'auteur garde son parcours et reçoit le motif et votre message.",
+        message: "Message à l'auteur",
+        confirm: 'Dépublier le parcours',
+      },
+      republishDialog: {
+        title: 'Republier ce parcours ?',
+        description: "Le parcours redevient visible par tous dans l'app.",
+        message: 'Pourquoi le remettre en ligne',
+        messageHint: "Gardé dans l'historique du parcours et dans le journal.",
+        confirm: 'Republier le parcours',
+      },
+      reassignDialog: {
+        title: "Réassigner ce parcours à l'équipe Widoo ?",
+        description:
+          "Le parcours devient « Par Widoo » et n'a plus d'auteur : l'équipe le maintient depuis l'éditeur de l'app. Cette action ne se défait pas depuis l'admin.",
+        confirm: "Réassigner à l'équipe",
+      },
+      toasts: {
+        unpublished: 'Parcours dépublié',
+        republished: 'Parcours republié',
+        reassigned: "Parcours réassigné à l'équipe Widoo",
+      },
+    },
+  },
   moderation: {
     search: 'Rechercher un titre ou un auteur',
     total: (count: number) => `${count} parcours`,
@@ -254,16 +327,6 @@ export const messages = {
       next: 'Parcours suivant',
       notFound: "Ce parcours n'existe pas.",
       error: "La fiche n'a pas pu être chargée.",
-      statuses: {
-        pending: 'En relecture',
-        changes_requested: 'À corriger',
-        published: 'Publié',
-        rejected: 'Refusé',
-        unpublished: 'Retiré',
-        needs_fix: 'À corriger',
-        draft: 'Brouillon',
-        private: 'Privé',
-      },
       premium: 'Premium',
       premiumComputed: (minSteps: number) => `Premium calculé : ${minSteps} étapes ou plus`,
       waitingSince: 'En file depuis',
