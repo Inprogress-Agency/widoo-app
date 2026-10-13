@@ -19,6 +19,10 @@ export type Session =
   /** The browser has not said yet whether someone is signed in, or the account is being read. */
   | { status: 'loading' }
   | { status: 'signedOut'; refusal: SignInRefusal | null }
+  /** The account has a second factor: the sign-in waits for the code of the app. */
+  | { status: 'secondFactorChallenge' }
+  /** A member of the team signed in, who must add a second factor before entering (D-087). */
+  | { status: 'secondFactorEnrollment'; member: TeamMember }
   | { status: 'signedIn'; member: TeamMember }
   /** Signed in, but the API did not answer: nothing is known about the role. */
   | { status: 'unavailable' };
@@ -53,4 +57,19 @@ export async function readSession(api: { getMe: () => Promise<Me> }): Promise<Se
     }
     return { status: 'unavailable' };
   }
+}
+
+/**
+ * Holds a member of the team at the door until the account has a second factor, when the admin
+ * requires one. Any other session is left as it is: an account outside the team is refused
+ * before being asked for anything.
+ */
+export function requireSecondFactor(
+  session: Session,
+  factor: { isRequired: boolean; isEnrolled: boolean },
+): Session {
+  if (session.status !== 'signedIn' || !factor.isRequired || factor.isEnrolled) {
+    return session;
+  }
+  return { status: 'secondFactorEnrollment', member: session.member };
 }
