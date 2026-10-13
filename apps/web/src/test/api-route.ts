@@ -17,7 +17,7 @@ export const apiRoute = {
   neighborhood: 'Abbesses',
   durationMin: 420,
   durationBucket: 'full_day',
-  budgetPerPersonEur: { min: 38, max: 38 },
+  budgetPerPersonEur: 38,
   budgetBucket: 'medium',
   distanceM: 6100,
   rating: { average: 4.9, count: 128 },
