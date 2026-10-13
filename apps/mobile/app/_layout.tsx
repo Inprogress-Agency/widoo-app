@@ -2,9 +2,10 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { useFonts } from 'expo-font';
 import { DefaultTheme, Stack, ThemeProvider, type Theme } from 'expo-router';
-import { colors } from '@widoo/tokens';
+import { colors, motion } from '@widoo/tokens';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useReducedMotion } from 'react-native-reanimated';
 import '../global.css';
 import { useAppOpenedEvent } from '../src/analytics';
 import { persistOptions } from '../src/api/persister';
@@ -32,6 +33,7 @@ const navigationTheme: Theme = {
 
 export default function RootLayout() {
   useAppOpenedEvent();
+  const isReducedMotion = useReducedMotion();
   const [fontsLoaded, fontError] = useFonts(fonts);
   // A font that fails to load falls back to the system font rather than blocking the app.
   const isReady = fontsLoaded || fontError !== null;
@@ -48,10 +50,21 @@ export default function RootLayout() {
           {/* Modal sheets, such as « Trier par », rise over the tab bar. */}
           <BottomSheetModalProvider>
             <Stack screenOptions={{ headerShown: false }}>
-              {/* The route sheet rises from the bottom (M-02). */}
+              {/*
+                The route sheet rises from the bottom over the tabs, full screen (M-02, the
+                fallback of M-01 that the ticket accepts): `page` and the standard curve; with
+                « Réduire les animations », a fade in place. It closes by sliding down, its own pan.
+              */}
               <Stack.Screen
                 name="route/[id]"
-                options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+                options={{
+                  presentation: 'fullScreenModal',
+                  // `mappings.motion.modal.animation`, which the generated theme does not carry.
+                  animation: isReducedMotion ? 'fade' : 'slide_from_bottom',
+                  animationDuration: isReducedMotion
+                    ? motion.durations.fade
+                    : motion.durations.page,
+                }}
               />
             </Stack>
           </BottomSheetModalProvider>

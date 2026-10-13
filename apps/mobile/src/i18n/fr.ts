@@ -219,10 +219,6 @@ export const fr = {
   },
   // Route sheet (E-05). No middle dot outside the « ambiance · quartier » line.
   route: {
-    title: 'Fiche du parcours',
-    comingSoon: 'La fiche détaillée arrive bientôt.',
-    step_opened: "Ouverte à l'étape {{position}}.",
-    back: 'Retour',
     dialog: 'Fiche du parcours {{title}}',
     close: 'Fermer la fiche',
     share: 'Partager le parcours',
@@ -233,7 +229,6 @@ export const fr = {
     reviewsLink_other: '{{count}} avis',
     ratingLabel_one: 'Note {{value}} sur 5, {{count}} avis',
     ratingLabel_other: 'Note {{value}} sur 5, {{count}} avis',
-    creatorLabel: '{{creator}}, voir le profil',
     sharedBy: 'Partagé par {{name}}, visible seulement avec le lien',
     tiles: {
       label: 'Infos clés',
@@ -307,7 +302,6 @@ export const fr = {
       lastCheck: 'Dernière vérification {{ago}}',
       neverChecked: 'Pas encore vérifié',
       advice: 'Le conseil de {{name}} : ',
-      endsOn: "Jusqu'au {{date}}",
     },
     ago: {
       days_one: 'il y a {{count}} jour',
@@ -329,8 +323,6 @@ export const fr = {
     creator: {
       routes_one: '{{count}} parcours publié',
       routes_other: '{{count}} parcours publiés',
-      seeProfile: 'Voir le profil',
-      label: '{{name}}, {{routes}}, voir le profil',
     },
     reviews: {
       title: 'Avis',
@@ -339,8 +331,6 @@ export const fr = {
       summary_one: 'Note moyenne {{value}} sur 5, {{count}} avis',
       summary_other: 'Note moyenne {{value}} sur 5, {{count}} avis',
       item: '{{name}}, {{date}}, note {{rating}} sur 5',
-      seeAll_one: 'Voir le {{count}} avis',
-      seeAll_other: 'Voir les {{count}} avis',
     },
     plan: 'Programmer',
     go: "C'est parti",
