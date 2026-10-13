@@ -6,11 +6,14 @@ import {
   CatalogRouteAction,
   CatalogRoutes,
   CatalogRoutesQuery,
+  PlaceImportBody,
+  PlaceImportResult,
   RepublishBody,
 } from '@widoo/shared';
 import type { FastifyRequest } from 'fastify';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
+import { importPlaces } from '../catalog/place-import';
 import { createCatalogPlace, updateCatalogPlace } from '../catalog/place-writes';
 import { readCatalogPlace, readCatalogPlaces } from '../catalog/places';
 import { reassignRouteToTeam, republishRoute } from '../catalog/route-actions';
@@ -177,5 +180,20 @@ export const adminCatalogRoutes: FastifyPluginAsyncZod = async (app) => {
       }
       return place;
     },
+  );
+
+  app.post(
+    '/admin/places/import',
+    {
+      onRequest: app.requireRole('admin'),
+      schema: {
+        tags,
+        summary: 'Import places from the rows of a file, or preview the import',
+        security,
+        body: PlaceImportBody,
+        response: { 200: PlaceImportResult },
+      },
+    },
+    async (request) => importPlaces(app.db, request.body, memberOf(request).id),
   );
 };

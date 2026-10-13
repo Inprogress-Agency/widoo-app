@@ -21,6 +21,7 @@ export * from './schemas/geocode';
 export * from './schemas/me';
 export * from './schemas/moderation';
 export * from './schemas/place';
+export * from './schemas/place-import';
 export * from './schemas/recommendation';
 export * from './schemas/route';
 export * from './schemas/search';
