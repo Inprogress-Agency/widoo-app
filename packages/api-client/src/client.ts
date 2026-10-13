@@ -1,4 +1,5 @@
 import {
+  PlaceImportResult,
   CatalogPlaces,
   CatalogPlaceDetail,
   CatalogRoutes,
@@ -35,6 +36,7 @@ import {
   type RepublishBody,
   type CatalogPlaceInput,
   type CatalogPlacesQuery,
+  type PlaceImportBody,
 } from '@widoo/shared';
 import { plannedPath, plannedQueryString, type PlannedListParams } from './planned';
 import {
@@ -388,6 +390,19 @@ export function createApiClient(options: ApiClientOptions) {
         path: `/v1/admin/places/${placeId}`,
         body: place,
         schema: CatalogPlaceDetail,
+        auth: true,
+      }),
+
+    /**
+     * `POST /v1/admin/places/import`: creates the places of a file, row by row, or says what
+     * each row would become with `dryRun`. Admins.
+     */
+    importPlaces: (body: PlaceImportBody) =>
+      request({
+        method: 'POST',
+        path: '/v1/admin/places/import',
+        body,
+        schema: PlaceImportResult,
         auth: true,
       }),
 
