@@ -3,6 +3,7 @@
 import { AccountMenu } from '@/components/shell/AccountMenu';
 import { AdminShell } from '@/components/shell/AdminShell';
 import { AdminSidebar, type SidebarEntry } from '@/components/shell/AdminSidebar';
+import { AccessDenied } from '@/components/states/AccessDenied';
 import { PageMessage } from '@/components/states/PageMessage';
 import { navigationFor, sectionOfPath, sectionPaths } from '@/config/navigation';
 import { useAdminCounters } from '@/hooks/useAdminCounters';
@@ -12,6 +13,7 @@ import { counterLabel } from '@/lib/counter-label';
 import { signInPathFor } from '@/lib/return-path';
 import { messages } from '@/messages/fr';
 import {
+  canOpenAdminSection,
   countedAdminSections,
   type AdminCounters,
   type AdminSection,
@@ -117,7 +119,13 @@ export function ShellContainer({ children }: { children: ReactNode }) {
           />
         }
       >
-        {children}
+        {/* A section the role does not open is refused here, whatever the address typed: the menu
+            hides it, and the API refuses its data anyway. */}
+        {activeSection && !canOpenAdminSection(member.role, activeSection) ? (
+          <AccessDenied backHref={sectionPaths.dashboard} backLabel={messages.notFound.back} />
+        ) : (
+          children
+        )}
       </AdminShell>
     </TooltipProvider>
   );

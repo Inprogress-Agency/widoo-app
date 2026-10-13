@@ -9,6 +9,7 @@ import { RoutePreview } from '@/components/moderation/sheet/RoutePreview';
 import { SheetHeader } from '@/components/moderation/sheet/SheetHeader';
 import { StepList } from '@/components/moderation/sheet/StepList';
 import { RouteReasonDialog } from '@/components/routes/RouteReasonDialog';
+import { AccessDenied } from '@/components/states/AccessDenied';
 import { BackLink } from '@/components/states/BackLink';
 import { PageMessage } from '@/components/states/PageMessage';
 import { sectionPaths } from '@/config/navigation';
@@ -44,6 +45,10 @@ export function CatalogRouteSheetContainer({ routeId }: { routeId: string }) {
     reload?.();
   });
 
+  // The sheet of a route is read by moderators and admins; the API refuses it to an editor.
+  if (session.status === 'signedIn' && session.member.role === 'editor') {
+    return <AccessDenied backHref={routesPath} backLabel={texts.sheet.back} />;
+  }
   if (sheet.status === 'loading') {
     return <PageMessage role="status" title={messages.shell.loading} />;
   }
