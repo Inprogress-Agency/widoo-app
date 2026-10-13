@@ -2,7 +2,7 @@ import { FirstName, type UpdateMe } from '@widoo/shared';
 import { and, eq, isNull, sql } from 'drizzle-orm';
 import type { VerifiedIdentity } from '../auth/verifier';
 import type { Db } from '../db/client';
-import { users } from '../db/schema';
+import { userAnecdotes, userFeaturedRoutes, users } from '../db/schema';
 
 export type User = typeof users.$inferSelect;
 
@@ -71,20 +71,28 @@ export async function updateUser(
 
 /**
  * Account deletion (wiki Compte-et-Monetisation): `deleted_at` set, e-mail, first name, avatar,
- * bio and preferences erased, profile no longer public, so its routes show « Membre Widoo ».
- * The row and its `firebase_uid` stay until the purge, 30 days later (wiki Securite-et-RGPD).
+ * bio, neighborhood and preferences erased, anecdotes and featured routes deleted, profile no
+ * longer public, so its routes show « Membre Widoo ». The row and its `firebase_uid` stay until
+ * the purge, 30 days later (wiki Securite-et-RGPD), whose cascade finds nothing left to delete.
  */
 export async function softDeleteUser(db: Db, userId: string): Promise<void> {
-  await db
-    .update(users)
-    .set({
-      deletedAt: sql`now()`,
-      email: null,
-      firstName: null,
-      avatarUrl: null,
-      bio: null,
-      isPublic: false,
-      notificationPrefs: {},
-    })
-    .where(and(eq(users.id, userId), isNull(users.deletedAt)));
+  await db.transaction(async (tx) => {
+    const deleted = await tx
+      .update(users)
+      .set({
+        deletedAt: sql`now()`,
+        email: null,
+        firstName: null,
+        avatarUrl: null,
+        bio: null,
+        neighborhood: null,
+        isPublic: false,
+        notificationPrefs: {},
+      })
+      .where(and(eq(users.id, userId), isNull(users.deletedAt)))
+      .returning({ id: users.id });
+    if (deleted.length === 0) return;
+    await tx.delete(userAnecdotes).where(eq(userAnecdotes.userId, userId));
+    await tx.delete(userFeaturedRoutes).where(eq(userFeaturedRoutes.userId, userId));
+  });
 }
