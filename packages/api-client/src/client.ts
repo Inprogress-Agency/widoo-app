@@ -22,7 +22,10 @@ export function createApiClient(options: ApiClientOptions) {
   const { request, requestEmpty } = createTransport(options);
 
   return {
-    /** `GET /v1/config`: taxonomies, French labels, bucket thresholds, oldest supported build. */
+    /**
+     * `GET /v1/config`: taxonomies, French labels, bucket thresholds, anecdote questions,
+     * certification thresholds, oldest supported build.
+     */
     getConfig: (signal?: AbortSignal) =>
       request({ method: 'GET', path: '/v1/config', schema: AppConfig, signal }),
 
@@ -30,7 +33,10 @@ export function createApiClient(options: ApiClientOptions) {
     getMe: (signal?: AbortSignal) =>
       request({ method: 'GET', path: '/v1/me', schema: Me, auth: true, signal }),
 
-    /** `PATCH /v1/me`: listed fields only; notification preferences are merged. */
+    /**
+     * `PATCH /v1/me`: listed fields only; notification preferences are merged, anecdotes and
+     * featured routes replaced as a whole.
+     */
     updateMe: (update: UpdateMe) =>
       request({ method: 'PATCH', path: '/v1/me', body: update, schema: Me, auth: true }),
 

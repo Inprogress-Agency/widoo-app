@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { taxonomies, type Taxonomy } from '../taxonomies';
 import { BucketThresholds } from '../thresholds';
+import { AnecdoteQuestion, CertificationThresholds } from './profile';
 
 /** App build version, `major.minor.patch`. */
 export const AppVersion = z.string().regex(/^\d+\.\d+\.\d+$/, 'Expected major.minor.patch');
@@ -24,5 +25,9 @@ export const AppConfig = z.object({
   labels: z.object({ fr: byTaxonomy(z.record(z.string(), z.string())) }),
   /** Bucket bounds used to classify budgets and durations. */
   thresholds: BucketThresholds,
+  /** Active anecdote questions, in the order of the sheet (E-09). */
+  anecdoteQuestions: z.array(AnecdoteQuestion),
+  /** Public thresholds of the Créateur certifié badge (D-023). */
+  certificationThresholds: CertificationThresholds,
 });
 export type AppConfig = z.infer<typeof AppConfig>;

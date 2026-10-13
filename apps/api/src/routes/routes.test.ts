@@ -1,14 +1,28 @@
-import { AppConfig, labels, taxonomies } from '@widoo/shared';
+import { AppConfig, defaultCertificationThresholds, labels, taxonomies } from '@widoo/shared';
+import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
+import { anecdoteQuestions } from '../db/schema';
+import { seed } from '../db/seed';
+import { anecdoteQuestionsAtLaunch } from '../db/seed/anecdote-questions';
 import { testConfig } from '../test-config';
+
+// Shared database, parallel files: a retired question of this file only, deleted by key.
+const retiredQuestion = 'test_config_retired_question';
 
 describe('system routes', () => {
   let app: Awaited<ReturnType<typeof buildApp>>;
   beforeAll(async () => {
     app = await buildApp(testConfig({ MIN_APP_VERSION: '1.2.0' }));
+    await seed(app.db);
+    await app.db
+      .insert(anecdoteQuestions)
+      .values({ key: retiredQuestion, label: 'Question retirée', position: 4, isActive: false });
   });
-  afterAll(() => app.close());
+  afterAll(async () => {
+    await app.db.delete(anecdoteQuestions).where(eq(anecdoteQuestions.key, retiredQuestion));
+    await app.close();
+  });
 
   it('report a reachable database on /v1/health', async () => {
     const response = await app.inject({ url: '/v1/health' });
@@ -29,6 +43,25 @@ describe('system routes', () => {
     expect(config.labels.fr.budgets).toEqual(labels.fr.budgets);
     expect(config.labels.fr.budgets.high).toBe('Plus de 70 €');
     expect(config.labels.fr.durations).toEqual(labels.fr.durations);
+  });
+
+  it('serve the active anecdote questions in order, without the retired ones, on /v1/config', async () => {
+    const config = AppConfig.parse((await app.inject({ url: '/v1/config' })).json());
+    // Keys and order: the seed test edits the label of `work_cafe` for a moment.
+    expect(config.anecdoteQuestions.map(({ key, position }) => ({ key, position }))).toEqual(
+      anecdoteQuestionsAtLaunch.map(({ key, position }) => ({ key, position })),
+    );
+    expect(config.anecdoteQuestions).toContainEqual({
+      key: 'hidden_gem',
+      label: 'Un bon plan que personne ne connaît',
+      position: 3,
+    });
+    expect(config.anecdoteQuestions.map((question) => question.key)).not.toContain(retiredQuestion);
+  });
+
+  it('serve the certification thresholds of settings on /v1/config', async () => {
+    const config = AppConfig.parse((await app.inject({ url: '/v1/config' })).json());
+    expect(config.certificationThresholds).toEqual(defaultCertificationThresholds);
   });
 
   it('describe the public routes in the OpenAPI document outside production', async () => {

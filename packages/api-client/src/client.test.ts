@@ -1,5 +1,6 @@
 import {
   defaultBucketThresholds,
+  defaultCertificationThresholds,
   defaultNotificationPrefs,
   labels,
   taxonomies,
@@ -13,6 +14,10 @@ const config = {
   taxonomies,
   labels,
   thresholds: defaultBucketThresholds,
+  anecdoteQuestions: [
+    { key: 'hidden_gem', label: 'Un bon plan que personne ne connaît', position: 3 },
+  ],
+  certificationThresholds: defaultCertificationThresholds,
 };
 
 // Fictitious account.

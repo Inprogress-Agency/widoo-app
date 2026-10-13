@@ -1,4 +1,5 @@
 import type {
+  AnecdoteQuestion,
   Anecdotes,
   CertificationValues,
   FeaturedRoute,
@@ -13,6 +14,19 @@ import { anecdoteQuestions, routes, userAnecdotes, userFeaturedRoutes } from '..
 
 /** A rule of `PATCH /me` broken by the body, at the path of the offending field. */
 export type ProfileIssue = Omit<ValidationIssue, 'location'>;
+
+/** The questions a user may choose for a new anecdote, in the order of the sheet (E-09). */
+export async function readActiveAnecdoteQuestions(db: Db): Promise<AnecdoteQuestion[]> {
+  return db
+    .select({
+      key: anecdoteQuestions.key,
+      label: anecdoteQuestions.label,
+      position: anecdoteQuestions.position,
+    })
+    .from(anecdoteQuestions)
+    .where(eq(anecdoteQuestions.isActive, true))
+    .orderBy(asc(anecdoteQuestions.position), asc(anecdoteQuestions.key));
+}
 
 /** The anecdotes of a profile in display order, with the current label of each question. */
 export async function readAnecdotes(db: Db, userId: string): Promise<ProfileAnecdote[]> {
