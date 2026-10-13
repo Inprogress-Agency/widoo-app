@@ -13,6 +13,8 @@ describe('parseEnv', () => {
     expect(parseEnv(valid)).toEqual({
       ...valid,
       NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL: undefined,
+      NEXT_PUBLIC_POSTHOG_URL: undefined,
+      NEXT_PUBLIC_REVENUECAT_URL: undefined,
     });
   });
 
@@ -54,5 +56,13 @@ describe('parseEnv', () => {
         NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL: 'http://127.0.0.1:9099',
       }),
     ).toThrow(/demo-\* project/);
+  });
+
+  it('reads the dashboards the admin links to, https only', () => {
+    const env = parseEnv({ ...valid, NEXT_PUBLIC_POSTHOG_URL: 'https://eu.posthog.com/project/1' });
+    expect(env.NEXT_PUBLIC_POSTHOG_URL).toBe('https://eu.posthog.com/project/1');
+    expect(() =>
+      parseEnv({ ...valid, NEXT_PUBLIC_REVENUECAT_URL: 'http://plain.example' }),
+    ).toThrow(/NEXT_PUBLIC_REVENUECAT_URL/);
   });
 });
