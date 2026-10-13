@@ -3,6 +3,7 @@ import {
   ModerationQueue,
   ModerationDecision,
   AdminCounters,
+  AdminStats,
   AppConfig,
   GeocodeResult,
   LegalDocument,
@@ -239,6 +240,16 @@ export function createApiClient(options: ApiClientOptions) {
         method: 'GET',
         path: '/v1/admin/counters',
         schema: AdminCounters,
+        auth: true,
+        signal,
+      }),
+
+    /** `GET /v1/admin/stats`: the figures of the dashboard (A-05), for the role of the caller. */
+    getAdminStats: (signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: '/v1/admin/stats',
+        schema: AdminStats,
         auth: true,
         signal,
       }),
