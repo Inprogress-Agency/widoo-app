@@ -3,7 +3,8 @@ import { eq, inArray } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp, type BuildAppOptions } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
-import { users } from '../db/schema';
+import { userAnecdotes, userFeaturedRoutes, users } from '../db/schema';
+import { seed } from '../db/seed';
 import { testConfig } from '../test-config';
 
 // Shared database, parallel files: unique Firebase uids, only those users are deleted.
@@ -109,6 +110,18 @@ describe('DELETE /v1/me', () => {
   it('marks deleted_at and anonymizes the account, then refuses its token', async () => {
     const { uid, headers } = signIn();
     await app.inject({ url: '/v1/me', headers });
+    const userId = (await userOf(uid))?.id ?? '';
+    const { routeIds } = await seed(app.db);
+    await app.db
+      .update(users)
+      .set({ bio: 'Flâneuse du dimanche.', neighborhood: 'Paris 11e' })
+      .where(eq(users.id, userId));
+    await app.db
+      .insert(userAnecdotes)
+      .values({ userId, questionKey: 'hidden_gem', answer: 'Un passage couvert.', position: 1 });
+    await app.db
+      .insert(userFeaturedRoutes)
+      .values({ userId, routeId: routeIds[0] ?? '', position: 1 });
 
     const response = await app.inject({ method: 'DELETE', url: '/v1/me', headers });
     expect(response.statusCode).toBe(204);
@@ -119,9 +132,14 @@ describe('DELETE /v1/me', () => {
       email: null,
       firstName: null,
       avatarUrl: null,
+      bio: null,
+      neighborhood: null,
       isPublic: false,
       notificationPrefs: {},
     });
+    for (const table of [userAnecdotes, userFeaturedRoutes]) {
+      expect(await app.db.select().from(table).where(eq(table.userId, userId))).toEqual([]);
+    }
 
     for (const method of ['GET', 'DELETE'] as const) {
       const again = await app.inject({ method, url: '/v1/me', headers });
