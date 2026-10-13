@@ -16,6 +16,9 @@ parse_args "$@"
 # false, the default of the API: temporary geocoding results, which Mapbox forbids caching, so no
 # cache. Not a secret. Its value waits for the decision on the geocoding cache (#306).
 : "${MAPBOX_GEOCODING_PERMANENT:=false}"
+# 0, the default of the API: no cache of the Directions answers, which the Mapbox Product Terms
+# forbid storing (2.10.1). Not a secret. 30 at most (D-032), only if an order with Mapbox allows it.
+: "${MAPBOX_DIRECTIONS_CACHE_DAYS:=0}"
 
 announce \
   "creates or updates the public service $SERVICE and the job $MIGRATION_JOB; each update of the service creates a revision that receives the traffic" \
@@ -26,6 +29,7 @@ network=(--network="$NETWORK" --subnet="$SUBNET" --vpc-egress=private-ranges-onl
 env_vars="^|^FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID|SENTRY_ENVIRONMENT=$ENVIRONMENT"
 env_vars+="|TRUST_PROXY=$TRUST_PROXY|CORS_ORIGINS=$CORS_ORIGINS"
 env_vars+="|MAPBOX_GEOCODING_PERMANENT=$MAPBOX_GEOCODING_PERMANENT"
+env_vars+="|MAPBOX_DIRECTIONS_CACHE_DAYS=$MAPBOX_DIRECTIONS_CACHE_DAYS"
 
 # Secrets of the service, one VARIABLE=secret:latest entry each. --update-secrets adds or
 # replaces these entries and keeps the others: a secret left out here stays mounted if it was.
@@ -46,6 +50,8 @@ optional_secret() {
 optional_secret SENTRY_DSN sentry-dsn 'no error report'
 optional_secret MAPBOX_GEOCODING_TOKEN mapbox-geocoding-token \
   "the API offers no zone to the search in $ENVIRONMENT"
+optional_secret MAPBOX_DIRECTIONS_TOKEN mapbox-directions-token \
+  "every transition between steps is estimated in a straight line in $ENVIRONMENT"
 secrets_arg=$(
   IFS=,
   echo "${secrets[*]}"
