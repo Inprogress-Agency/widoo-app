@@ -10,6 +10,12 @@ const Origin = z
 /** A host name, without scheme or path: `project.firebaseapp.com`. */
 const Host = z.string().regex(/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/);
 
+const OptionalHttpsUrl = z
+  .string()
+  .optional()
+  .transform((value) => value || undefined)
+  .pipe(z.url({ protocol: /^https$/ }).optional());
+
 /**
  * Environment variables of the admin, validated once. See `.env.example`. Every value is public:
  * Next.js writes the `NEXT_PUBLIC_` variables in the pages at build time.
@@ -24,6 +30,9 @@ const Env = z.object({
   NEXT_PUBLIC_FIREBASE_API_KEY: z.string().min(1),
   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: Host,
   NEXT_PUBLIC_FIREBASE_PROJECT_ID: z.string().regex(/^[a-z][a-z0-9-]{4,28}[a-z0-9]$/),
+  /** Exact pages of the Widoo project in PostHog and RevenueCat, linked from A-05. */
+  NEXT_PUBLIC_POSTHOG_URL: OptionalHttpsUrl,
+  NEXT_PUBLIC_REVENUECAT_URL: OptionalHttpsUrl,
   /** Local Auth emulator; empty on staging and production. */
   NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL: z
     .string()
