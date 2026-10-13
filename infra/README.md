@@ -37,6 +37,8 @@ cd infra/gcp
 read -rs dsn && printf '%s' "$dsn" | gcloud secrets versions add sentry-dsn --data-file=- --project=widoo-staging
 # Avant l'étape 3 : jeton Mapbox serveur du géocodage de la recherche (E-02), saisi sans écho
 read -rs token && printf '%s' "$token" | gcloud secrets versions add mapbox-geocoding-token --data-file=- --project=widoo-staging
+# Avant l'étape 3 : jeton Mapbox serveur des itinéraires entre étapes (Directions), un autre jeton
+read -rs token && printf '%s' "$token" | gcloud secrets versions add mapbox-directions-token --data-file=- --project=widoo-staging
 ./3-run.sh --dry-run
 ./3-run.sh                 # 2 minutes environ
 ```
@@ -44,6 +46,8 @@ read -rs token && printf '%s' "$token" | gcloud secrets versions add mapbox-geoc
 Sans valeur dans `sentry-dsn`, le service démarre sans envoyer de rapports d'erreur. Relancer `3-run.sh` une fois le DSN ajouté.
 
 Le jeton de `mapbox-geocoding-token` est un jeton Mapbox **serveur**, dédié à l'API (`widoo-api-geocoding` en staging), avec les scopes publics seulement : jamais le jeton public de l'app (`EXPO_PUBLIC_MAPBOX_TOKEN`), qui est lisible dans l'application. Il ne passe que par la saisie masquée ci-dessus : ni en argument de commande, ni dans un fichier, ni dans un message. Sans valeur, l'API ne propose aucune zone : `GET /v1/geocode` répond 503 sur Cloud Run, où `NODE_ENV` vaut `production` ; hors production (poste local, tests), une courte liste locale de zones de Paris répond. `3-run.sh` le signale ; le relancer une fois le jeton saisi.
+
+Le jeton de `mapbox-directions-token` est un second jeton Mapbox serveur (`widoo-api-directions` en staging), mêmes règles : scopes publics seulement, saisie masquée. Il est distinct de celui du géocodage pour être révoqué et suivi à part. Sans valeur, l'API ne demande aucun itinéraire : chaque trajet entre deux étapes est estimé à vol d'oiseau (× 1,3, à 4,5 km/h) et marqué `estimated` ; le métro, estimé par coefficient, n'en a pas besoin.
 
 Si une commande échoue juste après une création, c'est la propagation IAM (jusqu'à une minute) : relancer le même script.
 
@@ -83,15 +87,16 @@ Rotation du mot de passe : désactiver la version active de `database-url` (`gcl
 | `TRUST_PROXY` | `linklocal` | adresse du frontal Cloud Run, à confirmer au premier déploiement |
 | `CORS_ORIGINS` | vide | pas d'admin web en staging pour l'instant |
 | `MAPBOX_GEOCODING_PERMANENT` | `false` | valeur par défaut de l'API : résultats temporaires, que Mapbox interdit de garder, donc pas de cache ; variable ordinaire, pas un secret ; la valeur attend la décision sur le cache ([#306](https://github.com/Inprogress-Agency/widoo-app/issues/306)) |
-| Secrets | `DATABASE_URL`, `SENTRY_DSN`, `MAPBOX_GEOCODING_TOKEN` depuis Secret Manager | jamais en clair dans la configuration ; `SENTRY_DSN` et `MAPBOX_GEOCODING_TOKEN` passés seulement si leur secret a une valeur |
+| `MAPBOX_DIRECTIONS_CACHE_DAYS` | `0` | valeur par défaut de l'API : pas de cache des réponses Directions, que les conditions de Mapbox interdisent de stocker (Product Terms, 2.10.1) ; 30 au plus (D-032), seulement si un contrat avec Mapbox l'autorise ; variable ordinaire, pas un secret |
+| Secrets | `DATABASE_URL`, `SENTRY_DSN`, `MAPBOX_GEOCODING_TOKEN`, `MAPBOX_DIRECTIONS_TOKEN` depuis Secret Manager | jamais en clair dans la configuration ; tous sauf `DATABASE_URL` passés seulement si leur secret a une valeur |
 
 Le job `widoo-api-migrate` lance `node --enable-source-maps dist/migrate.js` sur la même image, dans le même réseau, sans nouvelle tentative et avec 10 minutes au plus.
 
 Les deux ressources sont créées avec les images d'exemple de Google (`hello`, `job`). Le premier run du workflow les remplace par l'image de l'API. Relancé, `3-run.sh` met à jour la configuration et garde l'image déployée ; chaque mise à jour crée une révision.
 
-Le secret `mapbox-geocoding-token` ne sert qu'au géocodage de la recherche ([#30](https://github.com/Inprogress-Agency/widoo-app/issues/30)) : seul le service le lit, le job de migration ne le reçoit pas. `--update-secrets` ajoute ou remplace les entrées nommées et garde les autres : un secret absent de la commande reste monté s'il l'était. Pas de clé Firebase (voir Droits).
+Le secret `mapbox-geocoding-token` ne sert qu'au géocodage de la recherche ([#30](https://github.com/Inprogress-Agency/widoo-app/issues/30)), `mapbox-directions-token` qu'aux trajets entre étapes ([#34](https://github.com/Inprogress-Agency/widoo-app/issues/34)) : seul le service les lit, le job de migration ne les reçoit pas. `--update-secrets` ajoute ou remplace les entrées nommées et garde les autres : un secret absent de la commande reste monté s'il l'était. Pas de clé Firebase (voir Droits).
 
-Rotation du jeton Mapbox, sans coupure :
+Rotation d'un jeton Mapbox, sans coupure (ici celui du géocodage ; pour Directions, `mapbox-directions-token` et `MAPBOX_DIRECTIONS_TOKEN`, vérifiés par un trajet calculé sans `estimated`) :
 
 1. créer un nouveau jeton serveur chez Mapbox, scopes publics seulement ;
 2. l'ajouter comme nouvelle version par la saisie masquée de la mise en place (`read -rs token && printf '%s' "$token" | gcloud secrets versions add mapbox-geocoding-token …`) ;
