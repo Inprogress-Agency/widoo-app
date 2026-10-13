@@ -21,6 +21,13 @@ export function httpError(statusCode: 400 | 401 | 403 | 404 | 409, message: stri
 }
 
 /**
+ * Wiki API › Conventions (D-071): 400 for an invalid query, params or headers, 422 for an
+ * invalid body. A body that cannot be parsed at all (malformed JSON) stays 400.
+ */
+const statusOfValidation = (location: ValidationIssue['location']) =>
+  location === 'body' ? 422 : 400;
+
+/**
  * A failed query as it may be logged. Drizzle writes the query parameters into its message and
  * stack, and the driver error may quote a value or the failing row: personal data (e-mail, first
  * name). Only the SQL text, parameterized, and the SQLSTATE code and constraint are kept.
@@ -60,7 +67,7 @@ export function registerErrorHandling(app: FastifyInstance): void {
         message: 'Invalid request',
         details: { issues },
       };
-      return reply.status(400).send(body);
+      return reply.status(statusOfValidation(location)).send(body);
     }
 
     const status = error.statusCode ?? 500;

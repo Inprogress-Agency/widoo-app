@@ -49,6 +49,20 @@ describe('error handling', () => {
     ]);
   });
 
+  it('answers an invalid body with 422 validation_error and the invalid fields', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/v1/test/echo',
+      payload: { title: 42 },
+    });
+    expect(response.statusCode).toBe(422);
+    const error = ApiError.parse(response.json());
+    expect(error.code).toBe('validation_error');
+    expect(error.details?.issues).toEqual([
+      expect.objectContaining({ location: 'body', path: 'title', code: 'invalid_type' }),
+    ]);
+  });
+
   it('answers a malformed JSON body with 400 validation_error', async () => {
     const response = await app.inject({
       method: 'POST',
