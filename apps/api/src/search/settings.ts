@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { z } from 'zod';
 import type { Db } from '../db/client';
 import { settings } from '../db/schema';
@@ -20,13 +20,25 @@ export async function readSetting(db: Db, key: string): Promise<unknown> {
   return row?.value;
 }
 
+/** Values of several `settings` rows by key; an absent row has no entry. */
+export async function readSettings(
+  db: Db,
+  keys: readonly string[],
+): Promise<Record<string, unknown>> {
+  const rows = await db
+    .select({ key: settings.key, value: settings.value })
+    .from(settings)
+    .where(inArray(settings.key, [...keys]));
+  return Object.fromEntries(rows.map((row) => [row.key, row.value]));
+}
+
 /**
  * A value read from `settings` and kept one minute per process, so that a change applies without
  * a deployment. `parse` turns a missing or invalid value into its default.
  */
-export function createCachedSetting<T>(
-  read: () => Promise<unknown>,
-  parse: (value: unknown) => T,
+export function createCachedSetting<T, Stored = unknown>(
+  read: () => Promise<Stored>,
+  parse: (value: Stored) => T,
   now: () => number = () => Date.now(),
 ) {
   let cached: { value: T; readAt: number } | undefined;
