@@ -26,6 +26,19 @@ const me: Me = {
   planExpiresAt: null,
   isPublic: true,
   notificationPrefs: defaultNotificationPrefs,
+  bio: null,
+  neighborhood: null,
+  anecdotes: [],
+  featuredRoutes: [],
+  certification: {
+    isCertified: false,
+    certifiedAt: null,
+    criteria: [
+      { criterion: 'verifiedRoutes', value: 0, threshold: 3, isMet: false },
+      { criterion: 'averageRating', value: null, threshold: 4.5, isMet: false },
+      { criterion: 'completedRoutes', value: 0, threshold: 3, isMet: false },
+    ],
+  },
   createdAt: '2026-09-01T10:00:00.000Z',
 };
 

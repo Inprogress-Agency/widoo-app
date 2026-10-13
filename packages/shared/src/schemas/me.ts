@@ -1,7 +1,15 @@
 import { z } from 'zod';
 import { taxonomies } from '../taxonomies';
 import { HttpsUrl, plainText } from './common';
-import { Anecdotes, Bio, FeaturedRouteIds, Neighborhood } from './profile';
+import {
+  Anecdotes,
+  Bio,
+  Certification,
+  FeaturedRoute,
+  FeaturedRouteIds,
+  Neighborhood,
+  ProfileAnecdote,
+} from './profile';
 
 /** First name shown on the profile and as route author (E-09, E-16). */
 export const FirstName = plainText(50);
@@ -37,6 +45,13 @@ export const Me = z.object({
   planExpiresAt: z.iso.datetime().nullable(),
   isPublic: z.boolean(),
   notificationPrefs: NotificationPrefs,
+  bio: z.string().nullable(),
+  neighborhood: z.string().nullable(),
+  /** In display order, with the label of each question. */
+  anecdotes: z.array(ProfileAnecdote),
+  /** Published routes of the caller only, in display order. */
+  featuredRoutes: z.array(FeaturedRoute),
+  certification: Certification,
   createdAt: z.iso.datetime(),
 });
 export type Me = z.infer<typeof Me>;
