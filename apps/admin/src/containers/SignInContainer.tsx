@@ -5,6 +5,7 @@ import { SignInForm } from '@/components/sign-in/SignInForm';
 import { SignInLayout } from '@/components/sign-in/SignInLayout';
 import { SignInNotices } from '@/components/sign-in/SignInNotices';
 import { PageMessage } from '@/components/states/PageMessage';
+import { SecondFactorContainer } from '@/containers/SecondFactorContainer';
 import { useSession } from '@/hooks/useSession';
 import { useSignIn } from '@/hooks/useSignIn';
 import { returnParam, returnSection, safeReturnPath } from '@/lib/return-path';
@@ -35,6 +36,9 @@ export function SignInContainer() {
         action={<Button onClick={retry}>{messages.signIn.retry}</Button>}
       />
     );
+  }
+  if (session.status === 'secondFactorChallenge' || session.status === 'secondFactorEnrollment') {
+    return <SecondFactorContainer isEnrolling={session.status === 'secondFactorEnrollment'} />;
   }
   if (session.status !== 'signedOut') {
     return <PageMessage role="status" title={messages.shell.loading} />;
