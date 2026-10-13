@@ -18,4 +18,5 @@ export * from './schemas/place';
 export * from './schemas/profile';
 export * from './schemas/recommendation';
 export * from './schemas/route';
+export * from './schemas/route-detail';
 export * from './schemas/search';
