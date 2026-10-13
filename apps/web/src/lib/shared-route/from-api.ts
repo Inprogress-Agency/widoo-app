@@ -36,8 +36,7 @@ export function toSharedRoute(body: unknown): SharedRoute {
     district: route.district,
     neighborhood: route.neighborhood,
     durationMin: route.durationMin,
-    // The API sends a single exact sum since D-032 (#170); the upper bound until then.
-    budgetPerPersonEur: route.budgetPerPersonEur.max,
+    budgetPerPersonEur: route.budgetPerPersonEur,
     distanceM: route.distanceM,
     stepCount: route.steps.length,
     rating:
