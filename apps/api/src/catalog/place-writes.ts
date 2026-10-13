@@ -7,19 +7,28 @@ import { httpError } from '../errors';
 
 type Transaction = Parameters<Parameters<Db['transaction']>[0]>[0];
 
-/**
- * The city a position belongs to: the one whose bounds hold it. A place outside every city is
- * refused until cities are created from the position itself (wiki Admin-Web › Villes).
- */
-async function cityOf(tx: Transaction, location: CatalogPlaceInput['location']): Promise<string> {
-  const [city] = await tx.execute<{ id: string }>(sql`
+/** The city a position belongs to: the one whose bounds hold it; undefined outside every city. */
+export async function findCityId(
+  db: Pick<Db, 'execute'>,
+  location: CatalogPlaceInput['location'],
+): Promise<string | undefined> {
+  const [city] = await db.execute<{ id: string }>(sql`
     select id from cities
     where ST_Covers(bounds, ST_SetSRID(ST_MakePoint(${location.lng}, ${location.lat}), 4326)::geography)
     limit 1`);
-  if (!city) {
+  return city?.id;
+}
+
+/**
+ * The city of a place being written. A place outside every city is refused until cities are
+ * created from the position itself (wiki Admin-Web › Villes).
+ */
+async function cityOf(tx: Transaction, location: CatalogPlaceInput['location']): Promise<string> {
+  const cityId = await findCityId(tx, location);
+  if (!cityId) {
     throw httpError(400, 'Position outside every city');
   }
-  return city.id;
+  return cityId;
 }
 
 const fieldsOf = (input: CatalogPlaceInput) => ({
@@ -48,6 +57,8 @@ export async function createCatalogPlace(
   db: Db,
   input: CatalogPlaceInput,
   actorId: string,
+  /** How the place came in, as the journal names it: by hand, or from an imported file. */
+  action: 'place.create' | 'place.import' = 'place.create',
 ): Promise<string> {
   return db.transaction(async (tx) => {
     const cityId = await cityOf(tx, input.location);
@@ -61,7 +72,7 @@ export async function createCatalogPlace(
     await replaceHours(tx, created.id, input.hours);
     await recordAdminAction(tx, {
       actorId,
-      action: 'place.create',
+      action,
       targetType: 'place',
       targetId: created.id,
       after: input,
