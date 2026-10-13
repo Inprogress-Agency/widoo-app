@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ApiRequestError } from '@widoo/api-client';
 import type { Me } from '@widoo/shared';
-import { readSession, sessionOfAccount } from './session';
+import { readSession, requireSecondFactor, sessionOfAccount, type Session } from './session';
 
 const account = { firstName: 'Sarah', email: 'sarah@example.com' };
 
@@ -55,5 +55,32 @@ describe('readSession', () => {
       throw new Error('offline');
     };
     await expect(readSession({ getMe })).resolves.toEqual({ status: 'unavailable' });
+  });
+});
+
+describe('requireSecondFactor', () => {
+  const signedIn: Session = { status: 'signedIn', member: { ...account, role: 'moderator' } };
+
+  it('holds a member of the team until the account has a second factor', () => {
+    expect(requireSecondFactor(signedIn, { isRequired: true, isEnrolled: false })).toEqual({
+      status: 'secondFactorEnrollment',
+      member: signedIn.member,
+    });
+  });
+
+  it('lets in a member whose account has one', () => {
+    expect(requireSecondFactor(signedIn, { isRequired: true, isEnrolled: true })).toBe(signedIn);
+  });
+
+  it('asks for nothing where no second factor exists (local Auth emulator)', () => {
+    expect(requireSecondFactor(signedIn, { isRequired: false, isEnrolled: false })).toBe(signedIn);
+  });
+
+  it('asks nothing of an account that is refused anyway', () => {
+    const refused: Session = {
+      status: 'signedOut',
+      refusal: { reason: 'noAccess', email: 'lea@example.com' },
+    };
+    expect(requireSecondFactor(refused, { isRequired: true, isEnrolled: false })).toBe(refused);
   });
 });
