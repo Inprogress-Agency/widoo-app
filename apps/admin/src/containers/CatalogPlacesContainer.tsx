@@ -10,6 +10,7 @@ import {
   toCatalogPlacesParams,
 } from '@/config/catalog-places-list';
 import { PlacePanelContainer } from '@/containers/PlacePanelContainer';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useDebouncedCallback } from '@/hooks/useDebouncedCallback';
 import { useListQuery } from '@/hooks/useListQuery';
 import { useCanWriteCatalog } from '@/hooks/useCanWriteCatalog';
@@ -17,7 +18,7 @@ import { useRemoteData } from '@/hooks/useRemoteData';
 import { getSessionClients } from '@/lib/auth/clients';
 import { serializeListQuery } from '@/lib/list-query';
 import { messages } from '@/messages/fr';
-import { PlusIcon } from '@phosphor-icons/react/dist/ssr';
+import { PlusIcon, UploadSimpleIcon } from '@phosphor-icons/react/dist/ssr';
 import { labels, taxonomies } from '@widoo/shared';
 import { Button, Pagination, SearchInput } from '@widoo/ui';
 import Link from 'next/link';
@@ -45,6 +46,7 @@ export function CatalogPlacesContainer() {
   const router = useRouter();
   const openId = useSearchParams().get(openPlaceParam);
   const canWrite = useCanWriteCatalog();
+  const isAdmin = useIsAdmin();
   const { query, handleSearch, handleFilter, handleSort, handlePage } =
     useListQuery(catalogPlacesListOptions);
   const listAddress = serializeListQuery(query, catalogPlacesListOptions);
@@ -105,14 +107,24 @@ export function CatalogPlacesContainer() {
           {data ? (
             <p className="text-body-s text-muted-foreground">{texts.total(data.total)}</p>
           ) : null}
-          {canWrite ? (
-            <Button asChild className="ml-auto">
-              <Link href={`${catalogPaths.places}/nouveau`}>
-                <PlusIcon aria-hidden className="size-18" />
-                {texts.create}
-              </Link>
-            </Button>
-          ) : null}
+          <div className="ml-auto flex flex-wrap gap-12">
+            {isAdmin ? (
+              <Button asChild variant="outline">
+                <Link href={`${catalogPaths.places}/import`}>
+                  <UploadSimpleIcon aria-hidden className="size-18" />
+                  {texts.import.open}
+                </Link>
+              </Button>
+            ) : null}
+            {canWrite ? (
+              <Button asChild>
+                <Link href={`${catalogPaths.places}/nouveau`}>
+                  <PlusIcon aria-hidden className="size-18" />
+                  {texts.create}
+                </Link>
+              </Button>
+            ) : null}
+          </div>
         </div>
         <CatalogPlacesFilters
           categories={categoryOptions}
