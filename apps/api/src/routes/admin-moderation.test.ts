@@ -50,7 +50,10 @@ afterAll(async () => {
 async function signIn(role: UserRole) {
   const { token, uid } = verifier.issue({ secondFactor: 'totp' });
   createdUids.push(uid);
-  const [user] = await app.db.insert(users).values({ firebaseUid: uid, role }).returning();
+  const [user] = await app.db
+    .insert(users)
+    .values({ firebaseUid: uid, role, email: 'julie.test@example.com' })
+    .returning();
   if (!user) throw new Error('User not created');
   return { id: user.id, headers: { authorization: `Bearer ${token}` } };
 }
@@ -333,7 +336,10 @@ describe('GET /v1/admin/routes/:id', () => {
     const route = ModerationRouteDetail.parse((await sheet(moderator.headers, id)).json());
     expect(route.status).toBe('rejected');
     expect(route.queue).toBeNull();
-    expect(route.history).toMatchObject([{ action: 'reject', ...refusal }]);
+    // The moderator of this test has no first name: the start of the address stands for it.
+    expect(route.history).toMatchObject([
+      { action: 'reject', actorName: 'julie.test', ...refusal },
+    ]);
   });
 
   it('counts what the author already published and was refused', async () => {
