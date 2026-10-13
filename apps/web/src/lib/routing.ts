@@ -14,7 +14,7 @@ export type RoutingInput = {
 export type RoutingDecision =
   | { kind: 'next' }
   | { kind: 'redirect'; location: string; status: 307 | 308; negotiated: boolean }
-  | { kind: 'rewrite'; pathname: string };
+  | { kind: 'rewrite'; location: string };
 
 /**
  * What the proxy does with a request (Site-Web › Référencement, Langues):
@@ -22,7 +22,8 @@ export type RoutingDecision =
  * - `/` sends to the language of the browser, 307, never cached;
  * - a path with a language prefix is served as is;
  * - any other path is served in the language of the browser, without changing the address, so
- *   that an unknown address shows the missing page in the right language.
+ *   that an unknown address shows the missing page in the right language; its query goes with
+ *   it, as on a redirect.
  */
 export function decideRouting(input: RoutingInput): RoutingDecision {
   const host = input.host?.toLowerCase().replace(/:\d+$/, '') ?? '';
@@ -47,5 +48,5 @@ export function decideRouting(input: RoutingInput): RoutingDecision {
       negotiated: true,
     };
   }
-  return { kind: 'rewrite', pathname: `/${locale}${input.pathname}` };
+  return { kind: 'rewrite', location: `/${locale}${input.pathname}${input.search}` };
 }

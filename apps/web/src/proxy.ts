@@ -17,7 +17,7 @@ export function proxy(request: NextRequest) {
     case 'next':
       return NextResponse.next();
     case 'rewrite':
-      return NextResponse.rewrite(new URL(decision.pathname, request.url));
+      return NextResponse.rewrite(new URL(decision.location, request.url));
     case 'redirect': {
       const response = NextResponse.redirect(new URL(decision.location, request.url), {
         status: decision.status,
