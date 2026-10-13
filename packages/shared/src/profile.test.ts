@@ -3,10 +3,12 @@ import {
   Anecdote,
   Anecdotes,
   Bio,
+  certificationCriteriaOf,
   certificationThresholdsOf,
   CertifiedOverride,
   defaultCertificationThresholds,
   FeaturedRouteIds,
+  isCertifiedWith,
   ProfileSlot,
 } from '.';
 
@@ -118,5 +120,37 @@ describe('certificationThresholdsOf', () => {
         'certification.min_completed_routes': 5,
       }),
     ).toEqual({ ...defaultCertificationThresholds, minCompletedRoutes: 5 });
+  });
+});
+
+describe('certificationCriteriaOf', () => {
+  it('lists the three criteria in the order of the sheet, met at the threshold', () => {
+    const values = { verifiedRoutes: 3, averageRating: 4.4, completedRoutes: 23 };
+    expect(certificationCriteriaOf(values, defaultCertificationThresholds)).toEqual([
+      { criterion: 'verifiedRoutes', value: 3, threshold: 3, isMet: true },
+      { criterion: 'averageRating', value: 4.4, threshold: 4.5, isMet: false },
+      { criterion: 'completedRoutes', value: 23, threshold: 3, isMet: true },
+    ]);
+  });
+
+  it('never meets the rating without any rating, even at a zero threshold', () => {
+    const values = { verifiedRoutes: 0, averageRating: null, completedRoutes: 0 };
+    const thresholds = { minVerifiedRoutes: 0, minRating: 0, minCompletedRoutes: 0 };
+    expect(certificationCriteriaOf(values, thresholds).map((c) => c.isMet)).toEqual([
+      true,
+      false,
+      true,
+    ]);
+  });
+});
+
+describe('isCertifiedWith', () => {
+  it.each([
+    [false, 'none', false],
+    [true, 'none', true],
+    [false, 'granted', true],
+    [true, 'revoked', false],
+  ] as const)('computed %s with override %s is %s', (computed, override, expected) => {
+    expect(isCertifiedWith(computed, override)).toBe(expected);
   });
 });

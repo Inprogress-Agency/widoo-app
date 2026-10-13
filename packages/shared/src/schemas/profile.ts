@@ -30,7 +30,8 @@ export type AnecdoteQuestion = z.infer<typeof AnecdoteQuestion>;
 
 export const anecdoteAnswerMaxLength = 150;
 
-export const Anecdote = z.object({
+/** An answer as `PATCH /me` writes it: strict, an unknown key is refused. */
+export const Anecdote = z.strictObject({
   questionKey: AnecdoteQuestionKey,
   answer: plainText(anecdoteAnswerMaxLength),
 });
@@ -97,4 +98,71 @@ export function certificationThresholdsOf(
     return [criterion, parsed.success ? parsed.data : defaultCertificationThresholds[criterion]];
   });
   return Object.fromEntries(entries) as CertificationThresholds;
+}
+
+/**
+ * An anecdote as `GET /me` returns it, with the current label of its question; not strict, so
+ * that a build already in the stores keeps reading a field added later.
+ */
+export const ProfileAnecdote = z.object({ ...Anecdote.shape, questionLabel: z.string() });
+export type ProfileAnecdote = z.infer<typeof ProfileAnecdote>;
+
+/** A featured route as `GET /me` returns it, in display order. */
+export const FeaturedRoute = z.object({ id: z.uuid(), title: z.string() });
+export type FeaturedRoute = z.infer<typeof FeaturedRoute>;
+
+/** Criteria of the badge, in the order of the « Créateur certifié » sheet (E-09, E-16). */
+export const certificationCriteria = [
+  'verifiedRoutes',
+  'averageRating',
+  'completedRoutes',
+] as const;
+export type CertificationCriterionKey = (typeof certificationCriteria)[number];
+
+/** What the creator has on each criterion; the average is null without any rating. */
+export type CertificationValues = {
+  verifiedRoutes: number;
+  averageRating: number | null;
+  completedRoutes: number;
+};
+
+const thresholdOfCriterion = {
+  verifiedRoutes: 'minVerifiedRoutes',
+  averageRating: 'minRating',
+  completedRoutes: 'minCompletedRoutes',
+} as const satisfies Record<CertificationCriterionKey, keyof CertificationThresholds>;
+
+/** One line of the sheet: the creator's value, the threshold and whether it is reached. */
+export const CertificationCriterion = z.object({
+  criterion: z.enum(certificationCriteria),
+  value: z.number().nullable(),
+  threshold: z.number(),
+  isMet: z.boolean(),
+});
+export type CertificationCriterion = z.infer<typeof CertificationCriterion>;
+
+/** The badge of the caller and what it rests on (`GET /me`). */
+export const Certification = z.object({
+  isCertified: z.boolean(),
+  /** When the badge was obtained; null without it. */
+  certifiedAt: z.iso.datetime().nullable(),
+  criteria: z.array(CertificationCriterion),
+});
+export type Certification = z.infer<typeof Certification>;
+
+/** Each criterion against its threshold: reached at the threshold, never without a value. */
+export function certificationCriteriaOf(
+  values: CertificationValues,
+  thresholds: CertificationThresholds,
+): CertificationCriterion[] {
+  return certificationCriteria.map((criterion) => {
+    const value = values[criterion];
+    const threshold = thresholds[thresholdOfCriterion[criterion]];
+    return { criterion, value, threshold, isMet: value !== null && value >= threshold };
+  });
+}
+
+/** The badge shown: the team's choice in the admin wins over the nightly computation (#127). */
+export function isCertifiedWith(computed: boolean, override: CertifiedOverride): boolean {
+  return override === 'none' ? computed : override === 'granted';
 }
