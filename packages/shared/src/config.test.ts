@@ -1,15 +1,25 @@
 import { describe, expect, it } from 'vitest';
-import { AppConfig, defaultBucketThresholds, labels, taxonomies } from '.';
+import {
+  AppConfig,
+  defaultBucketThresholds,
+  defaultCertificationThresholds,
+  labels,
+  taxonomies,
+} from '.';
 
 const config = {
   minAppVersion: '1.2.0',
   taxonomies,
   labels,
   thresholds: defaultBucketThresholds,
+  anecdoteQuestions: [
+    { key: 'hidden_gem', label: 'Un bon plan que personne ne connaît', position: 3 },
+  ],
+  certificationThresholds: defaultCertificationThresholds,
 };
 
 describe('AppConfig', () => {
-  it('accepts the shared taxonomies, labels and thresholds', () => {
+  it('accepts the shared taxonomies, labels, thresholds and the anecdote questions', () => {
     expect(AppConfig.parse(config)).toEqual(config);
   });
 
