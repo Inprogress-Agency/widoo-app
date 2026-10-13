@@ -1,4 +1,6 @@
 import {
+  CatalogPlaces,
+  CatalogPlaceDetail,
   CatalogRoutes,
   CatalogRouteAction,
   ModerationRouteDetail,
@@ -31,6 +33,8 @@ import {
   type RequestChangesBody,
   type CatalogRoutesQuery,
   type RepublishBody,
+  type CatalogPlaceInput,
+  type CatalogPlacesQuery,
 } from '@widoo/shared';
 import { plannedPath, plannedQueryString, type PlannedListParams } from './planned';
 import {
@@ -43,7 +47,7 @@ import { isProfileUnavailable, publicProfilePath, type PublicProfileAnswer } fro
 import { removedOf, routePath, type GetRouteOptions, type RouteSheetAnswer } from './route';
 import { createTransport, type ApiClientOptions } from './transport';
 import { moderationQueryString, type ModerationQueueParams } from './moderation';
-import { catalogQueryString } from './catalog';
+import { catalogPlacesQueryString, catalogQueryString } from './catalog';
 
 /**
  * Typed client of the API, one method per route, answers validated by the `shared` schemas.
@@ -344,6 +348,46 @@ export function createApiClient(options: ApiClientOptions) {
         method: 'POST',
         path: `/v1/admin/routes/${routeId}/reassign`,
         schema: CatalogRouteAction,
+        auth: true,
+      }),
+
+    /** `GET /v1/admin/places`: a page of the places of the catalog (A-04). */
+    getCatalogPlaces: (params: Partial<CatalogPlacesQuery>, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/admin/places?${catalogPlacesQueryString(params)}`,
+        schema: CatalogPlaces,
+        auth: true,
+        signal,
+      }),
+
+    /** `GET /v1/admin/places/:id`: the sheet of a place, its hours and the routes that use it. */
+    getCatalogPlace: (placeId: string, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/admin/places/${placeId}`,
+        schema: CatalogPlaceDetail,
+        auth: true,
+        signal,
+      }),
+
+    /** `POST /v1/admin/places`: creates a place by hand. Editors and admins. */
+    createCatalogPlace: (place: CatalogPlaceInput) =>
+      request({
+        method: 'POST',
+        path: '/v1/admin/places',
+        body: place,
+        schema: CatalogPlaceDetail,
+        auth: true,
+      }),
+
+    /** `PATCH /v1/admin/places/:id`: replaces the sheet of a place. Editors and admins. */
+    updateCatalogPlace: (placeId: string, place: CatalogPlaceInput) =>
+      request({
+        method: 'PATCH',
+        path: `/v1/admin/places/${placeId}`,
+        body: place,
+        schema: CatalogPlaceDetail,
         auth: true,
       }),
 
