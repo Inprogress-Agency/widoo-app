@@ -29,6 +29,13 @@
       "when": 1791887020675,
       "tag": "0003_add_direction_cache",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791890280667,
+      "tag": "0004_add_profile",
+      "breakpoints": true
     }
   ]
 }
