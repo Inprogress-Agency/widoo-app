@@ -3,7 +3,9 @@ import {
   GeocodeResult,
   Me,
   RouteCount,
+  RouteDetail,
   RouteSearchResult,
+  RouteTimeline,
   type UpdateMe,
 } from '@widoo/shared';
 import {
@@ -12,6 +14,7 @@ import {
   type RouteCountParams,
   type RouteSearchParams,
 } from './search';
+import { removedOf, routePath, type GetRouteOptions, type RouteSheetAnswer } from './route';
 import { createTransport, type ApiClientOptions } from './transport';
 
 /**
@@ -75,6 +78,40 @@ export function createApiClient(options: ApiClientOptions) {
         method: 'GET',
         path: `/v1/geocode?${new URLSearchParams({ q: text }).toString()}`,
         schema: GeocodeResult,
+        signal,
+      }),
+
+    /**
+     * `GET /v1/routes/:id`: the route sheet (E-05), reduced for a Premium route the caller has
+     * no right to (D-014); a withdrawn route answers its date instead. Public, with the token of
+     * the signed-in user when `getToken` gives one.
+     */
+    getRoute: async (id: string, options: GetRouteOptions = {}): Promise<RouteSheetAnswer> => {
+      try {
+        const route = await request({
+          method: 'GET',
+          path: routePath(id, options.token),
+          schema: RouteDetail,
+          auth: 'optional',
+          signal: options.signal,
+        });
+        return { kind: 'route', route };
+      } catch (error) {
+        const removed = removedOf(error);
+        if (removed) {
+          return removed;
+        }
+        throw error;
+      }
+    },
+
+    /** `GET /v1/routes/:id/timeline`: the times of the steps for a start, and their conflicts. */
+    getRouteTimeline: (id: string, startsAt: string, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/routes/${encodeURIComponent(id)}/timeline?${new URLSearchParams({ startsAt }).toString()}`,
+        schema: RouteTimeline,
+        auth: 'optional',
         signal,
       }),
 
