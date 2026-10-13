@@ -12,7 +12,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
 import { adminActions, moderationActionsTable, routes, users } from '../db/schema';
-import { seed } from '../db/seed';
+import { seed, seedId } from '../db/seed';
 import { uuidv7 } from '../db/uuid';
 import { testConfig } from '../test-config';
 
@@ -22,6 +22,9 @@ const createdUids: string[] = [];
 const createdRouteIds: string[] = [];
 const marker = `modtest-${uuidv7()}`;
 const hour = 60 * 60 * 1000;
+const templateId = seedId('route:marais-gourmand');
+const farAway = { lat: 32, lng: 32 };
+const farAwayBounds = { west: 32, south: 32, east: 32.001, north: 32.001 };
 
 let app: Awaited<ReturnType<typeof buildApp>>;
 let authorId: string;
@@ -54,8 +57,10 @@ async function signIn(role: UserRole) {
 
 /** A route copied from the seed, in `status`, last changed `hoursAgo` hours ago. */
 async function addRoute(status: RouteStatus, hoursAgo = 1, title = 'Montmartre') {
-  const [template] = await app.db.select().from(routes).limit(1);
-  if (!template) throw new Error('No route in the seed');
+  // Always the same demo route of the seed, never a row another test file is using, and far
+  // from every zone the search tests look at: some of these copies are published.
+  const [template] = await app.db.select().from(routes).where(eq(routes.id, templateId));
+  if (!template) throw new Error('Demo route missing from the seed');
   const id = uuidv7();
   createdRouteIds.push(id);
   await app.db.insert(routes).values({
@@ -63,6 +68,8 @@ async function addRoute(status: RouteStatus, hoursAgo = 1, title = 'Montmartre')
     id,
     authorId,
     shareToken: null,
+    startLocation: farAway,
+    bounds: farAwayBounds,
     status,
     publishedAt: null,
     title: `${title} ${marker}`,
