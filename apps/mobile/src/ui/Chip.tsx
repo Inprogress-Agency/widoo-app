@@ -108,3 +108,22 @@ export function Chip({
     </Pressable>
   );
 }
+
+/**
+ * A chip read only, as the route sheet lists its publics and conditions (Ecrans › E-05, infos):
+ * the look of a filter chip on warm grey, read as text, never as a button.
+ */
+export function InfoChip({ label, icon }: { label: string; icon?: IconName }) {
+  return (
+    <View
+      accessible
+      accessibilityLabel={label}
+      className="min-h-chip-h flex-row items-center gap-6 self-start rounded-pill bg-surface px-12 py-6"
+    >
+      {icon && <Icon name={icon} size="icon-m" />}
+      <Text variant="label" isDense className="shrink">
+        {label}
+      </Text>
+    </View>
+  );
+}
