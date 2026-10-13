@@ -9,6 +9,7 @@ const codeByStatus: Partial<Record<number, ApiErrorCode>> = {
   403: 'forbidden',
   404: 'not_found',
   409: 'conflict',
+  422: 'validation_error',
   429: 'rate_limited',
 };
 
@@ -18,6 +19,15 @@ const codeByStatus: Partial<Record<number, ApiErrorCode>> = {
  */
 export function httpError(statusCode: 400 | 401 | 403 | 404 | 409, message: string) {
   return Object.assign(new Error(message), { statusCode });
+}
+
+/**
+ * A body that is well formed but breaks a rule only the database can check (a retired
+ * question, a route of another author): 422 `validation_error`, its issues in `details`.
+ */
+export function bodyValidationError(issues: Omit<ValidationIssue, 'location'>[]) {
+  const details = { issues: issues.map((issue) => ({ location: 'body' as const, ...issue })) };
+  return Object.assign(new Error('Invalid request'), { statusCode: 422, details });
 }
 
 /**
@@ -73,9 +83,11 @@ export function registerErrorHandling(app: FastifyInstance): void {
     const status = error.statusCode ?? 500;
     if (status >= 400 && status < 500) {
       // Other client errors raised by Fastify (malformed JSON, body too large...) are validation errors.
+      const { details } = error as { details?: ApiError['details'] };
       const body: ApiError = {
         code: codeByStatus[status] ?? 'validation_error',
         message: error.message,
+        ...(details && { details }),
       };
       return reply.status(status).send(body);
     }

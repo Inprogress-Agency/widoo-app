@@ -2,7 +2,7 @@ import { defaultNotificationPrefs, Me, NotificationPrefs, UpdateMe } from '@wido
 import type { FastifyRequest } from 'fastify';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { httpError } from '../errors';
+import { bodyValidationError, httpError } from '../errors';
 import { softDeleteUser, updateUser, type User } from '../users/repository';
 
 const StoredPrefs = NotificationPrefs.partial();
@@ -51,18 +51,23 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     {
       schema: {
         tags: ['account'],
-        summary: 'Update my first name, avatar removal, visibility or notification preferences',
+        summary:
+          'Update my first name, avatar removal, visibility, notification preferences, bio, ' +
+          'neighborhood, anecdotes or featured routes, in one transaction',
         security,
         body: UpdateMe,
         response: { 200: Me },
       },
     },
     async (request) => {
-      const updated = await updateUser(app.db, currentUser(request).id, request.body);
-      if (!updated) {
+      const outcome = await updateUser(app.db, currentUser(request).id, request.body);
+      if (outcome.kind === 'deleted') {
         throw httpError(401, 'Account deleted');
       }
-      return toMe(updated);
+      if (outcome.kind === 'invalid') {
+        throw bodyValidationError(outcome.issues);
+      }
+      return toMe(outcome.user);
     },
   );
 

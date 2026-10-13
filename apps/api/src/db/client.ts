@@ -21,6 +21,9 @@ export function createSql(databaseUrl: string): Sql {
 
 export type Db = PostgresJsDatabase<typeof schema>;
 
+/** The handle of a transaction opened by `db.transaction`. */
+export type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
+
 /** Drizzle over the pool: typed queries, always parameterized. */
 export function createDb(sql: Sql): Db {
   return drizzle({ client: sql, schema });

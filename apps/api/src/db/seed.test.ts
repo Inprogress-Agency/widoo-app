@@ -177,8 +177,14 @@ describe('seed', () => {
   });
 
   it('holds the eight questions of migration 0004, and keeps a label the team edited', async () => {
+    // The launch keys only: other files add questions of their own to the shared database.
+    const launchKeys = anecdoteQuestionsAtLaunch.map((question) => question.key);
     const questions = () =>
-      app.db.select().from(anecdoteQuestions).orderBy(anecdoteQuestions.position);
+      app.db
+        .select()
+        .from(anecdoteQuestions)
+        .where(inArray(anecdoteQuestions.key, launchKeys))
+        .orderBy(anecdoteQuestions.position);
     expect(await questions()).toEqual(
       anecdoteQuestionsAtLaunch.map((question) => ({ ...question, isActive: true })),
     );
