@@ -9,6 +9,7 @@ import {
   type ModerationQueueStatus,
 } from '@widoo/shared';
 import { sql, type SQL } from 'drizzle-orm';
+import { neighbourCursors, offsetOfCursor } from '../admin/page-cursor';
 import type { Db } from '../db/client';
 
 type QueueRow = {
@@ -86,21 +87,6 @@ const queueFrom = sql`from routes r
   join cities c on c.id = r.city_id
   left join users u on u.id = r.author_id and u.deleted_at is null`;
 
-/**
- * The cursor of a page is the number of rows before it, kept opaque for the client. The queue is
- * short and sorted by several columns: an offset is enough, and a row decided meanwhile only
- * shifts the next page by one.
- */
-const encodeCursor = (offset: number) => Buffer.from(String(offset)).toString('base64url');
-
-export function decodeCursor(cursor: string | undefined): number {
-  if (!cursor) {
-    return 0;
-  }
-  const offset = Number(Buffer.from(cursor, 'base64url').toString());
-  return Number.isSafeInteger(offset) && offset > 0 ? offset : 0;
-}
-
 const toItem = (row: QueueRow): ModerationQueueItem => ({
   id: row.id,
   title: row.title,
@@ -127,7 +113,7 @@ export async function readModerationQueue(
   query: ModerationQueueQuery,
   now = new Date(),
 ): Promise<ModerationQueue> {
-  const offset = decodeCursor(query.cursor);
+  const offset = offsetOfCursor(query.cursor);
   const where = filtersOf(query, now);
   const direction = query.direction === 'desc' ? sql`desc` : sql`asc`;
 
@@ -181,10 +167,6 @@ export async function readModerationQueue(
     },
     cities: cities.map(({ id, name }) => ({ id, name })),
     offset,
-    previousCursor: offset > 0 ? encodeCursor(Math.max(0, offset - moderationQueuePageSize)) : null,
-    nextCursor:
-      offset + moderationQueuePageSize < total
-        ? encodeCursor(offset + moderationQueuePageSize)
-        : null,
+    ...neighbourCursors(offset, total, moderationQueuePageSize),
   };
 }
