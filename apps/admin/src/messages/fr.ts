@@ -100,10 +100,34 @@ export const messages = {
         detail: "Pour en savoir plus, adressez-vous à un admin de l'équipe Widoo.",
       },
     },
+    otherAccount: 'Utiliser un autre compte',
+    code: {
+      label: 'Code à 6 chiffres',
+      placeholder: '000000',
+    },
+    challenge: {
+      title: 'Code de vérification',
+      text: "Saisissez le code à 6 chiffres affiché par votre application d'authentification.",
+      submit: 'Vérifier',
+    },
+    enrollment: {
+      title: 'Activez la double authentification',
+      text: "L'admin Widoo demande un second code à chaque connexion. Il vous faut une application d'authentification sur votre téléphone (Google Authenticator, 1Password, Authy…).",
+      scan: "1. Scannez ce QR code avec l'application.",
+      qrCodeAlt: "QR code à scanner avec l'application d'authentification",
+      manual: 'Ou saisissez cette clé à la main :',
+      keepSecret:
+        'Ne partagez ni ce QR code ni cette clé, et ne les photographiez pas : ils servent à produire vos codes.',
+      enter: "2. Saisissez le code à 6 chiffres qu'elle affiche.",
+      submit: 'Activer',
+      preparing: 'Préparation du QR code…',
+    },
     errors: {
       generic: "La connexion n'a pas abouti. Réessayez.",
       popupBlocked: 'Votre navigateur a bloqué la fenêtre de Google. Autorisez-la, puis réessayez.',
       linkInvalid: 'Ce lien de connexion a expiré ou a déjà servi. Demandez-en un nouveau.',
+      codeInvalid: 'Ce code est incorrect ou a expiré. Saisissez le code affiché en ce moment.',
+      recentSignInRequired: 'Votre connexion est trop ancienne pour cette étape. Reconnectez-vous.',
       linkOtherDevice:
         "Ouvrez le lien sur l'appareil où vous l'avez demandé, ou demandez-en un nouveau ici.",
       unavailable: "L'admin ne répond pas pour le moment.",
