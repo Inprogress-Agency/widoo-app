@@ -35,7 +35,7 @@ export function useSignIn(returnPath: string) {
     }
     hasReadLink.current = true;
     completeSignInLink(window.location.href)
-      .then((wasLink) => wasLink && router.replace(signInPathFor(returnPath)))
+      .then((outcome) => outcome !== 'notALink' && router.replace(signInPathFor(returnPath)))
       .catch((error: unknown) => {
         setFailure(failureOf(error));
         router.replace(signInPathFor(returnPath));
