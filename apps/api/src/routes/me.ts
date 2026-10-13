@@ -1,14 +1,32 @@
-import { defaultNotificationPrefs, Me, NotificationPrefs, UpdateMe } from '@widoo/shared';
+import {
+  certificationCriteriaOf,
+  defaultNotificationPrefs,
+  isCertifiedWith,
+  Me,
+  NotificationPrefs,
+  UpdateMe,
+  type CertificationThresholds,
+} from '@widoo/shared';
 import type { FastifyRequest } from 'fastify';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
+import type { Db } from '../db/client';
 import { bodyValidationError, httpError } from '../errors';
+import { createCertificationThresholds } from '../users/certification';
+import { readAnecdotes, readCertificationValues, readFeaturedRoutes } from '../users/profile';
 import { softDeleteUser, updateUser, type User } from '../users/repository';
 
 const StoredPrefs = NotificationPrefs.partial();
 
-function toMe(user: User): Me {
+/** The account with its profile: anecdotes, featured routes and certification. */
+async function toMe(db: Db, user: User, thresholds: CertificationThresholds): Promise<Me> {
   const stored = StoredPrefs.safeParse(user.notificationPrefs);
+  const [anecdotes, featuredRoutes, values] = await Promise.all([
+    readAnecdotes(db, user.id),
+    readFeaturedRoutes(db, user.id),
+    readCertificationValues(db, user.id),
+  ]);
+  const isCertified = isCertifiedWith(user.isCertified, user.certifiedOverride);
   return {
     id: user.id,
     email: user.email,
@@ -19,6 +37,15 @@ function toMe(user: User): Me {
     planExpiresAt: user.planExpiresAt?.toISOString() ?? null,
     isPublic: user.isPublic,
     notificationPrefs: { ...defaultNotificationPrefs, ...(stored.success ? stored.data : {}) },
+    bio: user.bio,
+    neighborhood: user.neighborhood,
+    anecdotes,
+    featuredRoutes,
+    certification: {
+      isCertified,
+      certifiedAt: isCertified ? (user.certifiedAt?.toISOString() ?? null) : null,
+      criteria: certificationCriteriaOf(values, thresholds),
+    },
     createdAt: user.createdAt.toISOString(),
   };
 }
@@ -35,6 +62,9 @@ const security = [{ firebaseIdToken: [] }];
 
 /** The caller's own account (E-09). Personal data: never cached. */
 export const meRoutes: FastifyPluginAsyncZod = async (app) => {
+  const certificationThresholds = createCertificationThresholds(app.db);
+  const meOf = async (user: User) => toMe(app.db, user, await certificationThresholds());
+
   app.addHook('onRequest', app.requireAuth);
   app.addHook('onSend', async (_request, reply) => {
     reply.header('cache-control', 'no-store');
@@ -42,8 +72,15 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.get(
     '/me',
-    { schema: { tags: ['account'], summary: 'My account', security, response: { 200: Me } } },
-    async (request) => toMe(currentUser(request)),
+    {
+      schema: {
+        tags: ['account'],
+        summary: 'My account and profile: anecdotes, featured routes, certification',
+        security,
+        response: { 200: Me },
+      },
+    },
+    async (request) => meOf(currentUser(request)),
   );
 
   app.patch(
@@ -67,7 +104,7 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
       if (outcome.kind === 'invalid') {
         throw bodyValidationError(outcome.issues);
       }
-      return toMe(outcome.user);
+      return meOf(outcome.user);
     },
   );
 
