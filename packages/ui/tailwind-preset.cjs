@@ -99,6 +99,8 @@ module.exports = {
       // Text of a button of 36 px and of a navigation entry: `body-s` in 700.
       fontSize: {
         control: ['14px', { lineHeight: '20px', fontWeight: '700' }],
+        // Figure of the dashboard: 30/36 in 800.
+        figure: ['30px', { lineHeight: '36px', fontWeight: '800', letterSpacing: '-0.6px' }],
         // Header of a table column and text of a badge: 12/16 in 600.
         'column-head': ['12px', { lineHeight: '16px', fontWeight: '600' }],
       },
