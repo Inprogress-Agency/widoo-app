@@ -1,5 +1,6 @@
 import { CertifiedSeal } from '@/components/moderation/CertifiedSeal';
 import { WaitingTime } from '@/components/moderation/WaitingTime';
+import { RouteStatusBadge } from '@/components/routes/RouteStatusBadge';
 import { messages } from '@/messages/fr';
 import { CrownSimpleIcon, MapPinIcon } from '@phosphor-icons/react/dist/ssr';
 import type { ModerationRouteDetail } from '@widoo/shared';
@@ -19,9 +20,7 @@ export function SheetHeader({ route, isLate }: SheetHeaderProps) {
   return (
     <header className="flex flex-col gap-10">
       <div className="flex flex-wrap items-center gap-8">
-        <StatusBadge tone={route.status === 'pending' ? 'info' : 'neutral'}>
-          {texts.statuses[route.status]}
-        </StatusBadge>
+        <RouteStatusBadge status={route.status} />
         {route.isRevision ? (
           <StatusBadge tone="neutral">{messages.moderation.revision}</StatusBadge>
         ) : null}
