@@ -282,7 +282,11 @@ importers:
         specifier: ^4.6.5
         version: 4.6.5
 
-  packages/orchestration: {}
+  packages/orchestration:
+    dependencies:
+      '@widoo/shared':
+        specifier: workspace:*
+        version: link:../shared
 
   packages/shared:
     dependencies:

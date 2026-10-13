@@ -8,6 +8,10 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@widoo/shared": "workspace:*"
   }
 }
