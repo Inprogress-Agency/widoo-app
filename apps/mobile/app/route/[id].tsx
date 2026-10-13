@@ -15,7 +15,7 @@ export default function RouteScreen() {
     <Screen title={t('route.title')}>
       <StatusMessage
         title={t('route.comingSoon')}
-        body={step ? t('route.step', { position: step }) : undefined}
+        body={step ? t('route.step_opened', { position: step }) : undefined}
         action={
           <Button label={t('route.back')} variant="secondary" onPress={() => router.back()} />
         }
