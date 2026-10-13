@@ -1,6 +1,7 @@
+import { BackLink } from '@/components/states/BackLink';
 import { sectionPaths } from '@/config/navigation';
 import { messages } from '@/messages/fr';
-import { ArrowLeftIcon, CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react/dist/ssr';
+import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react/dist/ssr';
 import type { ModerationRouteDetail } from '@widoo/shared';
 import { cn } from '@widoo/ui';
 import Link from 'next/link';
@@ -38,13 +39,7 @@ function NeighbourLink({ routeId, label, direction }: NeighbourLinkProps) {
 export function SheetNavigation({ queue }: { queue: ModerationRouteDetail['queue'] }) {
   return (
     <nav aria-label={texts.back} className="flex items-center gap-16">
-      <Link
-        href={sectionPaths.moderation}
-        className="inline-flex items-center gap-8 rounded-pill text-control hover:underline"
-      >
-        <ArrowLeftIcon aria-hidden className="size-16" />
-        {texts.back}
-      </Link>
+      <BackLink href={sectionPaths.moderation} label={texts.back} />
       {queue ? (
         <>
           <span className="text-body-s text-muted-foreground">
