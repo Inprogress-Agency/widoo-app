@@ -9,3 +9,11 @@ export {
   type DirectionsProvider,
 } from './directions';
 export { COORDINATE_DECIMALS, roundedPoint, straightLineM } from './geo';
+export {
+  computeTransitions,
+  proposedMode,
+  WALK_PROPOSAL_MAX_M,
+  type Transition,
+  type TransitionStep,
+  type TransitionTransport,
+} from './transitions';
