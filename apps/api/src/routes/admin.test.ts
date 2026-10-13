@@ -1,4 +1,4 @@
-import { AdminCounters, ApiError, type UserRole } from '@widoo/shared';
+import { AdminCounters, AdminStats, ApiError, type UserRole } from '@widoo/shared';
 import { eq, inArray } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
@@ -127,5 +127,62 @@ describe('GET /v1/admin/counters', () => {
   it('gives an editor no counter of the moderation', async () => {
     const response = await getCounters(await signIn('editor'));
     expect(AdminCounters.parse(response.json())).toEqual({});
+  });
+});
+
+describe('GET /v1/admin/stats', () => {
+  const getStats = (headers: Record<string, string>) =>
+    app.inject({ url: '/v1/admin/stats', headers });
+
+  it('refuses an account outside the team', async () => {
+    expect((await getStats(await signIn('user'))).statusCode).toBe(403);
+  });
+
+  it('gives a moderator what waits, with the oldest route of the queue', async () => {
+    const headers = await signIn('moderator');
+    await addPendingRoute(90);
+
+    const stats = AdminStats.parse((await getStats(headers)).json());
+    expect(Object.keys(stats.toHandle).sort()).toEqual([
+      'moderation',
+      'reports',
+      'support',
+      'translations',
+    ]);
+    const moderation = stats.toHandle.moderation;
+    expect(moderation?.count).toBeGreaterThanOrEqual(1);
+    expect(moderation?.lateCount).toBeGreaterThanOrEqual(1);
+    const oldest = new Date(moderation?.oldestSince ?? '').getTime();
+    expect(Date.now() - oldest).toBeGreaterThanOrEqual(90 * hour - 60_000);
+  });
+
+  it('gives an editor the catalog, the users and the tiles of its sections only', async () => {
+    const response = await getStats(await signIn('editor'));
+    expect(response.headers['cache-control']).toBe('no-store');
+    const stats = AdminStats.parse(response.json());
+    const nothing = { count: 0, lateCount: 0, oldestSince: null };
+    expect(stats.toHandle).toEqual({ aiDrafts: nothing, translations: nothing });
+    expect(stats.catalog.publishedRoutes).toBeGreaterThanOrEqual(1);
+    expect(stats.catalog.premiumRoutes).toBeLessThanOrEqual(stats.catalog.publishedRoutes);
+    expect(stats.catalog.placesInRoutes).toBeGreaterThanOrEqual(1);
+    expect(stats.catalog.cities).toBeGreaterThanOrEqual(1);
+    expect(stats.users.registered).toBeGreaterThanOrEqual(1);
+    expect(stats.users.newLast7Days).toBeGreaterThanOrEqual(1);
+    expect(stats.users.unlocksLast30Days).toBe(0);
+  });
+
+  it('counts a new account once, and a Premium plan only while it runs', async () => {
+    const headers = await signIn('admin');
+    const before = AdminStats.parse((await getStats(headers)).json()).users;
+    const day = 24 * hour;
+    for (const planExpiresAt of [new Date(Date.now() + day), new Date(Date.now() - day)]) {
+      const { uid } = verifier.issue();
+      createdUids.push(uid);
+      await app.db.insert(users).values({ firebaseUid: uid, plan: 'premium', planExpiresAt });
+    }
+
+    const after = AdminStats.parse((await getStats(headers)).json()).users;
+    expect(after.registered - before.registered).toBeGreaterThanOrEqual(2);
+    expect(after.premiumActive - before.premiumActive).toBeGreaterThanOrEqual(1);
   });
 });
