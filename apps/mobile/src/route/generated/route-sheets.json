@@ -1,0 +1,5265 @@
+{
+  "routes": [
+    {
+      "id": "01a0d794-1000-76ec-9ac0-e364536f65b0",
+      "title": "Le Marais à l’abri de la pluie",
+      "coverUrl": "https://images.unsplash.com/photo-1775210676191-f450802fa51e?w=1200&h=800&fit=crop&auto=format&q=80",
+      "isOfficial": true,
+      "author": null,
+      "access": "free",
+      "isVerified": true,
+      "moods": ["culture", "romantic"],
+      "audiences": ["couple", "friends", "solo"],
+      "conditions": ["no_booking", "wheelchair", "indoor", "rainy"],
+      "transport": "walk",
+      "district": "4e",
+      "neighborhood": "Le Marais",
+      "durationMin": 245,
+      "durationBucket": "half_day",
+      "budgetPerPersonEur": 16,
+      "budgetBucket": "low",
+      "distanceM": 1320,
+      "rating": {
+        "average": null,
+        "count": 0
+      },
+      "stepCount": 4,
+      "isLocked": false,
+      "status": "published",
+      "description": "Trois musées gratuits dans des hôtels particuliers du Marais, sans jamais rester longtemps dehors, puis un goûter sous la halle du plus vieux marché couvert de Paris.",
+      "photoUrls": [
+        "https://images.unsplash.com/photo-1775210676191-f450802fa51e?w=1200&h=800&fit=crop&auto=format&q=80",
+        "https://images.unsplash.com/photo-1691472898646-7011d4d0ad55?w=1200&h=800&fit=crop&auto=format&q=80"
+      ],
+      "walkingDistanceM": 1320,
+      "effort": "easy",
+      "startAccess": null,
+      "creator": {
+        "routesPublished": 7,
+        "isCertified": false
+      },
+      "sharedBy": null,
+      "reviews": [],
+      "timeline": {
+        "startsAt": "2026-09-25T12:00:00.000Z",
+        "endsAt": "2026-09-25T16:03:00.000Z",
+        "steps": [
+          {
+            "stepId": "01a0d794-1000-79e2-98c4-caec098f6208",
+            "arrivesAt": "2026-09-25T12:00:00.000Z",
+            "leavesAt": "2026-09-25T12:45:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7677-8e7f-ef663e093a09",
+            "arrivesAt": "2026-09-25T12:52:00.000Z",
+            "leavesAt": "2026-09-25T14:07:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7022-8551-4a5e2722434d",
+            "arrivesAt": "2026-09-25T14:09:00.000Z",
+            "leavesAt": "2026-09-25T14:54:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-76c8-9f69-87f0786c97ff",
+            "arrivesAt": "2026-09-25T15:03:00.000Z",
+            "leavesAt": "2026-09-25T16:03:00.000Z",
+            "conflicts": []
+          }
+        ]
+      },
+      "steps": [
+        {
+          "id": "01a0d794-1000-79e2-98c4-caec098f6208",
+          "position": 0,
+          "isLocked": false,
+          "title": null,
+          "description": "L’appartement de l’écrivain, sur la place des Vosges. Collections permanentes gratuites.",
+          "durationMin": 45,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 505,
+            "durationMin": 7,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7d9f-94a4-85a235454ec3",
+            "name": "Maison de Victor Hugo",
+            "category": "museum",
+            "location": {
+              "lat": 48.8548,
+              "lng": 2.36614
+            },
+            "address": "6 place des Vosges, 75004 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 1,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 3,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7677-8e7f-ef663e093a09",
+          "position": 1,
+          "isLocked": false,
+          "title": null,
+          "description": "Le musée de l’histoire de Paris : enseignes anciennes, salons reconstitués, chambre de Proust.",
+          "durationMin": 75,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": "Passer sous les arcades de la place, puis rue des Francs-Bourgeois.",
+          "transition": {
+            "distanceM": 138,
+            "durationMin": 2,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7df8-ac16-8b05bfe9a217",
+            "name": "Musée Carnavalet",
+            "category": "museum",
+            "location": {
+              "lat": 48.85732,
+              "lng": 2.36247
+            },
+            "address": "23 rue de Sévigné, 75003 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 1,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 5,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7022-8551-4a5e2722434d",
+          "position": 2,
+          "isLocked": false,
+          "title": null,
+          "description": "Un petit musée du XVIIIᵉ siècle, calme, idéal pour ralentir.",
+          "durationMin": 45,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 677,
+            "durationMin": 9,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7932-9719-3cfb8ed46879",
+            "name": "Musée Cognacq-Jay",
+            "category": "museum",
+            "location": {
+              "lat": 48.85812,
+              "lng": 2.36168
+            },
+            "address": "8 rue Elzévir, 75003 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 1,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 7,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-76c8-9f69-87f0786c97ff",
+          "position": 3,
+          "isLocked": false,
+          "title": null,
+          "description": "Goûter ou dîner tôt sous la halle : cuisine marocaine, japonaise ou libanaise au comptoir.",
+          "durationMin": 60,
+          "costPerPersonEur": 16,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": null,
+          "place": {
+            "id": "01a0d794-1000-7b98-95ea-d3feaef5ea16",
+            "name": "Marché des Enfants Rouges",
+            "category": "restaurant",
+            "location": {
+              "lat": 48.8628,
+              "lng": 2.36197
+            },
+            "address": "39 rue de Bretagne, 75003 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 1,
+                "opens": "08:30",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "08:30",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "08:30",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "08:30",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "08:30",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "08:30",
+                "closes": "17:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 9,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "01a0d794-1000-79f6-a104-4beb72b37775",
+      "title": "Montmartre à deux, des Abbesses au coucher du soleil",
+      "coverUrl": "https://images.unsplash.com/photo-1561370665-7e266065fce1?w=1200&h=800&fit=crop&auto=format&q=80",
+      "isOfficial": true,
+      "author": null,
+      "access": "free",
+      "isVerified": true,
+      "moods": ["romantic", "instagrammable", "culture"],
+      "audiences": ["couple"],
+      "conditions": ["outdoor", "sunny"],
+      "transport": "walk",
+      "district": "18e",
+      "neighborhood": "Montmartre",
+      "durationMin": 230,
+      "durationBucket": "half_day",
+      "budgetPerPersonEur": 50,
+      "budgetBucket": "medium",
+      "distanceM": 1010,
+      "rating": {
+        "average": null,
+        "count": 0
+      },
+      "stepCount": 5,
+      "isLocked": false,
+      "status": "published",
+      "description": "Une montée douce vers la Butte : le mur des je t’aime, la vue depuis le parvis du Sacré-Cœur, les peintres de la place du Tertre, puis le musée et un dîner à la Maison Rose.",
+      "photoUrls": [
+        "https://images.unsplash.com/photo-1561370665-7e266065fce1?w=1200&h=800&fit=crop&auto=format&q=80",
+        "https://images.unsplash.com/photo-1623009070764-45002990256e?w=1200&h=800&fit=crop&auto=format&q=80"
+      ],
+      "walkingDistanceM": 1010,
+      "effort": "easy",
+      "startAccess": null,
+      "creator": {
+        "routesPublished": 7,
+        "isCertified": false
+      },
+      "sharedBy": null,
+      "reviews": [],
+      "timeline": {
+        "startsAt": "2026-09-25T12:00:00.000Z",
+        "endsAt": "2026-09-25T15:48:00.000Z",
+        "steps": [
+          {
+            "stepId": "01a0d794-1000-7432-96f0-d6cd462afdb1",
+            "arrivesAt": "2026-09-25T12:00:00.000Z",
+            "leavesAt": "2026-09-25T12:15:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7c18-9dd9-3437b9cc4807",
+            "arrivesAt": "2026-09-25T12:21:00.000Z",
+            "leavesAt": "2026-09-25T12:51:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7ea8-800d-6cc2fafa0954",
+            "arrivesAt": "2026-09-25T12:54:00.000Z",
+            "leavesAt": "2026-09-25T13:14:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-72c8-94d9-b17f72b56ca5",
+            "arrivesAt": "2026-09-25T13:17:00.000Z",
+            "leavesAt": "2026-09-25T14:17:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7347-a343-92b6398f25da",
+            "arrivesAt": "2026-09-25T14:18:00.000Z",
+            "leavesAt": "2026-09-25T15:48:00.000Z",
+            "conflicts": []
+          }
+        ]
+      },
+      "steps": [
+        {
+          "id": "01a0d794-1000-7432-96f0-d6cd462afdb1",
+          "position": 0,
+          "isLocked": false,
+          "title": null,
+          "description": "« Je t’aime » écrit dans plus de 250 langues, dans un petit square des Abbesses.",
+          "durationMin": 15,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": "Monter par la rue Yvonne-Le-Tac puis les escaliers du square Louise-Michel.",
+          "transition": {
+            "distanceM": 477,
+            "durationMin": 6,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-783b-aec5-f6752d38b3f7",
+            "name": "Le Mur des je t’aime",
+            "category": "other",
+            "location": {
+              "lat": 48.88481,
+              "lng": 2.33852
+            },
+            "address": "square Jehan-Rictus, place des Abbesses, 75018 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "09:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "09:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 3,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7c18-9dd9-3437b9cc4807",
+          "position": 1,
+          "isLocked": false,
+          "title": null,
+          "description": "La vue sur tout Paris depuis les marches. Plus calme en fin d’après-midi en semaine.",
+          "durationMin": 30,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 216,
+            "durationMin": 3,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7a21-a335-712dbd95f1d8",
+            "name": "Parvis du Sacré-Cœur",
+            "category": "viewpoint",
+            "location": {
+              "lat": 48.88625,
+              "lng": 2.34303
+            },
+            "address": "35 rue du Chevalier-de-la-Barre, 75018 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": []
+          },
+          "verification": {
+            "confirmations": 5,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7ea8-800d-6cc2fafa0954",
+          "position": 2,
+          "isLocked": false,
+          "title": null,
+          "description": "Les portraitistes et les terrasses du vieux village.",
+          "durationMin": 20,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 220,
+            "durationMin": 3,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7450-b8f6-8862ea352e7d",
+            "name": "Place du Tertre",
+            "category": "walk",
+            "location": {
+              "lat": 48.88653,
+              "lng": 2.3408
+            },
+            "address": "place du Tertre, 75018 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": []
+          },
+          "verification": {
+            "confirmations": 7,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-72c8-94d9-b17f72b56ca5",
+          "position": 3,
+          "isLocked": false,
+          "title": null,
+          "description": "Les jardins Renoir et l’atelier de Suzanne Valadon.",
+          "durationMin": 60,
+          "costPerPersonEur": 15,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 94,
+            "durationMin": 1,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-727e-b878-6a25394373cb",
+            "name": "Musée de Montmartre",
+            "category": "museum",
+            "location": {
+              "lat": 48.88805,
+              "lng": 2.34063
+            },
+            "address": "12 rue Cortot, 75018 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "10:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "10:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "10:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "10:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "10:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "10:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "10:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 9,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7347-a343-92b6398f25da",
+          "position": 4,
+          "isLocked": false,
+          "title": null,
+          "description": "Dîner dans la maison peinte par Utrillo. Réserver, la salle est petite.",
+          "durationMin": 90,
+          "costPerPersonEur": 35,
+          "bookingRequired": true,
+          "bookingUrl": null,
+          "bookingProvider": "restaurant",
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": null,
+          "place": {
+            "id": "01a0d794-1000-73a2-9b94-9c9c1b9459d9",
+            "name": "La Maison Rose",
+            "category": "restaurant",
+            "location": {
+              "lat": 48.88799,
+              "lng": 2.33965
+            },
+            "address": "2 rue de l’Abreuvoir, 75018 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "12:00",
+                "closes": "22:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "12:00",
+                "closes": "22:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "12:00",
+                "closes": "22:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "12:00",
+                "closes": "22:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "12:00",
+                "closes": "22:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "12:00",
+                "closes": "22:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "12:00",
+                "closes": "22:30",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 11,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "01a0d794-1000-7a0e-bab7-eadc3bd50c52",
+      "title": "Le canal Saint-Martin à vélo jusqu’à la Villette",
+      "coverUrl": "https://images.unsplash.com/photo-1642766603265-e33f8a27fb31?w=1200&h=800&fit=crop&auto=format&q=80",
+      "isOfficial": false,
+      "author": {
+        "id": "01a0d794-1000-7183-8f78-2f9c9aa1018a",
+        "firstName": "Camille",
+        "avatarUrl": null
+      },
+      "access": "free",
+      "isVerified": true,
+      "moods": ["relax", "sport", "instagrammable"],
+      "audiences": ["friends", "solo"],
+      "conditions": ["no_booking", "outdoor", "sunny"],
+      "transport": "bike",
+      "district": "10e",
+      "neighborhood": "Canal Saint-Martin",
+      "durationMin": 215,
+      "durationBucket": "half_day",
+      "budgetPerPersonEur": 14,
+      "budgetBucket": "low",
+      "distanceM": 4430,
+      "rating": {
+        "average": null,
+        "count": 0
+      },
+      "stepCount": 5,
+      "isLocked": false,
+      "status": "published",
+      "description": "Une balade en Vélib le long de l’eau : viennoiserie d’une boulangerie culte, écluses et passerelles, pause au bord du bassin de la Villette, puis les pelouses du parc.",
+      "photoUrls": [
+        "https://images.unsplash.com/photo-1642766603265-e33f8a27fb31?w=1200&h=800&fit=crop&auto=format&q=80",
+        "https://images.unsplash.com/photo-1548123833-0d46ee1d7400?w=1200&h=800&fit=crop&auto=format&q=80"
+      ],
+      "walkingDistanceM": 0,
+      "effort": "easy",
+      "startAccess": null,
+      "creator": {
+        "routesPublished": 2,
+        "isCertified": false
+      },
+      "sharedBy": null,
+      "reviews": [],
+      "timeline": {
+        "startsAt": "2026-09-25T12:00:00.000Z",
+        "endsAt": "2026-09-25T16:09:00.000Z",
+        "steps": [
+          {
+            "stepId": "01a0d794-1000-795c-a9a8-4bb34e51c950",
+            "arrivesAt": "2026-09-25T12:00:00.000Z",
+            "leavesAt": "2026-09-25T12:20:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7d81-a1cf-3cfb051645df",
+            "arrivesAt": "2026-09-25T12:25:00.000Z",
+            "leavesAt": "2026-09-25T12:45:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7174-8950-756fdb961ba0",
+            "arrivesAt": "2026-09-25T12:48:00.000Z",
+            "leavesAt": "2026-09-25T13:18:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-715b-8b08-41406c79182f",
+            "arrivesAt": "2026-09-25T13:50:00.000Z",
+            "leavesAt": "2026-09-25T14:50:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7604-a963-bb5e80923da7",
+            "arrivesAt": "2026-09-25T15:09:00.000Z",
+            "leavesAt": "2026-09-25T16:09:00.000Z",
+            "conflicts": []
+          }
+        ]
+      },
+      "steps": [
+        {
+          "id": "01a0d794-1000-795c-a9a8-4bb34e51c950",
+          "position": 0,
+          "isLocked": false,
+          "title": null,
+          "description": "Le « pain des amis » et l’escargot pistache-chocolat. Fermé le week-end.",
+          "durationMin": 20,
+          "costPerPersonEur": 6,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 361,
+            "durationMin": 5,
+            "mode": "bike",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7a29-8984-4d401bfbba23",
+            "name": "Du Pain et des Idées",
+            "category": "bakery",
+            "location": {
+              "lat": 48.87125,
+              "lng": 2.3629
+            },
+            "address": "34 rue Yves-Toudic, 75010 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "07:15",
+                "closes": "19:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "07:15",
+                "closes": "19:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "07:15",
+                "closes": "19:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "07:15",
+                "closes": "19:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "07:15",
+                "closes": "19:30",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 3,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7d81-a1cf-3cfb051645df",
+          "position": 1,
+          "isLocked": false,
+          "title": null,
+          "description": "Regarder une péniche passer l’écluse depuis la passerelle, à côté de l’Hôtel du Nord.",
+          "durationMin": 20,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 257,
+            "durationMin": 3,
+            "mode": "bike",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-766b-a7a3-ae0f1a2dbbc3",
+            "name": "Écluse des Récollets",
+            "category": "walk",
+            "location": {
+              "lat": 48.87372,
+              "lng": 2.36345
+            },
+            "address": "quai de Jemmapes, 75010 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": []
+          },
+          "verification": {
+            "confirmations": 5,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7174-8950-756fdb961ba0",
+          "position": 2,
+          "isLocked": false,
+          "title": null,
+          "description": "Un jardin partagé caché derrière le canal, pour une première pause.",
+          "durationMin": 30,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": "Reprendre le quai de Valmy vers le nord, piste cyclable sur la gauche.",
+          "transition": {
+            "distanceM": 2390,
+            "durationMin": 32,
+            "mode": "bike",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7b6e-b183-e566e8ea1e7f",
+            "name": "Jardin Villemin",
+            "category": "park",
+            "location": {
+              "lat": 48.87515,
+              "lng": 2.36185
+            },
+            "address": "14 rue des Récollets, 75010 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "08:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "08:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "08:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "08:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "08:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "09:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "09:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 7,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-715b-8b08-41406c79182f",
+          "position": 3,
+          "isLocked": false,
+          "title": null,
+          "description": "Un café dans une maison au bord de l’eau : on s’installe dans la baignoire ou sur la terrasse.",
+          "durationMin": 60,
+          "costPerPersonEur": 8,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 1422,
+            "durationMin": 19,
+            "mode": "bike",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-720d-853c-455a2c56f979",
+            "name": "Pavillon des Canaux",
+            "category": "cafe",
+            "location": {
+              "lat": 48.88743,
+              "lng": 2.37869
+            },
+            "address": "39 quai de la Loire, 75019 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "10:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "10:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "10:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "10:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "10:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "10:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "10:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 9,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7604-a963-bb5e80923da7",
+          "position": 4,
+          "isLocked": false,
+          "title": null,
+          "description": "Les grandes pelouses et le canal de l’Ourcq. Déposer le vélo à la station de la Grande Halle.",
+          "durationMin": 60,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": null,
+          "place": {
+            "id": "01a0d794-1000-70ba-b08b-e056cc7e542c",
+            "name": "Parc de la Villette",
+            "category": "park",
+            "location": {
+              "lat": 48.89489,
+              "lng": 2.38844
+            },
+            "address": "211 avenue Jean-Jaurès, 75019 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": []
+          },
+          "verification": {
+            "confirmations": 11,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "01a0d794-1000-735a-a62f-1efe50ef01ea",
+      "title": "La Butte-aux-Cailles, un village dans Paris",
+      "coverUrl": "https://images.unsplash.com/photo-1594676632059-b0707a8cca55?w=1200&h=800&fit=crop&auto=format&q=80",
+      "isOfficial": false,
+      "author": {
+        "id": "01a0d794-1000-7623-b97e-f9e2e79b40b1",
+        "firstName": "Yanis",
+        "avatarUrl": null
+      },
+      "access": "free",
+      "isVerified": true,
+      "moods": ["unusual", "food"],
+      "audiences": ["friends"],
+      "conditions": ["no_booking", "outdoor", "sunny"],
+      "transport": "walk",
+      "district": "13e",
+      "neighborhood": "Butte-aux-Cailles",
+      "durationMin": 225,
+      "durationBucket": "half_day",
+      "budgetPerPersonEur": 22,
+      "budgetBucket": "low",
+      "distanceM": 2070,
+      "rating": {
+        "average": null,
+        "count": 0
+      },
+      "stepCount": 5,
+      "isLocked": false,
+      "status": "published",
+      "description": "Maisons à colombages, impasses fleuries, baignade dans une piscine Art nouveau alimentée par un puits artésien, puis un dîner basque aux grandes tablées.",
+      "photoUrls": [
+        "https://images.unsplash.com/photo-1594676632059-b0707a8cca55?w=1200&h=800&fit=crop&auto=format&q=80",
+        "https://images.unsplash.com/photo-1683020369711-fa6e11acaccd?w=1200&h=800&fit=crop&auto=format&q=80"
+      ],
+      "walkingDistanceM": 2070,
+      "effort": "easy",
+      "startAccess": null,
+      "creator": {
+        "routesPublished": 1,
+        "isCertified": false
+      },
+      "sharedBy": null,
+      "reviews": [],
+      "timeline": {
+        "startsAt": "2026-09-25T12:00:00.000Z",
+        "endsAt": "2026-09-25T15:43:00.000Z",
+        "steps": [
+          {
+            "stepId": "01a0d794-1000-7ba5-9f2f-e33e5d3c8769",
+            "arrivesAt": "2026-09-25T12:00:00.000Z",
+            "leavesAt": "2026-09-25T12:15:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7705-9357-cede8d8e066a",
+            "arrivesAt": "2026-09-25T12:25:00.000Z",
+            "leavesAt": "2026-09-25T12:45:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-78ba-9788-e5d74412dd4a",
+            "arrivesAt": "2026-09-25T12:58:00.000Z",
+            "leavesAt": "2026-09-25T13:58:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-78c7-9b79-8499bafff90c",
+            "arrivesAt": "2026-09-25T14:01:00.000Z",
+            "leavesAt": "2026-09-25T14:26:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-79e5-a625-697685c59ec3",
+            "arrivesAt": "2026-09-25T14:28:00.000Z",
+            "leavesAt": "2026-09-25T15:43:00.000Z",
+            "conflicts": []
+          }
+        ]
+      },
+      "steps": [
+        {
+          "id": "01a0d794-1000-7ba5-9f2f-e33e5d3c8769",
+          "position": 0,
+          "isLocked": false,
+          "title": null,
+          "description": "Des maisons ouvrières à colombages autour d’une cour, bâties en 1912.",
+          "durationMin": 15,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 747,
+            "durationMin": 10,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7475-9b69-eeac7928d1a1",
+            "name": "La Petite Alsace",
+            "category": "walk",
+            "location": {
+              "lat": 48.82781,
+              "lng": 2.34602
+            },
+            "address": "10 rue Daviel, 75013 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": []
+          },
+          "verification": {
+            "confirmations": 3,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7705-9357-cede8d8e066a",
+          "position": 1,
+          "isLocked": false,
+          "title": null,
+          "description": "Rues des Glycines, des Iris, des Orchidées : des maisons de ville couvertes de lierre.",
+          "durationMin": 20,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 964,
+            "durationMin": 13,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-710e-ad3e-4fc1fce609b4",
+            "name": "Cité florale",
+            "category": "walk",
+            "location": {
+              "lat": 48.8227,
+              "lng": 2.34482
+            },
+            "address": "rue des Glycines, 75013 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": []
+          },
+          "verification": {
+            "confirmations": 5,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-78ba-9788-e5d74412dd4a",
+          "position": 2,
+          "isLocked": false,
+          "title": null,
+          "description": "Bassin Art nouveau sous verrière, eau venue d’un puits à 580 m. Prendre un bonnet.",
+          "durationMin": 60,
+          "costPerPersonEur": 4,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 215,
+            "durationMin": 3,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7a59-b369-4b572ebd08b0",
+            "name": "Piscine de la Butte-aux-Cailles",
+            "category": "activity",
+            "location": {
+              "lat": 48.8271,
+              "lng": 2.35243
+            },
+            "address": "5 place Paul-Verlaine, 75013 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 1,
+                "opens": "07:00",
+                "closes": "08:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "07:00",
+                "closes": "08:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "11:30",
+                "closes": "13:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "11:30",
+                "closes": "13:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "11:30",
+                "closes": "13:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "11:30",
+                "closes": "13:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "07:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "08:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 7,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-78c7-9b79-8499bafff90c",
+          "position": 3,
+          "isLocked": false,
+          "title": null,
+          "description": "Pochoirs et collages sur les façades, entre la rue des Cinq-Diamants et la place de la Commune.",
+          "durationMin": 25,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 149,
+            "durationMin": 2,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-748f-a820-7cf33a176444",
+            "name": "Rue de la Butte-aux-Cailles",
+            "category": "walk",
+            "location": {
+              "lat": 48.82779,
+              "lng": 2.35043
+            },
+            "address": "rue de la Butte-aux-Cailles, 75013 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": []
+          },
+          "verification": {
+            "confirmations": 9,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-79e5-a625-697685c59ec3",
+          "position": 4,
+          "isLocked": false,
+          "title": null,
+          "description": "Salade géante et piperade, aux tables partagées. Sans réservation : venir tôt.",
+          "durationMin": 75,
+          "costPerPersonEur": 18,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": null,
+          "place": {
+            "id": "01a0d794-1000-7008-928b-747d93124be4",
+            "name": "Chez Gladines",
+            "category": "restaurant",
+            "location": {
+              "lat": 48.82881,
+              "lng": 2.35064
+            },
+            "address": "30 rue des Cinq-Diamants, 75013 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "12:00",
+                "closes": "15:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "12:00",
+                "closes": "15:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "12:00",
+                "closes": "15:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "12:00",
+                "closes": "15:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "12:00",
+                "closes": "15:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "12:00",
+                "closes": "15:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "12:00",
+                "closes": "15:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 0,
+                "opens": "19:00",
+                "closes": "23:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "19:00",
+                "closes": "23:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "19:00",
+                "closes": "23:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "19:00",
+                "closes": "23:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "19:00",
+                "closes": "23:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "19:00",
+                "closes": "23:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "19:00",
+                "closes": "23:30",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 11,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "01a0d794-1000-7467-b7b8-2ba1382da326",
+      "title": "Belleville, street art et vue sur Paris",
+      "coverUrl": "https://images.unsplash.com/photo-1682939033295-031f290adbd2?w=1200&h=800&fit=crop&auto=format&q=80",
+      "isOfficial": false,
+      "author": {
+        "id": "01a0d794-1000-7183-8f78-2f9c9aa1018a",
+        "firstName": "Camille",
+        "avatarUrl": null
+      },
+      "access": "free",
+      "isVerified": true,
+      "moods": ["unusual", "instagrammable"],
+      "audiences": ["couple", "friends", "solo", "dog_friendly"],
+      "conditions": ["no_booking", "outdoor", "sunny"],
+      "transport": "walk",
+      "district": "20e",
+      "neighborhood": "Belleville",
+      "durationMin": 100,
+      "durationBucket": "1_2h",
+      "budgetPerPersonEur": 0,
+      "budgetBucket": "free",
+      "distanceM": 1360,
+      "rating": {
+        "average": null,
+        "count": 0
+      },
+      "stepCount": 4,
+      "isLocked": false,
+      "status": "published",
+      "description": "Une boucle courte et gratuite : les murs repeints de la rue Dénoyez, le belvédère du parc de Belleville au coucher du soleil, puis les escaliers de la rue des Cascades.",
+      "photoUrls": [
+        "https://images.unsplash.com/photo-1682939033295-031f290adbd2?w=1200&h=800&fit=crop&auto=format&q=80",
+        "https://images.unsplash.com/photo-1682939036672-cf58620cf3e8?w=1200&h=800&fit=crop&auto=format&q=80"
+      ],
+      "walkingDistanceM": 1360,
+      "effort": "easy",
+      "startAccess": null,
+      "creator": {
+        "routesPublished": 2,
+        "isCertified": false
+      },
+      "sharedBy": null,
+      "reviews": [],
+      "timeline": {
+        "startsAt": "2026-09-25T08:00:00.000Z",
+        "endsAt": "2026-09-25T09:38:00.000Z",
+        "steps": [
+          {
+            "stepId": "01a0d794-1000-71ac-8416-b9a1070449de",
+            "arrivesAt": "2026-09-25T08:00:00.000Z",
+            "leavesAt": "2026-09-25T08:20:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-79a3-a967-96301062f525",
+            "arrivesAt": "2026-09-25T08:25:00.000Z",
+            "leavesAt": "2026-09-25T08:40:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7d07-a596-b8ea2188fb70",
+            "arrivesAt": "2026-09-25T08:45:00.000Z",
+            "leavesAt": "2026-09-25T09:15:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7dbd-adbe-dfe596b71e66",
+            "arrivesAt": "2026-09-25T09:23:00.000Z",
+            "leavesAt": "2026-09-25T09:38:00.000Z",
+            "conflicts": []
+          }
+        ]
+      },
+      "steps": [
+        {
+          "id": "01a0d794-1000-71ac-8416-b9a1070449de",
+          "position": 0,
+          "isLocked": false,
+          "title": null,
+          "description": "Une rue entière de graffitis, repeinte presque chaque semaine.",
+          "durationMin": 20,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 369,
+            "durationMin": 5,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-710d-a93f-37d0066236e2",
+            "name": "Rue Dénoyez",
+            "category": "walk",
+            "location": {
+              "lat": 48.87165,
+              "lng": 2.37852
+            },
+            "address": "rue Dénoyez, 75020 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": []
+          },
+          "verification": {
+            "confirmations": 3,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-79a3-a967-96301062f525",
+          "position": 1,
+          "isLocked": false,
+          "title": null,
+          "description": "La fresque « Il faut se méfier des mots » de Ben, au-dessus d’une petite place.",
+          "durationMin": 15,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 404,
+            "durationMin": 5,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7143-a136-2f2ed3ccb853",
+            "name": "Place Fréhel",
+            "category": "other",
+            "location": {
+              "lat": 48.87308,
+              "lng": 2.38174
+            },
+            "address": "place Fréhel, 75020 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": []
+          },
+          "verification": {
+            "confirmations": 5,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7d07-a596-b8ea2188fb70",
+          "position": 2,
+          "isLocked": false,
+          "title": null,
+          "description": "La plus belle vue gratuite sur Paris, la tour Eiffel en face.",
+          "durationMin": 30,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": "Descendre par les jardins en terrasses du parc.",
+          "transition": {
+            "distanceM": 586,
+            "durationMin": 8,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7b82-bb2f-8fe9f952feed",
+            "name": "Belvédère de Belleville",
+            "category": "viewpoint",
+            "location": {
+              "lat": 48.87158,
+              "lng": 2.38532
+            },
+            "address": "27 rue Piat, 75020 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "09:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "09:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 7,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7dbd-adbe-dfe596b71e66",
+          "position": 3,
+          "isLocked": false,
+          "title": null,
+          "description": "Un petit édifice de pierre qui surveillait les sources de Belleville.",
+          "durationMin": 15,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": null,
+          "place": {
+            "id": "01a0d794-1000-7d7c-9547-a8d99ff248c1",
+            "name": "Regard Saint-Martin",
+            "category": "monument",
+            "location": {
+              "lat": 48.87147,
+              "lng": 2.39148
+            },
+            "address": "42 rue des Cascades, 75020 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": []
+          },
+          "verification": {
+            "confirmations": 9,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "01a0d794-1000-7776-be7f-e3481cd8e31b",
+      "title": "Une journée au Jardin des Plantes en famille",
+      "coverUrl": "https://images.unsplash.com/photo-1578838389363-a62d9069d2c6?w=1200&h=800&fit=crop&auto=format&q=80",
+      "isOfficial": true,
+      "author": null,
+      "access": "free",
+      "isVerified": true,
+      "moods": ["nature", "culture"],
+      "audiences": ["family", "kids_friendly"],
+      "conditions": ["no_booking", "wheelchair", "outdoor", "sunny"],
+      "transport": "walk",
+      "district": "5e",
+      "neighborhood": "Quartier latin",
+      "durationMin": 355,
+      "durationBucket": "full_day",
+      "budgetPerPersonEur": 34,
+      "budgetBucket": "medium",
+      "distanceM": 1980,
+      "rating": {
+        "average": null,
+        "count": 0
+      },
+      "stepCount": 5,
+      "isLocked": false,
+      "status": "published",
+      "description": "Les arènes romaines, la ménagerie et ses pandas roux, un thé à la menthe à la Grande Mosquée, puis les squelettes et les animaux naturalisés de la Grande Galerie de l’Évolution.",
+      "photoUrls": [
+        "https://images.unsplash.com/photo-1578838389363-a62d9069d2c6?w=1200&h=800&fit=crop&auto=format&q=80",
+        "https://images.unsplash.com/photo-1654103399842-98a63767b6bc?w=1200&h=800&fit=crop&auto=format&q=80"
+      ],
+      "walkingDistanceM": 1980,
+      "effort": "easy",
+      "startAccess": null,
+      "creator": {
+        "routesPublished": 7,
+        "isCertified": false
+      },
+      "sharedBy": null,
+      "reviews": [],
+      "timeline": {
+        "startsAt": "2026-09-25T08:00:00.000Z",
+        "endsAt": "2026-09-25T13:57:00.000Z",
+        "steps": [
+          {
+            "stepId": "01a0d794-1000-79ff-8125-b4657dcae64a",
+            "arrivesAt": "2026-09-25T08:00:00.000Z",
+            "leavesAt": "2026-09-25T08:30:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-791a-a15e-90296f8f430c",
+            "arrivesAt": "2026-09-25T08:40:00.000Z",
+            "leavesAt": "2026-09-25T10:10:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7ac0-a98d-a6250201f3f6",
+            "arrivesAt": "2026-09-25T10:20:00.000Z",
+            "leavesAt": "2026-09-25T11:05:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-77e6-aa44-61c178cfc1f9",
+            "arrivesAt": "2026-09-25T11:06:00.000Z",
+            "leavesAt": "2026-09-25T13:06:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7b7f-8d0e-90155fb9b408",
+            "arrivesAt": "2026-09-25T13:12:00.000Z",
+            "leavesAt": "2026-09-25T13:57:00.000Z",
+            "conflicts": []
+          }
+        ]
+      },
+      "steps": [
+        {
+          "id": "01a0d794-1000-79ff-8125-b4657dcae64a",
+          "position": 0,
+          "isLocked": false,
+          "title": null,
+          "description": "Un amphithéâtre gallo-romain où les enfants jouent au ballon. Entrée accessible par la rue de Navarre.",
+          "durationMin": 30,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 714,
+            "durationMin": 10,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7bcc-b00f-7bc56608cecc",
+            "name": "Arènes de Lutèce",
+            "category": "monument",
+            "location": {
+              "lat": 48.8446,
+              "lng": 2.35322
+            },
+            "address": "49 rue Monge, 75005 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "09:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "09:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 3,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-791a-a15e-90296f8f430c",
+          "position": 1,
+          "isLocked": false,
+          "title": null,
+          "description": "L’un des plus vieux zoos du monde : pandas roux, orangs-outans, tortues géantes. Gratuit pour les moins de 3 ans.",
+          "durationMin": 90,
+          "costPerPersonEur": 13,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 723,
+            "durationMin": 10,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-709d-a433-36111e4efd62",
+            "name": "Ménagerie du Jardin des Plantes",
+            "category": "activity",
+            "location": {
+              "lat": 48.84553,
+              "lng": 2.36059
+            },
+            "address": "57 rue Cuvier, 75005 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "09:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "09:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "09:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "09:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "09:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "09:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "09:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 5,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7ac0-a98d-a6250201f3f6",
+          "position": 2,
+          "isLocked": false,
+          "title": null,
+          "description": "Thé à la menthe et cornes de gazelle sous les figuiers du patio.",
+          "durationMin": 45,
+          "costPerPersonEur": 8,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 109,
+            "durationMin": 1,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-704a-972f-88c68b1e1b80",
+            "name": "Salon de thé de la Grande Mosquée",
+            "category": "cafe",
+            "location": {
+              "lat": 48.84207,
+              "lng": 2.3551
+            },
+            "address": "39 rue Geoffroy-Saint-Hilaire, 75005 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "09:00",
+                "closes": "23:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "09:00",
+                "closes": "23:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "09:00",
+                "closes": "23:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "09:00",
+                "closes": "23:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "09:00",
+                "closes": "23:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "09:00",
+                "closes": "23:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "09:00",
+                "closes": "23:30",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 7,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-77e6-aa44-61c178cfc1f9",
+          "position": 3,
+          "isLocked": false,
+          "title": null,
+          "description": "La caravane des animaux sous la verrière. Fermée le mardi.",
+          "durationMin": 120,
+          "costPerPersonEur": 13,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 434,
+            "durationMin": 6,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7817-8bf2-080a9b796919",
+            "name": "Grande Galerie de l’Évolution",
+            "category": "museum",
+            "location": {
+              "lat": 48.84211,
+              "lng": 2.35624
+            },
+            "address": "36 rue Geoffroy-Saint-Hilaire, 75005 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "10:00",
+                "closes": "18:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 9,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7b7f-8d0e-90155fb9b408",
+          "position": 4,
+          "isLocked": false,
+          "title": null,
+          "description": "Les parterres et le labyrinthe, pour finir en courant.",
+          "durationMin": 45,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": null,
+          "place": {
+            "id": "01a0d794-1000-768e-994d-a26eef7294bd",
+            "name": "Jardin des Plantes",
+            "category": "park",
+            "location": {
+              "lat": 48.84404,
+              "lng": 2.35973
+            },
+            "address": "57 rue Cuvier, 75005 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "07:30",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "07:30",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "07:30",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "07:30",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "07:30",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "07:30",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "07:30",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 11,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "01a0d794-1000-77e7-95df-464d67289b68",
+      "title": "De la Cité à Montparnasse, une journée en solo",
+      "coverUrl": "https://images.unsplash.com/photo-1571860424830-0271e6c9d9b2?w=1200&h=800&fit=crop&auto=format&q=80",
+      "isOfficial": true,
+      "author": null,
+      "access": "free",
+      "isVerified": true,
+      "moods": ["culture", "shopping"],
+      "audiences": ["solo"],
+      "conditions": ["indoor", "rainy"],
+      "transport": "metro",
+      "district": "1er",
+      "neighborhood": "Île de la Cité",
+      "durationMin": 345,
+      "durationBucket": "full_day",
+      "budgetPerPersonEur": 65,
+      "budgetBucket": "medium",
+      "distanceM": 3370,
+      "rating": {
+        "average": null,
+        "count": 0
+      },
+      "stepCount": 5,
+      "isLocked": false,
+      "status": "published",
+      "description": "Une journée au sec, reliée par la ligne 4 : les vitraux de la Sainte-Chapelle, une librairie mythique, le Moyen Âge à Cluny, un bouillon parisien et Paris vu d’en haut.",
+      "photoUrls": [
+        "https://images.unsplash.com/photo-1571860424830-0271e6c9d9b2?w=1200&h=800&fit=crop&auto=format&q=80",
+        "https://images.unsplash.com/photo-1546444809-d64eccd9fb88?w=1200&h=800&fit=crop&auto=format&q=80"
+      ],
+      "walkingDistanceM": 1630,
+      "effort": "easy",
+      "startAccess": null,
+      "creator": {
+        "routesPublished": 7,
+        "isCertified": false
+      },
+      "sharedBy": null,
+      "reviews": [],
+      "timeline": {
+        "startsAt": "2026-09-25T08:00:00.000Z",
+        "endsAt": "2026-09-25T13:47:00.000Z",
+        "steps": [
+          {
+            "stepId": "01a0d794-1000-752c-a6b5-fe7c18a4c4f8",
+            "arrivesAt": "2026-09-25T08:00:00.000Z",
+            "leavesAt": "2026-09-25T09:00:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-72ea-9643-750f189e2023",
+            "arrivesAt": "2026-09-25T09:06:00.000Z",
+            "leavesAt": "2026-09-25T09:36:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-74eb-b483-23ebd10154a9",
+            "arrivesAt": "2026-09-25T09:42:00.000Z",
+            "leavesAt": "2026-09-25T11:12:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7a69-94f5-f6b99c16a53f",
+            "arrivesAt": "2026-09-25T11:27:00.000Z",
+            "leavesAt": "2026-09-25T12:42:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7dbc-bb56-683218831461",
+            "arrivesAt": "2026-09-25T12:47:00.000Z",
+            "leavesAt": "2026-09-25T13:47:00.000Z",
+            "conflicts": []
+          }
+        ]
+      },
+      "steps": [
+        {
+          "id": "01a0d794-1000-752c-a6b5-fe7c18a4c4f8",
+          "position": 0,
+          "isLocked": false,
+          "title": null,
+          "description": "Les vitraux sont plus beaux le matin, avec le soleil de l’est. Créneau horaire obligatoire.",
+          "durationMin": 60,
+          "costPerPersonEur": 13,
+          "bookingRequired": true,
+          "bookingUrl": "https://www.sainte-chapelle.fr/",
+          "bookingProvider": "ticketing",
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 455,
+            "durationMin": 6,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7e78-a0e2-354acddf253a",
+            "name": "Sainte-Chapelle",
+            "category": "monument",
+            "location": {
+              "lat": 48.85539,
+              "lng": 2.34499
+            },
+            "address": "10 boulevard du Palais, 75001 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "09:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "09:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "09:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "09:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "09:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "09:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "09:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 3,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-72ea-9643-750f189e2023",
+          "position": 1,
+          "isLocked": false,
+          "title": null,
+          "description": "Librairie anglophone face à Notre-Dame. Monter à l’étage lire au calme.",
+          "durationMin": 30,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 437,
+            "durationMin": 6,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7d00-9ccc-34ccc7d7e0aa",
+            "name": "Shakespeare and Company",
+            "category": "shop",
+            "location": {
+              "lat": 48.85257,
+              "lng": 2.34711
+            },
+            "address": "37 rue de la Bûcherie, 75005 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "10:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "10:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "10:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "10:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "10:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "10:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "10:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 5,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-74eb-b483-23ebd10154a9",
+          "position": 2,
+          "isLocked": false,
+          "title": null,
+          "description": "Les tapisseries de la Dame à la licorne et les thermes romains.",
+          "durationMin": 90,
+          "costPerPersonEur": 12,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": "Prendre la ligne 4 à Saint-Michel jusqu’à Vavin.",
+          "transition": {
+            "distanceM": 2300,
+            "durationMin": 15,
+            "mode": "metro",
+            "estimated": false
+          },
+          "place": {
+            "id": "01a0d794-1000-7c9e-8255-6fe664751a34",
+            "name": "Musée de Cluny",
+            "category": "museum",
+            "location": {
+              "lat": 48.85065,
+              "lng": 2.34356
+            },
+            "address": "28 rue du Sommerard, 75005 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 1,
+                "opens": "09:30",
+                "closes": "18:15",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "09:30",
+                "closes": "18:15",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "09:30",
+                "closes": "18:15",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "09:30",
+                "closes": "18:15",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "09:30",
+                "closes": "18:15",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "09:30",
+                "closes": "18:15",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 7,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7a69-94f5-f6b99c16a53f",
+          "position": 3,
+          "isLocked": false,
+          "title": null,
+          "description": "Grande salle Art nouveau, carte courte à prix doux.",
+          "durationMin": 75,
+          "costPerPersonEur": 20,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 343,
+            "durationMin": 5,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7fa7-a607-bf6866f58a9b",
+            "name": "Bouillon Chartier Montparnasse",
+            "category": "restaurant",
+            "location": {
+              "lat": 48.84432,
+              "lng": 2.32327
+            },
+            "address": "59 boulevard du Montparnasse, 75006 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "11:30",
+                "closes": "23:59",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "11:30",
+                "closes": "23:59",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "11:30",
+                "closes": "23:59",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "11:30",
+                "closes": "23:59",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "11:30",
+                "closes": "23:59",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "11:30",
+                "closes": "23:59",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "11:30",
+                "closes": "23:59",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 9,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7dbc-bb56-683218831461",
+          "position": 4,
+          "isLocked": false,
+          "title": null,
+          "description": "La vue à 360° depuis le 56ᵉ étage, par temps couvert comme par beau temps.",
+          "durationMin": 60,
+          "costPerPersonEur": 20,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": null,
+          "place": {
+            "id": "01a0d794-1000-7e49-a319-0a4a00843a0d",
+            "name": "Observatoire de la tour Montparnasse",
+            "category": "viewpoint",
+            "location": {
+              "lat": 48.84211,
+              "lng": 2.32197
+            },
+            "address": "33 avenue du Maine, 75015 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "09:30",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "09:30",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "09:30",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "09:30",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "09:30",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "09:30",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "09:30",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 11,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "01a0d794-1000-7804-bb63-0b1b16a70b24",
+      "title": "Guignol et goûter aux Buttes-Chaumont",
+      "coverUrl": "https://images.unsplash.com/photo-1731666593725-197dc759038d?w=1200&h=800&fit=crop&auto=format&q=80",
+      "isOfficial": true,
+      "author": null,
+      "access": "free",
+      "isVerified": true,
+      "moods": ["nature", "relax"],
+      "audiences": ["family", "kids_friendly"],
+      "conditions": ["no_booking", "outdoor", "sunny"],
+      "transport": "walk",
+      "district": "19e",
+      "neighborhood": "Buttes-Chaumont",
+      "durationMin": 165,
+      "durationBucket": "half_day",
+      "budgetPerPersonEur": 14,
+      "budgetBucket": "low",
+      "distanceM": 890,
+      "rating": {
+        "average": null,
+        "count": 0
+      },
+      "stepCount": 4,
+      "isLocked": false,
+      "status": "published",
+      "description": "Un après-midi pour les enfants : le spectacle de Guignol, la grotte et sa cascade, la montée au belvédère de la Sibylle, puis un goûter en terrasse chez Rosa Bonheur.",
+      "photoUrls": [
+        "https://images.unsplash.com/photo-1731666593725-197dc759038d?w=1200&h=800&fit=crop&auto=format&q=80",
+        "https://images.unsplash.com/photo-1731666595277-2082e64c8936?w=1200&h=800&fit=crop&auto=format&q=80"
+      ],
+      "walkingDistanceM": 890,
+      "effort": "easy",
+      "startAccess": null,
+      "creator": {
+        "routesPublished": 7,
+        "isCertified": false
+      },
+      "sharedBy": null,
+      "reviews": [],
+      "timeline": {
+        "startsAt": "2026-09-25T12:00:00.000Z",
+        "endsAt": "2026-09-25T14:48:00.000Z",
+        "steps": [
+          {
+            "stepId": "01a0d794-1000-7ab5-ac6b-4d4150ff824d",
+            "arrivesAt": "2026-09-25T12:00:00.000Z",
+            "leavesAt": "2026-09-25T12:45:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7a30-a67a-229b47b1eabc",
+            "arrivesAt": "2026-09-25T12:50:00.000Z",
+            "leavesAt": "2026-09-25T13:10:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-751c-a735-394dc826c9a9",
+            "arrivesAt": "2026-09-25T13:13:00.000Z",
+            "leavesAt": "2026-09-25T13:43:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7ba3-879f-d43ac07eede4",
+            "arrivesAt": "2026-09-25T13:48:00.000Z",
+            "leavesAt": "2026-09-25T14:48:00.000Z",
+            "conflicts": []
+          }
+        ]
+      },
+      "steps": [
+        {
+          "id": "01a0d794-1000-7ab5-ac6b-4d4150ff824d",
+          "position": 0,
+          "isLocked": false,
+          "title": null,
+          "description": "Spectacle de marionnettes le mercredi, le samedi et le dimanche après-midi.",
+          "durationMin": 45,
+          "costPerPersonEur": 6,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 350,
+            "durationMin": 5,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-700d-a600-4e36c7ac23e2",
+            "name": "Théâtre Guignol Anatole",
+            "category": "activity",
+            "location": {
+              "lat": 48.88213,
+              "lng": 2.3829
+            },
+            "address": "avenue de la Grotte, parc des Buttes-Chaumont, 75019 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 2,
+                "opens": "15:00",
+                "closes": "17:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "15:00",
+                "closes": "17:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "15:00",
+                "closes": "17:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 3,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7a30-a67a-229b47b1eabc",
+          "position": 1,
+          "isLocked": false,
+          "title": null,
+          "description": "Une ancienne carrière de gypse transformée en grotte, avec une cascade de 20 mètres.",
+          "durationMin": 20,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 200,
+            "durationMin": 3,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-739b-a061-3fbe3b354e2d",
+            "name": "Grotte des Buttes-Chaumont",
+            "category": "park",
+            "location": {
+              "lat": 48.87976,
+              "lng": 2.38366
+            },
+            "address": "parc des Buttes-Chaumont, 75019 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "07:00",
+                "closes": "21:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "07:00",
+                "closes": "21:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "07:00",
+                "closes": "21:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "07:00",
+                "closes": "21:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "07:00",
+                "closes": "21:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "07:00",
+                "closes": "21:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "07:00",
+                "closes": "21:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 5,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-751c-a735-394dc826c9a9",
+          "position": 2,
+          "isLocked": false,
+          "title": null,
+          "description": "Le petit temple en haut du rocher, par la passerelle suspendue.",
+          "durationMin": 30,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 341,
+            "durationMin": 5,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7e41-9c62-175dbeaf8f60",
+            "name": "Belvédère de la Sibylle",
+            "category": "viewpoint",
+            "location": {
+              "lat": 48.88109,
+              "lng": 2.38307
+            },
+            "address": "parc des Buttes-Chaumont, 75019 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "07:00",
+                "closes": "21:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "07:00",
+                "closes": "21:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "07:00",
+                "closes": "21:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "07:00",
+                "closes": "21:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "07:00",
+                "closes": "21:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "07:00",
+                "closes": "21:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "07:00",
+                "closes": "21:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 7,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7ba3-879f-d43ac07eede4",
+          "position": 3,
+          "isLocked": false,
+          "title": null,
+          "description": "Guinguette dans le parc : crêpes et jus de pomme sur la terrasse.",
+          "durationMin": 60,
+          "costPerPersonEur": 8,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": null,
+          "place": {
+            "id": "01a0d794-1000-7be1-b511-427a11536761",
+            "name": "Rosa Bonheur",
+            "category": "bar",
+            "location": {
+              "lat": 48.87998,
+              "lng": 2.38623
+            },
+            "address": "2 avenue de la Cascade, 75019 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 2,
+                "opens": "12:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "12:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "12:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "12:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "12:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 9,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "01a0d794-1000-705c-b24a-30d8b8f3b527",
+      "title": "Le Marais gourmand en deux heures",
+      "coverUrl": "https://images.unsplash.com/photo-1788101841904-669e8b5924b4?w=1200&h=800&fit=crop&auto=format&q=80",
+      "isOfficial": true,
+      "author": null,
+      "access": "free",
+      "isVerified": true,
+      "moods": ["food", "shopping"],
+      "audiences": ["couple", "friends"],
+      "conditions": ["no_booking", "indoor"],
+      "transport": "walk",
+      "district": "3e",
+      "neighborhood": "Le Marais",
+      "durationMin": 135,
+      "durationBucket": "1_2h",
+      "budgetPerPersonEur": 26,
+      "budgetBucket": "medium",
+      "distanceM": 2010,
+      "rating": {
+        "average": null,
+        "count": 0
+      },
+      "stepCount": 4,
+      "isLocked": false,
+      "status": "published",
+      "description": "Un café dans un concept-store, le falafel de la rue des Rosiers, les cours d’antiquaires du village Saint-Paul et une glace Berthillon sur l’île Saint-Louis.",
+      "photoUrls": [
+        "https://images.unsplash.com/photo-1788101841904-669e8b5924b4?w=1200&h=800&fit=crop&auto=format&q=80",
+        "https://images.unsplash.com/photo-1563896171319-a5534fcf465f?w=1200&h=800&fit=crop&auto=format&q=80"
+      ],
+      "walkingDistanceM": 2010,
+      "effort": "easy",
+      "startAccess": null,
+      "creator": {
+        "routesPublished": 7,
+        "isCertified": false
+      },
+      "sharedBy": null,
+      "reviews": [],
+      "timeline": {
+        "startsAt": "2026-09-25T08:00:00.000Z",
+        "endsAt": "2026-09-25T10:17:00.000Z",
+        "steps": [
+          {
+            "stepId": "01a0d794-1000-7af2-8af3-fe4fcba5ae52",
+            "arrivesAt": "2026-09-25T08:00:00.000Z",
+            "leavesAt": "2026-09-25T08:30:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7da9-ac5b-d586b817ea5f",
+            "arrivesAt": "2026-09-25T08:42:00.000Z",
+            "leavesAt": "2026-09-25T09:12:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7508-95a4-c081d27fbab9",
+            "arrivesAt": "2026-09-25T09:21:00.000Z",
+            "leavesAt": "2026-09-25T09:51:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7fc6-bce0-2657a7e97b8e",
+            "arrivesAt": "2026-09-25T09:57:00.000Z",
+            "leavesAt": "2026-09-25T10:17:00.000Z",
+            "conflicts": []
+          }
+        ]
+      },
+      "steps": [
+        {
+          "id": "01a0d794-1000-7af2-8af3-fe4fcba5ae52",
+          "position": 0,
+          "isLocked": false,
+          "title": null,
+          "description": "Café au Used Book Café, au milieu des livres d’occasion.",
+          "durationMin": 30,
+          "costPerPersonEur": 8,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 891,
+            "durationMin": 12,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-767b-87d0-2a9912057f10",
+            "name": "Merci",
+            "category": "shop",
+            "location": {
+              "lat": 48.86077,
+              "lng": 2.36693
+            },
+            "address": "111 boulevard Beaumarchais, 75003 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "10:30",
+                "closes": "19:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "10:30",
+                "closes": "19:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "10:30",
+                "closes": "19:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "10:30",
+                "closes": "19:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "10:30",
+                "closes": "19:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "10:30",
+                "closes": "19:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "11:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 3,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7da9-ac5b-d586b817ea5f",
+          "position": 1,
+          "isLocked": false,
+          "title": null,
+          "description": "Le sandwich falafel à emporter. Fermé le samedi.",
+          "durationMin": 30,
+          "costPerPersonEur": 12,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": "Rejoindre la rue des Rosiers par la rue du Pas-de-la-Mule.",
+          "transition": {
+            "distanceM": 702,
+            "durationMin": 9,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7912-87df-5eebd16c342a",
+            "name": "L’As du Fallafel",
+            "category": "restaurant",
+            "location": {
+              "lat": 48.85742,
+              "lng": 2.35907
+            },
+            "address": "34 rue des Rosiers, 75004 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "11:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "11:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "11:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "11:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "11:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "11:00",
+                "closes": "15:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 5,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7508-95a4-c081d27fbab9",
+          "position": 2,
+          "isLocked": false,
+          "title": null,
+          "description": "Des cours intérieures pleines d’antiquaires et de brocanteurs.",
+          "durationMin": 30,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 421,
+            "durationMin": 6,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7464-af87-4002b816640a",
+            "name": "Village Saint-Paul",
+            "category": "shop",
+            "location": {
+              "lat": 48.85271,
+              "lng": 2.36088
+            },
+            "address": "23 rue Saint-Paul, 75004 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "11:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "11:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "11:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "11:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "11:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 7,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7fc6-bce0-2657a7e97b8e",
+          "position": 3,
+          "isLocked": false,
+          "title": null,
+          "description": "Glace au caramel au beurre salé, à déguster sur le quai d’Orléans.",
+          "durationMin": 20,
+          "costPerPersonEur": 6,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": null,
+          "place": {
+            "id": "01a0d794-1000-70ac-a50a-12830ae86341",
+            "name": "Berthillon",
+            "category": "shop",
+            "location": {
+              "lat": 48.85171,
+              "lng": 2.35672
+            },
+            "address": "29-31 rue Saint-Louis-en-l’Île, 75004 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 2,
+                "opens": "10:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "10:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "10:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "10:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "10:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 9,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "01a0d794-1000-764a-9d0c-b935faae6650",
+      "title": "De Bastille au bois de Vincennes par la Coulée verte",
+      "coverUrl": "https://images.unsplash.com/photo-1663511870425-5dd7edf1c071?w=1200&h=800&fit=crop&auto=format&q=80",
+      "isOfficial": true,
+      "author": null,
+      "access": "free",
+      "isVerified": true,
+      "moods": ["sport", "nature"],
+      "audiences": ["couple", "friends", "solo"],
+      "conditions": ["no_booking", "outdoor", "sunny"],
+      "transport": "walk",
+      "district": "12e",
+      "neighborhood": "Bastille",
+      "durationMin": 335,
+      "durationBucket": "full_day",
+      "budgetPerPersonEur": 0,
+      "budgetBucket": "free",
+      "distanceM": 7250,
+      "rating": {
+        "average": null,
+        "count": 0
+      },
+      "stepCount": 4,
+      "isLocked": false,
+      "status": "published",
+      "description": "Plus de sept kilomètres de marche sur l’ancienne voie ferrée de la Bastille, des jardins suspendus jusqu’au lac Daumesnil et au Parc floral. Prévoir de bonnes chaussures et un pique-nique.",
+      "photoUrls": [
+        "https://images.unsplash.com/photo-1663511870425-5dd7edf1c071?w=1200&h=800&fit=crop&auto=format&q=80",
+        "https://images.unsplash.com/photo-1663511433047-c0f9317e046a?w=1200&h=800&fit=crop&auto=format&q=80"
+      ],
+      "walkingDistanceM": 7250,
+      "effort": "intense",
+      "startAccess": null,
+      "creator": {
+        "routesPublished": 7,
+        "isCertified": false
+      },
+      "sharedBy": null,
+      "reviews": [],
+      "timeline": {
+        "startsAt": "2026-09-25T08:00:00.000Z",
+        "endsAt": "2026-09-25T12:51:00.000Z",
+        "steps": [
+          {
+            "stepId": "01a0d794-1000-7a56-b081-43f0d52e0aee",
+            "arrivesAt": "2026-09-25T08:00:00.000Z",
+            "leavesAt": "2026-09-25T08:30:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7594-9993-7ed19333f5b8",
+            "arrivesAt": "2026-09-25T08:45:00.000Z",
+            "leavesAt": "2026-09-25T09:30:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-78cb-bebf-ad7bb76ad43b",
+            "arrivesAt": "2026-09-25T09:48:00.000Z",
+            "leavesAt": "2026-09-25T11:03:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7206-8068-4b55098cf9ab",
+            "arrivesAt": "2026-09-25T11:21:00.000Z",
+            "leavesAt": "2026-09-25T12:51:00.000Z",
+            "conflicts": []
+          }
+        ]
+      },
+      "steps": [
+        {
+          "id": "01a0d794-1000-7a56-b081-43f0d52e0aee",
+          "position": 0,
+          "isLocked": false,
+          "title": null,
+          "description": "Monter sur la Coulée verte par l’escalier de l’avenue Daumesnil.",
+          "durationMin": 30,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 1104,
+            "durationMin": 15,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7700-b8e9-3bcd586afff4",
+            "name": "Viaduc des Arts",
+            "category": "walk",
+            "location": {
+              "lat": 48.84635,
+              "lng": 2.3778
+            },
+            "address": "avenue Daumesnil, 75012 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": []
+          },
+          "verification": {
+            "confirmations": 3,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7594-9993-7ed19333f5b8",
+          "position": 1,
+          "isLocked": false,
+          "title": null,
+          "description": "Pelouse et passerelle au-dessus du jardin, pause pique-nique.",
+          "durationMin": 45,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": "Suivre la Coulée verte jusqu’à la porte de Montempoivre.",
+          "transition": {
+            "distanceM": 3366,
+            "durationMin": 18,
+            "mode": "metro",
+            "estimated": false
+          },
+          "place": {
+            "id": "01a0d794-1000-79bd-89b4-1a5c5056307e",
+            "name": "Jardin de Reuilly",
+            "category": "park",
+            "location": {
+              "lat": 48.84219,
+              "lng": 2.38753
+            },
+            "address": "rue Albinoni, 75012 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "09:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "09:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 5,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-78cb-bebf-ad7bb76ad43b",
+          "position": 2,
+          "isLocked": false,
+          "title": null,
+          "description": "Le tour du lac et de ses deux îles, par le pont suspendu.",
+          "durationMin": 75,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 3254,
+            "durationMin": 18,
+            "mode": "metro",
+            "estimated": false
+          },
+          "place": {
+            "id": "01a0d794-1000-7bd8-8590-7358b7874c83",
+            "name": "Lac Daumesnil",
+            "category": "park",
+            "location": {
+              "lat": 48.83076,
+              "lng": 2.41541
+            },
+            "address": "route de Ceinture du Lac Daumesnil, 75012 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": []
+          },
+          "verification": {
+            "confirmations": 7,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7206-8068-4b55098cf9ab",
+          "position": 3,
+          "isLocked": false,
+          "title": null,
+          "description": "Les collections de plantes, la forêt de bambous et les grandes pelouses.",
+          "durationMin": 90,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": null,
+          "place": {
+            "id": "01a0d794-1000-7fb0-836c-6066ddb2561b",
+            "name": "Parc floral de Paris",
+            "category": "park",
+            "location": {
+              "lat": 48.83732,
+              "lng": 2.44556
+            },
+            "address": "route de la Pyramide, 75012 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "09:30",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "09:30",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "09:30",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "09:30",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "09:30",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "09:30",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "09:30",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 9,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "01a0d794-1000-74ca-8b68-280d29c13fca",
+      "title": "Montmartre à deux, des Abbesses au coucher du soleil",
+      "coverUrl": "https://images.unsplash.com/photo-1561370665-7e266065fce1?w=1200&h=800&fit=crop&auto=format&q=80",
+      "isOfficial": true,
+      "author": null,
+      "access": "premium",
+      "isVerified": true,
+      "moods": ["romantic", "instagrammable", "culture"],
+      "audiences": ["couple"],
+      "conditions": ["outdoor", "sunny"],
+      "transport": "walk",
+      "district": "18e",
+      "neighborhood": "Montmartre",
+      "durationMin": 230,
+      "durationBucket": "half_day",
+      "budgetPerPersonEur": 50,
+      "budgetBucket": "medium",
+      "distanceM": 1010,
+      "rating": {
+        "average": null,
+        "count": 0
+      },
+      "stepCount": 5,
+      "isLocked": true,
+      "status": "published",
+      "description": "Une montée douce vers la Butte : le mur des je t’aime, la vue depuis le parvis du Sacré-Cœur, les peintres de la place du Tertre, puis le musée et un dîner à la Maison Rose.",
+      "photoUrls": [
+        "https://images.unsplash.com/photo-1561370665-7e266065fce1?w=1200&h=800&fit=crop&auto=format&q=80",
+        "https://images.unsplash.com/photo-1623009070764-45002990256e?w=1200&h=800&fit=crop&auto=format&q=80"
+      ],
+      "walkingDistanceM": 1010,
+      "effort": "easy",
+      "startAccess": null,
+      "creator": {
+        "routesPublished": 7,
+        "isCertified": false
+      },
+      "sharedBy": null,
+      "reviews": [],
+      "timeline": {
+        "startsAt": "2026-09-25T12:00:00.000Z",
+        "endsAt": "2026-09-25T15:48:00.000Z",
+        "steps": [
+          {
+            "stepId": "01a0d794-1000-799f-9cef-b5aefd76ba18",
+            "arrivesAt": "2026-09-25T12:00:00.000Z",
+            "leavesAt": "2026-09-25T12:15:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-788e-8d7a-9b25dd090939",
+            "arrivesAt": "2026-09-25T12:21:00.000Z",
+            "leavesAt": "2026-09-25T12:51:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7c46-ab48-97662735e8dd",
+            "arrivesAt": "2026-09-25T12:54:00.000Z",
+            "leavesAt": "2026-09-25T13:14:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7631-a5c8-08e4416dce50",
+            "arrivesAt": "2026-09-25T13:17:00.000Z",
+            "leavesAt": "2026-09-25T14:17:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7e12-aa92-601cad482959",
+            "arrivesAt": "2026-09-25T14:18:00.000Z",
+            "leavesAt": "2026-09-25T15:48:00.000Z",
+            "conflicts": []
+          }
+        ]
+      },
+      "steps": [
+        {
+          "id": "01a0d794-1000-799f-9cef-b5aefd76ba18",
+          "position": 0,
+          "isLocked": false,
+          "title": null,
+          "description": "« Je t’aime » écrit dans plus de 250 langues, dans un petit square des Abbesses.",
+          "durationMin": 15,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": "Monter par la rue Yvonne-Le-Tac puis les escaliers du square Louise-Michel.",
+          "transition": {
+            "distanceM": 477,
+            "durationMin": 6,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-783b-aec5-f6752d38b3f7",
+            "name": "Le Mur des je t’aime",
+            "category": "other",
+            "location": {
+              "lat": 48.88481,
+              "lng": 2.33852
+            },
+            "address": "square Jehan-Rictus, place des Abbesses, 75018 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "08:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "09:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "09:00",
+                "closes": "20:30",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 3,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-788e-8d7a-9b25dd090939",
+          "position": 1,
+          "isLocked": true,
+          "category": "viewpoint",
+          "durationMin": 30,
+          "transition": {
+            "distanceM": 216,
+            "durationMin": 3,
+            "mode": "walk",
+            "estimated": true
+          }
+        },
+        {
+          "id": "01a0d794-1000-7c46-ab48-97662735e8dd",
+          "position": 2,
+          "isLocked": true,
+          "category": "walk",
+          "durationMin": 20,
+          "transition": {
+            "distanceM": 220,
+            "durationMin": 3,
+            "mode": "walk",
+            "estimated": true
+          }
+        },
+        {
+          "id": "01a0d794-1000-7631-a5c8-08e4416dce50",
+          "position": 3,
+          "isLocked": true,
+          "category": "museum",
+          "durationMin": 60,
+          "transition": {
+            "distanceM": 94,
+            "durationMin": 1,
+            "mode": "walk",
+            "estimated": true
+          }
+        },
+        {
+          "id": "01a0d794-1000-7e12-aa92-601cad482959",
+          "position": 4,
+          "isLocked": true,
+          "category": "restaurant",
+          "durationMin": 90,
+          "transition": null
+        }
+      ]
+    },
+    {
+      "id": "01a0d794-1000-7608-9f30-19be4d17ab18",
+      "title": "Le canal Saint-Martin à vélo jusqu’à la Villette",
+      "coverUrl": "https://images.unsplash.com/photo-1642766603265-e33f8a27fb31?w=1200&h=800&fit=crop&auto=format&q=80",
+      "isOfficial": false,
+      "author": {
+        "id": "01a0d794-1000-7183-8f78-2f9c9aa1018a",
+        "firstName": "Camille",
+        "avatarUrl": null
+      },
+      "access": "free",
+      "isVerified": false,
+      "moods": ["relax", "sport", "instagrammable"],
+      "audiences": ["friends", "solo"],
+      "conditions": ["no_booking", "outdoor", "sunny"],
+      "transport": "bike",
+      "district": "10e",
+      "neighborhood": "Canal Saint-Martin",
+      "durationMin": 215,
+      "durationBucket": "half_day",
+      "budgetPerPersonEur": 14,
+      "budgetBucket": "low",
+      "distanceM": 4430,
+      "rating": {
+        "average": null,
+        "count": 0
+      },
+      "stepCount": 5,
+      "isLocked": false,
+      "status": "private",
+      "description": "Une balade en Vélib le long de l’eau : viennoiserie d’une boulangerie culte, écluses et passerelles, pause au bord du bassin de la Villette, puis les pelouses du parc.",
+      "photoUrls": [
+        "https://images.unsplash.com/photo-1642766603265-e33f8a27fb31?w=1200&h=800&fit=crop&auto=format&q=80",
+        "https://images.unsplash.com/photo-1548123833-0d46ee1d7400?w=1200&h=800&fit=crop&auto=format&q=80"
+      ],
+      "walkingDistanceM": 0,
+      "effort": "easy",
+      "startAccess": null,
+      "creator": {
+        "routesPublished": 2,
+        "isCertified": false
+      },
+      "sharedBy": {
+        "firstName": "Camille"
+      },
+      "reviews": [],
+      "timeline": {
+        "startsAt": "2026-09-25T12:00:00.000Z",
+        "endsAt": "2026-09-25T16:09:00.000Z",
+        "steps": [
+          {
+            "stepId": "01a0d794-1000-7619-8464-34f892940a7f",
+            "arrivesAt": "2026-09-25T12:00:00.000Z",
+            "leavesAt": "2026-09-25T12:20:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7884-a823-c29041c938ad",
+            "arrivesAt": "2026-09-25T12:25:00.000Z",
+            "leavesAt": "2026-09-25T12:45:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7271-a599-23042d128b3d",
+            "arrivesAt": "2026-09-25T12:48:00.000Z",
+            "leavesAt": "2026-09-25T13:18:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-77d8-8b09-9fe98669addc",
+            "arrivesAt": "2026-09-25T13:50:00.000Z",
+            "leavesAt": "2026-09-25T14:50:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7642-90e8-1f2ee858b1e8",
+            "arrivesAt": "2026-09-25T15:09:00.000Z",
+            "leavesAt": "2026-09-25T16:09:00.000Z",
+            "conflicts": []
+          }
+        ]
+      },
+      "steps": [
+        {
+          "id": "01a0d794-1000-7619-8464-34f892940a7f",
+          "position": 0,
+          "isLocked": false,
+          "title": null,
+          "description": "Le « pain des amis » et l’escargot pistache-chocolat. Fermé le week-end.",
+          "durationMin": 20,
+          "costPerPersonEur": 6,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 361,
+            "durationMin": 5,
+            "mode": "bike",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7a29-8984-4d401bfbba23",
+            "name": "Du Pain et des Idées",
+            "category": "bakery",
+            "location": {
+              "lat": 48.87125,
+              "lng": 2.3629
+            },
+            "address": "34 rue Yves-Toudic, 75010 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "07:15",
+                "closes": "19:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "07:15",
+                "closes": "19:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "07:15",
+                "closes": "19:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "07:15",
+                "closes": "19:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "07:15",
+                "closes": "19:30",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 3,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7884-a823-c29041c938ad",
+          "position": 1,
+          "isLocked": false,
+          "title": null,
+          "description": "Regarder une péniche passer l’écluse depuis la passerelle, à côté de l’Hôtel du Nord.",
+          "durationMin": 20,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 257,
+            "durationMin": 3,
+            "mode": "bike",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-766b-a7a3-ae0f1a2dbbc3",
+            "name": "Écluse des Récollets",
+            "category": "walk",
+            "location": {
+              "lat": 48.87372,
+              "lng": 2.36345
+            },
+            "address": "quai de Jemmapes, 75010 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": []
+          },
+          "verification": {
+            "confirmations": 5,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7271-a599-23042d128b3d",
+          "position": 2,
+          "isLocked": false,
+          "title": null,
+          "description": "Un jardin partagé caché derrière le canal, pour une première pause.",
+          "durationMin": 30,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": "Reprendre le quai de Valmy vers le nord, piste cyclable sur la gauche.",
+          "transition": {
+            "distanceM": 2390,
+            "durationMin": 32,
+            "mode": "bike",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7b6e-b183-e566e8ea1e7f",
+            "name": "Jardin Villemin",
+            "category": "park",
+            "location": {
+              "lat": 48.87515,
+              "lng": 2.36185
+            },
+            "address": "14 rue des Récollets, 75010 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "08:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "08:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "08:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "08:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "08:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "09:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "09:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 7,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-77d8-8b09-9fe98669addc",
+          "position": 3,
+          "isLocked": false,
+          "title": null,
+          "description": "Un café dans une maison au bord de l’eau : on s’installe dans la baignoire ou sur la terrasse.",
+          "durationMin": 60,
+          "costPerPersonEur": 8,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 1422,
+            "durationMin": 19,
+            "mode": "bike",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-720d-853c-455a2c56f979",
+            "name": "Pavillon des Canaux",
+            "category": "cafe",
+            "location": {
+              "lat": 48.88743,
+              "lng": 2.37869
+            },
+            "address": "39 quai de la Loire, 75019 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "10:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "10:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "10:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "10:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "10:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "10:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "10:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 9,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-7642-90e8-1f2ee858b1e8",
+          "position": 4,
+          "isLocked": false,
+          "title": null,
+          "description": "Les grandes pelouses et le canal de l’Ourcq. Déposer le vélo à la station de la Grande Halle.",
+          "durationMin": 60,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": null,
+          "place": {
+            "id": "01a0d794-1000-70ba-b08b-e056cc7e542c",
+            "name": "Parc de la Villette",
+            "category": "park",
+            "location": {
+              "lat": 48.89489,
+              "lng": 2.38844
+            },
+            "address": "211 avenue Jean-Jaurès, 75019 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": []
+          },
+          "verification": {
+            "confirmations": 11,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "01a0d794-1000-76a5-a7f7-68e74903b975",
+      "title": "Le Marais gourmand en deux heures",
+      "coverUrl": "https://images.unsplash.com/photo-1788101841904-669e8b5924b4?w=1200&h=800&fit=crop&auto=format&q=80",
+      "isOfficial": true,
+      "author": null,
+      "access": "free",
+      "isVerified": true,
+      "moods": ["food", "shopping"],
+      "audiences": ["couple", "friends"],
+      "conditions": ["no_booking", "indoor"],
+      "transport": "walk",
+      "district": "3e",
+      "neighborhood": "Le Marais",
+      "durationMin": 135,
+      "durationBucket": "1_2h",
+      "budgetPerPersonEur": 26,
+      "budgetBucket": "medium",
+      "distanceM": 2010,
+      "rating": {
+        "average": 4.7,
+        "count": 3
+      },
+      "stepCount": 4,
+      "isLocked": false,
+      "status": "published",
+      "description": "Un café dans un concept-store, le falafel de la rue des Rosiers, les cours d’antiquaires du village Saint-Paul et une glace Berthillon sur l’île Saint-Louis.",
+      "photoUrls": [
+        "https://images.unsplash.com/photo-1788101841904-669e8b5924b4?w=1200&h=800&fit=crop&auto=format&q=80",
+        "https://images.unsplash.com/photo-1563896171319-a5534fcf465f?w=1200&h=800&fit=crop&auto=format&q=80"
+      ],
+      "walkingDistanceM": 2010,
+      "effort": "easy",
+      "startAccess": null,
+      "creator": {
+        "routesPublished": 7,
+        "isCertified": false
+      },
+      "sharedBy": null,
+      "reviews": [
+        {
+          "id": "01a0d794-1000-7a35-b3f5-a8bbddd2bbde",
+          "firstName": "Inès",
+          "rating": 5,
+          "comment": "Parfait pour un samedi à deux, on a tout fait à pied.",
+          "createdAt": "2026-09-21T08:00:00.000Z"
+        },
+        {
+          "id": "01a0d794-1000-7aa1-a342-df25ec979cdf",
+          "firstName": "Hugo",
+          "rating": 5,
+          "comment": "Les adresses sont bonnes, le timing tient.",
+          "createdAt": "2026-09-17T08:00:00.000Z"
+        },
+        {
+          "id": "01a0d794-1000-7dd4-905b-bfaaa9b9ad77",
+          "firstName": "Léa",
+          "rating": 4,
+          "comment": "Très bien, un peu de monde au fallafel à midi.",
+          "createdAt": "2026-09-12T08:00:00.000Z"
+        }
+      ],
+      "timeline": {
+        "startsAt": "2026-09-25T08:00:00.000Z",
+        "endsAt": "2026-09-25T10:17:00.000Z",
+        "steps": [
+          {
+            "stepId": "01a0d794-1000-7aec-b584-d4521cfc6e9e",
+            "arrivesAt": "2026-09-25T08:00:00.000Z",
+            "leavesAt": "2026-09-25T08:30:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-74fa-8635-71edf00c3ef4",
+            "arrivesAt": "2026-09-25T08:42:00.000Z",
+            "leavesAt": "2026-09-25T09:12:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-7075-9f54-8f19fe5fcb96",
+            "arrivesAt": "2026-09-25T09:21:00.000Z",
+            "leavesAt": "2026-09-25T09:51:00.000Z",
+            "conflicts": []
+          },
+          {
+            "stepId": "01a0d794-1000-70e1-ac53-644edca8b103",
+            "arrivesAt": "2026-09-25T09:57:00.000Z",
+            "leavesAt": "2026-09-25T10:17:00.000Z",
+            "conflicts": []
+          }
+        ]
+      },
+      "steps": [
+        {
+          "id": "01a0d794-1000-7aec-b584-d4521cfc6e9e",
+          "position": 0,
+          "isLocked": false,
+          "title": null,
+          "description": "Café au Used Book Café, au milieu des livres d’occasion.",
+          "durationMin": 30,
+          "costPerPersonEur": 8,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 891,
+            "durationMin": 12,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-767b-87d0-2a9912057f10",
+            "name": "Merci",
+            "category": "shop",
+            "location": {
+              "lat": 48.86077,
+              "lng": 2.36693
+            },
+            "address": "111 boulevard Beaumarchais, 75003 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "10:30",
+                "closes": "19:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "10:30",
+                "closes": "19:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "10:30",
+                "closes": "19:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "10:30",
+                "closes": "19:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "10:30",
+                "closes": "19:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "10:30",
+                "closes": "19:30",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "11:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 3,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-74fa-8635-71edf00c3ef4",
+          "position": 1,
+          "isLocked": false,
+          "title": null,
+          "description": "Le sandwich falafel à emporter. Fermé le samedi.",
+          "durationMin": 30,
+          "costPerPersonEur": 12,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": "Rejoindre la rue des Rosiers par la rue du Pas-de-la-Mule.",
+          "transition": {
+            "distanceM": 702,
+            "durationMin": 9,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7912-87df-5eebd16c342a",
+            "name": "L’As du Fallafel",
+            "category": "restaurant",
+            "location": {
+              "lat": 48.85742,
+              "lng": 2.35907
+            },
+            "address": "34 rue des Rosiers, 75004 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "flagged",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "11:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 1,
+                "opens": "11:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 2,
+                "opens": "11:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "11:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "11:00",
+                "closes": "23:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "11:00",
+                "closes": "15:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 0,
+            "lastConfirmedAt": "2026-09-18T08:00:00.000Z",
+            "reports": {
+              "count": 3,
+              "lastAt": "2026-09-22T08:00:00.000Z"
+            }
+          }
+        },
+        {
+          "id": "01a0d794-1000-7075-9f54-8f19fe5fcb96",
+          "position": 2,
+          "isLocked": false,
+          "title": null,
+          "description": "Des cours intérieures pleines d’antiquaires et de brocanteurs.",
+          "durationMin": 30,
+          "costPerPersonEur": 0,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": {
+            "distanceM": 421,
+            "durationMin": 6,
+            "mode": "walk",
+            "estimated": true
+          },
+          "place": {
+            "id": "01a0d794-1000-7464-af87-4002b816640a",
+            "name": "Village Saint-Paul",
+            "category": "shop",
+            "location": {
+              "lat": 48.85271,
+              "lng": 2.36088
+            },
+            "address": "23 rue Saint-Paul, 75004 Paris",
+            "isIndoor": false,
+            "photoUrl": null,
+            "verificationStatus": "stale",
+            "verifiedAt": "2026-05-23T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 0,
+                "opens": "11:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "11:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "11:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "11:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "11:00",
+                "closes": "19:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 0,
+            "lastConfirmedAt": "2026-05-23T08:00:00.000Z",
+            "reports": null
+          }
+        },
+        {
+          "id": "01a0d794-1000-70e1-ac53-644edca8b103",
+          "position": 3,
+          "isLocked": false,
+          "title": null,
+          "description": "Glace au caramel au beurre salé, à déguster sur le quai d’Orléans.",
+          "durationMin": 20,
+          "costPerPersonEur": 6,
+          "bookingRequired": false,
+          "bookingUrl": null,
+          "bookingProvider": null,
+          "bookingNote": null,
+          "bookingIsAffiliate": false,
+          "endsOn": null,
+          "transitionNote": null,
+          "transition": null,
+          "place": {
+            "id": "01a0d794-1000-70ac-a50a-12830ae86341",
+            "name": "Berthillon",
+            "category": "shop",
+            "location": {
+              "lat": 48.85171,
+              "lng": 2.35672
+            },
+            "address": "29-31 rue Saint-Louis-en-l’Île, 75004 Paris",
+            "isIndoor": true,
+            "photoUrl": null,
+            "verificationStatus": "verified",
+            "verifiedAt": "2026-09-25T08:00:00.000Z",
+            "hours": [
+              {
+                "weekday": 2,
+                "opens": "10:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 3,
+                "opens": "10:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 4,
+                "opens": "10:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 5,
+                "opens": "10:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              },
+              {
+                "weekday": 6,
+                "opens": "10:00",
+                "closes": "20:00",
+                "validFrom": null,
+                "validTo": null
+              }
+            ]
+          },
+          "verification": {
+            "confirmations": 9,
+            "lastConfirmedAt": "2026-09-25T08:00:00.000Z",
+            "reports": null
+          }
+        }
+      ]
+    }
+  ],
+  "removed": [
+    {
+      "id": "01a0d794-1000-7c65-8700-0ce047497f0a",
+      "removedAt": "2026-09-20T08:00:00.000Z"
+    }
+  ]
+}
