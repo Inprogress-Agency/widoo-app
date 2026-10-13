@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { taxonomies } from '../taxonomies';
 import { HttpsUrl, plainText } from './common';
+import { Anecdotes, Bio, FeaturedRouteIds, Neighborhood } from './profile';
 
 /** First name shown on the profile and as route author (E-09, E-16). */
 export const FirstName = plainText(50);
@@ -43,7 +44,9 @@ export type Me = z.infer<typeof Me>;
 /**
  * Body of `PATCH /me`: listed fields only, at least one; preferences are merged. `avatarUrl`
  * only accepts null (removal) until avatars go through the upload pipeline, which re-encodes
- * images server side (wiki Securite-et-RGPD).
+ * images server side (wiki Securite-et-RGPD). `bio` and `neighborhood` are cleared with null;
+ * `anecdotes` and `featuredRouteIds` replace the whole ordered list, an empty one clears it.
+ * Active questions and published routes of the caller are checked by the API (422).
  */
 export const UpdateMe = z
   .strictObject({
@@ -51,6 +54,10 @@ export const UpdateMe = z
     avatarUrl: z.null(),
     isPublic: z.boolean(),
     notificationPrefs: NotificationPrefs.partial().strict(),
+    bio: Bio.nullable(),
+    neighborhood: Neighborhood.nullable(),
+    anecdotes: Anecdotes,
+    featuredRouteIds: FeaturedRouteIds,
   })
   .partial()
   .refine((update) => Object.keys(update).length > 0, 'Nothing to update');

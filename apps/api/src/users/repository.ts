@@ -3,6 +3,7 @@ import { and, eq, isNull, sql } from 'drizzle-orm';
 import type { VerifiedIdentity } from '../auth/verifier';
 import type { Db } from '../db/client';
 import { userAnecdotes, userFeaturedRoutes, users } from '../db/schema';
+import { profileIssues, replaceProfileLists, type ProfileIssue } from './profile';
 
 export type User = typeof users.$inferSelect;
 
@@ -46,27 +47,42 @@ export async function findOrCreateUser(db: Db, identity: VerifiedIdentity): Prom
   return user;
 }
 
+/** Outcome of `updateUser`: nothing is written unless it is `updated`. */
+export type UserUpdate =
+  | { kind: 'updated'; user: User }
+  | { kind: 'invalid'; issues: ProfileIssue[] }
+  | { kind: 'deleted' };
+
 /**
- * Applies a profile update to an active account; notification preferences are merged into the
- * stored ones by the database. Undefined when the account is deleted meanwhile.
+ * Applies a profile update to an active account, in one transaction: account fields,
+ * notification preferences merged into the stored ones by the database, then the anecdotes and
+ * featured routes, each list replaced as a whole. The account row is locked first, so that two
+ * saves of the same profile run one after the other. A broken rule writes nothing.
  */
-export async function updateUser(
-  db: Db,
-  userId: string,
-  update: UpdateMe,
-): Promise<User | undefined> {
-  const { notificationPrefs, ...fields } = update;
-  const [updated] = await db
-    .update(users)
-    .set({
+export async function updateUser(db: Db, userId: string, update: UpdateMe): Promise<UserUpdate> {
+  const { notificationPrefs, anecdotes, featuredRouteIds, ...fields } = update;
+  return db.transaction(async (tx): Promise<UserUpdate> => {
+    const active = and(eq(users.id, userId), isNull(users.deletedAt));
+    const [locked] = await tx.select().from(users).where(active).for('update');
+    if (!locked) return { kind: 'deleted' };
+
+    const issues = await profileIssues(tx, userId, { anecdotes, featuredRouteIds });
+    if (issues.length > 0) return { kind: 'invalid', issues };
+
+    const set = {
       ...fields,
       ...(notificationPrefs && {
         notificationPrefs: sql`${users.notificationPrefs} || ${JSON.stringify(notificationPrefs)}::jsonb`,
       }),
-    })
-    .where(and(eq(users.id, userId), isNull(users.deletedAt)))
-    .returning();
-  return updated;
+    };
+    const [user] =
+      Object.keys(set).length > 0
+        ? await tx.update(users).set(set).where(active).returning()
+        : [locked];
+    if (!user) return { kind: 'deleted' };
+    await replaceProfileLists(tx, userId, { anecdotes, featuredRouteIds });
+    return { kind: 'updated', user };
+  });
 }
 
 /**
