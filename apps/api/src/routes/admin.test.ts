@@ -1,11 +1,11 @@
 import { AdminCounters, ApiError, type UserRole } from '@widoo/shared';
-import { inArray } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
 import type { VerifiedIdentity } from '../auth/verifier';
 import { routes, users } from '../db/schema';
-import { seed } from '../db/seed';
+import { seed, seedId } from '../db/seed';
 import { uuidv7 } from '../db/uuid';
 import { testConfig } from '../test-config';
 
@@ -14,6 +14,9 @@ const verifier = new TestTokenVerifier();
 const createdUids: string[] = [];
 const createdRouteIds: string[] = [];
 const hour = 60 * 60 * 1000;
+const templateId = seedId('route:marais-gourmand');
+const farAway = { lat: 31, lng: 31 };
+const farAwayBounds = { west: 31, south: 31, east: 31.001, north: 31.001 };
 
 let app: Awaited<ReturnType<typeof buildApp>>;
 beforeAll(async () => {
@@ -39,14 +42,18 @@ const getCounters = (headers: Record<string, string> = {}) =>
 
 /** A pending route copied from the seed, last changed `hoursAgo` hours ago. */
 async function addPendingRoute(hoursAgo: number) {
-  const [template] = await app.db.select().from(routes).limit(1);
-  if (!template) throw new Error('No route in the seed');
+  // Always the same demo route of the seed, never a row another test file is using, and far
+  // from every zone the search tests look at.
+  const [template] = await app.db.select().from(routes).where(eq(routes.id, templateId));
+  if (!template) throw new Error('Demo route missing from the seed');
   const id = uuidv7();
   createdRouteIds.push(id);
   await app.db.insert(routes).values({
     ...template,
     id,
     shareToken: null,
+    startLocation: farAway,
+    bounds: farAwayBounds,
     status: 'pending',
     updatedAt: new Date(Date.now() - hoursAgo * hour),
   });
