@@ -89,13 +89,13 @@ describe('PATCH /v1/me', () => {
     ['an e-mail', { email: 'other.me@example.com' }],
     ['a first name with markup', { firstName: '<script>x</script>' }],
     ['an avatar URL', { avatarUrl: 'https://example.com/avatar.jpg' }],
-  ])('refuses %s with 400 and changes nothing', async (_, payload) => {
+  ])('refuses %s with 422 and changes nothing', async (_, payload) => {
     const { uid, headers } = signIn();
     await app.inject({ url: '/v1/me', headers });
     const before = await userOf(uid);
 
     const response = await patchMe(headers, payload);
-    expect(response.statusCode).toBe(400);
+    expect(response.statusCode).toBe(422);
     expect(ApiError.parse(response.json()).code).toBe('validation_error');
     expect(await userOf(uid)).toEqual(before);
   });
