@@ -1,7 +1,6 @@
-/**
- * A-05, the dashboard: its tiles and figures come with the ticket of the dashboard (#55). The
- * shell around it already shows its title.
- */
+import { DashboardContainer } from '@/containers/DashboardContainer';
+
+/** A-05, the dashboard: the home page of the admin. */
 export default function DashboardPage() {
-  return null;
+  return <DashboardContainer />;
 }
