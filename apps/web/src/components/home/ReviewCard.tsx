@@ -36,7 +36,9 @@ export function ReviewCard({
         </span>
         <span className="text-label-strong text-muted">{texts.reviewSource[review.store]}</span>
       </div>
-      <blockquote className="mt-10 text-quote-s text-ink xl:text-quote">« {review.text} »</blockquote>
+      <blockquote className="mt-10 text-quote-s text-ink xl:text-quote">
+        « {review.text} »
+      </blockquote>
       <figcaption className="mt-10 flex items-center gap-8">
         <span
           aria-hidden
