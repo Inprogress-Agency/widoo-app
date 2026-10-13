@@ -58,7 +58,12 @@ export function ShellContainer({ children }: { children: ReactNode }) {
   const counters = useAdminCounters(session.status === 'signedIn');
 
   useEffect(() => {
-    if (session.status === 'signedOut') {
+    // Signed out, or stopped at the second factor: both are finished on the sign-in page.
+    const isAtTheDoor =
+      session.status === 'signedOut' ||
+      session.status === 'secondFactorChallenge' ||
+      session.status === 'secondFactorEnrollment';
+    if (isAtTheDoor) {
       router.replace(signInPathFor(`${window.location.pathname}${window.location.search}`));
     }
   }, [session.status, router]);
