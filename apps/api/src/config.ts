@@ -84,6 +84,28 @@ const Env = z.object({
    */
   MAPBOX_GEOCODING_PERMANENT: z.enum(['true', 'false']).default('false'),
   /**
+   * Server token of Mapbox for the directions of the transitions (Orchestration › Transitions),
+   * never sent to the app; distinct from the geocoding one, to be revoked and counted apart.
+   * Empty or absent: every trip on foot, by bike or by car falls back to a straight line,
+   * marked estimated.
+   */
+  MAPBOX_DIRECTIONS_TOKEN: z
+    .string()
+    .optional()
+    .transform((value) => value || undefined)
+    .pipe(
+      z
+        .string()
+        .regex(/^[A-Za-z0-9._-]{20,512}$/, 'Expected a Mapbox access token')
+        .optional(),
+    ),
+  /**
+   * Days the answers of Mapbox Directions are kept in `direction_cache`, 30 at most (D-032).
+   * 0, the default: no cache, read or written, the Mapbox Product Terms forbidding to cache or
+   * store the results of a Navigation API (section 2.10.1) unless an order with Mapbox allows it.
+   */
+  MAPBOX_DIRECTIONS_CACHE_DAYS: z.coerce.number().int().min(0).max(30).default(0),
+  /**
    * `staging` or `production` on Cloud Run, where NODE_ENV is `production` for both; empty or
    * absent, the reports carry NODE_ENV.
    */
@@ -143,6 +165,8 @@ export const Config = ProductionEnv.transform((env) => ({
   internalToken: env.INTERNAL_TOKEN,
   mapboxGeocodingToken: env.MAPBOX_GEOCODING_TOKEN,
   isMapboxGeocodingPermanent: env.MAPBOX_GEOCODING_PERMANENT === 'true',
+  mapboxDirectionsToken: env.MAPBOX_DIRECTIONS_TOKEN,
+  directionsCacheDays: env.MAPBOX_DIRECTIONS_CACHE_DAYS,
 }));
 export type Config = z.output<typeof Config>;
 

@@ -23,7 +23,27 @@ describe('loadConfig', () => {
       internalToken: undefined,
       mapboxGeocodingToken: undefined,
       isMapboxGeocodingPermanent: false,
+      mapboxDirectionsToken: undefined,
+      directionsCacheDays: 0,
     });
+  });
+
+  it('reads the Mapbox directions token and the days of its cache, 30 at most', () => {
+    const load = (env: Record<string, string>) => loadConfig({ DATABASE_URL: databaseUrl, ...env });
+    const token = 'sk.fictitious-directions-token-0123456789';
+    expect(load({ MAPBOX_DIRECTIONS_TOKEN: token }).mapboxDirectionsToken).toBe(token);
+    expect(load({ MAPBOX_DIRECTIONS_TOKEN: '' }).mapboxDirectionsToken).toBeUndefined();
+    expect(() => load({ MAPBOX_DIRECTIONS_TOKEN: `${token} x` })).toThrow(
+      /MAPBOX_DIRECTIONS_TOKEN/,
+    );
+    expect(() => load({ MAPBOX_DIRECTIONS_TOKEN: `${token} x` })).not.toThrow(token);
+    expect(load({ MAPBOX_DIRECTIONS_CACHE_DAYS: '30' }).directionsCacheDays).toBe(30);
+    expect(() => load({ MAPBOX_DIRECTIONS_CACHE_DAYS: '31' })).toThrow(
+      /MAPBOX_DIRECTIONS_CACHE_DAYS/,
+    );
+    expect(() => load({ MAPBOX_DIRECTIONS_CACHE_DAYS: '-1' })).toThrow(
+      /MAPBOX_DIRECTIONS_CACHE_DAYS/,
+    );
   });
 
   it('reads the Mapbox geocoding token and mode, never echoing a refused token', () => {
