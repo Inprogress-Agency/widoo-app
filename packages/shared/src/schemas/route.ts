@@ -6,6 +6,16 @@ import { RecommendationReason } from './recommendation';
 
 const euros = z.number().nonnegative();
 
+/** The trip from a step to the next one (Orchestration › Transitions). */
+export const StepTransition = z.object({
+  distanceM: z.number().nonnegative(),
+  durationMin: z.number().nonnegative(),
+  mode: z.enum(taxonomies.transports),
+  /** Straight-line fallback, used when the directions provider is unavailable. */
+  estimated: z.boolean(),
+});
+export type StepTransition = z.infer<typeof StepTransition>;
+
 export const Step = z.object({
   id: z.uuid(),
   position: z.number().int().nonnegative(),
@@ -18,15 +28,8 @@ export const Step = z.object({
   bookingUrl: HttpsUrl.nullable(),
   bookingProvider: z.enum(taxonomies.bookingProviders).nullable(),
   transitionNote: z.string().nullable(),
-  transition: z
-    .object({
-      distanceM: z.number().nonnegative(),
-      durationMin: z.number().nonnegative(),
-      mode: z.enum(taxonomies.transports),
-      /** Straight-line fallback, used when the directions provider is unavailable. */
-      estimated: z.boolean(),
-    })
-    .nullable(),
+  /** The trip to the next step; null for the last one. */
+  transition: StepTransition.nullable(),
   place: Place,
 });
 export type Step = z.infer<typeof Step>;
@@ -37,8 +40,8 @@ const Author = z.object({
   avatarUrl: HttpsUrl.nullable(),
 });
 
-/** Fields of a search result card, shared with the full route sheet. */
-const routeCardShape = {
+/** Fields of a search result card, shared with the full route sheet (`RouteDetail`). */
+export const routeCardFields = {
   id: z.uuid(),
   title: z.string().min(1),
   coverUrl: HttpsUrl.nullable(),
@@ -70,6 +73,10 @@ const routeCardShape = {
   }),
   /** Number of steps of the route, whether or not `steps` carries them all. */
   stepCount: z.number().int().nonnegative(),
+};
+
+const routeCardShape = {
+  ...routeCardFields,
   /**
    * Map pins, in step order. A locked card carries its start alone: the steps 2 and after of a
    * Premium route never leave the API for a caller without the right to it (D-014, D-075).
@@ -120,13 +127,3 @@ export const RouteCard = z
     },
   );
 export type RouteCard = z.infer<typeof RouteCard>;
-
-/** Full route sheet (E-05). */
-export const RouteDetail = z.object(routeCardShape).extend({
-  status: z.enum(taxonomies.routeStatuses),
-  description: z.string(),
-  photoUrls: z.array(HttpsUrl),
-  walkingDistanceM: z.number().nonnegative(),
-  steps: z.array(Step),
-});
-export type RouteDetail = z.infer<typeof RouteDetail>;

@@ -11,6 +11,8 @@ export const apiErrorCodes = [
   'coherence_blocked',
   'quota_exceeded',
   'premium_required',
+  /** 410 of a withdrawn route, with `details.removedAt` (`RouteRemovedDetails`). */
+  'route_removed',
   'internal_error',
 ] as const;
 

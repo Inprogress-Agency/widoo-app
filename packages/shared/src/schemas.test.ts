@@ -7,7 +7,6 @@ import {
   RouteCard,
   RouteCount,
   RouteCountQuery,
-  RouteDetail,
   RouteSearchQuery,
   RouteSearchResult,
   Step,
@@ -67,16 +66,6 @@ const card = {
   stepCount: 1,
   steps: [{ category: 'museum', location, name: 'Musée fictif', durationMin: 45 }],
 };
-const detail = {
-  ...card,
-  status: 'published',
-  description: 'Description fictive',
-  photoUrls: [],
-  conditions: ['indoor'],
-  transport: 'walk',
-  walkingDistanceM: 2400,
-  steps: [step],
-};
 const error = { code: 'not_found', message: 'Route not found' };
 
 const cases: [string, z.ZodType, object, object][] = [
@@ -85,8 +74,6 @@ const cases: [string, z.ZodType, object, object][] = [
   ['Step', Step, step, { bookingProvider: 'thefork' }],
   ['RouteCard', RouteCard, card, { moods: ['Culture'] }],
   ['RouteCard', RouteCard, card, { access: 'gold' }],
-  ['RouteDetail', RouteDetail, detail, { status: 'archived' }],
-  ['RouteDetail', RouteDetail, detail, { conditions: ['snowy'] }],
   ['ApiError', ApiError, error, { code: 'teapot' }],
 ];
 
