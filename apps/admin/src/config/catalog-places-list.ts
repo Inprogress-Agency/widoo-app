@@ -21,6 +21,7 @@ export const catalogPlacesListOptions: ListQueryOptions<CatalogPlaceFilter, Cata
 
 /** Values of the `statut` filter, and the verification status each one asks for. */
 export const placeStatusFilterValues = {
+  'pas-verifie': 'unverified',
   verifie: 'verified',
   'a-verifier': 'stale',
   signale: 'flagged',
