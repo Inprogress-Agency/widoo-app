@@ -19,20 +19,29 @@ export interface CardText {
   label: string;
 }
 
+/** « Nature · 10e · République »: main mood, arrondissement, neighbourhood, when known. */
+export function placeText(route: Pick<RouteCard, 'moods' | 'district' | 'neighborhood'>): string {
+  const mood = route.moods[0];
+  return [mood && labels.fr.moods[mood], route.district, route.neighborhood]
+    .filter(Boolean)
+    .join(' · ');
+}
+
+/** « Par Camille », « Par Widoo »; « Membre Widoo » for a profile that is not public. */
+export function creatorText(t: TFunction, route: Pick<RouteCard, 'isOfficial' | 'author'>): string {
+  if (route.isOfficial) {
+    return t('card.byWidoo');
+  }
+  return route.author ? t('card.by', { name: route.author.firstName }) : t('card.member');
+}
+
 /**
  * Text of a route card (Ecrans › E-01, carte de parcours): a pure function, so that the card, the
  * summary of a selected route and « Voir tout » (#62) write a route the same way.
  */
 export function cardText(t: TFunction, route: RouteCard, position: LatLng | null): CardText {
-  const mood = route.moods[0];
-  const place = [mood && labels.fr.moods[mood], route.district, route.neighborhood]
-    .filter(Boolean)
-    .join(' · ');
-  const creator = route.isOfficial
-    ? t('card.byWidoo')
-    : route.author
-      ? t('card.by', { name: route.author.firstName })
-      : t('card.member');
+  const place = placeText(route);
+  const creator = creatorText(t, route);
   const budget = formatBudget(t, route);
   const duration = {
     short: formatDuration(t, route.durationMin, 'short'),

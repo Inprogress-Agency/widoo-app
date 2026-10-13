@@ -5,6 +5,7 @@ import {
   type ColorToken,
   type TextStyleToken,
 } from '@widoo/tokens';
+import type { Ref } from 'react';
 import { Platform, Text as NativeText, type TextProps as NativeTextProps } from 'react-native';
 import { useFontScale } from './useFontScale';
 
@@ -18,6 +19,8 @@ export interface TextProps extends NativeTextProps {
    * never by a screen.
    */
   isDense?: boolean;
+  /** The native text, to give it the screen reader focus (the title of the route sheet). */
+  ref?: Ref<NativeText>;
 }
 
 /**
