@@ -39,6 +39,7 @@ describe('formatDistance', () => {
   it('says the distance in words for the screen reader', () => {
     expect(formatDistance(t, 836, 'spoken')).toBe('850 mètres');
     expect(formatDistance(t, 1000, 'spoken')).toBe('1 kilomètre');
+    expect(formatDistance(t, 1010, 'spoken')).toBe('1 kilomètre');
     expect(formatDistance(t, 4230, 'spoken')).toBe('4,2 kilomètres');
   });
 });

@@ -15,6 +15,7 @@ export function formatDistance(t: TFunction, meters: number, form: 'short' | 'sp
     return t(`distance.${form}.meters`, { count: rounded });
   }
   const km = meters / 1000;
-  const value = kilometers.format(km >= 10 ? Math.round(km) : Math.round(km * 10) / 10);
-  return t(`distance.${form}.kilometers`, { count: km, value });
+  const shown = km >= 10 ? Math.round(km) : Math.round(km * 10) / 10;
+  // The plural follows the figure said: « 1 kilomètre » for 1,01 km.
+  return t(`distance.${form}.kilometers`, { count: shown, value: kilometers.format(shown) });
 }
