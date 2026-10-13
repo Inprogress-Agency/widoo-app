@@ -26,17 +26,15 @@ function answer(status: number, body: unknown) {
 }
 
 describe('fetchSharedRoute', () => {
-  it('asks the API for the route in the language of the page, cached 5 minutes', async () => {
+  it('asks the API for the route in the language of the page, never cached', async () => {
     const fetchImpl = answer(200, apiRoute);
     const result = await fetchSharedRoute('https://api.example', { id }, 'en', fetchImpl);
 
     expect(result.kind).toBe('public');
     const [url, init] = fetchImpl.mock.calls[0] ?? [];
     expect(String(url)).toBe(`https://api.example/v1/routes/${id}`);
-    expect(init).toMatchObject({
-      headers: { 'accept-language': 'en' },
-      next: { revalidate: 300, tags: [`route:${id}`] },
-    });
+    expect(init).toMatchObject({ headers: { 'accept-language': 'en' }, cache: 'no-store' });
+    expect(init).not.toHaveProperty('next');
   });
 
   it('sends the token of a private link and never caches the answer', async () => {
