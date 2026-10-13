@@ -1,25 +1,72 @@
 import { router, useLocalSearchParams } from 'expo-router';
+import { Linking, Share } from 'react-native';
+import { analytics } from '../../src/analytics';
+import { discoveryStore, useDiscovery } from '../../src/discovery/useRouteSearch';
+import { googleMapsUrl } from '../../src/route/maps';
+import { RouteSheet } from '../../src/route/RouteSheet';
+import { routeShareUrl } from '../../src/route/share';
+import { useRouteSheet } from '../../src/route/useRouteSheet';
 import { useTranslation } from 'react-i18next';
-import { Screen } from '../../src/components/Screen';
-import { StatusMessage } from '../../src/components/StatusMessage';
-import { Button } from '../../src/ui/Button';
 
 /**
- * E-05, provisional until the route sheet (#37): where « Voir plus » of the map leads, at the step
- * of its tooltip when it points at one.
+ * E-05, the route sheet: opened from a card, a marker or « Voir plus » of the map, at a step when
+ * the tooltip points at one (`step`, from 1); `token` for a private route opened by its link.
  */
 export default function RouteScreen() {
   const { t } = useTranslation();
-  const { step } = useLocalSearchParams<{ id: string; step?: string }>();
+  const { id, step, token } = useLocalSearchParams<{ id: string; step?: string; token?: string }>();
+  const { state, retry } = useRouteSheet(id, token);
+  const isOnMap = useDiscovery(
+    (discovery) => discovery.results?.items.some((route) => route.id === id) ?? false,
+  );
+
+  const goHome = () => {
+    router.dismissTo('/');
+  };
+
   return (
-    <Screen title={t('route.title')}>
-      <StatusMessage
-        title={t('route.comingSoon')}
-        body={step ? t('route.step_opened', { position: step }) : undefined}
-        action={
-          <Button label={t('route.back')} variant="secondary" onPress={() => router.back()} />
+    <RouteSheet
+      state={state}
+      initialStep={step ? Number(step) - 1 : undefined}
+      onRetry={retry}
+      onClose={() => router.back()}
+      onShare={(route) => {
+        const url = routeShareUrl(route.id);
+        void Share.share({
+          message: t('route.shareMessage', { title: route.title, url }),
+          url,
+        }).then((result) => {
+          if (result.action === Share.sharedAction) {
+            analytics.track('route_shared', { route_id: route.id });
+          }
+        });
+      }}
+      onGo={(route) => {
+        const url = googleMapsUrl(
+          route.steps.flatMap((routeStep) =>
+            'place' in routeStep
+              ? [routeStep.place.location]
+              : 'location' in routeStep
+                ? [routeStep.location]
+                : [],
+          ),
+          route.transport,
+        );
+        if (url) {
+          void Linking.openURL(url);
         }
-      />
-    </Screen>
+      }}
+      // Back to the home with the route selected, framed with its steps (E-04).
+      onSeeOnMap={
+        isOnMap
+          ? () => {
+              discoveryStore.getState().select(id);
+              goHome();
+            }
+          : null
+      }
+      onNearby={goHome}
+      onScrollDepth={(depth) => analytics.track('route_scrolled', { route_id: id, depth })}
+    />
   );
 }
