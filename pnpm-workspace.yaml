@@ -11,10 +11,12 @@ ignoredOptionalDependencies:
   - '@google-cloud/firestore'
   - '@google-cloud/storage'
 
-# Optional peer of @rnmapbox/maps (its web build): pnpm would install the latest react-dom,
-# ahead of the React of the app. The app is native only: no react-dom at all.
+# Optional peer of @rnmapbox/maps (its web build): alone, pnpm would install the latest react-dom,
+# ahead of the React of the app. The peer is dropped there, not in the whole workspace: the site
+# (apps/web) is a web app and declares its own react-dom, pinned to the React of the app, and pnpm
+# links that one version wherever a peer asks for react-dom.
 overrides:
-  react-dom: '-'
+  '@rnmapbox/maps>react-dom': '-'
   # source-map-js <1.2.2, high advisory GHSA-68fv-2mgg-jv7q (#297). Reached through
   # @vitest/coverage-v8 > magicast (the path the audit reports), and through postcss and
   # @eslint/css-tree: test, lint and build tooling only, absent from the app bundles and the API image.
