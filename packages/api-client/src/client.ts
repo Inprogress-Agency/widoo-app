@@ -11,11 +11,13 @@ import {
   ModerationDecision,
   ModerationQueue,
   ModerationRouteDetail,
+  PlaceImportResult,
   RouteCount,
   RouteSearchResult,
   type CatalogPlaceInput,
   type CatalogPlacesQuery,
   type CatalogRoutesQuery,
+  type PlaceImportBody,
   type RejectionBody,
   type RepublishBody,
   type RequestChangesBody,
@@ -237,6 +239,19 @@ export function createApiClient(options: ApiClientOptions) {
         path: `/v1/admin/places/${placeId}`,
         body: place,
         schema: CatalogPlaceDetail,
+        auth: true,
+      }),
+
+    /**
+     * `POST /v1/admin/places/import`: creates the places of a file, row by row, or says what
+     * each row would become with `dryRun`. Admins.
+     */
+    importPlaces: (body: PlaceImportBody) =>
+      request({
+        method: 'POST',
+        path: '/v1/admin/places/import',
+        body,
+        schema: PlaceImportResult,
         auth: true,
       }),
 
