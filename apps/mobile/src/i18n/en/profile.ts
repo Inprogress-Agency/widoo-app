@@ -100,6 +100,14 @@ export const profile = {
     deleted: 'Your account is deleted.',
   },
   creator: {
+    back: 'Back',
+    loading: 'Loading the profile',
+    offline: { title: 'Offline', body: 'The profile will show when you are back online.' },
+    unavailable: {
+      title: 'This profile is not available',
+      body: 'It was hidden or the account was deleted.',
+      explore: 'Explore routes',
+    },
     certification: {
       body: '{{name}} offers reliable routes and meets the criteria of Widoo.',
       averageRatingHelp: 'Across all their routes.',
