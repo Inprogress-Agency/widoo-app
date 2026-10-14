@@ -11,10 +11,12 @@ ignoredOptionalDependencies:
   - '@google-cloud/firestore'
   - '@google-cloud/storage'
 
-# Optional peer of @rnmapbox/maps (its web build): alone, pnpm would install the latest react-dom,
-# ahead of the React of the app. The peer is dropped there, not in the whole workspace: the site
-# (apps/web) and the admin (apps/admin) are web apps and declare their own react-dom, and pnpm
-# links that one version wherever a peer asks for react-dom.
+# Optional peer of @rnmapbox/maps (its web build): pnpm would install the latest react-dom,
+# ahead of the React of the app. The rule is scoped to it: the admin (apps/admin) is a web app
+# and declares its own react-dom. Since the admin brings react-dom 19.2.3 into the workspace,
+# pnpm links that version as the peer of @rnmapbox/maps, expo and react-i18next: the same
+# version as the React of the app, and code for the web only, which the native bundles of the
+# app never import.
 overrides:
   '@rnmapbox/maps>react-dom': '-'
   # source-map-js <1.2.2, high advisory GHSA-68fv-2mgg-jv7q (#297). Reached through
