@@ -25,18 +25,17 @@ const verifier = new TestTokenVerifier();
 let app: Awaited<ReturnType<typeof buildApp>>;
 const fixtures = editorFixtures(() => app, verifier);
 const photoIds: string[] = [];
-
-beforeAll(async () => {
-  app = await buildApp(testConfig(), { tokenVerifier: verifier });
-});
-afterAll(async () => {
-  if (photoIds.length > 0) await app.db.delete(media).where(inArray(media.id, photoIds));
-  await fixtures.cleanUp();
-  await app.close();
-});
+const plainUids: string[] = [];
 
 async function accountOf(headers: Record<string, string>): Promise<string> {
   return (await app.inject({ url: '/v1/me', headers })).json().id;
+}
+
+/** An account with nothing in it, without the seed the editor fixtures run. */
+function plainAccount() {
+  const { token, uid } = verifier.issue();
+  plainUids.push(uid);
+  return { authorization: `Bearer ${token}` };
 }
 
 /** Fictitious data in every table of the account, `marker` in its free texts. */
@@ -96,11 +95,24 @@ async function fillAccount(headers: Record<string, string>, marker: string) {
   return { userId, route };
 }
 
+// One account filled once for the file: building it runs the seed and the editor.
+const marker = randomUUID();
+let filled: Awaited<ReturnType<typeof fillAccount>>;
+
+beforeAll(async () => {
+  app = await buildApp(testConfig(), { tokenVerifier: verifier });
+  filled = await fillAccount(await fixtures.signIn(), marker);
+}, 30_000);
+afterAll(async () => {
+  if (photoIds.length > 0) await app.db.delete(media).where(inArray(media.id, photoIds));
+  await app.db.delete(users).where(inArray(users.firebaseUid, plainUids));
+  await fixtures.cleanUp();
+  await app.close();
+});
+
 describe('exportUserData', () => {
   it('exports every personal data of the account', async () => {
-    const headers = await fixtures.signIn();
-    const marker = randomUUID();
-    const { userId, route } = await fillAccount(headers, marker);
+    const { userId, route } = filled;
 
     const exported = MyDataExport.parse(await exportUserData(app.db, userId));
     expect(exported.account).toMatchObject({ id: userId, bio: `Bio ${marker}` });
@@ -123,13 +135,10 @@ describe('exportUserData', () => {
   });
 
   it('exports the data of the caller only', async () => {
-    const other = await fixtures.signIn();
-    const otherMarker = randomUUID();
-    await fillAccount(other, otherMarker);
-    const userId = await accountOf(await fixtures.signIn());
+    const userId = await accountOf(plainAccount());
 
     const exported = MyDataExport.parse(await exportUserData(app.db, userId));
-    expect(JSON.stringify(exported)).not.toContain(otherMarker);
+    expect(JSON.stringify(exported)).not.toContain(marker);
     expect(exported.createdRoutes).toEqual([]);
     expect(exported.supportMessages).toEqual([]);
   });
@@ -172,7 +181,7 @@ describe('exportUserData', () => {
   });
 
   it('exports nothing for a deleted account', async () => {
-    const headers = await fixtures.signIn();
+    const headers = plainAccount();
     const userId = await accountOf(headers);
     await app.inject({ method: 'DELETE', url: '/v1/me', headers });
     expect(await exportUserData(app.db, userId)).toBeNull();

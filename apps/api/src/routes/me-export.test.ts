@@ -1,21 +1,28 @@
 import { MyDataExport } from '@widoo/shared';
+import { inArray } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
-import { editorFixtures } from '../editor/test-fixtures';
+import { users } from '../db/schema';
 import { testConfig } from '../test-config';
 import { EXPORT_RATE_LIMIT, exportFileName } from './me-export';
 
 // Shared database, parallel files: accounts of this file only (exportUserData: users/export.test).
 const verifier = new TestTokenVerifier();
 let app: Awaited<ReturnType<typeof buildApp>>;
-const fixtures = editorFixtures(() => app, verifier);
+const createdUids: string[] = [];
+
+function signIn() {
+  const { token, uid } = verifier.issue();
+  createdUids.push(uid);
+  return { authorization: `Bearer ${token}` };
+}
 
 beforeAll(async () => {
   app = await buildApp(testConfig(), { tokenVerifier: verifier });
 });
 afterAll(async () => {
-  await fixtures.cleanUp();
+  await app.db.delete(users).where(inArray(users.firebaseUid, createdUids));
   await app.close();
 });
 
@@ -27,7 +34,7 @@ describe('GET /v1/me/export', () => {
   });
 
   it('sends the data of the account of the token as a dated file, never cached', async () => {
-    const headers = await fixtures.signIn();
+    const headers = signIn();
     const { id } = (await app.inject({ url: '/v1/me', headers })).json();
     const response = await exportOf(headers);
     expect(response.statusCode).toBe(200);
@@ -39,19 +46,19 @@ describe('GET /v1/me/export', () => {
   });
 
   it('answers 401 once the account is deleted', async () => {
-    const headers = await fixtures.signIn();
+    const headers = signIn();
     await app.inject({ method: 'DELETE', url: '/v1/me', headers });
     expect((await exportOf(headers)).statusCode).toBe(401);
   });
 
   it(`answers 429 past ${EXPORT_RATE_LIMIT} exports an hour for one account`, async () => {
-    const headers = await fixtures.signIn();
+    const headers = signIn();
     for (let done = 0; done < EXPORT_RATE_LIMIT; done += 1) {
       expect((await exportOf(headers)).statusCode).toBe(200);
     }
     expect((await exportOf(headers)).statusCode).toBe(429);
     // Another account keeps its own quota.
-    expect((await exportOf(await fixtures.signIn())).statusCode).toBe(200);
+    expect((await exportOf(signIn())).statusCode).toBe(200);
   });
 });
 
