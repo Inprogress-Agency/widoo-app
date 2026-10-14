@@ -15,6 +15,7 @@ export * from './schemas/error';
 export * from './schemas/geocode';
 export * from './schemas/me';
 export * from './schemas/place';
+export * from './schemas/planned';
 export * from './schemas/profile';
 export * from './schemas/recommendation';
 export * from './schemas/route';
