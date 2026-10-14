@@ -9,3 +9,10 @@ jest.mock('react-native-reanimated', () => ({
   ...jest.requireActual<object>('react-native-reanimated/mock'),
   useReducedMotion: () => false,
 }));
+// Firebase Auth and Google Sign-In are native: the render tests run on a fake, anonymous at
+// first (`src/test/fakeAuth.ts`).
+jest.mock('./src/auth/firebase', () => ({
+  createFirebaseAuth: () =>
+    jest.requireActual<typeof import('./src/test/fakeAuth')>('./src/test/fakeAuth').fakeAuth
+      .provider,
+}));
