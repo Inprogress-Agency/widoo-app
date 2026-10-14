@@ -35,7 +35,7 @@ export class ApiRequestError extends Error {
     this.body = body;
   }
 
-  /** Stable code of the API (`not_found`, `quota_exceeded`...), null outside `kind: 'http'`. */
+  /** Stable code of the API (`not_found`, `premium_required`...), null outside `kind: 'http'`. */
   get code(): ApiErrorCode | null {
     return this.body?.code ?? null;
   }
