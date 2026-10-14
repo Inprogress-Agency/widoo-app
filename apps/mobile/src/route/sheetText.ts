@@ -10,6 +10,7 @@ import type { TFunction } from 'i18next';
 import { formatBudget } from '../format/budget';
 import { formatDistance } from '../format/distance';
 import { formatDuration } from '../format/duration';
+import { dateFormat } from '../i18n/formats';
 
 /**
  * Texts of the route sheet (Ecrans › E-05), pure functions of the route and of the time, so that
@@ -17,8 +18,6 @@ import { formatDuration } from '../format/duration';
  */
 
 const timeZone = 'Europe/Paris';
-const clock = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone });
-const shortDay = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', timeZone });
 const isoDay = new Intl.DateTimeFormat('en-CA', { timeZone });
 const weekdayOf = new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone });
 const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -30,16 +29,20 @@ export interface Spoken {
   spoken: string;
 }
 
-/** « 10:35 », said « 10 heures 35 »; « 10 heures » on the hour. */
+/** « 10:35 », said « 10 heures 35 »; « 10 heures » on the hour; in English, said as written. */
 export function parisTime(t: TFunction, iso: string): Spoken {
-  const short = clock.format(new Date(iso));
+  const short = dateFormat({ hour: '2-digit', minute: '2-digit', timeZone }).format(new Date(iso));
   const [hours = 0, minutes = 0] = short.split(':').map(Number);
-  const hoursSpoken = t('duration.spoken.hours', { count: hours });
-  return { short, spoken: minutes === 0 ? hoursSpoken : `${hoursSpoken} ${minutes}` };
+  const spoken =
+    minutes === 0
+      ? t('clock.spoken.onTheHour', { count: hours, time: short })
+      : t('clock.spoken.time', { count: hours, minutes, time: short });
+  return { short, spoken };
 }
 
-/** « 20 sept. ». */
-export const parisDay = (iso: string) => shortDay.format(new Date(iso));
+/** « 20 sept. », « 20 Sept ». */
+export const parisDay = (iso: string) =>
+  dateFormat({ day: 'numeric', month: 'short', timeZone }).format(new Date(iso));
 
 /** « 22 sept » before the full stop of a sentence, never « sept.. ». */
 export const withoutFinalDot = (text: string) => text.replace(/\.$/, '');

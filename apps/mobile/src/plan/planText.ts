@@ -1,4 +1,5 @@
 import type { TFunction } from 'i18next';
+import { capitalize, dateFormat } from '../i18n/formats';
 import { clockOf, daysBetween, planDayOf, planMinuteOf } from './calendar';
 
 /**
@@ -10,17 +11,15 @@ import { clockOf, daysBetween, planDayOf, planMinuteOf } from './calendar';
 /** « Aujourd'hui », « Demain » and the day after, before « Autre date ». */
 export const PROPOSED_DAYS = 3;
 
-const format = (options: Intl.DateTimeFormatOptions) =>
-  new Intl.DateTimeFormat('fr-FR', { timeZone: 'UTC', ...options });
-const weekdayLong = format({ weekday: 'long' });
-const weekdayShort = format({ weekday: 'short' });
-const monthLong = format({ month: 'long' });
-const monthShort = format({ month: 'short' });
+const format = (options: Intl.DateTimeFormatOptions) => dateFormat({ timeZone: 'UTC', ...options });
+const weekdayLong = () => format({ weekday: 'long' });
+const weekdayShort = () => format({ weekday: 'short' });
+const monthLong = () => format({ month: 'long' });
+const monthShort = () => format({ month: 'short' });
 
 const noonOf = (day: string) => new Date(`${day}T12:00:00Z`);
 const dateNumber = (day: string) => Number(day.slice(8, 10));
 const yearOf = (day: string) => day.slice(0, 4);
-const capitalize = (text: string) => text.charAt(0).toLocaleUpperCase('fr-FR') + text.slice(1);
 
 export const isProposedDay = (day: string, today: string) => {
   const ahead = daysBetween(today, day);
@@ -28,30 +27,30 @@ export const isProposedDay = (day: string, today: string) => {
 };
 
 /** « lundi », for « Fermé le lundi ». */
-export const weekdayName = (day: string) => weekdayLong.format(noonOf(day));
+export const weekdayName = (day: string) => weekdayLong().format(noonOf(day));
 
 /** « 23 », for « Le 23, cette étape n'aura plus lieu ». */
 export const dateOfMonth = (day: string) => String(dateNumber(day));
 
 /** « samedi 26 septembre », the year after it when it is not this one. */
 export function fullDayName(day: string, today: string): string {
-  const name = `${weekdayLong.format(noonOf(day))} ${dateNumber(day)} ${monthLong.format(noonOf(day))}`;
+  const name = `${weekdayLong().format(noonOf(day))} ${dateNumber(day)} ${monthLong().format(noonOf(day))}`;
   return yearOf(day) === yearOf(today) ? name : `${name} ${yearOf(day)}`;
 }
 
 /** « samedi 26 » for a proposed day, « samedi 23 janvier » otherwise (E-06, the button). */
 export function dayName(day: string, today: string): string {
   return isProposedDay(day, today)
-    ? `${weekdayLong.format(noonOf(day))} ${dateNumber(day)}`
+    ? `${weekdayLong().format(noonOf(day))} ${dateNumber(day)}`
     : fullDayName(day, today);
 }
 
 /** « Dim. 27 », and « Sam. 23 janv. » for the day chosen in the calendar. */
 export function shortDayName(day: string, today: string): string {
-  const weekday = capitalize(weekdayShort.format(noonOf(day)));
+  const weekday = capitalize(weekdayShort().format(noonOf(day)));
   return isProposedDay(day, today)
     ? `${weekday} ${dateNumber(day)}`
-    : `${weekday} ${dateNumber(day)} ${monthShort.format(noonOf(day))}`;
+    : `${weekday} ${dateNumber(day)} ${monthShort().format(noonOf(day))}`;
 }
 
 /** The label of a day chip, and what a screen reader says of it. */

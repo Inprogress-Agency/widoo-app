@@ -6,6 +6,7 @@ import { use, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Linking, ScrollView, View } from 'react-native';
 import { session } from '../auth';
+import { dateFormat } from '../i18n/formats';
 import { PRIVACY_URL, TERMS_URL } from '../auth/links';
 import { SettingsRow, SettingsSection, SwitchRow } from '../ui/SettingsRow';
 import { Text } from '../ui/Text';
@@ -14,12 +15,6 @@ import { TopBar } from '../ui/TopBar';
 import { useMe, useUpdateMe } from './me';
 import { PremiumCard } from './PremiumCard';
 import { appVersion, openStoreSubscriptions } from './store';
-
-const dayFormat = new Intl.DateTimeFormat('fr-FR', {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-});
 
 /**
  * Réglages (Ecrans › E-09), pushed over my profile with the tab bar in place (M-03). The rows of
@@ -132,7 +127,11 @@ function AccountSettings({ me }: { me: Me }) {
             label={t('settings.premium')}
             help={
               me.planExpiresAt
-                ? t('settings.premiumUntil', { date: dayFormat.format(new Date(me.planExpiresAt)) })
+                ? t('settings.premiumUntil', {
+                    date: dateFormat({ day: 'numeric', month: 'long', year: 'numeric' }).format(
+                      new Date(me.planExpiresAt),
+                    ),
+                  })
                 : undefined
             }
             trailingLabel={t('settings.manage')}

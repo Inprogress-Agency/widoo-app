@@ -659,6 +659,15 @@ export const fr = {
       hoursMinutes_other: '{{count}} heures {{minutes}}',
     },
   },
+  // A time of day as a screen reader says it: « 10 heures 35 », « 10 heures ».
+  clock: {
+    spoken: {
+      time_one: '{{count}} heure {{minutes}}',
+      time_other: '{{count}} heures {{minutes}}',
+      onTheHour_one: '{{count}} heure',
+      onTheHour_other: '{{count}} heures',
+    },
+  },
   // « ≈ 25 € par pers. », never « env. » nor a range (D-032).
   budget: {
     amount: '≈ {{euros}} €',
