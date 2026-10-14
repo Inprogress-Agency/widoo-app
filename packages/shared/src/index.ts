@@ -22,4 +22,5 @@ export * from './schemas/profile';
 export * from './schemas/recommendation';
 export * from './schemas/route';
 export * from './schemas/route-detail';
+export * from './schemas/route-editor';
 export * from './schemas/search';
