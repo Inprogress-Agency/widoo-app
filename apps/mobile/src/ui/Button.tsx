@@ -34,6 +34,8 @@ interface ButtonProps {
   /** What the screen where it leads is not built yet: dimmed label, announced « estompé ». */
   isDisabled?: boolean;
   accessibilityHint?: string;
+  /** What a screen reader says when it differs from the label: the date of a planning. */
+  accessibilityLabel?: string;
 }
 
 /**
@@ -49,6 +51,7 @@ export function Button({
   icon,
   isDisabled = false,
   accessibilityHint,
+  accessibilityLabel = label,
 }: ButtonProps) {
   const variantStyle = variants[variant];
   const labelColor = isDisabled ? variantStyle.disabledLabel : variantStyle.label;
@@ -59,7 +62,7 @@ export function Button({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={accessibilityLabel}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled: isDisabled }}
       disabled={isDisabled}

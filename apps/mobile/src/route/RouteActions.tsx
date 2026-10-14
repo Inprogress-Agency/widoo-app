@@ -7,14 +7,18 @@ interface RouteActionsProps {
   isLocked: boolean;
   /** « C'est parti »: Google Maps, without tracking, until the route under way (E-07, v0.4). */
   onGo: () => void;
+  /** « Programmer » (E-06), once the detail is there: null while it loads. */
+  onPlan: (() => void) | null;
+  /** A planned route: its date in place of « Programmer » (« Sam. 26, 10:00 »). */
+  plannedDate: { label: string; spoken: string } | null;
 }
 
 /**
  * The bar stuck under the sheet: « Programmer » and « C'est parti » in equal parts, no price; a
- * locked Premium route, the ink « Débloquer avec Premium » with its gold crown. Programmer (E-06,
- * #41) and Premium (E-17, #67) are not built yet: shown, and disabled.
+ * planned route, its date with the checked calendar. A locked Premium route, the ink « Débloquer
+ * avec Premium » with its gold crown; Premium (E-17, #67) is not built yet: shown, and disabled.
  */
-export function RouteActions({ isLocked, onGo }: RouteActionsProps) {
+export function RouteActions({ isLocked, onGo, onPlan, plannedDate }: RouteActionsProps) {
   const { t } = useTranslation();
   const noop = () => undefined;
   return (
@@ -34,14 +38,14 @@ export function RouteActions({ isLocked, onGo }: RouteActionsProps) {
         [
           <Button
             key="plan"
-            label={t('route.plan')}
-            icon="duration"
+            label={plannedDate?.label ?? t('route.plan')}
+            accessibilityLabel={plannedDate?.spoken}
+            icon={plannedDate ? 'plan-date' : 'duration'}
             variant="secondary"
             isDense
             isFullWidth
-            isDisabled
-            accessibilityHint={t('route.notYet')}
-            onPress={noop}
+            isDisabled={onPlan === null}
+            onPress={onPlan ?? noop}
           />,
           <Button
             key="go"

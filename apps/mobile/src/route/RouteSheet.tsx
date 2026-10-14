@@ -33,6 +33,9 @@ export interface RouteSheetProps {
   onClose: () => void;
   onShare: (route: Pick<RouteCard, 'id' | 'title'>) => void;
   onGo: (route: RouteDetail | RouteCard) => void;
+  /** « Programmer », or the date of the planning of the route (E-06). */
+  onPlan: (route: RouteDetail) => void;
+  plannedDate: { label: string; spoken: string } | null;
   /** « Voir sur la carte », when the route is among the results of the home (E-04). */
   onSeeOnMap: (() => void) | null;
   onNearby: () => void;
@@ -55,6 +58,8 @@ export function RouteSheet({
   onClose,
   onShare,
   onGo,
+  onPlan,
+  plannedDate,
   onSeeOnMap,
   onNearby,
   onScrollDepth,
@@ -302,7 +307,14 @@ export function RouteSheet({
             </View>
           </Animated.ScrollView>
         </GestureDetector>
-        {card && <RouteActions isLocked={card.isLocked} onGo={() => onGo(card)} />}
+        {card && (
+          <RouteActions
+            isLocked={card.isLocked}
+            onGo={() => onGo(card)}
+            onPlan={route ? () => onPlan(route) : null}
+            plannedDate={plannedDate}
+          />
+        )}
       </Animated.View>
     </GestureDetector>
   );
