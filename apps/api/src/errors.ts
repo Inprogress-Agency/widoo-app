@@ -1,4 +1,4 @@
-import type { ApiError, ApiErrorCode, ValidationIssue } from '@widoo/shared';
+import type { ApiError, ApiErrorCode, CoherenceIssue, ValidationIssue } from '@widoo/shared';
 import { DrizzleQueryError } from 'drizzle-orm';
 import type { FastifyError, FastifyInstance } from 'fastify';
 import { hasZodFastifySchemaValidationErrors } from 'fastify-type-provider-zod';
@@ -45,6 +45,18 @@ export function pendingRoutesLimitReached(limit: number) {
 /** 409 `conflict` of a request the current state refuses, that state in `details`. */
 export function conflict(message: string, details: Record<string, unknown>) {
   return Object.assign(new Error(message), { statusCode: 409, details });
+}
+
+/**
+ * 422 `coherence_blocked` of a submission that breaks blocking rules (Orchestration › Règles de
+ * cohérence): `details.errors` lists them, for « Avant de soumettre » (E-14).
+ */
+export function coherenceBlocked(errors: CoherenceIssue[]) {
+  return Object.assign(new Error('Blocking coherence rules'), {
+    statusCode: 422,
+    apiCode: 'coherence_blocked' as const,
+    details: { errors },
+  });
 }
 
 /**
@@ -109,9 +121,12 @@ export function registerErrorHandling(app: FastifyInstance): void {
     const status = error.statusCode ?? 500;
     if (status >= 400 && status < 500) {
       // Other client errors raised by Fastify (malformed JSON, body too large...) are validation errors.
-      const { details } = error as { details?: ApiError['details'] };
+      const { details, apiCode } = error as {
+        details?: ApiError['details'];
+        apiCode?: ApiErrorCode;
+      };
       const body: ApiError = {
-        code: codeByStatus[status] ?? 'validation_error',
+        code: apiCode ?? codeByStatus[status] ?? 'validation_error',
         message: error.message,
         ...(details && { details }),
       };

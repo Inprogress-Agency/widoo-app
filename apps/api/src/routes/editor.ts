@@ -1,4 +1,5 @@
 import {
+  ChangeRouteStatus,
   CreateRoute,
   MyRouteList,
   MyRoutesQuery,
@@ -10,6 +11,7 @@ import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { listOwnRoutes } from '../editor/list';
 import { createRoute, putRouteSteps, readOwnRoute, updateRoute } from '../editor/repository';
+import { changeRouteStatus, submitRoute } from '../editor/submit';
 import { currentUser } from './me';
 
 const security = [{ firebaseIdToken: [] }];
@@ -101,5 +103,43 @@ export const editorRoutes: FastifyPluginAsyncZod = async (app) => {
     },
     async (request) =>
       putRouteSteps(app.db, currentUser(request).id, request.params.id, request.body, new Date()),
+  );
+
+  app.post(
+    '/routes/:id/submit',
+    {
+      schema: {
+        tags,
+        summary:
+          'Submit my route to moderation, or publish it for an editor; a published route ' +
+          'submits its revision and stays online',
+        security,
+        params: RouteParams,
+        response: { 200: OwnRoute },
+      },
+    },
+    async (request) => submitRoute(app.db, currentUser(request), request.params.id, new Date()),
+  );
+
+  app.post(
+    '/routes/:id/status',
+    {
+      schema: {
+        tags,
+        summary: 'Save my route as private, take a refused one back as a draft, or withdraw it',
+        security,
+        params: RouteParams,
+        body: ChangeRouteStatus,
+        response: { 200: OwnRoute },
+      },
+    },
+    async (request) =>
+      changeRouteStatus(
+        app.db,
+        currentUser(request).id,
+        request.params.id,
+        request.body.status,
+        new Date(),
+      ),
   );
 };
