@@ -8,13 +8,17 @@ import {
   anecdoteAnswerMaxLength,
   appLocales,
   bioMaxLength,
+  bookingNoteMaxLength,
   certifiedOverrides,
+  mediaSources,
   openRevisionStatuses,
   plannedRouteClosers,
   notificationKinds,
   plannedRouteStatuses,
   profileSlots,
   reportStatuses,
+  routeTipsMax,
+  routeTitleMaxLength,
   routeReportCommentMaxLength,
   routeReportCommentReasons,
   routeReportCommentRequiredReasons,
@@ -22,6 +26,7 @@ import {
   routeReportStepReasons,
   routeRevisionStatuses,
   systemRouteReportReason,
+  stepDescriptionMaxLength,
   stepHighlightsMax,
   stepPhotosMax,
   supportMessageMaxLength,
@@ -72,6 +77,8 @@ export const bookingProvider = pgEnum('booking_provider', taxonomies.bookingProv
  * (D-029). Only ever appended: the constraints of `media` name `route` and `place`, never `step`.
  */
 export const mediaOwnerType = pgEnum('media_owner_type', ['route', 'place', 'step']);
+/** Photo sent by its author, or free photo of Wikimedia Commons with its credit (D-050). */
+export const mediaSource = pgEnum('media_source', mediaSources);
 /** Mapbox Directions profile of a cached trip; technical only, never displayed. */
 export const directionsProfile = pgEnum('directions_profile', directionsProfiles);
 /** Choice of the team in the admin over the nightly computation of the badge (D-023). */
@@ -115,6 +122,14 @@ const isAtMost = (column: AnyPgColumn, maxLength: number): SQL =>
  * `column <@ ARRAY[...]`: every element of a `text[]` column is a key of the taxonomy. Keys are
  * snake_case constants (tested in `shared`), so inlining them is safe.
  */
+/** A `text[]` of one dimension without null nor empty element; `max` elements at most. */
+const isTextList = (column: AnyPgColumn, max?: number): SQL =>
+  sql`(cardinality(${column}) = 0 or (array_ndims(${column}) = 1
+    and array_position(${column}, null) is null
+    and array_position(${column}, '') is null))${
+      max === undefined ? sql`` : sql` and cardinality(${column}) <= ${sql.raw(String(max))}`
+    }`;
+
 /** `column in (...)` over keys of a taxonomy (snake_case constants, safe to inline). */
 function isOneOf(column: AnyPgColumn, keys: readonly string[]): SQL {
   return sql`(${column} in (${sql.raw(keys.map((key) => `'${key}'`).join(', '))}))`;
@@ -223,8 +238,15 @@ export const places = pgTable(
     phone: text('phone'),
     /** Google Places, OpenStreetMap... identifiers, for later. */
     externalRefs: jsonb('external_refs').notNull().default({}),
-    /** No default: whoever creates a place states how far it is verified. */
+    /**
+     * No default: whoever creates a place states how far it is verified; `unverified` for a place
+     * created by a user (D-049).
+     */
     verificationStatus: verificationStatus('verification_status').notNull(),
+    /** « Accessible à toute heure » (a park, a street): no hours, no `hours_unknown` (D-049). */
+    alwaysOpen: boolean('always_open').notNull().default(false),
+    /** Last day of an ephemeral place (an exhibition, a pop-up); after it, the place leaves (D-050). */
+    endsOn: date('ends_on'),
     verifiedAt: timestamp('verified_at', { withTimezone: true }),
     /** Weighted by the trust score of each confirmation. */
     confirmationsSinceVerified: numeric('confirmations_since_verified', { mode: 'number' })
@@ -286,7 +308,14 @@ export const routes = pgTable(
     audiences: text('audiences').array().$type<Audience[]>().notNull().default([]),
     /** Entered and derived conditions. */
     conditions: text('conditions').array().$type<Condition[]>().notNull().default([]),
+    /** Derived from the trips: the mode that covers the most distance (D-048). */
     transport: transport('transport').notNull().default('walk'),
+    /** « Départ conseillé » chosen by the creator, local time; null: computed (D-048, D-050). */
+    suggestedStart: time('suggested_start'),
+    /** « À prévoir », lines of the creator only, 3 at most; suggestions are computed (D-050). */
+    tips: text('tips').array().notNull().default([]),
+    /** Keys of the computed « À prévoir » suggestions the creator switched off (D-050). */
+    tipsHidden: text('tips_hidden').array().notNull().default([]),
     /** First step; null while the route has none. */
     startLocation: geographyPoint('start_location'),
     /** Envelope of the steps; null while the route has none. */
@@ -315,6 +344,9 @@ export const routes = pgTable(
     check('routes_moods_check', onlyKeysOf(t.moods, taxonomies.moods)),
     check('routes_audiences_check', onlyKeysOf(t.audiences, taxonomies.audiences)),
     check('routes_conditions_check', onlyKeysOf(t.conditions, taxonomies.conditions)),
+    check('routes_title_length_check', isAtMost(t.title, routeTitleMaxLength)),
+    check('routes_tips_check', isTextList(t.tips, routeTipsMax)),
+    check('routes_tips_hidden_check', isTextList(t.tipsHidden)),
   ],
 );
 
@@ -339,6 +371,12 @@ export const steps = pgTable(
     bookingRequired: boolean('booking_required').notNull().default(false),
     bookingUrl: text('booking_url'),
     bookingProvider: bookingProvider('booking_provider'),
+    /** « Précision » of the booking, 80 characters (D-049). */
+    bookingNote: text('booking_note'),
+    /** « C'est un lien affilié »: « Lien affilié » near « Réserver » (D-048); needs the link. */
+    bookingIsAffiliate: boolean('booking_is_affiliate').notNull().default(false),
+    /** Last day of an ephemeral step (D-050). */
+    endsOn: date('ends_on'),
     /** « Passer par la rue des Rosiers ». */
     transitionNote: text('transition_note'),
     /** Computed: `distance_m`, `duration_min`, `mode`, `estimated`. */
@@ -367,6 +405,12 @@ export const steps = pgTable(
       sql`(${t.audioPath} is null and ${t.audioDurationS} is null)
         or (${t.audioPath} is not null and ${t.audioDurationS} is not null and ${t.audioDurationS} > 0)`,
     ),
+    check('steps_description_length_check', isAtMost(t.description, stepDescriptionMaxLength)),
+    check('steps_booking_note_length_check', isAtMost(t.bookingNote, bookingNoteMaxLength)),
+    check(
+      'steps_booking_affiliate_check',
+      sql`not ${t.bookingIsAffiliate} or ${t.bookingUrl} is not null`,
+    ),
   ],
 );
 
@@ -389,6 +433,12 @@ export const media = pgTable(
     height: integer('height').notNull(),
     position: smallint('position').notNull().default(0),
     uploadedBy: uuid('uploaded_by').references(() => users.id, { onDelete: 'set null' }),
+    source: mediaSource('source').notNull().default('upload'),
+    /** Credit of a free photo, shown wherever it appears (D-050): all three, or none. */
+    author: text('author'),
+    license: text('license'),
+    /** Page of the photo on Wikimedia Commons, https only. */
+    sourceUrl: text('source_url'),
     createdAt: createdAt(),
   },
   (t) => [
@@ -400,6 +450,14 @@ export const media = pgTable(
       'media_step_position_check',
       sql`${t.ownerType} in ('route', 'place')
         or ${t.position} between 0 and ${sql.raw(String(stepPhotosMax - 1))}`,
+    ),
+    check(
+      'media_credit_check',
+      sql`(${t.source} = 'upload'
+          and ${t.author} is null and ${t.license} is null and ${t.sourceUrl} is null)
+        or (${t.source} = 'commons'
+          and coalesce(${t.author}, '') <> '' and coalesce(${t.license}, '') <> ''
+          and coalesce(${t.sourceUrl}, '') like 'https://%')`,
     ),
   ],
 );

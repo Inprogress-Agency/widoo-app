@@ -47,7 +47,8 @@ export const taxonomies = {
   ],
   /** Indicative price level of a place (`places.price_range`), unlike a route's computed budget. */
   priceRanges: ['free', 'low', 'medium', 'high'],
-  verificationStatuses: ['verified', 'stale', 'flagged', 'closed'],
+  /** `unverified`: a place created by a user, until moderation or a first verification (D-049). */
+  verificationStatuses: ['unverified', 'verified', 'stale', 'flagged', 'closed'],
   signalReasons: [
     'closed_permanently',
     'closed_temporarily',
