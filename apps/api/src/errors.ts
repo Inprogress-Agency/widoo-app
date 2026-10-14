@@ -6,6 +6,7 @@ import { reportError } from './monitoring';
 
 const codeByStatus: Partial<Record<number, ApiErrorCode>> = {
   401: 'unauthorized',
+  402: 'premium_required',
   403: 'forbidden',
   404: 'not_found',
   409: 'conflict',
@@ -19,6 +20,14 @@ const codeByStatus: Partial<Record<number, ApiErrorCode>> = {
  */
 export function httpError(statusCode: 400 | 401 | 403 | 404 | 409, message: string) {
   return Object.assign(new Error(message), { statusCode });
+}
+
+/**
+ * 402 `premium_required` of a Premium route for a caller without the right to it (D-023, D-038):
+ * `details.reason` tells E-17 why.
+ */
+export function premiumRequired(reason: 'premium_route') {
+  return Object.assign(new Error('Premium required'), { statusCode: 402, details: { reason } });
 }
 
 /**
