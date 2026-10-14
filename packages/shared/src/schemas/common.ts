@@ -25,3 +25,18 @@ export const plainText = (maxLength?: number) => {
     plainTextMessage,
   );
 };
+
+/** Line breaks and tabs: the only control characters a multiline text keeps. */
+const multilineTextPattern = /^(?:[^<>\p{Cc}]|[\n\r\t])*$/u;
+
+/**
+ * Free text on several lines (a message to the support): `plainText`, line breaks and tabs
+ * allowed.
+ */
+export const multilineText = (maxLength: number) =>
+  z
+    .string()
+    .trim()
+    .min(1)
+    .max(maxLength)
+    .regex(multilineTextPattern, 'Text only, without < > or control characters but line breaks');
