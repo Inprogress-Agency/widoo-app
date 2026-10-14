@@ -131,7 +131,7 @@ Les fichiers Firebase ne sont jamais versionnés. Leurs clés sont publiques mai
 
 Après la pose ou le changement de ces fichiers, reconstruire l'app (`pnpm --filter mobile ios` / `android`) : ils sont lus au prebuild, pas par Metro. En local, `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` se met dans `apps/mobile/.env.local`.
 
-Lien de connexion par e-mail : Firebase l'envoie depuis le domaine `<projet>.firebaseapp.com`, autorisé par défaut, sur le chemin `/__/auth/links`. L'app s'y déclare : App Links sur Android (`autoVerify`), domaines associés sur iOS (`applinks:`). Le domaine se déduit du projet de `google-services.json`. Pour que le lien ouvre l'app plutôt que le navigateur, la console Firebase doit connaître l'empreinte SHA-256 du certificat qui signe le build (Android) et le Team ID Apple (iOS) : Firebase Hosting en tire `assetlinks.json` et `apple-app-site-association`.
+Lien de connexion par e-mail : Firebase l'envoie depuis le domaine `<projet>.firebaseapp.com`, autorisé par défaut, sur le chemin `/__/auth/links`. L'app s'y déclare : App Links sur Android (`autoVerify`), domaines associés sur iOS (`applinks:`). Le domaine se déduit du projet de `google-services.json`. Pour que le lien ouvre l'app plutôt que le navigateur, la console Firebase doit connaître l'empreinte SHA-256 du certificat qui signe le build (Android) et le Team ID Apple (iOS) : Firebase Hosting en tire `assetlinks.json` et `apple-app-site-association`. Ouvert dans l'app, le lien passe par `app/+native-intent.tsx`, qui le donne au parcours de connexion sans changer d'écran : la sheet E-10 s'ouvre sur l'écran en cours.
 
 ### Builds EAS
 
