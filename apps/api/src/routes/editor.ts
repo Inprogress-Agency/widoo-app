@@ -1,6 +1,14 @@
-import { CreateRoute, OwnRoute, PutRouteSteps, UpdateRoute } from '@widoo/shared';
+import {
+  CreateRoute,
+  MyRouteList,
+  MyRoutesQuery,
+  OwnRoute,
+  PutRouteSteps,
+  UpdateRoute,
+} from '@widoo/shared';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
+import { listOwnRoutes } from '../editor/list';
 import { createRoute, putRouteSteps, readOwnRoute, updateRoute } from '../editor/repository';
 import { currentUser } from './me';
 
@@ -17,6 +25,20 @@ export const editorRoutes: FastifyPluginAsyncZod = async (app) => {
   app.addHook('onSend', async (_request, reply) => {
     reply.header('cache-control', 'no-store');
   });
+
+  app.get(
+    '/me/routes',
+    {
+      schema: {
+        tags,
+        summary: 'My routes, every status, the newest first',
+        security,
+        querystring: MyRoutesQuery,
+        response: { 200: MyRouteList },
+      },
+    },
+    async (request) => listOwnRoutes(app.db, currentUser(request).id, request.query),
+  );
 
   app.get(
     '/me/routes/:id',
