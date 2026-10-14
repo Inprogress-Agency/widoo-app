@@ -23,9 +23,11 @@ export { computeTimeline, conflictsOf, type TimelineStepInput } from './timeline
 export {
   defaultCoherenceThresholds,
   evaluateRoute,
+  type BaseEvaluation,
   type CoherenceThresholds,
   type EvaluatedRoute,
   type EvaluatedStep,
+  type RouteAggregates,
 } from './evaluate';
 export {
   compatibleStart,
@@ -45,3 +47,13 @@ export {
   type DerivedStep,
 } from './derived';
 export { nearestNeighbourOrder, pathLengthM, reorderOf } from './order';
+export {
+  computeRoute,
+  isUnverifiedPlace,
+  type ComputeOptions,
+  type ComputedAggregates,
+  type ComputedRoute,
+  type RouteInput,
+  type RoutePlace,
+  type RouteStep,
+} from './route';
