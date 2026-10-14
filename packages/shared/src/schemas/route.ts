@@ -60,7 +60,11 @@ export const routeCardFields = {
   /** « Par Widoo »: `author` is then null. */
   isOfficial: z.boolean(),
   author: Author.nullable(),
-  /** `premium`: signature route, which only Premium users can plan. */
+  /**
+   * `premium`: Premium route, whole and plannable only with the right to it (subscription, 7-day
+   * pass or unlock, D-073), whoever made it; Signature is `isOfficial`, without effect on access
+   * (D-014).
+   */
   access: z.enum(taxonomies.plans),
   isVerified: z.boolean(),
   moods: z.array(z.enum(taxonomies.moods)),

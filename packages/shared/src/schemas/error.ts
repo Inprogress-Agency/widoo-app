@@ -9,7 +9,6 @@ export const apiErrorCodes = [
   'conflict',
   'rate_limited',
   'coherence_blocked',
-  'quota_exceeded',
   'premium_required',
   /** 410 of a withdrawn route, with `details.removedAt` (`RouteRemovedDetails`). */
   'route_removed',
@@ -20,7 +19,10 @@ export const apiErrorCodes = [
 export const ApiError = z.object({
   code: z.enum(apiErrorCodes),
   message: z.string(),
-  /** Field issues for `validation_error`; `limit` and `reason` for the 402 codes (E-17). */
+  /**
+   * Field issues for `validation_error`; `reason` for `premium_required` (E-17); `reason` and
+   * `limit` for the `rate_limited` of a submission (D-073).
+   */
   details: z.record(z.string(), z.unknown()).optional(),
 });
 export type ApiError = z.infer<typeof ApiError>;
