@@ -137,6 +137,21 @@ describe('GET /v1/admin/moderation', () => {
     expect(await ids('&sort=title&direction=desc')).toEqual(['Récent', 'Ancien', 'À']);
   });
 
+  it('counts as late only a route waiting for its first look', async () => {
+    const moderator = await signIn('moderator');
+    await addRoute('changes_requested', 100, 'Renvoyé');
+    const waiting = await addRoute('pending', 100, 'Attente');
+
+    const late = ModerationQueue.parse((await queue(moderator.headers, '&late=true')).json());
+
+    expect(late.items.map((item) => item.id)).toContain(waiting);
+    expect(late.items.map((item) => item.title.split(' ')[0])).not.toContain('Renvoyé');
+    const all = ModerationQueue.parse((await queue(moderator.headers)).json());
+    const lateIds = new Set(late.items.map((item) => item.id));
+    // The counter covers the whole queue, which other test files fill too: at least ours.
+    expect(all.counts.late).toBeGreaterThanOrEqual(lateIds.size);
+  });
+
   it('filters by city', async () => {
     const moderator = await signIn('moderator');
     const all = ModerationQueue.parse((await queue(moderator.headers)).json());
