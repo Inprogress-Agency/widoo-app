@@ -12,7 +12,14 @@ import { useSecondFactor } from '@/hooks/useSecondFactor';
  */
 export function SecondFactorContainer({ isEnrolling }: { isEnrolling: boolean }) {
   const factor = useSecondFactor(isEnrolling);
-  const notices = <SignInNotices returnSection={null} refusal={null} failure={factor.failure} />;
+  const notices = (
+    <SignInNotices
+      returnSection={null}
+      refusal={null}
+      failure={factor.failure}
+      hasExpired={false}
+    />
+  );
   return (
     <SignInLayout>
       {isEnrolling ? (

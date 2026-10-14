@@ -10,6 +10,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useSession } from '@/hooks/useSession';
 import { counterLabel } from '@/lib/counter-label';
 import { signInPathFor } from '@/lib/return-path';
+import { UnavailableMessage } from '@/components/states/UnavailableMessage';
 import { messages } from '@/messages/fr';
 import {
   countedAdminSections,
@@ -17,7 +18,7 @@ import {
   type AdminSection,
   type CountedAdminSection,
 } from '@widoo/shared';
-import { Button, TooltipProvider } from '@widoo/ui';
+import { TooltipProvider } from '@widoo/ui';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 
@@ -69,13 +70,7 @@ export function ShellContainer({ children }: { children: ReactNode }) {
   }, [session.status, router]);
 
   if (session.status === 'unavailable') {
-    return (
-      <PageMessage
-        role="alert"
-        title={messages.signIn.errors.unavailable}
-        action={<Button onClick={retry}>{messages.signIn.retry}</Button>}
-      />
-    );
+    return <UnavailableMessage onRetry={retry} onOtherAccount={() => void signOut()} />;
   }
   if (session.status !== 'signedIn') {
     return <PageMessage role="status" title={messages.shell.loading} />;

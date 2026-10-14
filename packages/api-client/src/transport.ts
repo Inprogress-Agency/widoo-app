@@ -19,6 +19,12 @@ export interface ApiClientOptions {
   timeoutMs?: number;
   /** The global `fetch` by default; injected by tests. */
   fetch?: typeof fetch;
+  /**
+   * Called when an authenticated request is still refused (401) with a fresh token: the API has
+   * ended the session (the 12 hours of the admin, a revoked account). Not for a deleted account,
+   * flagged on its own by `isAccountDeleted`.
+   */
+  onUnauthorized?: () => void;
 }
 
 export interface Request {
@@ -107,6 +113,9 @@ export function createTransport(options: ApiClientOptions) {
       response = await attempt(request, refreshed);
     }
     if (response.status < 200 || response.status > 299) {
+      if (response.status === 401 && token) {
+        options.onUnauthorized?.();
+      }
       throw httpFailure(response.status, response.json);
     }
     return response;

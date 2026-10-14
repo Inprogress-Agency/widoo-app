@@ -174,6 +174,29 @@ describe('authenticated routes', () => {
     expect(isAccountDeleted(error)).toBe(false);
   });
 
+  it('says when the session is refused even with a fresh token', async () => {
+    const onUnauthorized = vi.fn();
+    const responses = [
+      unauthorized('Admin session expired'),
+      unauthorized('Admin session expired'),
+    ];
+    const { client } = setup(responses, { getToken: async () => 'token-1', onUnauthorized });
+    await failure(client.getMe());
+    expect(onUnauthorized).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps quiet about a deleted account and a request sent without token', async () => {
+    const onUnauthorized = vi.fn();
+    const deleted = setup([unauthorized('Account deleted')], {
+      getToken: async () => 'token-1',
+      onUnauthorized,
+    });
+    await failure(deleted.client.getMe());
+    const signedOut = setup([unauthorized('Missing bearer token')], { onUnauthorized });
+    await failure(signedOut.client.getMe());
+    expect(onUnauthorized).not.toHaveBeenCalled();
+  });
+
   it('does not retry a deleted account, flagged for sign-out', async () => {
     const getToken = vi.fn(async () => 'token-1');
     const { client, fetch } = setup([unauthorized('Account deleted')], { getToken });
