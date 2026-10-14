@@ -36,13 +36,16 @@ const hapticOfKind: Partial<Record<ToastKind, 'toastSuccess' | 'toastError'>> = 
 export function ToastHost() {
   const toast = useStore(toastStore, (state) => state.toast);
   const tabBarHeight = useStore(toastStore, (state) => state.tabBarHeight);
+  const stickyBarHeight = useStore(toastStore, (state) => state.stickyBarHeight);
   const insets = useSafeAreaInsets();
   if (!toast) {
     return null;
   }
   const bottom = toast.isAboveTabBar
     ? tabBarHeight + spacing['space-8']
-    : insets.bottom + size['touch-min'] / 2;
+    : toast.isAboveStickyBar
+      ? stickyBarHeight + spacing['space-8']
+      : insets.bottom + size['touch-min'] / 2;
   // The window above the native modals exists only while a toast shows.
   return (
     <OverModals>

@@ -56,6 +56,7 @@ describe('submitPlan', () => {
     expect(given.toast).toHaveBeenCalledWith('success', 'Sortie programmée', {
       subtitle: 'Samedi 26 septembre à 10:00',
       action: { label: 'Voir', onPress: given.onSee },
+      isAboveStickyBar: true,
     });
   });
 
@@ -81,6 +82,7 @@ describe('submitPlan', () => {
     expect(given.trackPlanned).not.toHaveBeenCalled();
     expect(given.toast).toHaveBeenCalledWith('error', "La sortie n'a pas été programmée", {
       subtitle: 'Ce parcours est réservé à Premium.',
+      isAboveStickyBar: true,
     });
   });
 });

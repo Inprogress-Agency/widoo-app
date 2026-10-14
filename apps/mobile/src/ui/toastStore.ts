@@ -15,6 +15,8 @@ export interface ToastOptions {
   action?: ToastAction;
   /** Over the tab bar, for a toast shown on a tab: « Profil enregistré. » (Ecrans › E-09). */
   isAboveTabBar?: boolean;
+  /** Over the bar stuck under the route sheet: « Sortie programmée » (Ecrans › E-06). */
+  isAboveStickyBar?: boolean;
 }
 
 export interface ToastMessage extends ToastOptions {
@@ -28,10 +30,16 @@ interface ToastState {
   toast: ToastMessage | null;
   /** Height of the floating tab bar, which a toast on a tab stays above. */
   tabBarHeight: number;
+  /** Height of the last bar stuck to the bottom of a screen laid out (`StickyBar`). */
+  stickyBarHeight: number;
 }
 
 /** The toast shown, by the host at the root of the app. */
-export const toastStore = createStore<ToastState>(() => ({ toast: null, tabBarHeight: 0 }));
+export const toastStore = createStore<ToastState>(() => ({
+  toast: null,
+  tabBarHeight: 0,
+  stickyBarHeight: 0,
+}));
 
 let nextId = 1;
 
@@ -49,6 +57,11 @@ export function hideToast(id: number) {
 /** Measured by the tab bar as it lays out. */
 export function setTabBarHeight(height: number) {
   toastStore.setState({ tabBarHeight: height });
+}
+
+/** Measured by a sticky bar as it lays out. */
+export function setStickyBarHeight(height: number) {
+  toastStore.setState({ stickyBarHeight: height });
 }
 
 /** How long a toast stays: 4 s, 6 s for an attention, until an action or a swipe for an error. */
