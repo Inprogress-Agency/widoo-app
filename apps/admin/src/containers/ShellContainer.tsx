@@ -56,7 +56,7 @@ export function ShellContainer({ children }: { children: ReactNode }) {
   const { session, signOut, retry } = useSession();
   const hasRoomForFullMenu = useMediaQuery(fullMenuQuery);
   const [isMenuReduced, setIsMenuReduced] = useState(false);
-  const counters = useAdminCounters(session.status === 'signedIn', pathname);
+  const counters = useAdminCounters(session.status === 'signedIn');
 
   useEffect(() => {
     // Signed out, or stopped at the second factor: both are finished on the sign-in page.
