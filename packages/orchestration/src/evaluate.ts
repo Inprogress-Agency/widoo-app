@@ -1,8 +1,7 @@
 /**
  * Aggregates and coherence rules of a route being edited (Orchestration › Agrégats, Règles de
- * cohérence): what `PUT /routes/:id/steps` answers and what blocks a submission. The rules on
- * hours (`closed_at_arrival`), verification (`unverified_place`) and order (`back_and_forth`) need
- * the timeline and the places' state, and are left to the full engine (#35).
+ * cohérence) that need neither the hours nor the places: the rules on hours, verification and
+ * order are added to them by `computeRoute`.
  */
 import type { CoherenceIssue, CoherenceRuleCode, RouteEvaluation, Transport } from '@widoo/shared';
 
@@ -25,7 +24,7 @@ export interface EvaluatedRoute {
   steps: readonly EvaluatedStep[];
 }
 
-/** Thresholds of the rules, kept by the wiki and meant to be read from `settings` (#35). */
+/** Thresholds of the rules, kept by the wiki and read from `settings` (`coherenceThresholdsOf`). */
 export interface CoherenceThresholds {
   minSteps: number;
   maxSteps: number;
@@ -37,9 +36,11 @@ export interface CoherenceThresholds {
   /** Share of the total duration spent travelling, above which `too_many_transitions` warns. */
   travelShareMax: number;
   descriptionMinLength: number;
+  /** Share by which the order of the steps lengthens the trips, above which `back_and_forth`. */
+  backAndForthMax: number;
 }
 
-/** 2 and 10 steps, 10 min and 6 h, 30 and 45 min, 14 h, 40 %, 80 characters. */
+/** 2 and 10 steps, 10 min and 6 h, 30 and 45 min, 14 h, 40 %, 80 characters, 50 %. */
 export const defaultCoherenceThresholds: CoherenceThresholds = {
   minSteps: 2,
   maxSteps: 10,
@@ -50,6 +51,7 @@ export const defaultCoherenceThresholds: CoherenceThresholds = {
   totalMaxMin: 14 * 60,
   travelShareMax: 0.4,
   descriptionMinLength: 80,
+  backAndForthMax: 0.5,
 };
 
 /** Effort: `easy` under 3 km on foot, `moderate` under 7 km, `intense` beyond. */
