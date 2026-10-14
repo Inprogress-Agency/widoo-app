@@ -1,6 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { Linking, Share } from 'react-native';
 import { analytics } from '../../src/analytics';
+import { signInFlow } from '../../src/auth/signIn';
 import { discoveryStore, useDiscovery } from '../../src/discovery/useRouteSearch';
 import { googleMapsUrl } from '../../src/route/maps';
 import { RouteSheet } from '../../src/route/RouteSheet';
@@ -41,21 +42,25 @@ export default function RouteScreen() {
           }
         });
       }}
-      onGo={(route) => {
-        const url = googleMapsUrl(
-          route.steps.flatMap((routeStep) =>
-            'place' in routeStep
-              ? [routeStep.place.location]
-              : 'location' in routeStep
-                ? [routeStep.location]
-                : [],
-          ),
-          route.transport,
-        );
-        if (url) {
-          void Linking.openURL(url);
-        }
-      }}
+      // Launching a route asks for an account (D-029): signed out, the sheet E-10 opens and
+      // the launch resumes after the sign-in. Google Maps until the route under way (E-07).
+      onGo={(route) =>
+        void signInFlow.requireAccount('go', () => {
+          const url = googleMapsUrl(
+            route.steps.flatMap((routeStep) =>
+              'place' in routeStep
+                ? [routeStep.place.location]
+                : 'location' in routeStep
+                  ? [routeStep.location]
+                  : [],
+            ),
+            route.transport,
+          );
+          if (url) {
+            void Linking.openURL(url);
+          }
+        })
+      }
       // Back to the home with the route selected, framed with its steps (E-04).
       onSeeOnMap={
         isOnMap
