@@ -6,6 +6,15 @@ import { createFirebaseAuthClient } from './firebase-client';
 type SessionClients = { auth: AuthClient; api: ApiClient };
 
 let clients: SessionClients | undefined;
+let sessionRefusedListener: (() => void) | undefined;
+
+/**
+ * Who to tell when the API ends the session of the member (401 with a fresh token): the session
+ * provider, which signs out and sends back to A-01. Undefined to stop listening.
+ */
+export function onSessionRefused(listener: (() => void) | undefined): void {
+  sessionRefusedListener = listener;
+}
 
 /**
  * The identity provider and the API client of the admin, created on first use: in the browser
@@ -22,6 +31,7 @@ export function getSessionClients(): SessionClients {
     const api = createApiClient({
       baseUrl: publicEnv.NEXT_PUBLIC_API_URL,
       getToken: auth.getToken,
+      onUnauthorized: () => sessionRefusedListener?.(),
     });
     clients = { auth, api };
   }

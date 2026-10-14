@@ -50,6 +50,16 @@ describe('readSession', () => {
     });
   });
 
+  it('refuses a deleted account, which may then try another one', async () => {
+    const getMe = async () => {
+      throw new ApiRequestError('http', 401, { code: 'unauthorized', message: 'Account deleted' });
+    };
+    await expect(readSession({ getMe })).resolves.toEqual({
+      status: 'signedOut',
+      refusal: { reason: 'noAccess', email: null },
+    });
+  });
+
   it('lets nobody in when the API does not answer', async () => {
     const getMe = async () => {
       throw new Error('offline');

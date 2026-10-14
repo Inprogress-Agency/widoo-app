@@ -28,7 +28,8 @@ export function LinkSentPanel({
       <h1 className="text-title-l">{texts.title}</h1>
       {notices}
       <p className="text-body text-muted-foreground">
-        {texts.sentTo} <strong className="font-bold text-foreground">{email}</strong>.
+        {texts.sentTo} <strong className="font-bold text-foreground">{email}</strong>.{' '}
+        {texts.openHere}
       </p>
       <p className="text-body-s text-muted-foreground">{texts.expiry}</p>
       <div className="flex flex-col gap-8">

@@ -84,22 +84,28 @@ export const messages = {
     sendLink: 'Recevoir un lien de connexion',
     help: "Un problème d'accès ? Demandez à un admin de l'équipe.",
     returnTo: (target: string) => `Reconnectez-vous pour revenir ${target}.`,
+    expired: 'Votre session a expiré.',
     returnTargets,
     linkSent: {
       title: 'Vérifiez votre boîte mail',
       sentTo: 'Nous avons envoyé un lien de connexion à',
+      openHere: 'Ouvrez-le sur cet ordinateur.',
       expiry: "Le lien ne sert qu'une fois et expire au bout de quelques heures.",
       resend: 'Renvoyer le lien',
       resendIn: (seconds: number) => `Renvoyer le lien dans ${seconds} s`,
       otherAddress: 'Utiliser une autre adresse',
     },
     refusals: {
-      noAccess: { title: "Ce compte n'a pas accès à l'admin.", detail: null },
+      noAccess: {
+        title: "Ce compte n'a pas accès à l'admin.",
+        detail: "L'admin est réservé aux comptes de l'équipe Widoo.",
+      },
       suspended: {
         title: 'Ce compte est suspendu.',
         detail: "Pour en savoir plus, adressez-vous à un admin de l'équipe Widoo.",
       },
     },
+    signedInAs: (email: string) => `Vous étiez connecté avec ${email}.`,
     otherAccount: 'Utiliser un autre compte',
     code: {
       label: 'Code à 6 chiffres',

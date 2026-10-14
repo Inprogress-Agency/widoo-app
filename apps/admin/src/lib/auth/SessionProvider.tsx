@@ -4,11 +4,13 @@ import { createContext, useCallback, useEffect, useMemo, useRef, useState } from
 import type { ReactNode } from 'react';
 import { publicEnv } from '@/config/public-env';
 import type { SignInOutcome, TotpEnrollment } from './auth-client';
-import { getSessionClients } from './clients';
+import { getSessionClients, onSessionRefused } from './clients';
 import { readSession, requireSecondFactor, type Session, type SignInRefusal } from './session';
 
 export type SessionContextValue = {
   session: Session;
+  /** The API ended the session of the member signed in (12 hours, D-087): A-01 says so. */
+  hasExpired: boolean;
   /** Opens the Google window, and says how the attempt ended. Throws a `SignInError`. */
   signInWithGoogle: () => Promise<SignInOutcome>;
   sendSignInLink: (email: string, returnPath: string) => Promise<void>;
@@ -43,6 +45,24 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const refusal = useRef<SignInRefusal | null>(null);
   // A sign-in waits for its code: nobody is signed in yet, but the person is not signed out.
   const isChallengePending = useRef(false);
+  const [hasExpired, setHasExpired] = useState(false);
+  const status = useRef(session.status);
+
+  useEffect(() => {
+    status.current = session.status;
+  });
+
+  // The API refuses the token of a member who was in: the session is over, back to A-01.
+  useEffect(() => {
+    onSessionRefused(() => {
+      if (status.current !== 'signedIn') {
+        return;
+      }
+      setHasExpired(true);
+      void getSessionClients().auth.signOut();
+    });
+    return () => onSessionRefused(undefined);
+  }, []);
 
   useEffect(() => {
     const { auth, api } = getSessionClients();
@@ -83,6 +103,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const startAttempt = useCallback(() => {
     refusal.current = null;
+    setHasExpired(false);
     setSession((current) =>
       current.status === 'signedOut' ? { status: 'signedOut', refusal: null } : current,
     );
@@ -101,6 +122,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     const auth = () => getSessionClients().auth;
     return {
       session,
+      hasExpired,
       signInWithGoogle: async () => {
         startAttempt();
         return followUp(await auth().signInWithGoogle());
@@ -119,6 +141,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       },
       signOut: () => {
         isChallengePending.current = false;
+        setHasExpired(false);
         setSession((current) =>
           current.status === 'secondFactorChallenge'
             ? { status: 'signedOut', refusal: null }
@@ -128,7 +151,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       },
       retry: () => setAttempt((count) => count + 1),
     };
-  }, [session, startAttempt, followUp]);
+  }, [session, hasExpired, startAttempt, followUp]);
 
   return <SessionContext value={value}>{children}</SessionContext>;
 }
