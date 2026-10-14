@@ -24,7 +24,7 @@ export interface Transition {
   distanceM: number;
   durationMin: number;
   mode: Transport;
-  /** Straight-line fallback: the provider did not answer. */
+  /** Straight-line estimate (`estimateOfMode`) in place of the provider, which did not answer. */
   estimated: boolean;
   /**
    * The route along the streets, as an encoded polyline (precision 5), for the map; only for a
@@ -42,14 +42,27 @@ export interface TransitionTransport {
 /** Proposed mode up to this straight-line distance: on foot, then the metro (D-048). */
 export const WALK_PROPOSAL_MAX_M = 1500;
 
-/** Metro at the MVP: 1.4 times the straight line, at 20 km/h, plus 8 minutes. */
-const METRO_DETOUR = 1.4;
-const METRO_SPEED_M_PER_MIN = 20_000 / 60;
-const METRO_ACCESS_MIN = 8;
+/** How a trip is estimated from its straight line, in one mode. */
+export interface ModeEstimate {
+  /** The straight line times this coefficient: the distance travelled. */
+  detour: number;
+  /** Speed over that distance, in km/h. */
+  speedKmH: number;
+  /** Minutes added to the trip: getting to the station or the parking. */
+  accessMin: number;
+}
 
-/** Fallback when the provider is unavailable: 1.3 times the straight line, at 4.5 km/h. */
-const FALLBACK_DETOUR = 1.3;
-const FALLBACK_SPEED_M_PER_MIN = 4_500 / 60;
+/**
+ * Our estimate of a trip in each mode (Orchestration › Transitions, D-088): the only measures
+ * stored, and those of the trips the provider did not answer. The metro is never asked of the
+ * provider. The bike and car values are to be confirmed by the product.
+ */
+export const estimateOfMode: Record<Transport, ModeEstimate> = {
+  walk: { detour: 1.3, speedKmH: 4.5, accessMin: 0 },
+  metro: { detour: 1.4, speedKmH: 20, accessMin: 8 },
+  bike: { detour: 1.3, speedKmH: 15, accessMin: 0 },
+  car: { detour: 1.4, speedKmH: 20, accessMin: 8 },
+};
 
 /** The mode proposed for a trip of this straight-line distance (D-048). */
 export function proposedMode(straightM: number): Transport {
@@ -58,6 +71,18 @@ export function proposedMode(straightM: number): Transport {
 
 /** Whole minutes, one at least for a trip that moves. */
 const minutes = (value: number) => Math.max(1, Math.round(value));
+
+/** The trip of this straight-line distance in this mode, by our estimate. */
+function estimatedTrip(straightM: number, mode: Transport, estimated: boolean): Transition {
+  const { detour, speedKmH, accessMin } = estimateOfMode[mode];
+  const distanceM = straightM * detour;
+  return {
+    distanceM: Math.round(distanceM),
+    durationMin: minutes((distanceM / (speedKmH * 1000)) * 60 + accessMin),
+    mode,
+    estimated,
+  };
+}
 
 async function transitionBetween(
   from: LatLng,
@@ -74,24 +99,12 @@ async function transitionBetween(
   }
   const profile = profileOfMode[mode];
   if (profile === null) {
-    const distanceM = straightM * METRO_DETOUR;
-    return {
-      distanceM: Math.round(distanceM),
-      durationMin: minutes(distanceM / METRO_SPEED_M_PER_MIN + METRO_ACCESS_MIN),
-      mode,
-      estimated: false,
-    };
+    return estimatedTrip(straightM, mode, false);
   }
   const leg: DirectionsLeg = { from: start, to: end, profile };
   const directions = await routeOf(leg, transport);
   if (!directions) {
-    const distanceM = straightM * FALLBACK_DETOUR;
-    return {
-      distanceM: Math.round(distanceM),
-      durationMin: minutes(distanceM / FALLBACK_SPEED_M_PER_MIN),
-      mode,
-      estimated: true,
-    };
+    return estimatedTrip(straightM, mode, true);
   }
   return {
     distanceM: Math.round(directions.distanceM),
