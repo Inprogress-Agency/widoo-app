@@ -1,6 +1,7 @@
+import { profileRouteSorts, type Mood, type ProfileRouteSort } from '@widoo/shared';
 import { spacing } from '@widoo/tokens';
 import { router } from 'expo-router';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,9 +11,12 @@ import { CertificationSheet, type CertificationSheetMethods } from '../profile/C
 import { useMe } from '../profile/me';
 import { ProfileHeader, ProfileStats, type ProfileIdentity } from '../profile/ProfileHeader';
 import { Anecdotes } from '../profile/ProfileSections';
+import { openRoute } from '../results/navigation';
 import { Button } from '../ui/Button';
 import { DiscButton } from '../ui/DiscButton';
 import { Skeleton } from '../ui/Skeleton';
+import { SortSheet, type SortSheetMethods } from '../ui/SortSheet';
+import { CreatorRoutes, FeaturedCarousel, FieldWork } from './CreatorSections';
 import { usePublicProfile, type KnownCreator } from './usePublicProfile';
 
 interface PublicProfileScreenProps {
@@ -40,9 +44,17 @@ const knownIdentity = (known: KnownCreator): ProfileIdentity => ({
 export function PublicProfileScreen({ id, known, onBack }: PublicProfileScreenProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { state, retry } = usePublicProfile(id, {}, known);
+  // The sort is kept for the page; « Récents » by default, as on E-09.
+  const [sort, setSort] = useState<ProfileRouteSort>('recent');
+  const [moods, setMoods] = useState<Mood[]>([]);
+  const { state, retry, hasMore, isLoadingMore, hasFailedMore, loadMore } = usePublicProfile(
+    id,
+    { sort, moods },
+    known,
+  );
   const { state: meState } = useMe();
   const certificationSheet = useRef<CertificationSheetMethods>(null);
+  const sortSheet = useRef<SortSheetMethods>(null);
   const profile = state.status === 'ready' ? state.profile : null;
 
   const openCertification = () => {
@@ -50,6 +62,10 @@ export function PublicProfileScreen({ id, known, onBack }: PublicProfileScreenPr
     analytics.track('certified_info_opened', { creator_id: id, own: isOwn });
     certificationSheet.current?.open();
   };
+  const toggleMood = (mood: Mood) =>
+    setMoods((current) =>
+      current.includes(mood) ? current.filter((value) => value !== mood) : [...current, mood],
+    );
 
   return (
     // Safe area measured at runtime.
@@ -123,7 +139,26 @@ export function PublicProfileScreen({ id, known, onBack }: PublicProfileScreenPr
                 rating: profile.ratingAvg,
               }}
             />
+            <FeaturedCarousel
+              routes={profile.featuredRoutes}
+              onOpen={(route) => openRoute(route, 'card')}
+            />
             <Anecdotes anecdotes={profile.anecdotes} />
+            <FieldWork count={profile.verifiedPlaces} />
+            <CreatorRoutes
+              profile={profile}
+              routes={state.routes}
+              sort={sort}
+              moods={moods}
+              onOpenSort={() => sortSheet.current?.open()}
+              onToggleMood={toggleMood}
+              onOpen={(route) => openRoute(route, 'card')}
+              more={
+                hasMore
+                  ? { isLoading: isLoadingMore, hasFailed: hasFailedMore, onLoad: loadMore }
+                  : null
+              }
+            />
           </>
         )}
       </ScrollView>
@@ -139,6 +174,18 @@ export function PublicProfileScreen({ id, known, onBack }: PublicProfileScreenPr
           creatorName={profile.firstName}
         />
       )}
+      <SortSheet
+        ref={sortSheet}
+        title={t('sort.title')}
+        closeLabel={t('sort.close')}
+        options={profileRouteSorts.map((value) => ({
+          value,
+          label: t(`creator.sort.${value}.label`),
+          description: t(`creator.sort.${value}.description`),
+        }))}
+        value={sort}
+        onChange={setSort}
+      />
     </View>
   );
 }

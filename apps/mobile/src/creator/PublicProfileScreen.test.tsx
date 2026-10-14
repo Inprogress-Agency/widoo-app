@@ -18,6 +18,7 @@ jest.mock(
 );
 // The sheet mock of gorhom draws its content at once, modal: it would hide the screen.
 jest.mock('../profile/CertificationSheet', () => ({ CertificationSheet: () => null }));
+jest.mock('../ui/SortSheet', () => ({ SortSheet: () => null }));
 jest.mock('expo-router', () => ({ router: { push: jest.fn(), dismissTo: jest.fn() } }));
 jest.mock('../analytics', () => ({
   analytics: { track: jest.fn(), setAuthenticated: jest.fn() },
@@ -64,7 +65,7 @@ describe('E-16, the public profile of a creator', () => {
     await act(() => fakeAuth.setUser(null));
   });
 
-  it('shows the profile without « Modifier le profil », its figures and anecdotes', async () => {
+  it('shows the profile without « Modifier le profil », its figures, sections and routes', async () => {
     await renderProfile(ready());
     expect(
       await screen.findByLabelText(
@@ -80,6 +81,15 @@ describe('E-16, the public profile of a creator', () => {
         'Mon quartier pour flâner. Le haut de Belleville, pour la vue sur tout Paris.',
       ),
     ).toBeTruthy();
+    expect(screen.getByRole('header', { name: 'À la une' })).toBeTruthy();
+    expect(screen.getByRole('header', { name: 'Sur le terrain' })).toBeTruthy();
+    expect(
+      screen.getByLabelText(
+        "12 lieux vérifiés sur place. Confirmés pendant ses sorties. Les prochains visiteurs savent à quoi s'attendre.",
+      ),
+    ).toBeTruthy();
+    expect(screen.getByRole('header', { name: 'Tous ses parcours (8)' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Trier par, Récents' })).toBeTruthy();
   });
 
   it('opens « Créateur certifié » for a visitor with certified_info_opened, own false', async () => {
@@ -106,11 +116,25 @@ describe('E-16, the public profile of a creator', () => {
     });
   });
 
-  it('shows the minimal profile: one route published, without badge', async () => {
+  it('shows the minimal profile: one route published, without sort, filter nor sections', async () => {
     await renderProfile(ready(testMinimalProfile()));
     expect(await screen.findByLabelText('Camille, Sur Widoo depuis mars 2026')).toBeTruthy();
     expect(screen.getByLabelText('1 parcours publié')).toBeTruthy();
+    expect(screen.getByRole('header', { name: 'Ses parcours (1)' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /^Trier par/ })).toBeNull();
+    expect(screen.queryByRole('header', { name: 'À la une' })).toBeNull();
+    expect(screen.queryByRole('header', { name: 'Sur le terrain' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Créateur certifié, en savoir plus' })).toBeNull();
+  });
+
+  it('filters the routes by mood, the chips with their count', async () => {
+    await renderProfile(ready());
+    await fireEvent.press(await screen.findByRole('button', { name: 'Gastronomie, 3 parcours' }));
+    expect(getPublicProfile).toHaveBeenLastCalledWith(
+      testPublicProfile().id,
+      { sort: 'recent', moods: ['food'] },
+      expect.anything(),
+    );
   });
 
   it('shows the known first name while loading, the rest busy', async () => {
