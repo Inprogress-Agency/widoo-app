@@ -123,6 +123,18 @@ const Env = z.object({
 
 /** Guards against local settings that would weaken production: token checks, report transport. */
 const ProductionEnv = Env.superRefine((env, context) => {
+  // The emulator accepts unsigned tokens: with a demo project only, which exists nowhere else.
+  // The admin applies the same rule on its side.
+  if (
+    env.FIREBASE_AUTH_EMULATOR_HOST !== undefined &&
+    !env.FIREBASE_PROJECT_ID?.startsWith('demo-')
+  ) {
+    context.addIssue({
+      code: 'custom',
+      path: ['FIREBASE_AUTH_EMULATOR_HOST'],
+      message: 'The Auth emulator needs a demo- project',
+    });
+  }
   if (env.NODE_ENV !== 'production') {
     return;
   }

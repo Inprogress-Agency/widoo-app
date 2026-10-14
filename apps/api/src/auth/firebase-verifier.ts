@@ -25,6 +25,10 @@ export function createFirebaseVerifier(projectId: string): TokenVerifier {
     async verify(token) {
       try {
         const decoded = await auth.verifyIdToken(token);
+        // The 12 hours of the admin are counted from it: a token without it is not trusted.
+        if (!Number.isFinite(decoded.auth_time)) {
+          throw new InvalidTokenError('auth/missing-auth-time');
+        }
         return {
           uid: decoded.uid,
           email: decoded.email ?? null,

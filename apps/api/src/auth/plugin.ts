@@ -16,7 +16,7 @@ declare module 'fastify' {
     /**
      * Guard of the admin routes (wiki Admin-Web › Rôles et Principes): `requireAuth`, then refuses
      * a role that does not open `section` (403), a session older than 12 hours (401) and a
-     * session opened without a second factor (403 `mfa_required`, D-087).
+     * session opened without the code of an authenticator app (403 `mfa_required`, D-087).
      */
     requireAdminSection: (section: AdminSection) => AuthHook;
     /**
@@ -123,7 +123,8 @@ export function registerAuth(
     if (!identity || Date.now() - identity.authTime.getTime() > adminSessionMaxMs) {
       throw httpError(401, 'Admin session expired');
     }
-    if (options.isSecondFactorRequired && !identity.secondFactor) {
+    // The authenticator app only (D-087): a text message is not a second factor of the admin.
+    if (options.isSecondFactorRequired && identity.secondFactor !== 'totp') {
       throw httpError(403, 'Second factor required', 'mfa_required');
     }
   });
