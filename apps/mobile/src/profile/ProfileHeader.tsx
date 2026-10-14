@@ -1,4 +1,5 @@
 import type { Me } from '@widoo/shared';
+import { size } from '@widoo/tokens';
 import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -11,32 +12,55 @@ import { memberSince } from './progress';
 /** Side of the photo of the header, as the maquettes draw it (Ecrans › E-09, planche 1). */
 const PHOTO_SIZE = 96;
 
-interface ProfileHeaderProps {
-  me: Me;
-  onCertifiedPress: () => void;
-  onEditPress: () => void;
+/** What the header shows of a profile, mine (E-09) or a creator's (E-16). */
+export interface ProfileIdentity {
+  firstName: string | null;
+  avatarUrl: string | null;
+  /** Null while a public profile loads: only the photo and the first name are known. */
+  createdAt: string | null;
+  neighborhood: string | null;
+  bio: string | null;
 }
 
+interface ProfileHeaderProps {
+  identity: ProfileIdentity;
+  isCertified: boolean;
+  onCertifiedPress: () => void;
+  /** « Modifier le profil », on my profile only. */
+  onEditPress?: () => void;
+}
+
+// The seal is smaller than a finger: its hit slop brings it to 44 points.
+const sealHitSlop = size['touch-min'] / 4;
+
 /**
- * The centred header of my profile (Ecrans › E-09): photo or initial, first name with the blue
- * seal, « Créateur certifié » that opens its sheet, place and seniority, bio, « Modifier le
- * profil ». The identity is one element for screen readers; the badge link and the button apart.
+ * The centred header of a profile (Ecrans › E-09, E-16): photo or initial, first name with the
+ * blue seal, « Créateur certifié » that opens its sheet, as the seal does, place and seniority,
+ * bio, and on my profile « Modifier le profil ». The identity is one element for screen readers;
+ * the badge link and the button apart.
  */
-export function ProfileHeader({ me, onCertifiedPress, onEditPress }: ProfileHeaderProps) {
+export function ProfileHeader({
+  identity,
+  isCertified,
+  onCertifiedPress,
+  onEditPress,
+}: ProfileHeaderProps) {
   const { t } = useTranslation();
-  const name = me.firstName ?? '';
-  const isCertified = me.certification.isCertified;
-  const date = memberSince(me.createdAt);
-  const seniority = me.neighborhood
-    ? t('profile.placeAndSince', { place: me.neighborhood, date })
-    : t('profile.memberSince', { date });
-  const identity = [name, isCertified ? t('profile.certified') : null, seniority]
+  const name = identity.firstName ?? '';
+  const date = identity.createdAt ? memberSince(identity.createdAt) : null;
+  let seniority: string | null = null;
+  if (date) {
+    seniority = identity.neighborhood
+      ? t('profile.placeAndSince', { place: identity.neighborhood, date })
+      : t('profile.memberSince', { date });
+  }
+  const spoken = [name, isCertified ? t('profile.certified') : null, seniority]
     .filter(Boolean)
     .join(', ');
 
   return (
     <View className="items-center gap-12">
-      <View accessible accessibilityLabel={identity} className="items-center gap-8">
+      <View accessible accessibilityLabel={spoken} className="items-center gap-8">
         <View
           className="items-center justify-center overflow-hidden rounded-pill bg-blue-soft"
           style={{ width: PHOTO_SIZE, height: PHOTO_SIZE }}
@@ -44,9 +68,9 @@ export function ProfileHeader({ me, onCertifiedPress, onEditPress }: ProfileHead
           <Text variant="title-xl" color="blue-ink">
             {name.charAt(0).toUpperCase()}
           </Text>
-          {me.avatarUrl && (
+          {identity.avatarUrl && (
             <Image
-              source={{ uri: me.avatarUrl }}
+              source={{ uri: identity.avatarUrl }}
               contentFit="cover"
               style={StyleSheet.absoluteFill}
             />
@@ -56,7 +80,12 @@ export function ProfileHeader({ me, onCertifiedPress, onEditPress }: ProfileHead
           <Text variant="title-xl" className="text-center">
             {name}
           </Text>
-          {isCertified && <Icon {...uiIcon('certified')} size="icon-l" />}
+          {isCertified && (
+            // The link under it says the same to screen readers.
+            <Pressable hitSlop={sealHitSlop} onPress={onCertifiedPress}>
+              <Icon {...uiIcon('certified')} size="icon-l" />
+            </Pressable>
+          )}
         </View>
       </View>
       {isCertified && (
@@ -72,48 +101,64 @@ export function ProfileHeader({ me, onCertifiedPress, onEditPress }: ProfileHead
           <Icon {...uiIcon('info')} size="icon-s" color="blue-ink" />
         </Pressable>
       )}
-      {/* Read in the identity above. */}
-      <Text
-        variant="body-s"
-        color="muted"
-        accessibilityElementsHidden
-        importantForAccessibility="no"
-        className="text-center"
-      >
-        {seniority}
-      </Text>
-      {me.bio && (
-        <Text variant="body" className="text-center">
-          {me.bio}
+      {seniority && (
+        // Read in the identity above.
+        <Text
+          variant="body-s"
+          color="muted"
+          accessibilityElementsHidden
+          importantForAccessibility="no"
+          className="text-center"
+        >
+          {seniority}
         </Text>
       )}
-      <Button variant="secondary" icon="edit" label={t('profile.edit')} onPress={onEditPress} />
+      {identity.bio && (
+        <Text variant="body" className="text-center">
+          {identity.bio}
+        </Text>
+      )}
+      {onEditPress && (
+        <Button variant="secondary" icon="edit" label={t('profile.edit')} onPress={onEditPress} />
+      )}
     </View>
   );
 }
+
+/** The figures of a profile, each null when it does not exist. */
+export interface ProfileFigures {
+  published: number | null;
+  completed: number | null;
+  rating: number | null;
+}
+
+/** My figures, from the criteria of my badge: published routes are not in `GET /me` (#421). */
+export function figuresOfMe(me: Me): ProfileFigures {
+  const valueOf = (key: 'completedRoutes' | 'averageRating') =>
+    me.certification.criteria.find((criterion) => criterion.criterion === key)?.value ?? null;
+  return {
+    published: null,
+    completed: valueOf('completedRoutes'),
+    rating: valueOf('averageRating'),
+  };
+}
+
+const counted = (value: number | null): value is number => value !== null && value > 0;
 
 /**
  * The figures, in text and not touchable: each only when it exists (no « 0 », no rating without
  * reviews); the row goes when there is none. Read as a list.
  */
-export function ProfileStats({ me }: { me: Me }) {
+export function ProfileStats({ figures }: { figures: ProfileFigures }) {
   const { t } = useTranslation();
-  const valueOf = (key: 'completedRoutes' | 'averageRating') =>
-    me.certification.criteria.find((criterion) => criterion.criterion === key)?.value ?? null;
-  const completed = valueOf('completedRoutes');
-  const rating = valueOf('averageRating');
+  const { published, completed, rating } = figures;
+  const countStat = (key: 'published' | 'completed', value: number) => {
+    const label = t(`profile.stats.${key}`, { count: value });
+    return { key, value: String(value), label, spoken: `${value} ${label}`, hasStar: false };
+  };
   const stats = [
-    ...(completed !== null && completed > 0
-      ? [
-          {
-            key: 'completed',
-            value: String(completed),
-            label: t('profile.stats.completed', { count: completed }),
-            spoken: `${completed} ${t('profile.stats.completed', { count: completed })}`,
-            hasStar: false,
-          },
-        ]
-      : []),
+    ...(counted(published) ? [countStat('published', published)] : []),
+    ...(counted(completed) ? [countStat('completed', completed)] : []),
     ...(rating !== null
       ? [
           {

@@ -36,4 +36,17 @@ describe('Créateur certifié sheet', () => {
     await render(<CertificationSheet certification={testMe().certification} />);
     expect(screen.getByRole('header', { name: 'Créateur certifié' })).toBeTruthy();
   });
+
+  it('tells a visitor why the creator has the badge, and closes on « Compris » (E-16)', async () => {
+    await render(
+      <CertificationSheet certification={testMe().certification} creatorName="Camille" />,
+    );
+    expect(screen.getByRole('header', { name: 'Créateur certifié' })).toBeTruthy();
+    expect(
+      screen.getByText('Camille propose des parcours fiables et remplit les critères de Widoo.'),
+    ).toBeTruthy();
+    expect(screen.getByText("Sur l'ensemble de ses parcours.")).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Compris' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Créer un parcours' })).toBeNull();
+  });
 });
