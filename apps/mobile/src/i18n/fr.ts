@@ -381,6 +381,7 @@ export const fr = {
       discover: 'Découvrir les formules',
     },
     saved: 'Profil enregistré.',
+    deleted: 'Votre compte est supprimé.',
   },
   field: {
     counter_one: '{{count}} caractère sur {{max}}',
@@ -440,6 +441,34 @@ export const fr = {
       confirm: 'Supprimer',
     },
     noQuestions: 'Les questions ne sont pas disponibles hors connexion.',
+  },
+  // Supprimer mon compte (E-09, D-025): no choice, the published routes stay online.
+  deleteAccount: {
+    title: 'Supprimer mon compte',
+    back: 'Retour aux réglages',
+    intro: 'La suppression est définitive. Nous effaçons :',
+    profile: 'Votre profil, votre photo et vos anecdotes',
+    outings: 'Vos favoris, vos sorties et votre historique',
+    drafts: 'Vos brouillons et vos parcours privés',
+    keptTitle: 'Vos parcours publiés restent en ligne',
+    keptBody: 'Signés « Membre Widoo », sans lien vers votre profil, avec leurs avis.',
+    subscriptionIos:
+      "Votre abonnement Premium continue tant que vous ne le résiliez pas dans l'App Store.",
+    subscriptionAndroid:
+      'Votre abonnement Premium continue tant que vous ne le résiliez pas dans Google Play.',
+    manageSubscription: "Gérer l'abonnement",
+    confirm: 'Supprimer mon compte',
+    alert: {
+      title: 'Supprimer votre compte ?',
+      body: 'Vos parcours publiés restent en ligne, signés « Membre Widoo ». Cette action ne peut pas être annulée.',
+      cancel: 'Annuler',
+      confirm: 'Supprimer',
+    },
+    error: {
+      title: 'Suppression impossible',
+      body: 'Réessayez dans un instant.',
+      retry: 'Réessayer',
+    },
   },
   // Unbreakable spaces in the written forms: « 7 h » never splits over two lines.
   duration: {
