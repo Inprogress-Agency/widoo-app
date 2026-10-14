@@ -1,9 +1,14 @@
-import { CreatePlannedRoute, PlannedRoute } from '@widoo/shared';
+import {
+  CreatePlannedRoute,
+  PlannedRoute,
+  PlannedRouteList,
+  PlannedRouteQuery,
+} from '@widoo/shared';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { canAccessRoute } from '../access/route-access';
 import { httpError, premiumRequired } from '../errors';
-import { createPlanned, ownedPlanned, readPlanned } from '../planned/repository';
+import { createPlanned, listPlanned, ownedPlanned, readPlanned } from '../planned/repository';
 import { snapshotOf } from '../planned/snapshot';
 import { currentUser } from './me';
 
@@ -20,6 +25,20 @@ export const plannedRoutesPlugin: FastifyPluginAsyncZod = async (app) => {
   app.addHook('onSend', async (_request, reply) => {
     reply.header('cache-control', 'no-store');
   });
+
+  app.get(
+    '/me/planned',
+    {
+      schema: {
+        tags,
+        summary: 'My plannings by start, one status or all',
+        security,
+        querystring: PlannedRouteQuery,
+        response: { 200: PlannedRouteList },
+      },
+    },
+    async (request) => listPlanned(app.db, currentUser(request).id, request.query),
+  );
 
   app.post(
     '/me/planned',

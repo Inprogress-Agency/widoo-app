@@ -1,4 +1,4 @@
-import { ApiError, PlannedRoute } from '@widoo/shared';
+import { ApiError, PlannedRoute, PlannedRouteList } from '@widoo/shared';
 import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
@@ -83,7 +83,7 @@ describe('POST /v1/me/planned', () => {
   });
 });
 
-describe('GET /v1/me/planned/:id', () => {
+describe('GET /v1/me/planned and /v1/me/planned/:id', () => {
   it('keeps a planning readable once its route is unpublished (snapshot)', async () => {
     const headers = await fixtures.signIn();
     const copyId = await fixtures.copyDemoRoute();
@@ -102,7 +102,7 @@ describe('GET /v1/me/planned/:id', () => {
     expect(planned.route.steps).toEqual(created.route.steps);
   });
 
-  it("answers 404 for another user's planning", async () => {
+  it("answers 404 for another user's planning, and lists only mine", async () => {
     const owner = await fixtures.signIn();
     const other = await fixtures.signIn();
     const created = PlannedRoute.parse(
@@ -111,6 +111,40 @@ describe('GET /v1/me/planned/:id', () => {
 
     const read = await app.inject({ url: `/v1/me/planned/${created.id}`, headers: other });
     expect(read.statusCode).toBe(404);
+    const list = PlannedRouteList.parse(
+      (await app.inject({ url: '/v1/me/planned', headers: other })).json(),
+    );
+    expect(list.items).toEqual([]);
+  });
+
+  it('pages by start and filters by status', async () => {
+    const headers = await fixtures.signIn();
+    await plan(headers, { routeId, startsAt: '2026-10-25T10:00:00+01:00' });
+    const first = PlannedRoute.parse(
+      (await plan(headers, { routeId, startsAt: saturdayTen })).json(),
+    );
+    await app.db
+      .update(plannedRoutes)
+      .set({ status: 'cancelled' })
+      .where(eq(plannedRoutes.id, first.id));
+
+    const page = PlannedRouteList.parse(
+      (await app.inject({ url: '/v1/me/planned?limit=1', headers })).json(),
+    );
+    expect(page.items.map((item) => item.id)).toEqual([first.id]);
+    expect(page.nextCursor).not.toBeNull();
+    const next = PlannedRouteList.parse(
+      (
+        await app.inject({ url: `/v1/me/planned?limit=1&cursor=${page.nextCursor}`, headers })
+      ).json(),
+    );
+    expect(next.items.map((item) => item.startsAt)).toEqual(['2026-10-25T09:00:00.000Z']);
+    expect(next.nextCursor).toBeNull();
+    const cancelled = PlannedRouteList.parse(
+      (await app.inject({ url: '/v1/me/planned?status=cancelled', headers })).json(),
+    );
+    expect(cancelled.items.map((item) => item.id)).toEqual([first.id]);
+    expect((await app.inject({ url: '/v1/me/planned?cursor=bad', headers })).statusCode).toBe(400);
   });
 });
 

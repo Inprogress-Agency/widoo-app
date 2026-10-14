@@ -3,8 +3,14 @@
  * the owner: another user's planning is « not found », never « forbidden », so that its id
  * reveals nothing.
  */
-import { PlannedRouteSnapshot, RouteTimeline, type PlannedRoute } from '@widoo/shared';
-import { and, asc, eq } from 'drizzle-orm';
+import {
+  PlannedRouteSnapshot,
+  RouteTimeline,
+  type PlannedRoute,
+  type PlannedRouteStatus,
+} from '@widoo/shared';
+import { and, asc, eq, gt, inArray, or, type SQL } from 'drizzle-orm';
+import { z } from 'zod';
 import type { Db, Tx } from '../db/client';
 import { plannedRoutes, plannedSteps } from '../db/schema';
 import { httpError } from '../errors';
@@ -106,4 +112,69 @@ export async function createPlanned(
     );
     return readPlanned(tx, row);
   });
+}
+
+/** Position of the last planning of a page: base64url JSON, a position and no right. */
+const Cursor = z.strictObject({ startsAt: z.iso.datetime(), id: z.uuid() });
+
+const encodeCursor = (row: PlannedRow) =>
+  Buffer.from(JSON.stringify({ startsAt: row.startsAt.toISOString(), id: row.id })).toString(
+    'base64url',
+  );
+
+function decodeCursor(cursor: string): z.infer<typeof Cursor> {
+  try {
+    return Cursor.parse(JSON.parse(Buffer.from(cursor, 'base64url').toString('utf8')));
+  } catch {
+    throw httpError(400, 'Invalid cursor');
+  }
+}
+
+/** Plannings of `userId` by start, then id; one status or all. */
+export async function listPlanned(
+  db: Db,
+  userId: string,
+  query: { status?: PlannedRouteStatus; cursor?: string; limit: number },
+): Promise<{ items: PlannedRoute[]; nextCursor: string | null }> {
+  const conditions: (SQL | undefined)[] = [eq(plannedRoutes.userId, userId)];
+  if (query.status) conditions.push(eq(plannedRoutes.status, query.status));
+  if (query.cursor) {
+    const after = decodeCursor(query.cursor);
+    const startsAt = new Date(after.startsAt);
+    conditions.push(
+      or(
+        gt(plannedRoutes.startsAt, startsAt),
+        and(eq(plannedRoutes.startsAt, startsAt), gt(plannedRoutes.id, after.id)),
+      ),
+    );
+  }
+  const rows = await db
+    .select()
+    .from(plannedRoutes)
+    .where(and(...conditions))
+    .orderBy(asc(plannedRoutes.startsAt), asc(plannedRoutes.id))
+    .limit(query.limit + 1);
+  const page = rows.slice(0, query.limit);
+  const stepRows =
+    page.length === 0
+      ? []
+      : await db
+          .select()
+          .from(plannedSteps)
+          .where(
+            inArray(
+              plannedSteps.plannedRouteId,
+              page.map((row) => row.id),
+            ),
+          );
+  const last = page.at(-1);
+  return {
+    items: page.map((row) =>
+      toPlannedRoute(
+        row,
+        stepRows.filter((step) => step.plannedRouteId === row.id),
+      ),
+    ),
+    nextCursor: rows.length > query.limit && last ? encodeCursor(last) : null,
+  };
 }
