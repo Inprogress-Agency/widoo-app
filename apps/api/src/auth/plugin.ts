@@ -56,13 +56,14 @@ export function registerAuth(app: FastifyInstance, verifier: TokenVerifier): voi
     if (identity.signInProvider === 'anonymous') {
       throw httpError(401, 'Sign in required');
     }
-    const user = await findOrCreateUser(app.db, identity);
-    // Kept until the purge so that the same Firebase account cannot silently reopen it.
-    if (user.deletedAt) {
+    const signedIn = await findOrCreateUser(app.db, identity);
+    // A session opened before the deletion of its account: the app signs out on this message
+    // (`isAccountDeleted` of the API client), and a new sign-in gets a new account (D-027).
+    if (signedIn.kind === 'signed_out') {
       throw httpError(401, 'Account deleted');
     }
-    request.user = user;
-    return user;
+    request.user = signedIn.user;
+    return signedIn.user;
   }
 
   app.decorate('requireAuth', async (request: FastifyRequest) => {

@@ -188,6 +188,33 @@ describe('DELETE /v1/me', () => {
       expect(again.json()).toEqual({ code: 'unauthorized', message: 'Account deleted' });
     }
   });
+
+  it('lets the same identity sign up again into a new account, the old one kept anonymized', async () => {
+    const { uid, headers } = signIn();
+    const old = Me.parse((await app.inject({ url: '/v1/me', headers })).json());
+    expect((await app.inject({ method: 'DELETE', url: '/v1/me', headers })).statusCode).toBe(204);
+    const [deleted] = await app.db.select().from(users).where(eq(users.id, old.id));
+
+    const again = verifier.issue({
+      uid,
+      email,
+      emailVerified: true,
+      name: 'Camille Exemple',
+      authTime: new Date((deleted?.deletedAt?.getTime() ?? 0) + 1000),
+    });
+    const response = await app.inject({
+      url: '/v1/me',
+      headers: { authorization: `Bearer ${again.token}` },
+    });
+    expect(response.statusCode).toBe(200);
+    const fresh = Me.parse(response.json());
+    expect(fresh.id).not.toBe(old.id);
+    expect(fresh).toMatchObject({ email, firstName: 'Camille', role: 'user', plan: 'free' });
+
+    const [kept] = await app.db.select().from(users).where(eq(users.id, old.id));
+    expect(kept).toEqual(deleted);
+    expect(kept).toMatchObject({ deletedAt: expect.any(Date), email: null, firstName: null });
+  });
 });
 
 describe('logs of the account routes', () => {

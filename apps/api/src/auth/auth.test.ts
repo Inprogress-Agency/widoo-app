@@ -113,7 +113,7 @@ describe('requireAuth', () => {
     expect(await userOf(uid)).toBeUndefined();
   });
 
-  it('refuses a deleted account, even with a valid token', async () => {
+  it('refuses a session opened before the deletion of its account, even with a valid token', async () => {
     const { uid, headers } = signIn();
     await app.inject({ url: '/v1/test/private', headers });
     await app.db.update(users).set({ deletedAt: new Date() }).where(eq(users.firebaseUid, uid));
@@ -121,6 +121,49 @@ describe('requireAuth', () => {
     const response = await app.inject({ url: '/v1/test/private', headers });
     expect(response.statusCode).toBe(401);
     expect(response.json()).toEqual({ code: 'unauthorized', message: 'Account deleted' });
+    expect(await app.db.select().from(users).where(eq(users.firebaseUid, uid))).toHaveLength(1);
+  });
+
+  it('gives a new account to the same identity signed in again after the deletion', async () => {
+    const { uid, headers } = signIn({ email: 'again.test@example.com', emailVerified: true });
+    const first = (await app.inject({ url: '/v1/test/private', headers })).json();
+    const [deleted] = await app.db
+      .update(users)
+      .set({ deletedAt: new Date(), email: null })
+      .where(eq(users.firebaseUid, uid))
+      .returning();
+    const deletedAt = deleted?.deletedAt ?? new Date();
+
+    const again = verifier.issue({
+      uid,
+      email: 'again.test@example.com',
+      emailVerified: true,
+      authTime: new Date(deletedAt.getTime() + 1000),
+    });
+    const responses = await Promise.all(
+      Array.from({ length: 3 }, () =>
+        app.inject({
+          url: '/v1/test/private',
+          headers: { authorization: `Bearer ${again.token}` },
+        }),
+      ),
+    );
+    expect(responses.map((response) => response.statusCode)).toEqual([200, 200, 200]);
+    const ids = new Set(responses.map((response) => response.json().userId));
+    expect(ids.size).toBe(1);
+    expect(ids.has(first.userId)).toBe(false);
+
+    const rows = await app.db.select().from(users).where(eq(users.firebaseUid, uid));
+    expect(rows).toHaveLength(2);
+    expect(rows.find((row) => row.id === first.userId)).toMatchObject({ deletedAt, email: null });
+    expect(rows.find((row) => ids.has(row.id))).toMatchObject({
+      deletedAt: null,
+      email: 'again.test@example.com',
+      role: 'user',
+    });
+    // Once the identity has a new account, its older session reaches that one, never the deleted.
+    const older = await app.inject({ url: '/v1/test/private', headers });
+    expect(ids.has(older.json().userId)).toBe(true);
   });
 
   it('answers 500 without detail when the verifier fails for another reason', async () => {

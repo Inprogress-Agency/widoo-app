@@ -11,7 +11,8 @@ const serverErrorCodes = new Set(['auth/internal-error', 'auth/invalid-credentia
  * Cloud Run service account), never from a key file; verifying a token needs none of them.
  *
  * Revocation is not checked, which would cost a call to Firebase on every request: an ID token
- * lives one hour, and a deleted account is refused by the API itself (`users.deleted_at`).
+ * lives one hour, and a session opened before the deletion of its account is refused by the API itself
+ * (`users.deleted_at` against `auth_time`).
  */
 export function createFirebaseVerifier(projectId: string): TokenVerifier {
   const name = `widoo-api:${projectId}`;
@@ -30,6 +31,7 @@ export function createFirebaseVerifier(projectId: string): TokenVerifier {
           emailVerified: decoded.email_verified === true,
           name: typeof decoded.name === 'string' ? decoded.name : null,
           signInProvider: decoded.firebase.sign_in_provider,
+          authTime: new Date(decoded.auth_time * 1000),
         };
       } catch (error) {
         if (error instanceof FirebaseAuthError && !serverErrorCodes.has(error.code)) {

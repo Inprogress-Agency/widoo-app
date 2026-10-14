@@ -155,7 +155,12 @@ export const users = pgTable(
   'users',
   {
     id: id(),
-    firebaseUid: text('firebase_uid').notNull().unique(),
+    /**
+     * Unique among active accounts only: once deleted, the identity may sign up again into a new
+     * account (D-027), while the deleted row keeps it until the purge, to refuse the sessions
+     * opened before the deletion.
+     */
+    firebaseUid: text('firebase_uid').notNull(),
     /** Null with Sign in with Apple when the user hides the address. */
     email: text('email'),
     firstName: text('first_name'),
@@ -188,6 +193,10 @@ export const users = pgTable(
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
   (t) => [
+    uniqueIndex('users_firebase_uid_active_idx')
+      .on(t.firebaseUid)
+      .where(sql`${t.deletedAt} is null`),
+    index('users_firebase_uid_deleted_idx').on(t.firebaseUid, t.deletedAt),
     check('users_bio_length_check', isAtMost(t.bio, bioMaxLength)),
     check('users_locale_check', sql`${t.locale} is null or ${isOneOf(t.locale, appLocales)}`),
   ],

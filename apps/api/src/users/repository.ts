@@ -1,5 +1,5 @@
 import { FirstName, type UpdateMe } from '@widoo/shared';
-import { and, eq, isNull, sql } from 'drizzle-orm';
+import { and, eq, gte, isNull, sql } from 'drizzle-orm';
 import type { VerifiedIdentity } from '../auth/verifier';
 import type { Db } from '../db/client';
 import {
@@ -25,20 +25,45 @@ export function firstNameOf(name: string | null): string | null {
   return parsed.success ? parsed.data : null;
 }
 
-async function findByFirebaseUid(db: Db, firebaseUid: string): Promise<User | undefined> {
-  const [user] = await db.select().from(users).where(eq(users.firebaseUid, firebaseUid));
+async function findActiveByFirebaseUid(db: Db, firebaseUid: string): Promise<User | undefined> {
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(and(eq(users.firebaseUid, firebaseUid), isNull(users.deletedAt)));
   return user;
 }
 
 /**
- * The account of a Firebase identity, created on its first authenticated request with the
- * verified e-mail and the first name. Deleted accounts are returned as well: refusing them is the
- * caller's decision. Concurrent first requests insert once, the others read that row.
+ * True when an account of this identity was deleted at or after `authTime`: the token comes from
+ * a session opened before the deletion, which never gets an account again. Only a new sign-in
+ * does (D-027). Second precision of `auth_time`: a sign-in in the very second of the deletion is
+ * refused too, and the app signs in again.
  */
-export async function findOrCreateUser(db: Db, identity: VerifiedIdentity): Promise<User> {
-  const existing = await findByFirebaseUid(db, identity.uid);
+async function deletedSince(db: Db, firebaseUid: string, authTime: Date): Promise<boolean> {
+  const [deleted] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(and(eq(users.firebaseUid, firebaseUid), gte(users.deletedAt, authTime)))
+    .limit(1);
+  return deleted !== undefined;
+}
+
+/** Outcome of `findOrCreateUser`: `signed_out` for a session opened before a deletion. */
+export type SignedInUser = { kind: 'active'; user: User } | { kind: 'signed_out' };
+
+/**
+ * The active account of a Firebase identity, created on its first authenticated request with the
+ * verified e-mail and the first name. A deleted account is never returned nor reopened: the same
+ * identity, signed in again after the deletion, gets a new account (D-027). Concurrent first
+ * requests insert once, the others read that row.
+ */
+export async function findOrCreateUser(db: Db, identity: VerifiedIdentity): Promise<SignedInUser> {
+  const existing = await findActiveByFirebaseUid(db, identity.uid);
   if (existing) {
-    return existing;
+    return { kind: 'active', user: existing };
+  }
+  if (await deletedSince(db, identity.uid, identity.authTime)) {
+    return { kind: 'signed_out' };
   }
   const [created] = await db
     .insert(users)
@@ -47,13 +72,13 @@ export async function findOrCreateUser(db: Db, identity: VerifiedIdentity): Prom
       email: identity.emailVerified ? identity.email : null,
       firstName: firstNameOf(identity.name),
     })
-    .onConflictDoNothing({ target: users.firebaseUid })
+    .onConflictDoNothing({ target: users.firebaseUid, where: isNull(users.deletedAt) })
     .returning();
-  const user = created ?? (await findByFirebaseUid(db, identity.uid));
+  const user = created ?? (await findActiveByFirebaseUid(db, identity.uid));
   if (!user) {
     throw new Error('User neither created nor found');
   }
-  return user;
+  return { kind: 'active', user };
 }
 
 /** Outcome of `updateUser`: nothing is written unless it is `updated`. */

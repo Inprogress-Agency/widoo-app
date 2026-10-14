@@ -9,6 +9,11 @@ export type VerifiedIdentity = {
   name: string | null;
   /** `firebase.sign_in_provider`: `apple.com`, `google.com`, `password`, `anonymous`... */
   signInProvider: string;
+  /**
+   * `auth_time`: when the user signed in, kept by every refresh of the token. A session opened
+   * before the deletion of the account is refused; a later sign-in gets a new account (D-027).
+   */
+  authTime: Date;
 };
 
 /**
