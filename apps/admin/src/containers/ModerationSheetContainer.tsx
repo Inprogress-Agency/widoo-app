@@ -76,7 +76,10 @@ export function ModerationSheetContainer({ routeId }: { routeId: string }) {
   return (
     <div className="flex flex-col gap-20">
       <SheetNavigation queue={route.queue} />
-      <SheetHeader route={route} isLate={isWaitingLate(new Date(route.waitingSince))} />
+      <SheetHeader
+        route={route}
+        isLate={route.status === 'pending' && isWaitingLate(new Date(route.waitingSince))}
+      />
       <div className="flex flex-col gap-24 lg:flex-row lg:items-start lg:gap-32">
         <div className="flex min-w-0 flex-1 flex-col gap-24">
           <CoherenceWarnings warnings={route.warnings} />

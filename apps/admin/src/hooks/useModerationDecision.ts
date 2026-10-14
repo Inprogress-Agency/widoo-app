@@ -37,7 +37,9 @@ export function useModerationDecision(routeId: string, onSettled: () => void) {
         });
         onSettled();
       } else {
-        showToast('error', { title: texts.failed });
+        const isInvalidMessage =
+          error instanceof ApiRequestError && error.code === 'validation_error';
+        showToast('error', { title: isInvalidMessage ? texts.invalidMessage : texts.failed });
       }
     } finally {
       setIsBusy(false);

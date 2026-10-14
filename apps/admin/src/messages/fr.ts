@@ -304,23 +304,26 @@ export const messages = {
       requestChangesDialog: {
         title: 'Demander des modifications ?',
         description:
-          "Le parcours passe en « À corriger ». L'auteur reçoit votre message et peut le soumettre à nouveau.",
+          "Le parcours passe en « À corriger ». Votre message est gardé dans son historique ; l'auteur n'est pas encore averti automatiquement.",
         message: "Message à l'auteur",
-        messageHint: "L'auteur le lit dans l'app.",
-        confirm: 'Envoyer la demande',
+        messageHint: "Texte brut, sans < ni >. Gardé dans l'historique du parcours.",
+        confirm: 'Demander les modifications',
       },
       rejectDialog: {
         title: 'Refuser ce parcours ?',
         description:
-          "Le parcours est refusé. L'auteur reçoit le motif et votre message, et peut le reprendre en brouillon.",
+          "Le parcours est refusé. Le motif et votre message sont gardés dans son historique ; l'auteur n'est pas encore averti automatiquement.",
         message: "Message à l'auteur",
+        messageHint: "Texte brut, sans < ni >. Gardé dans l'historique du parcours.",
         confirm: 'Refuser le parcours',
       },
       toasts: {
         published: 'Parcours publié',
-        changesRequested: 'Demande envoyée',
+        changesRequested: 'Modifications demandées',
         rejected: 'Parcours refusé',
         failed: "La décision n'a pas pu être enregistrée.",
+        invalidMessage:
+          'Le message est refusé : texte brut uniquement, sans < ni >, ni tabulation, 1 000 caractères au plus.',
         alreadyDecided: (status: string) =>
           `Un autre membre de l'équipe a déjà tranché : ${status.toLowerCase()}.`,
       },
