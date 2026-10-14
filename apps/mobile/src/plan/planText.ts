@@ -27,6 +27,12 @@ export const isProposedDay = (day: string, today: string) => {
   return ahead >= 0 && ahead < PROPOSED_DAYS;
 };
 
+/** « lundi », for « Fermé le lundi ». */
+export const weekdayName = (day: string) => weekdayLong.format(noonOf(day));
+
+/** « 23 », for « Le 23, cette étape n'aura plus lieu ». */
+export const dateOfMonth = (day: string) => String(dateNumber(day));
+
 /** « samedi 26 septembre », the year after it when it is not this one. */
 export function fullDayName(day: string, today: string): string {
   const name = `${weekdayLong.format(noonOf(day))} ${dateNumber(day)} ${monthLong.format(noonOf(day))}`;

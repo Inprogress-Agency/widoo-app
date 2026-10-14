@@ -53,6 +53,7 @@ describe('planNotice', () => {
       kind: 'ended',
       place: 'Musée Carnavalet',
       endsOn: '2026-10-19',
+      day: '2026-10-24',
       lastDay: '2026-10-18',
     });
   });

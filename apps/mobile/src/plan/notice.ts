@@ -34,7 +34,7 @@ export type PlanNotice =
       suggestion: number | null;
     }
   | { kind: 'closedThatDay'; place: string; day: string; nextDay: string | null }
-  | { kind: 'ended'; place: string; endsOn: string; lastDay: string | null };
+  | { kind: 'ended'; place: string; endsOn: string; day: string; lastDay: string | null };
 
 /** « il ferme à 18:00 », or « il ouvre à 10:00 » for an arrival before the opening. */
 export interface SlotTime {
@@ -157,6 +157,7 @@ export function planNotice(
       kind: 'ended',
       place: firstEnded.place.name,
       endsOn: firstEnded.endsOn,
+      day,
       lastDay: clearDay(steps, limit, -1, minute, now),
     };
   }
