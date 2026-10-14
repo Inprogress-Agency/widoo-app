@@ -28,6 +28,8 @@ interface SheetTextFieldProps extends InputProps {
    * cover it, the sheet not yet following the keyboard.
    */
   isFocusedOnOpen?: boolean;
+  /** A text of several lines, which grows with it: the answer of an anecdote (E-09). */
+  isMultiline?: boolean;
 }
 
 /**
@@ -38,6 +40,7 @@ export function SheetTextField({
   label,
   help,
   isFocusedOnOpen = false,
+  isMultiline = false,
   ...input
 }: SheetTextFieldProps) {
   const ref = useRef<ComponentRef<typeof BottomSheetTextInput>>(null);
@@ -53,15 +56,18 @@ export function SheetTextField({
       <Text variant="label-strong" importantForAccessibility="no" accessibilityElementsHidden>
         {label}
       </Text>
-      <View className="min-h-button-h justify-center rounded-pill bg-surface px-16">
+      <View
+        className={`min-h-button-h justify-center bg-surface px-16 ${isMultiline ? 'rounded-section py-8' : 'rounded-pill'}`}
+      >
         <BottomSheetTextInput
           ref={ref}
           {...input}
           accessibilityLabel={label}
           accessibilityHint={help}
           placeholderTextColor={colors.muted}
-          autoCorrect={false}
-          style={styles.input}
+          autoCorrect={isMultiline}
+          multiline={isMultiline}
+          style={[styles.input, isMultiline && styles.multiline]}
         />
       </View>
       {help && (
@@ -87,4 +93,5 @@ const styles = StyleSheet.create({
     color: colors.ink,
     paddingVertical: spacing['space-10'],
   },
+  multiline: { textAlignVertical: 'top' },
 });

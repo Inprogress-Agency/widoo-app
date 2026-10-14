@@ -349,6 +349,29 @@ export const fr = {
   profile: {
     title: 'Profil',
   },
+  field: {
+    counter_one: '{{count}} caractère sur {{max}}',
+    counter_other: '{{count}} caractères sur {{max}}',
+  },
+  // The two steps of the anecdote sheet: the question, then the answer.
+  anecdote: {
+    close: "Fermer l'anecdote",
+    chooseTitle: 'Choisissez une question',
+    used: 'Déjà sur votre profil',
+    change: 'Changer',
+    changeQuestion: 'Changer de question',
+    answer: 'Votre réponse',
+    add: "Ajouter l'anecdote",
+    save: 'Enregistrer',
+    delete: "Supprimer l'anecdote",
+    deleteConfirm: {
+      title: 'Supprimer cette anecdote ?',
+      body: 'La question redevient disponible.',
+      cancel: 'Annuler',
+      confirm: 'Supprimer',
+    },
+    noQuestions: 'Les questions ne sont pas disponibles hors connexion.',
+  },
   // Unbreakable spaces in the written forms: « 7 h » never splits over two lines.
   duration: {
     short: {
