@@ -1,10 +1,11 @@
 /**
  * Zones of the search (Filtres-et-Recherche › Recherche textuelle, D-010) from Mapbox, called by
  * the API alone with its server token: the Geocoding API v6 for neighbourhoods, districts,
- * postcodes and cities, the Search Box API for stations, both limited to France, in French,
- * biased towards Paris, never towards the user. Addresses and points of interest are not asked
+ * postcodes and cities, the Search Box API for stations, both limited to France, in the language
+ * of the app (French or English), biased towards Paris, never towards the user. Addresses and points of interest are not asked
  * for, and a point of interest that is not a station is dropped.
  */
+import type { AppLocale } from '@widoo/shared';
 import { createTtlCache } from './cache';
 import { GeocoderUnavailable, MAX_ZONES, textKey, type Geocoder, type ZoneHit } from './geocoder';
 import { namesText, stationsOfSearchBox, ZONE_TYPES, zonesOfGeocoding } from './mapbox-answers';
@@ -85,10 +86,17 @@ export function createMapboxGeocoder(options: MapboxGeocoderOptions): Geocoder {
     }
   }
 
-  const common = { country: 'fr', language: 'fr', proximity: PROXIMITY, bbox: SEARCH_AREA };
+  /** The language is one of the app (`AppLocale`), validated by the query of `/geocode`. */
+  const common = (locale: AppLocale) => ({
+    country: 'fr',
+    language: locale,
+    proximity: PROXIMITY,
+    bbox: SEARCH_AREA,
+  });
 
-  async function zones(text: string): Promise<ZoneHit[]> {
-    const key = textKey(text);
+  async function zones(text: string, locale: AppLocale): Promise<ZoneHit[]> {
+    // One entry per language: the same zone is named in each.
+    const key = `${locale}:${textKey(text)}`;
     const cached = options.isPermanent ? cache.get(key) : undefined;
     if (cached) {
       return cached;
@@ -98,13 +106,13 @@ export function createMapboxGeocoder(options: MapboxGeocoderOptions): Geocoder {
       GEOCODING_URL,
       {
         q: text,
-        ...common,
+        ...common(locale),
         types: ZONE_TYPES,
         limit: '5',
         autocomplete: 'true',
         ...(options.isPermanent && { permanent: 'true' }),
       },
-      zonesOfGeocoding,
+      (body) => zonesOfGeocoding(body, locale),
     );
     if (options.isPermanent) {
       cache.set(key, found);
@@ -112,19 +120,19 @@ export function createMapboxGeocoder(options: MapboxGeocoderOptions): Geocoder {
     return found;
   }
 
-  const stations = (text: string) =>
+  const stations = (text: string, locale: AppLocale) =>
     call(
       'search_box',
       SEARCH_BOX_URL,
-      { q: text, ...common, types: 'poi', limit: '10' },
-      stationsOfSearchBox,
+      { q: text, ...common(locale), types: 'poi', limit: '10' },
+      (body) => stationsOfSearchBox(body, locale),
     );
 
   return {
-    async find(text) {
+    async find(text, locale) {
       const [fromGeocoding, fromSearchBox] = await Promise.allSettled([
-        zones(text),
-        stations(text),
+        zones(text, locale),
+        stations(text, locale),
       ]);
       if (fromGeocoding.status === 'rejected' && fromSearchBox.status === 'rejected') {
         throw new GeocoderUnavailable();

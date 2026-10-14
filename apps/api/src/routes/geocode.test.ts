@@ -70,10 +70,29 @@ describe('GET /v1/geocode', () => {
     expect(zones.map((zone) => zone.id)).toEqual(['test-montmartre', 'test-offshore']);
   });
 
+  it('asks the zones in the language of the app, French when it is not given', async () => {
+    const asked: string[] = [];
+    const spying = await buildApp(testConfig(), {
+      geocoder: {
+        find: async (_text, locale) => {
+          asked.push(locale);
+          return [];
+        },
+      },
+    });
+    const english = await spying.inject({ url: '/v1/geocode?q=Montmartre&locale=en' });
+    const withoutLanguage = await spying.inject({ url: '/v1/geocode?q=Montmartre' });
+    await spying.close();
+    expect([english.statusCode, withoutLanguage.statusCode]).toEqual([200, 200]);
+    expect(asked).toEqual(['en', 'fr']);
+  });
+
   it.each([
     ['a single character', 'q=a'],
     ['no text', ''],
     ['an unknown key', 'q=canal&types=address'],
+    ['a language the app does not ship', 'q=canal&locale=de'],
+    ['a language given twice', 'q=canal&locale=en&locale=fr'],
   ])('refuses %s', async (_, query) => {
     const response = await app.inject({ url: `/v1/geocode?${query}` });
     expect(response.statusCode).toBe(400);

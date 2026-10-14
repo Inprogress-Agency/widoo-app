@@ -24,6 +24,19 @@ export const district = {
     context: { place: { name: 'Paris' } },
   },
 };
+/**
+ * The same zones asked with `language=en`: the shape of the arrondissement may change around its
+ * number (« 11th Arrondissement », « 18th arrondissement of Paris »), which alone is read.
+ */
+export const englishNeighborhood = {
+  properties: {
+    ...neighborhood.properties,
+    context: { ...neighborhood.properties.context, locality: { name: '18th Arrondissement' } },
+  },
+};
+export const englishDistrict = {
+  properties: { ...district.properties, name: '11th arrondissement of Paris' },
+};
 export const address = {
   properties: {
     mapbox_id: 'geo-address',

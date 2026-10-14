@@ -1,10 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import { namesText, stationsOfSearchBox, zonesOfGeocoding } from './mapbox-answers';
-import { address, busStop, cafe, district, neighborhood, station } from './mapbox.fixtures';
+import {
+  address,
+  busStop,
+  cafe,
+  district,
+  englishDistrict,
+  englishNeighborhood,
+  neighborhood,
+  station,
+} from './mapbox.fixtures';
 
 describe('zonesOfGeocoding', () => {
   it('reads neighbourhoods and districts, and drops an address', () => {
-    expect(zonesOfGeocoding({ features: [neighborhood, district, address] })).toEqual([
+    expect(zonesOfGeocoding({ features: [neighborhood, district, address] }, 'fr')).toEqual([
       {
         id: 'geo-montmartre',
         name: 'Montmartre',
@@ -23,11 +32,19 @@ describe('zonesOfGeocoding', () => {
       },
     ]);
   });
+
+  it('labels the arrondissements in English for an English answer', () => {
+    const zones = zonesOfGeocoding({ features: [englishNeighborhood, englishDistrict] }, 'en');
+    expect(zones.map(({ name, area }) => ({ name, area }))).toEqual([
+      { name: 'Montmartre', area: 'Paris 18th' },
+      { name: 'Paris 11th', area: 'Paris' },
+    ]);
+  });
 });
 
 describe('stationsOfSearchBox', () => {
   it('keeps the rail stations only: a café or a bus stop is not a zone', () => {
-    expect(stationsOfSearchBox({ features: [station, cafe, busStop] })).toEqual([
+    expect(stationsOfSearchBox({ features: [station, cafe, busStop] }, 'fr')).toEqual([
       {
         id: 'poi-republique',
         name: 'République',
@@ -38,6 +55,10 @@ describe('stationsOfSearchBox', () => {
         envelope: null,
       },
     ]);
+  });
+
+  it('labels the arrondissement of a station from its postcode in English', () => {
+    expect(stationsOfSearchBox({ features: [station] }, 'en')[0]?.area).toBe('Paris 3rd');
   });
 });
 
