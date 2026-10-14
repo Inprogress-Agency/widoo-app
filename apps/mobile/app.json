@@ -18,7 +18,8 @@
       },
       "infoPlist": {
         "UIStatusBarStyle": "UIStatusBarStyleLightContent",
-        "MGLMapboxMetricsEnabled": false
+        "MGLMapboxMetricsEnabled": false,
+        "CFBundleAllowMixedLocalizations": true
       }
     },
     "android": {
