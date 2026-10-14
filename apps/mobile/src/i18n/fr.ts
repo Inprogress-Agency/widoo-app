@@ -400,6 +400,82 @@ export const fr = {
     new: 'Nouveau',
     certified: 'Créateur certifié',
   },
+  // E-10, the sign-in sheet: the title says the action waiting for an account (D-033).
+  auth: {
+    dialog: 'Connexion',
+    close: 'Fermer la connexion',
+    intent: {
+      favorite: {
+        title: 'Connectez-vous pour enregistrer ce parcours',
+        body: 'Vos favoris vous suivent sur tous vos appareils.',
+      },
+      plan: {
+        title: 'Connectez-vous pour programmer ce parcours',
+        body: 'Vos sorties vous suivent sur tous vos appareils.',
+      },
+      go: {
+        title: 'Connectez-vous pour lancer ce parcours',
+        body: 'Vos sorties vous suivent sur tous vos appareils.',
+      },
+      create: {
+        title: 'Connectez-vous pour créer un parcours',
+        body: 'Vos parcours vous suivent sur tous vos appareils.',
+      },
+      signal: {
+        title: 'Connectez-vous pour signaler ce lieu',
+        body: 'Votre signalement aide les prochains promeneurs.',
+      },
+    },
+    // The text the Google SDK draws on its button in French: its label says the same.
+    google: 'Se connecter avec Google',
+    email: 'Continuer avec un e-mail',
+    legal: {
+      before: 'En continuant, vous acceptez les ',
+      terms: "conditions d'utilisation",
+      between: ' et la ',
+      privacy: 'politique de confidentialité',
+      after: ' de Widoo.',
+    },
+    error: {
+      failed: "La connexion n'a pas abouti. Réessayez.",
+      offline: 'Hors connexion. Réessayez une fois connecté.',
+    },
+    back: 'Revenir aux choix de connexion',
+    emailStep: {
+      label: 'Adresse e-mail',
+      help: 'Nous vous envoyons un lien de connexion. Aucun mot de passe à retenir.',
+      confirmHelp: "Confirmez l'adresse à laquelle le lien a été envoyé.",
+      submit: 'Recevoir le lien',
+      confirm: 'Continuer',
+    },
+    sent: {
+      title: 'Vérifiez vos e-mails',
+      body: 'Nous avons envoyé un lien de connexion à',
+      hint: 'Ouvrez-le sur ce téléphone. Pensez à regarder dans les indésirables.',
+      openMail: 'Ouvrir ma messagerie',
+      resendIn: 'Renvoyer dans {{seconds}} s',
+      resendInSpoken: 'Renvoyer dans 30 secondes',
+      resend: 'Renvoyer le lien',
+      resent: 'Nouveau lien envoyé',
+      changeAddress: "Changer d'adresse",
+      back: "Revenir à l'adresse e-mail",
+    },
+    expired: {
+      title: "Ce lien n'est plus valable",
+      body: 'Il a expiré ou a déjà servi. Recevez-en un nouveau à {{email}}.',
+      bodyNoEmail: 'Il a expiré ou a déjà servi.',
+      resend: 'Recevoir un nouveau lien',
+    },
+    welcome: {
+      title: 'Bienvenue sur Widoo',
+      body: "Votre prénom s'affiche sur votre profil et sur vos parcours.",
+      bodyRequired: 'Choisissez le nom affiché sur votre profil et sur vos parcours.',
+      label: 'Prénom ou pseudo',
+      placeholder: 'Votre prénom ou un pseudo',
+      prefilledGoogle: 'Repris de votre compte Google. Vous pouvez mettre un pseudo.',
+      submit: 'Continuer',
+    },
+  },
   consent: {
     title: "Mesure d'audience",
     body: "Avec votre accord, Widoo mesure l'usage de l'app pour l'améliorer, avec PostHog, hébergé dans l'Union européenne. Les rapports de plantage restent envoyés, sans information sur vous.",
