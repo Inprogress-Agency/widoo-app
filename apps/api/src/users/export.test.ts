@@ -1,10 +1,21 @@
 import { randomUUID } from 'node:crypto';
 import { MyDataExport } from '@widoo/shared';
-import { eq, inArray } from 'drizzle-orm';
+import { eq, inArray, sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
-import { media, plannedRoutes, plannedSteps, userAnecdotes, users } from '../db/schema';
+import {
+  devices,
+  media,
+  notifications,
+  plannedRoutes,
+  plannedSteps,
+  routeReports,
+  routeUnlocks,
+  supportMessages,
+  userAnecdotes,
+  users,
+} from '../db/schema';
 import { editorFixtures } from '../editor/test-fixtures';
 import { testConfig } from '../test-config';
 import { exportUserData } from './export';
@@ -63,6 +74,25 @@ async function fillAccount(headers: Record<string, string>, marker: string) {
     .returning({ id: plannedRoutes.id });
   const stepId = route.steps[0]?.id ?? randomUUID();
   await db.insert(plannedSteps).values({ plannedRouteId: planned?.id ?? '', stepId, position: 1 });
+  await db
+    .insert(routeUnlocks)
+    .values({ userId, routeId: route.id, storeTransactionId: `fictitious-${marker}` });
+  await db
+    .insert(routeReports)
+    .values({ userId, routeId: route.id, reason: 'other', comment: `Signalement ${marker}` });
+  await db.insert(supportMessages).values({
+    userId,
+    replyEmail: 'camille.fictive@example.com',
+    topic: 'data',
+    message: `Message ${marker}`,
+    appVersion: '1.2.0',
+    device: 'iPhone 15, iOS 18.2',
+    locale: 'fr',
+  });
+  await db
+    .insert(devices)
+    .values({ userId, pushToken: `ExponentPushToken[fictitious-${marker}]`, locale: 'en' });
+  await db.insert(notifications).values({ userId, kind: 'go_closed' });
   return { userId, route };
 }
 
@@ -83,6 +113,13 @@ describe('exportUserData', () => {
       { id: route.id, photoUrls: [`https://images.example.com/${marker}.jpg`] },
     ]);
     expect(exported.createdRoutes[0]?.steps).toHaveLength(route.steps.length);
+    expect(exported.unlockedRoutes).toMatchObject([{ routeId: route.id }]);
+    expect(exported.routeReports).toMatchObject([{ comment: `Signalement ${marker}` }]);
+    expect(exported.supportMessages).toMatchObject([{ message: `Message ${marker}` }]);
+    expect(exported.devices).toMatchObject([{ locale: 'en' }]);
+    expect(exported.notifications).toMatchObject([{ kind: 'go_closed' }]);
+    // The push token is a credential of the push service, never returned.
+    expect(JSON.stringify(exported)).not.toContain('ExponentPushToken');
   });
 
   it('exports the data of the caller only', async () => {
@@ -94,6 +131,44 @@ describe('exportUserData', () => {
     const exported = MyDataExport.parse(await exportUserData(app.db, userId));
     expect(JSON.stringify(exported)).not.toContain(otherMarker);
     expect(exported.createdRoutes).toEqual([]);
+    expect(exported.supportMessages).toEqual([]);
+  });
+
+  /**
+   * Every column pointing to an account is in the export or set aside with its reason: a new
+   * table of personal data fails here until the export reads it (wiki Securite-et-RGPD).
+   */
+  it('covers every table that points to an account', async () => {
+    const rows = await app.db.execute<{ column: string }>(sql`
+      select kcu.table_name || '.' || kcu.column_name as column
+      from information_schema.referential_constraints rc
+      join information_schema.key_column_usage kcu on kcu.constraint_name = rc.constraint_name
+      join information_schema.constraint_column_usage ccu
+        on ccu.constraint_name = rc.unique_constraint_name
+      where ccu.table_name = 'users' and kcu.table_schema = 'public'
+      order by 1`);
+    const exported = [
+      'devices.user_id',
+      'notifications.user_id',
+      'planned_routes.user_id',
+      'route_reports.user_id',
+      'route_unlocks.user_id',
+      'routes.author_id',
+      'support_messages.user_id',
+      'user_anecdotes.user_id',
+      'user_featured_routes.user_id',
+    ];
+    const setAside = [
+      // Photos of the caller's routes and steps are exported with them.
+      'media.uploaded_by',
+      // Places belong to the shared catalog, not to the person who added them.
+      'places.created_by',
+      // Decisions of a member of the team, part of their work.
+      'route_reports.reviewed_by',
+      // Working copy of a created route, whose content is exported with the route.
+      'route_revisions.author_id',
+    ];
+    expect(rows.map((row) => row.column)).toEqual([...exported, ...setAside].sort());
   });
 
   it('exports nothing for a deleted account', async () => {

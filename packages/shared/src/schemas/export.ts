@@ -1,7 +1,9 @@
 import { z } from 'zod';
+import { notificationKinds, reportStatuses, routeReportReasons } from '../reports';
 import { taxonomies } from '../taxonomies';
 import { AppLocale, NotificationPrefs } from './me';
 import { plannedRouteClosers, plannedRouteStatuses } from './planned';
+import { SupportTopic } from './support';
 
 /**
  * Body of `GET /me/export` (E-19 › Confidentialité, D-063, wiki Securite-et-RGPD › portabilité):
@@ -98,5 +100,33 @@ export const MyDataExport = z.object({
   plannedRoutes: z.array(ExportedPlannedRoute),
   /** Routes the caller wrote, any status, with their steps. */
   createdRoutes: z.array(ExportedCreatedRoute),
+  /** Premium routes bought alone (D-073). */
+  unlockedRoutes: z.array(z.object({ routeId: z.uuid(), title: z.string(), unlockedAt: DateTime })),
+  routeReports: z.array(
+    z.object({
+      routeId: z.uuid(),
+      reason: z.enum(routeReportReasons),
+      comment: z.string().nullable(),
+      status: z.enum(reportStatuses),
+      createdAt: DateTime,
+    }),
+  ),
+  supportMessages: z.array(
+    z.object({
+      topic: SupportTopic,
+      message: z.string(),
+      replyEmail: z.string(),
+      appVersion: z.string(),
+      device: z.string(),
+      locale: AppLocale,
+      createdAt: DateTime,
+      handledAt: DateTime.nullable(),
+    }),
+  ),
+  /** Phones registered for the push, without their token (a credential of the push service). */
+  devices: z.array(z.object({ locale: AppLocale, registeredAt: DateTime, updatedAt: DateTime })),
+  notifications: z.array(
+    z.object({ kind: z.enum(notificationKinds), createdAt: DateTime, readAt: DateTime.nullable() }),
+  ),
 });
 export type MyDataExport = z.infer<typeof MyDataExport>;

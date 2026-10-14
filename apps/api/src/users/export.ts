@@ -13,6 +13,7 @@ import {
   userFeaturedRoutes,
   users,
 } from '../db/schema';
+import { activityOf } from './export-activity';
 import { readNotificationPrefs } from './notification-prefs';
 import type { User } from './repository';
 
@@ -193,6 +194,7 @@ export async function exportUserData(
       const planned = await plannedRoutesOf(tx, userId);
       const createdRoutes = await createdRoutesOf(tx, userId);
       const profileLists = await profileListsOf(tx, userId);
+      const activity = await activityOf(tx, userId);
       return {
         exportedAt: iso(now),
         account: accountOf(user),
@@ -203,6 +205,7 @@ export async function exportUserData(
         ...profileLists,
         plannedRoutes: planned,
         createdRoutes,
+        ...activity,
       };
     },
     { isolationLevel: 'repeatable read', accessMode: 'read only' },
