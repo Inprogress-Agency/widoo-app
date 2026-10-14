@@ -17,6 +17,7 @@ export { InitialAvatar } from './components/InitialAvatar';
 export { Input, Label } from './components/Input';
 export { Notice } from './components/Notice';
 export { Pagination } from './components/Pagination';
+export { RadioGroup, type RadioOption } from './components/RadioGroup';
 export { SearchInput } from './components/SearchInput';
 export { Select } from './components/Select';
 export { SortableColumnHeader, type SortDirection } from './components/SortableColumnHeader';
