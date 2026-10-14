@@ -25,6 +25,27 @@ export const defaultBucketThresholds: BucketThresholds = {
   durationMin: { '1_2h': 150, half_day: 300, full_day: 720 },
 };
 
+/** Key of the `settings` row of each group of bucket bounds (Modele-de-Donnees › settings). */
+export const bucketSettingKeys = {
+  budgetEur: 'buckets.budget_eur',
+  durationMin: 'buckets.duration_min',
+} as const satisfies Record<keyof BucketThresholds, string>;
+
+/**
+ * Bucket bounds from the `settings` values by key: each group missing or invalid falls back to
+ * its defaults on its own.
+ */
+export function bucketThresholdsOf(values: Readonly<Record<string, unknown>>): BucketThresholds {
+  const budgetEur = BucketThresholds.shape.budgetEur.safeParse(values[bucketSettingKeys.budgetEur]);
+  const durationMin = BucketThresholds.shape.durationMin.safeParse(
+    values[bucketSettingKeys.durationMin],
+  );
+  return {
+    budgetEur: budgetEur.success ? budgetEur.data : defaultBucketThresholds.budgetEur,
+    durationMin: durationMin.success ? durationMin.data : defaultBucketThresholds.durationMin,
+  };
+}
+
 /** Bucket of a total duration in minutes: the first bucket whose inclusive bound holds it. */
 export function durationBucketOf(
   durationMin: number,

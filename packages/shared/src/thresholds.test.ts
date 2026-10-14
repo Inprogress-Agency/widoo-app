@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   BucketThresholds,
+  bucketThresholdsOf,
   budgetBucketOf,
   defaultBucketThresholds,
   durationBucketOf,
@@ -59,5 +60,22 @@ describe('budgetBucketOf', () => {
   it('follows thresholds read from settings', () => {
     const thresholds = { ...defaultBucketThresholds, budgetEur: { free: 0, low: 15, medium: 50 } };
     expect(budgetBucketOf(20, thresholds)).toBe('medium');
+  });
+});
+
+describe('bucketThresholdsOf', () => {
+  it('keeps the defaults without any row', () => {
+    expect(bucketThresholdsOf({})).toEqual(defaultBucketThresholds);
+  });
+
+  it('reads each group from its key, and falls back on its own for an invalid one', () => {
+    const thresholds = bucketThresholdsOf({
+      'buckets.budget_eur': { free: 0, low: 30, medium: 80 },
+      'buckets.duration_min': { '1_2h': 150, half_day: 100, full_day: 720 },
+    });
+    expect(thresholds).toEqual({
+      budgetEur: { free: 0, low: 30, medium: 80 },
+      durationMin: defaultBucketThresholds.durationMin,
+    });
   });
 });

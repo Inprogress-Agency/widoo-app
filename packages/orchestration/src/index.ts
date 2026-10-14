@@ -36,3 +36,4 @@ export {
   opensEverywhere,
   START_SEARCH,
 } from './start';
+export { coherenceSettingKeys, coherenceThresholdsOf } from './settings';
