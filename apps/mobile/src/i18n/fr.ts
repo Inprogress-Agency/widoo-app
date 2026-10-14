@@ -632,6 +632,10 @@ export const fr = {
         title: 'Connectez-vous pour signaler ce lieu',
         body: 'Votre signalement aide les prochains promeneurs.',
       },
+      profile: {
+        title: 'Créez votre compte ou connectez-vous',
+        body: 'Vos favoris et vos sorties vous suivent sur tous vos appareils.',
+      },
     },
     // The text the Google SDK draws on its button in French: its label says the same.
     google: 'Se connecter avec Google',
