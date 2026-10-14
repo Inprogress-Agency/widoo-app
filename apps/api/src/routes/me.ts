@@ -1,9 +1,7 @@
 import {
   certificationCriteriaOf,
-  defaultNotificationPrefs,
   isCertifiedWith,
   Me,
-  NotificationPrefs,
   UpdateMe,
   type CertificationThresholds,
 } from '@widoo/shared';
@@ -13,14 +11,12 @@ import { z } from 'zod';
 import type { Db } from '../db/client';
 import { bodyValidationError, httpError } from '../errors';
 import { createCertificationThresholds } from '../users/certification';
+import { readNotificationPrefs } from '../users/notification-prefs';
 import { readAnecdotes, readCertificationValues, readFeaturedRoutes } from '../users/profile';
 import { softDeleteUser, updateUser, type User } from '../users/repository';
 
-const StoredPrefs = NotificationPrefs.partial();
-
 /** The account with its profile: anecdotes, featured routes and certification. */
 async function toMe(db: Db, user: User, thresholds: CertificationThresholds): Promise<Me> {
-  const stored = StoredPrefs.safeParse(user.notificationPrefs);
   const [anecdotes, featuredRoutes, values] = await Promise.all([
     readAnecdotes(db, user.id),
     readFeaturedRoutes(db, user.id),
@@ -36,7 +32,8 @@ async function toMe(db: Db, user: User, thresholds: CertificationThresholds): Pr
     plan: user.plan,
     planExpiresAt: user.planExpiresAt?.toISOString() ?? null,
     isPublic: user.isPublic,
-    notificationPrefs: { ...defaultNotificationPrefs, ...(stored.success ? stored.data : {}) },
+    locale: user.locale,
+    notificationPrefs: readNotificationPrefs(user.notificationPrefs),
     bio: user.bio,
     neighborhood: user.neighborhood,
     anecdotes,
@@ -89,8 +86,8 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
       schema: {
         tags: ['account'],
         summary:
-          'Update my first name, avatar removal, visibility, notification preferences, bio, ' +
-          'neighborhood, anecdotes or featured routes, in one transaction',
+          'Update my first name, avatar removal, visibility, language, notification preferences, ' +
+          'bio, neighborhood, anecdotes or featured routes, in one transaction',
         security,
         body: UpdateMe,
         response: { 200: Me },

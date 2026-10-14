@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { appLocales } from '../locale';
 import { taxonomies } from '../taxonomies';
 import { HttpsUrl, plainText } from './common';
 import {
@@ -14,23 +15,28 @@ import {
 /** First name shown on the profile and as route author (E-09, E-16). */
 export const FirstName = plainText(50);
 
+/** A language of the app (D-062): `fr` or `en`. */
+export const AppLocale = z.enum(appLocales);
+export type AppLocale = z.infer<typeof AppLocale>;
+
 /**
- * Notification preferences (E-09): reminders of planned routes (day before, hour before), news
- * of the user's own routes (moderation, milestones) by push and by e-mail (wiki
- * Creation-et-Moderation). Keys to confirm with the E-09 mock-up.
+ * Notification preferences, one switch per kind (E-19, D-062): `reminders` the reminders of a
+ * planned route (day before, hour before), `nextDay` the 10:00 notification after a Go
+ * (`go_closed`), `myRoutes` the news of the user's own routes (publication, changes requested,
+ * `report_resolved`).
  */
 export const NotificationPrefs = z.object({
-  plannedRouteReminders: z.boolean(),
-  creatorPush: z.boolean(),
-  creatorEmail: z.boolean(),
+  reminders: z.boolean(),
+  nextDay: z.boolean(),
+  myRoutes: z.boolean(),
 });
 export type NotificationPrefs = z.infer<typeof NotificationPrefs>;
 
 /** Preferences of a new account, and of any key it never set. */
 export const defaultNotificationPrefs: NotificationPrefs = {
-  plannedRouteReminders: true,
-  creatorPush: true,
-  creatorEmail: true,
+  reminders: true,
+  nextDay: true,
+  myRoutes: true,
 };
 
 /** Body of `GET /me` and `PATCH /me`: the caller's own account. */
@@ -44,6 +50,8 @@ export const Me = z.object({
   plan: z.enum(taxonomies.plans),
   planExpiresAt: z.iso.datetime().nullable(),
   isPublic: z.boolean(),
+  /** Language chosen in Réglages › Langue; null follows the phone (D-062). */
+  locale: AppLocale.nullable(),
   notificationPrefs: NotificationPrefs,
   bio: z.string().nullable(),
   neighborhood: z.string().nullable(),
@@ -59,8 +67,9 @@ export type Me = z.infer<typeof Me>;
 /**
  * Body of `PATCH /me`: listed fields only, at least one; preferences are merged. `avatarUrl`
  * only accepts null (removal) until avatars go through the upload pipeline, which re-encodes
- * images server side (wiki Securite-et-RGPD). `bio` and `neighborhood` are cleared with null;
- * `anecdotes` and `featuredRouteIds` replace the whole ordered list, an empty one clears it.
+ * images server side (wiki Securite-et-RGPD). `bio` and `neighborhood` are cleared with null,
+ * `locale` goes back to the phone's language with null; `anecdotes` and `featuredRouteIds`
+ * replace the whole ordered list, an empty one clears it.
  * Active questions and published routes of the caller are checked by the API (422).
  */
 export const UpdateMe = z
@@ -68,6 +77,7 @@ export const UpdateMe = z
     firstName: FirstName,
     avatarUrl: z.null(),
     isPublic: z.boolean(),
+    locale: AppLocale.nullable(),
     notificationPrefs: NotificationPrefs.partial().strict(),
     bio: Bio.nullable(),
     neighborhood: Neighborhood.nullable(),

@@ -71,6 +71,13 @@
       "when": 1791978512266,
       "tag": "0009_add_route_reports",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791985590945,
+      "tag": "0010_add_user_locale",
+      "breakpoints": true
     }
   ]
 }

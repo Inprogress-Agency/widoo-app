@@ -51,6 +51,7 @@ describe('GET /v1/me', () => {
     const me = Me.parse(response.json());
     expect(me).toMatchObject({ email, firstName: 'Camille', role: 'user', plan: 'free' });
     expect(me.notificationPrefs).toEqual(defaultNotificationPrefs);
+    expect(me.locale).toBeNull();
     expect(me.id).toBe((await userOf(uid))?.id);
     expect(response.body).not.toContain(uid);
   });
@@ -65,21 +66,50 @@ describe('PATCH /v1/me', () => {
       .set({ avatarUrl: 'https://example.com/avatar.jpg' })
       .where(eq(users.firebaseUid, uid));
 
-    await patchMe(headers, { notificationPrefs: { creatorEmail: false } });
+    await patchMe(headers, { notificationPrefs: { myRoutes: false } });
     const response = await patchMe(headers, {
       firstName: ' Alex ',
       isPublic: false,
       avatarUrl: null,
-      notificationPrefs: { plannedRouteReminders: false },
+      notificationPrefs: { nextDay: false },
     });
 
     expect(response.statusCode).toBe(200);
-    expect(Me.parse(response.json())).toMatchObject({
+    const me = response.json();
+    expect(Me.parse(me)).toMatchObject({
       firstName: 'Alex',
       isPublic: false,
       avatarUrl: null,
-      notificationPrefs: { plannedRouteReminders: false, creatorPush: true, creatorEmail: false },
+      notificationPrefs: { reminders: true, nextDay: false, myRoutes: false },
     });
+    expect(Object.keys(me.notificationPrefs).sort()).toEqual(['myRoutes', 'nextDay', 'reminders']);
+    // Stored with the keys of the wiki (Modele-de-Donnees).
+    expect((await userOf(uid))?.notificationPrefs).toEqual({ next_day: false, my_routes: false });
+  });
+
+  it('keeps the chosen language, then follows the phone again with null', async () => {
+    const { uid, headers } = signIn();
+    const english = await patchMe(headers, { locale: 'en' });
+    expect(english.statusCode).toBe(200);
+    expect(Me.parse(english.json()).locale).toBe('en');
+    expect((await userOf(uid))?.locale).toBe('en');
+    expect(Me.parse((await app.inject({ url: '/v1/me', headers })).json()).locale).toBe('en');
+
+    const phone = await patchMe(headers, { locale: null });
+    expect(Me.parse(phone.json()).locale).toBeNull();
+    expect((await userOf(uid))?.locale).toBeNull();
+  });
+
+  it('exposes the keys of the wiki only, even over provisional keys left in the column', async () => {
+    const { uid, headers } = signIn();
+    await app.inject({ url: '/v1/me', headers });
+    await app.db
+      .update(users)
+      .set({ notificationPrefs: { plannedRouteReminders: false, creatorEmail: false } })
+      .where(eq(users.firebaseUid, uid));
+
+    const me = (await app.inject({ url: '/v1/me', headers })).json();
+    expect(me.notificationPrefs).toEqual(defaultNotificationPrefs);
   });
 
   it.each([
@@ -89,6 +119,10 @@ describe('PATCH /v1/me', () => {
     ['an e-mail', { email: 'other.me@example.com' }],
     ['a first name with markup', { firstName: '<script>x</script>' }],
     ['an avatar URL', { avatarUrl: 'https://example.com/avatar.jpg' }],
+    ['a provisional key of #385', { notificationPrefs: { plannedRouteReminders: false } }],
+    ['another provisional key', { notificationPrefs: { creatorPush: false } }],
+    ['the stored form of a key', { notificationPrefs: { next_day: false } }],
+    ['a language the app does not ship', { locale: 'de' }],
   ])('refuses %s with 422 and changes nothing', async (_, payload) => {
     const { uid, headers } = signIn();
     await app.inject({ url: '/v1/me', headers });
@@ -114,7 +148,7 @@ describe('DELETE /v1/me', () => {
     const { routeIds } = await seed(app.db);
     await app.db
       .update(users)
-      .set({ bio: 'Flâneuse du dimanche.', neighborhood: 'Paris 11e' })
+      .set({ bio: 'Flâneuse du dimanche.', neighborhood: 'Paris 11e', locale: 'en' })
       .where(eq(users.id, userId));
     await app.db
       .insert(userAnecdotes)
@@ -125,7 +159,6 @@ describe('DELETE /v1/me', () => {
     await app.db
       .insert(routeUnlocks)
       .values({ userId, routeId: routeIds[0] ?? '', storeTransactionId: `fictitious-${uid}` });
-
     const response = await app.inject({ method: 'DELETE', url: '/v1/me', headers });
     expect(response.statusCode).toBe(204);
     expect(response.body).toBe('');
@@ -139,6 +172,7 @@ describe('DELETE /v1/me', () => {
       neighborhood: null,
       isPublic: false,
       notificationPrefs: {},
+      locale: null,
     });
     for (const table of [userAnecdotes, userFeaturedRoutes, routeUnlocks]) {
       expect(await app.db.select().from(table).where(eq(table.userId, userId))).toEqual([]);
