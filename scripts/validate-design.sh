@@ -8,18 +8,20 @@
 # Si le clone du wiki (../widoo-app.wiki à côté du dépôt, ou --wiki <chemin>) a des
 # commits non poussés, le script les pousse d'abord.
 # Usage : scripts/validate-design.sh <n° ticket design> --date AAAA-MM-JJ --link <url Claude Design> [--wiki <chemin>] [--dry-run]
+#   -h, --help : cette aide, sans appel à GitHub ; option inconnue ou argument manquant : aide et code 2.
 set -euo pipefail
 REPO="${REPO:-Inprogress-Agency/widoo-app}"
 W="https://github.com/$REPO/wiki"
 RAW="https://raw.githubusercontent.com/wiki/$REPO"
 DN="" DATE="" LINK="" DRY="" WIKI=""
-usage() { sed -n '2,10p' "$0" >&2; exit 2; }
+usage() { sed -n '2,11p' "$0" >&2; exit 2; }
 while [ $# -gt 0 ]; do
   case "$1" in
     --date) DATE="${2:-}"; shift 2 ;;
     --link) LINK="${2:-}"; shift 2 ;;
     --wiki) WIKI="${2:-}"; shift 2 ;;
     --dry-run) DRY=1; shift ;;
+    -h | --help) sed -n '2,11p' "$0"; exit 0 ;;
     -*) echo "option inconnue : $1" >&2; usage ;;
     *) DN="$1"; shift ;;
   esac

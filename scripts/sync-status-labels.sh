@@ -14,7 +14,8 @@
 # (Bloqués tant qu'Ilan ne l'a pas créée) est signalée, jamais créée.
 # Journal en Markdown dans $GITHUB_STEP_SUMMARY (résumé du job), sinon sur la sortie standard.
 # --dry-run : mêmes décisions et même journal, sans rien écrire. Idempotent.
-# Usage : scripts/sync-status-labels.sh [--dry-run]
+# Usage : scripts/sync-status-labels.sh [--dry-run | -h | --help] ; tout autre argument est refusé
+# (code 2) avant le moindre appel à GitHub.
 # Chargé par source (sync-status-labels.test.sh), il ne définit que les règles.
 set -euo pipefail
 
@@ -103,9 +104,37 @@ status_summary() {
     }' <<<"$plan"
 }
 
+status_labels_usage() { # builtins seuls : l'aide s'affiche même sans PATH
+  local line
+  while IFS= read -r line; do printf '%s\n' "$line"; done <<'USAGE'
+Usage : scripts/sync-status-labels.sh [--dry-run]
+
+Pose status:ready ou status:blocked sur les tickets ouverts selon leurs bloqueurs, et range leur
+item dans la colonne Prêts ou Bloqués du Project. Un ticket en développement n'est jamais touché.
+
+Options :
+  --dry-run     mêmes décisions et même journal, sans rien écrire
+  -h, --help    affiche cette aide et sort, sans appel à GitHub
+
+Variables :
+  REPO            dépôt visé (défaut : Inprogress-Agency/widoo-app)
+  DRY_RUN         « true » équivaut à --dry-run (action status-labels.yml)
+  PROJECT_TITLE   titre du Project (défaut : Widoo — MVP)
+  PROJECT_TOKEN   jeton qui lit et écrit le Project ; sans lui, seuls les labels déjà posés sont tenus
+  GITHUB_STEP_SUMMARY  fichier du journal (défaut : sortie standard)
+USAGE
+}
+
 main() {
   local repo=${REPO:-Inprogress-Agency/widoo-app} dry=""
-  [ "${1:-}" = "--dry-run" ] || [ "${DRY_RUN:-false}" = "true" ] && dry=1
+  # Arguments lus avant tout appel à gh : une option inconnue ne lance jamais le script en réel.
+  case "$#:${1:-}" in
+    0:) ;;
+    1:--dry-run) dry=1 ;;
+    1:-h | 1:--help) status_labels_usage; return 0 ;;
+    *) echo "argument refusé : $*" >&2; status_labels_usage >&2; exit 2 ;;
+  esac
+  [ "${DRY_RUN:-false}" = "true" ] && dry=1
   local owner=${repo%%/*} name=${repo#*/} title=${PROJECT_TITLE:-Widoo — MVP}
 
   # Tickets ouverts, sans les PR, avec leurs bloqueurs ouverts.

@@ -2,9 +2,16 @@
 # Une fois : crée le label type:design, les tickets design du MVP, et déclare
 # les tickets dev concernés bloqués par eux (needs-design posé, status:ready retiré).
 # Idempotent sur les titres et sur les dépendances : relançable sans doublon.
-# Usage : scripts/bootstrap-design-issues.sh [--dry-run]
+# Usage : scripts/bootstrap-design-issues.sh [--dry-run | -h | --help]
+#   -h, --help : cette aide, sans appel à GitHub ; tout autre argument : aide et code 2, rien d'exécuté.
 set -euo pipefail
-REPO="${REPO:-Inprogress-Agency/widoo-app}"; DRY="${1:-}"
+REPO="${REPO:-Inprogress-Agency/widoo-app}"; DRY=""
+case "$#:${1:-}" in
+  0:) ;;
+  1:--dry-run) DRY=--dry-run ;;
+  1:-h | 1:--help) sed -n '2,6p' "$0"; exit 0 ;;
+  *) echo "argument refusé : $*" >&2; sed -n '2,6p' "$0" >&2; exit 2 ;;
+esac
 W="https://github.com/Inprogress-Agency/widoo-app/wiki"
 run() { if [ "$DRY" = "--dry-run" ]; then echo "+ $*"; else "$@"; fi; }
 
@@ -48,7 +55,7 @@ DESIGN=(
 )
 
 for row in "${DESIGN[@]}"; do
-  IFS='|' read -r key ms title screens devs <<<"$row"
+  IFS='|' read -r _ ms title screens devs <<<"$row"
   dev_nums=(); IFS=';' read -ra titles <<<"$devs"
   for dt in "${titles[@]}"; do [ -z "$dt" ] && continue; n=$(num_of "$dt"); [ -n "$n" ] && dev_nums+=("$n") || echo "  avertissement : ticket dev introuvable « $dt »"; done
   refs=$(printf '#%s ' "${dev_nums[@]}")
