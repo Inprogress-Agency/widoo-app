@@ -43,6 +43,13 @@
       "when": 1791971422344,
       "tag": "0005_add_planned_routes",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791973828255,
+      "tag": "0006_add_step_content",
+      "breakpoints": true
     }
   ]
 }
