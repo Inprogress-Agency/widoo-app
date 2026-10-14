@@ -4,6 +4,7 @@ import { useFonts } from 'expo-font';
 import { DefaultTheme, Stack, ThemeProvider, type Theme } from 'expo-router';
 import { colors, motion } from '@widoo/tokens';
 import { StatusBar } from 'expo-status-bar';
+import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useReducedMotion } from 'react-native-reanimated';
 import '../global.css';
@@ -37,6 +38,15 @@ const navigationTheme: Theme = {
 export default function RootLayout() {
   useAppOpenedEvent();
   const isReducedMotion = useReducedMotion();
+  // M-03, the pages pushed over the tabs: the iOS push, taken up on Android (`mappings.motion.page`).
+  const pageOptions = {
+    animation: isReducedMotion
+      ? ('fade' as const)
+      : Platform.OS === 'android'
+        ? ('ios_from_right' as const)
+        : ('default' as const),
+    animationDuration: isReducedMotion ? motion.durations.fade : motion.durations.page,
+  };
   const [fontsLoaded, fontError] = useFonts(fonts);
   // A font that fails to load falls back to the system font rather than blocking the app.
   const isReady = fontsLoaded || fontError !== null;
@@ -69,6 +79,8 @@ export default function RootLayout() {
                     : motion.durations.page,
                 }}
               />
+              {/* Modifier le profil (E-09): a page of its own, without the tab bar. */}
+              <Stack.Screen name="edit-profile" options={pageOptions} />
             </Stack>
             {/* E-10, over whichever screen asks for an account. */}
             <SignInSheet flow={signInFlow} />

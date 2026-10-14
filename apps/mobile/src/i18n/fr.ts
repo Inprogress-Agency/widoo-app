@@ -355,6 +355,7 @@ export const fr = {
       body: "Tous les parcours Premium, en entier : un pass de 7\u00a0jours à 2,99\u00a0€, ou l'abonnement dès 2,50\u00a0€ par mois.",
       discover: 'Découvrir les formules',
     },
+    saved: 'Profil enregistré.',
   },
   field: {
     counter_one: '{{count}} caractère sur {{max}}',
