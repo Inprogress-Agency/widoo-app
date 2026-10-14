@@ -9,6 +9,7 @@ import {
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { canAccessRoute } from '../access/route-access';
+import { routeViewerOf } from '../access/route-viewer';
 import { httpError, premiumRequired } from '../errors';
 import { markStepDone, nextStepMapsUrl } from '../planned/go';
 import { createPlanned, listPlanned, ownedPlanned, readPlanned } from '../planned/repository';
@@ -62,7 +63,7 @@ export const plannedRoutesPlugin: FastifyPluginAsyncZod = async (app) => {
       if (!snapshot) {
         throw httpError(404, 'Route not found');
       }
-      if (!canAccessRoute(snapshot, user, new Date())) {
+      if (!canAccessRoute(snapshot, await routeViewerOf(app.db, user, [snapshot]), new Date())) {
         throw premiumRequired('premium_route');
       }
       const planned = await createPlanned(

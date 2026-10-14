@@ -482,6 +482,31 @@ export const plannedSteps = pgTable(
   ],
 );
 
+/**
+ * A Premium route bought alone (D-072, D-073): unlocked for good for its buyer, whatever the plan,
+ * and kept with the account rather than restored by the store. Written by the RevenueCat webhook
+ * (#67); the 7-day pass writes `users.plan` and `plan_expires_at` instead. Personal data (a
+ * purchase), erased with the account; the store keeps the transaction of a deleted route.
+ */
+export const routeUnlocks = pgTable(
+  'route_unlocks',
+  {
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    routeId: uuid('route_id')
+      .notNull()
+      .references(() => routes.id, { onDelete: 'cascade' }),
+    /** One unlock per purchase: a webhook delivered twice writes nothing more. */
+    storeTransactionId: text('store_transaction_id').notNull().unique(),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    primaryKey({ name: 'route_unlocks_pkey', columns: [t.userId, t.routeId] }),
+    index('route_unlocks_route_idx').on(t.routeId),
+  ],
+);
+
 /** Thresholds (buckets, verification, rule limits), read by the API at startup. */
 export const settings = pgTable('settings', {
   key: text('key').primaryKey(),

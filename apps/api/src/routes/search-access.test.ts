@@ -3,27 +3,33 @@ import { eq, inArray } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
-import { routes, steps, users } from '../db/schema';
+import { routeUnlocks, routes, steps, users } from '../db/schema';
 import { seed, seedId } from '../db/seed';
 import { uuidv7 } from '../db/uuid';
 import { testConfig } from '../test-config';
 
 // The search with an optional token (D-075): a Premium copy of a demo route, same places and
 // steps, on a zone of its own far from Paris and from the other test files, and one account per
-// plan. Everything is deleted afterwards; the demo route is left untouched.
+// plan, pass and unlock (D-073). Everything is deleted afterwards; the demo route is left untouched.
 const verifier = new TestTokenVerifier();
 const premiumId = uuidv7();
 const premiumZone = 'bbox=20.99,20.99,21.01,21.01';
 const marais = 'bbox=2.355,48.85,2.37,48.865&moods[]=food';
 const demoId = seedId('route:marais-gourmand');
-const day = 24 * 60 * 60 * 1000;
+const minute = 60 * 1000;
+const day = 24 * 60 * minute;
+// The 7-day pass writes the same columns as a subscription, its end to the minute (D-072).
 const accounts = {
   free: { plan: 'free', planExpiresAt: null },
   premium: { plan: 'premium', planExpiresAt: new Date(Date.now() + 30 * day) },
   expired: { plan: 'premium', planExpiresAt: new Date(Date.now() - day) },
+  pass: { plan: 'premium', planExpiresAt: new Date(Date.now() + 7 * day) },
+  passEnded: { plan: 'premium', planExpiresAt: new Date(Date.now() - minute) },
+  unlocked: { plan: 'free', planExpiresAt: null },
 } as const;
 const tokens = new Map<keyof typeof accounts, string>();
 const uids: string[] = [];
+let unlockedUserId = '';
 
 let app: Awaited<ReturnType<typeof buildApp>>;
 beforeAll(async () => {
@@ -33,7 +39,11 @@ beforeAll(async () => {
     const { token, uid } = verifier.issue();
     tokens.set(key, token);
     uids.push(uid);
-    await app.db.insert(users).values({ firebaseUid: uid, ...accounts[key] });
+    const [user] = await app.db
+      .insert(users)
+      .values({ firebaseUid: uid, ...accounts[key] })
+      .returning({ id: users.id });
+    if (user && key === 'unlocked') unlockedUserId = user.id;
   }
   const [demoRoute] = await app.db.select().from(routes).where(eq(routes.id, demoId));
   if (!demoRoute) throw new Error('Demo route missing from the seed');
@@ -48,6 +58,11 @@ beforeAll(async () => {
   await app.db
     .insert(steps)
     .values(demoSteps.map((step) => ({ ...step, id: uuidv7(), routeId: premiumId })));
+  await app.db.insert(routeUnlocks).values({
+    userId: unlockedUserId,
+    routeId: premiumId,
+    storeTransactionId: `fictitious-${uuidv7()}`,
+  });
 });
 afterAll(async () => {
   await app.db.delete(routes).where(eq(routes.id, premiumId));
@@ -96,6 +111,7 @@ describe('GET /v1/routes/search with an optional token (D-075)', () => {
   it.each([
     ['a free account', 'free'],
     ['a Premium plan past its end', 'expired'],
+    ['a 7-day pass ended a minute ago', 'passEnded'],
   ] as const)('locks a Premium card for %s, in a private answer', async (_, account) => {
     const response = await get(`?${premiumZone}`, bearer(account));
     expect(response.statusCode).toBe(200);
@@ -104,15 +120,22 @@ describe('GET /v1/routes/search with an optional token (D-075)', () => {
     expect(response.headers.vary).toContain('Authorization');
   });
 
-  it('carries every step of a Premium card for a Premium plan, as the free route', async () => {
-    const response = await get(`?${premiumZone}`, bearer('premium'));
-    expect(response.statusCode).toBe(200);
-    const [card] = cardsOf(response.body);
-    expect(card).toMatchObject({ access: 'premium', isLocked: false, stepCount: 4 });
-    expect(card?.steps).toEqual((await demoCard()).steps);
-    expect(response.headers['cache-control']).toBe('private, no-cache');
-    expect(response.headers.vary).toContain('Authorization');
-  });
+  it.each([
+    ['a Premium plan', 'premium'],
+    ['a 7-day pass in progress', 'pass'],
+    ['a free account that bought this route alone', 'unlocked'],
+  ] as const)(
+    'carries every step of a Premium card for %s, as the free route',
+    async (_, account) => {
+      const response = await get(`?${premiumZone}`, bearer(account));
+      expect(response.statusCode).toBe(200);
+      const [card] = cardsOf(response.body);
+      expect(card).toMatchObject({ access: 'premium', isLocked: false, stepCount: 4 });
+      expect(card?.steps).toEqual((await demoCard()).steps);
+      expect(response.headers['cache-control']).toBe('private, no-cache');
+      expect(response.headers.vary).toContain('Authorization');
+    },
+  );
 
   it('never answers 304 to the ETag of another caller', async () => {
     const anonymous = await get(`?${premiumZone}`);

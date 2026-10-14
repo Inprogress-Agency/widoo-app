@@ -2,7 +2,13 @@ import { FirstName, type UpdateMe } from '@widoo/shared';
 import { and, eq, isNull, sql } from 'drizzle-orm';
 import type { VerifiedIdentity } from '../auth/verifier';
 import type { Db } from '../db/client';
-import { plannedRoutes, userAnecdotes, userFeaturedRoutes, users } from '../db/schema';
+import {
+  plannedRoutes,
+  routeUnlocks,
+  userAnecdotes,
+  userFeaturedRoutes,
+  users,
+} from '../db/schema';
 import { profileIssues, replaceProfileLists, type ProfileIssue } from './profile';
 
 export type User = typeof users.$inferSelect;
@@ -113,5 +119,7 @@ export async function softDeleteUser(db: Db, userId: string): Promise<void> {
     await tx.delete(userFeaturedRoutes).where(eq(userFeaturedRoutes.userId, userId));
     // Their progress rows go with them (cascade).
     await tx.delete(plannedRoutes).where(eq(plannedRoutes.userId, userId));
+    // A route bought alone belongs to the account: nothing is left to unlock (D-073).
+    await tx.delete(routeUnlocks).where(eq(routeUnlocks.userId, userId));
   });
 }

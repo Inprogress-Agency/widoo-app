@@ -149,6 +149,21 @@ describe('PATCH /v1/me/planned/:id', () => {
     expect((await patch(headers, id, { status: 'cancelled' })).statusCode).toBe(200);
   });
 
+  it('keeps a new start and a Go open to a Premium route bought alone once the plan ends', async () => {
+    const premiumId = await fixtures.copyDemoRoute({ access: 'premium' });
+    const headers = await fixtures.signIn({ plan: 'premium' });
+    const { id } = await planned(headers, premiumId);
+    await fixtures.unlock(headers, premiumId);
+    const me = await app.inject({ url: '/v1/me', headers });
+    await app.db
+      .update(users)
+      .set({ plan: 'free' })
+      .where(eq(users.id, me.json<{ id: string }>().id));
+
+    expect((await patch(headers, id, { startsAt: saturdayTen })).statusCode).toBe(200);
+    expect((await patch(headers, id, { status: 'in_progress' })).statusCode).toBe(200);
+  });
+
   it("answers 404 for another user's planning and leaves it unchanged", async () => {
     const owner = await fixtures.signIn();
     const other = await fixtures.signIn();

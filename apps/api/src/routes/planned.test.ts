@@ -81,6 +81,15 @@ describe('POST /v1/me/planned', () => {
       201,
     );
   });
+
+  it('plans a Premium route bought alone by a free account (D-073)', async () => {
+    const premiumId = await fixtures.copyDemoRoute({ access: 'premium' });
+    const buyer = await fixtures.signIn();
+    const other = await fixtures.signIn();
+    await fixtures.unlock(buyer, premiumId);
+    expect((await plan(buyer, { routeId: premiumId, startsAt: saturdayTen })).statusCode).toBe(201);
+    expect((await plan(other, { routeId: premiumId, startsAt: saturdayTen })).statusCode).toBe(402);
+  });
 });
 
 describe('GET /v1/me/planned and /v1/me/planned/:id', () => {

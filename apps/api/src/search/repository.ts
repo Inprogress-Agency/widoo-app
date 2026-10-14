@@ -11,10 +11,12 @@ import {
 import { sql, type SQL } from 'drizzle-orm';
 import { z } from 'zod';
 import { canAccessRoute, type RouteViewer } from '../access/route-access';
+import { routeViewerOf } from '../access/route-viewer';
 import type { Db } from '../db/client';
 import type { BBox } from '../db/geography';
 import { ratingOf } from '../db/route-stats';
 import { routes } from '../db/schema';
+import type { User } from '../users/repository';
 import { decodeCursor, encodeCursor, type SortKeyValue } from './cursor';
 import { activeFilters, allOf, inZone, titleMatches } from './filters';
 import { after, keyColumn, orderBy, sortKeys, type KeysetSort, type SortKey } from './sort';
@@ -194,7 +196,7 @@ export function searchPageSql(
 export async function searchRoutes(
   db: Db,
   query: RouteSearchQuery & { sort: KeysetSort },
-  viewer: RouteViewer | null,
+  user: User | null,
 ): Promise<{ items: RouteCard[]; nextCursor: string | null }> {
   const keys = sortKeys(query.sort, query.near);
   const cursor = query.cursor
@@ -211,6 +213,7 @@ export async function searchRoutes(
   const last = pageRows.at(-1);
   const nextCursor =
     hasMore && last ? encodeCursor(query.sort, keyValuesOf(last, keys.length)) : null;
+  const viewer = await routeViewerOf(db, user, pageRows);
   const now = new Date();
   return { items: pageRows.map((row) => toCard(row, viewer, now)), nextCursor };
 }

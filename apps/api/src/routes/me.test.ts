@@ -3,7 +3,7 @@ import { eq, inArray } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp, type BuildAppOptions } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
-import { userAnecdotes, userFeaturedRoutes, users } from '../db/schema';
+import { routeUnlocks, userAnecdotes, userFeaturedRoutes, users } from '../db/schema';
 import { seed } from '../db/seed';
 import { testConfig } from '../test-config';
 
@@ -122,6 +122,9 @@ describe('DELETE /v1/me', () => {
     await app.db
       .insert(userFeaturedRoutes)
       .values({ userId, routeId: routeIds[0] ?? '', position: 1 });
+    await app.db
+      .insert(routeUnlocks)
+      .values({ userId, routeId: routeIds[0] ?? '', storeTransactionId: `fictitious-${uid}` });
 
     const response = await app.inject({ method: 'DELETE', url: '/v1/me', headers });
     expect(response.statusCode).toBe(204);
@@ -137,7 +140,7 @@ describe('DELETE /v1/me', () => {
       isPublic: false,
       notificationPrefs: {},
     });
-    for (const table of [userAnecdotes, userFeaturedRoutes]) {
+    for (const table of [userAnecdotes, userFeaturedRoutes, routeUnlocks]) {
       expect(await app.db.select().from(table).where(eq(table.userId, userId))).toEqual([]);
     }
 

@@ -2,12 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { canAccessRoute, type RouteViewer } from './route-access';
 
 const now = new Date('2026-09-29T12:00:00Z');
-const free = { access: 'free' } as const;
-const premium = { access: 'premium' } as const;
-const viewer = (plan: RouteViewer['plan'], planExpiresAt: Date | null): RouteViewer => ({
-  plan,
-  planExpiresAt,
-});
+const free = { id: '0192f0a0-0000-7000-8000-00000000000f', access: 'free' } as const;
+const premium = { id: '0192f0a0-0000-7000-8000-00000000000a', access: 'premium' } as const;
+const otherPremium = { id: '0192f0a0-0000-7000-8000-00000000000b', access: 'premium' } as const;
+const viewer = (
+  plan: RouteViewer['plan'],
+  planExpiresAt: Date | null,
+  unlockedRouteIds: string[] = [],
+): RouteViewer => ({ plan, planExpiresAt, unlockedRouteIds: new Set(unlockedRouteIds) });
 
 describe('canAccessRoute', () => {
   it('opens a free route to anyone', () => {
@@ -36,5 +38,14 @@ describe('canAccessRoute', () => {
     expect(canAccessRoute(premium, viewer('premium', new Date('2026-09-28T12:00:00Z')), now)).toBe(
       false,
     );
+  });
+
+  it('opens a Premium route bought alone to its buyer, whatever the plan (D-072, D-073)', () => {
+    expect(canAccessRoute(premium, viewer('free', null, [premium.id]), now)).toBe(true);
+    expect(canAccessRoute(premium, viewer('premium', now, [premium.id]), now)).toBe(true);
+  });
+
+  it('opens only the route bought alone, not another Premium route', () => {
+    expect(canAccessRoute(otherPremium, viewer('free', null, [premium.id]), now)).toBe(false);
   });
 });
