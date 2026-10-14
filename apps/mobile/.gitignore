@@ -18,3 +18,6 @@ expo-env.d.ts
 
 # Metro
 .metro-health-check*
+
+# Firebase files of a local build (README › App mobile › Connexion), never versioned
+/firebase/

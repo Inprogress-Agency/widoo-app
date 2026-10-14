@@ -120,6 +120,19 @@ Analytics : PostHog Cloud UE, seulement après « Accepter » sur la bannière d
 
 Rapports de plantage : Sentry, avec ou sans consentement mais sans donnée utilisateur (`src/monitoring`, filtrage dans `packages/shared/src/monitoring.ts`). Sans `EXPO_PUBLIC_SENTRY_DSN`, rien n'est envoyé. L'envoi des source maps et symboles est coupé (`SENTRY_DISABLE_AUTO_UPLOAD=true` dans les scripts `ios` / `android` et dans `eas.json`) tant qu'aucun jeton Sentry n'est posé en secret EAS.
 
+### Connexion
+
+Firebase Authentication (E-10) passe par les SDK natifs : `@react-native-firebase/app` et `auth`, plus `@react-native-google-signin/google-signin` pour le bouton Google. La session est gardée par Firebase sur le téléphone. Le jeton ne sort de `src/auth` que dans l'en-tête `Authorization` des requêtes à l'API.
+
+Les fichiers Firebase ne sont jamais versionnés. Leurs clés sont publiques mais restreintes à `app.widoo`, et chaque environnement apporte son projet. `app.config.ts` les lit dans cet ordre :
+
+1. Sur EAS, les variables de type fichier `GOOGLE_SERVICES_JSON` et `GOOGLE_SERVICE_INFO_PLIST` de l'environnement du profil. Un build EAS sans elles échoue tout de suite, au lieu de planter au démarrage.
+2. En local, le dossier `apps/mobile/firebase/`, ignoré par git, avec les deux fichiers sous leur nom d'origine : `google-services.json` et `GoogleService-Info.plist`. Ils se téléchargent depuis la console Firebase (projet `widoo-staging`, Paramètres du projet, Vos applications, Android puis iOS `app.widoo`). Sans eux, le build de développement se construit, mais la connexion n'y marche pas.
+
+Après la pose ou le changement de ces fichiers, reconstruire l'app (`pnpm --filter mobile ios` / `android`) : ils sont lus au prebuild, pas par Metro. En local, `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` se met dans `apps/mobile/.env.local`.
+
+Lien de connexion par e-mail : Firebase l'envoie depuis le domaine `<projet>.firebaseapp.com`, autorisé par défaut, sur le chemin `/__/auth/links`. L'app s'y déclare : App Links sur Android (`autoVerify`), domaines associés sur iOS (`applinks:`). Le domaine se déduit du projet de `google-services.json`. Pour que le lien ouvre l'app plutôt que le navigateur, la console Firebase doit connaître l'empreinte SHA-256 du certificat qui signe le build (Android) et le Team ID Apple (iOS) : Firebase Hosting en tire `assetlinks.json` et `apple-app-site-association`.
+
 ### Builds EAS
 
 L'app est reliée au projet EAS `@inprogress-agency-team/widoo`, propriété de l'organisation Expo `inprogress-agency-team`, par `owner` et `extra.eas.projectId` dans `apps/mobile/app.json`. Ces deux valeurs sont publiques et versionnées ; `src/eas-project.test.ts` vérifie leur présence et que chaque profil lit l'environnement EAS de son nom. Les commandes `eas` qui écrivent (`init`, `env:create`, `build`, `credentials`) reviennent à Ilan ou Paul, et se lancent toujours depuis `apps/mobile` : à la racine, `eas init` crée un `app.json` parasite. `eas init` réécrit aussi `app.json` (permissions Android de localisation, `extra.router` vide, formatage) : n'en garder que `owner` et `extra.eas.projectId`, le reste est ajouté par les plugins `expo-location` et `expo-router` quand la configuration est évaluée.
@@ -135,9 +148,12 @@ Variables par environnement EAS. Les noms seulement : aucune valeur dans le dép
 | `EXPO_PUBLIC_POSTHOG_KEY` | vide (D-059) | projet « Widoo - Staging » | à poser quand le projet de production existera ([#264](https://github.com/Inprogress-Agency/widoo-app/issues/264)) | ignorée hors `preview` et `production`, même présente |
 | `EXPO_PUBLIC_SENTRY_DSN` | vide | posée | à poser | absente : aucun rapport de plantage |
 | `EXPO_PUBLIC_APP_ENV` | `development` | `preview` | `production` | posée par `eas.json`, jamais dans EAS |
+| `GOOGLE_SERVICES_JSON` | fichier du projet `widoo-staging` | fichier du projet `widoo-staging` | à poser : projet de production | variable de type fichier, « Sensitive » ; `google-services.json` de l'app Android `app.widoo` (voir Connexion) |
+| `GOOGLE_SERVICE_INFO_PLIST` | fichier du projet `widoo-staging` | fichier du projet `widoo-staging` | à poser | variable de type fichier, « Sensitive » ; `GoogleService-Info.plist` de l'app iOS `app.widoo` |
+| `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` | posée | posée | à poser | client OAuth « Web » du projet Firebase, public ; sans lui, Google ne rend pas de jeton sur Android |
 | `EXPO_PUBLIC_ANALYTICS_DEBUG` | — | — | — | `apps/mobile/.env.local` seulement, lue en développement |
 
-`development` reste vide exprès : un client de développement reçoit son JavaScript du Metro local, qui lit `apps/mobile/.env.local` ; l'URL de l'API y est par défaut celle de la machine, et aucune clé d'analytics n'existe en développement (D-059). Une variable `EXPO_PUBLIC_*` est embarquée dans l'app et lisible par quiconque l'installe : elle se crée en visibilité « Plain text », jamais « Secret » ni « Sensitive », qui ne la protégeraient pas. Une vraie clé secrète (jeton Sentry d'envoi des symboles, par exemple) n'a jamais le préfixe `EXPO_PUBLIC_` et se crée en « Secret ».
+`development` ne porte que ce que lit le build natif (les fichiers Firebase) et le client Google, exprès : un client de développement reçoit son JavaScript du Metro local, qui lit `apps/mobile/.env.local` ; l'URL de l'API y est par défaut celle de la machine, et aucune clé d'analytics n'existe en développement (D-059). Une variable `EXPO_PUBLIC_*` est embarquée dans l'app et lisible par quiconque l'installe : elle se crée en visibilité « Plain text », jamais « Secret » ni « Sensitive », qui ne la protégeraient pas. Une vraie clé secrète (jeton Sentry d'envoi des symboles, par exemple) n'a jamais le préfixe `EXPO_PUBLIC_` et se crée en « Secret ».
 
 `RNMAPBOX_MAPS_DOWNLOAD_TOKEN` n'est plus utile : Mapbox ne demande plus de jeton pour télécharger son SDK, et le plugin de `@rnmapbox/maps` 10.3 ne s'en sert que s'il est posé (dépôt Maven sans authentification sinon). Il ne figure plus dans `.env.example` ni dans aucun environnement EAS.
 
