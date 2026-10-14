@@ -27,8 +27,9 @@ export type MeState =
   | { status: 'error' };
 
 /**
- * The signed-in account, from `GET /me`. Kept on the phone, so that the profile shows offline:
- * offline, the query pauses and keeps its answer, which the persister keeps writing.
+ * The signed-in account, from `GET /me`. Kept on the phone without its e-mail (`deviceCopy`), so
+ * that the profile shows offline: offline, the query pauses and keeps its answer, which the
+ * persister keeps writing.
  */
 export function useMe() {
   const sessionStatus = useSession((state) => state.status);

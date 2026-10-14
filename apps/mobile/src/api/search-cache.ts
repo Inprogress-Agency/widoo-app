@@ -15,7 +15,8 @@ export const OFFLINE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 /**
  * Key prefix of the signed-in account, `['me', uid]`: kept on the device so that the profile shows
- * offline (Ecrans › E-09, hors connexion), forgotten at the sign-out.
+ * offline (Ecrans › E-09, hors connexion), without its e-mail (`deviceCopy`), forgotten at the
+ * sign-out.
  */
 export const meQueryPrefix = ['me'] as const;
 
@@ -35,6 +36,18 @@ export function persistedQuerySchema(queryKey: QueryKey): PersistedQuerySchema |
     return RouteSearchResult;
   }
   return isMeKey(queryKey) ? Me : null;
+}
+
+/**
+ * What the device keeps of an answer: the account without its e-mail, the one contact data of
+ * `Me`, which the storage of the app, unencrypted, would hold in clear (Securite-et-RGPD). Réglages
+ * read it online only; offline, its row is not shown. Any other answer is kept as it is.
+ */
+export function deviceCopy(queryKey: QueryKey, data: unknown): unknown {
+  if (!isMeKey(queryKey) || typeof data !== 'object' || data === null || !('email' in data)) {
+    return data;
+  }
+  return data.email === null ? data : { ...data, email: null };
 }
 
 /** The last search answered, the only one kept on the device. */
