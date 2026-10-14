@@ -3,6 +3,7 @@ import { BottomTabBarHeightCallbackContext, type BottomTabBarProps } from 'expo-
 import { use, type ReactNode } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Icon, uiIcon } from '../ui/Icon';
+import { setTabBarHeight } from '../ui/toastStore';
 import { Text } from '../ui/Text';
 
 // As React Navigation does: VoiceOver does not announce the `tab` role, a button whose selected
@@ -37,7 +38,12 @@ export function TabBar({ state, descriptors, navigation, insets, accessory }: Ta
     <View
       pointerEvents="box-none"
       className="items-center gap-8"
-      onLayout={(event) => onHeightChange?.(event.nativeEvent.layout.height)}
+      onLayout={(event) => {
+        const { height } = event.nativeEvent.layout;
+        onHeightChange?.(height);
+        // The toasts of a tab rise over the bar.
+        setTabBarHeight(height);
+      }}
       // Safe area measured at runtime.
       style={[styles.floating, { paddingBottom: Math.max(insets.bottom, spacing['space-12']) }]}
     >
