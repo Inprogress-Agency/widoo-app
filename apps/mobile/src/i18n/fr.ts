@@ -346,12 +346,55 @@ export const fr = {
   routes: {
     title: 'Mes parcours',
   },
+  // E-09, my profile as the others see it (D-023, D-025).
   profile: {
     title: 'Profil',
+    premium: {
+      title: 'Widoo Premium',
+      // Unbreakable spaces: « 2,99 € » and « 7 jours » never split over two lines.
+      body: "Tous les parcours Premium, en entier : un pass de 7\u00a0jours à 2,99\u00a0€, ou l'abonnement dès 2,50\u00a0€ par mois.",
+      discover: 'Découvrir les formules',
+    },
   },
   field: {
     counter_one: '{{count}} caractère sur {{max}}',
     counter_other: '{{count}} caractères sur {{max}}',
+  },
+  // Modifier le profil (E-09): one `PATCH /me` on « Enregistrer ».
+  editProfile: {
+    title: 'Modifier le profil',
+    cancel: 'Annuler',
+    save: 'Enregistrer',
+    saveSpoken: 'Enregistrer le profil',
+    firstName: 'Prénom ou pseudo',
+    firstNameError: 'Indiquez un prénom ou un pseudo de 50 caractères au plus.',
+    bio: 'Bio',
+    bioHelp: 'Visible sur votre profil public.',
+    bioError: 'La bio tient en 150 caractères.',
+    neighborhood: 'Quartier',
+    neighborhoodHelp: 'Facultatif.',
+    neighborhoodError: 'Le quartier tient en 60 caractères.',
+    anecdotes: 'Anecdotes',
+    featured: 'À la une',
+    featuredHelp: 'Les parcours montrés en premier sur votre profil, dans cet ordre.',
+    slots: '{{count}} sur {{max}}',
+    addAnecdote: 'Ajouter une anecdote',
+    addAnecdoteHelp: 'Une question au choix, 150 caractères.',
+    moveSpoken: 'Déplacer {{name}}',
+    moveUp: 'Monter',
+    moveDown: 'Descendre',
+    moved: '{{name}}, position {{position}} sur {{total}}',
+    remove: 'Retirer {{name}}',
+    discard: {
+      title: 'Abandonner les modifications ?',
+      keep: 'Continuer',
+      confirm: 'Abandonner',
+    },
+    error: {
+      title: 'Enregistrement impossible',
+      body: "Rien n'est perdu.",
+      retry: 'Réessayer',
+    },
   },
   // The two steps of the anecdote sheet: the question, then the answer.
   anecdote: {
