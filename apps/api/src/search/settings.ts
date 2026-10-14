@@ -1,6 +1,6 @@
 import { eq, inArray } from 'drizzle-orm';
 import { z } from 'zod';
-import type { Db } from '../db/client';
+import type { Db, Tx } from '../db/client';
 import { settings } from '../db/schema';
 
 /** Key of the `settings` row: above this zone surface, the search answers clusters. */
@@ -12,7 +12,7 @@ const refreshMs = 60_000;
 const AreaKm2 = z.number().positive();
 
 /** Value of a `settings` row, undefined when absent. */
-export async function readSetting(db: Db, key: string): Promise<unknown> {
+export async function readSetting(db: Db | Tx, key: string): Promise<unknown> {
   const [row] = await db
     .select({ value: settings.value })
     .from(settings)

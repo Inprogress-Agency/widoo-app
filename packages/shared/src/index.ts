@@ -4,6 +4,7 @@ export { assertNever } from './assert-never';
 export { budgetSumEur, displayedBudgetEur } from './budget';
 export { matchesFilters, type RouteFilters } from './filters';
 export { labels, type Locale, type TaxonomyLabels } from './labels';
+export * from './moderation';
 export * from './monitoring';
 export * from './taxonomies';
 export * from './thresholds';
