@@ -888,7 +888,7 @@
       "reviews": [],
       "timeline": {
         "startsAt": "2026-09-25T12:00:00.000Z",
-        "endsAt": "2026-09-25T16:09:00.000Z",
+        "endsAt": "2026-09-25T15:28:00.000Z",
         "steps": [
           {
             "stepId": "01a0d794-1000-795c-a9a8-4bb34e51c950",
@@ -898,26 +898,26 @@
           },
           {
             "stepId": "01a0d794-1000-7d81-a1cf-3cfb051645df",
-            "arrivesAt": "2026-09-25T12:25:00.000Z",
-            "leavesAt": "2026-09-25T12:45:00.000Z",
+            "arrivesAt": "2026-09-25T12:21:00.000Z",
+            "leavesAt": "2026-09-25T12:41:00.000Z",
             "conflicts": []
           },
           {
             "stepId": "01a0d794-1000-7174-8950-756fdb961ba0",
-            "arrivesAt": "2026-09-25T12:48:00.000Z",
-            "leavesAt": "2026-09-25T13:18:00.000Z",
+            "arrivesAt": "2026-09-25T12:42:00.000Z",
+            "leavesAt": "2026-09-25T13:12:00.000Z",
             "conflicts": []
           },
           {
             "stepId": "01a0d794-1000-715b-8b08-41406c79182f",
-            "arrivesAt": "2026-09-25T13:50:00.000Z",
-            "leavesAt": "2026-09-25T14:50:00.000Z",
+            "arrivesAt": "2026-09-25T13:22:00.000Z",
+            "leavesAt": "2026-09-25T14:22:00.000Z",
             "conflicts": []
           },
           {
             "stepId": "01a0d794-1000-7604-a963-bb5e80923da7",
-            "arrivesAt": "2026-09-25T15:09:00.000Z",
-            "leavesAt": "2026-09-25T16:09:00.000Z",
+            "arrivesAt": "2026-09-25T14:28:00.000Z",
+            "leavesAt": "2026-09-25T15:28:00.000Z",
             "conflicts": []
           }
         ]
@@ -940,7 +940,7 @@
           "transitionNote": null,
           "transition": {
             "distanceM": 361,
-            "durationMin": 5,
+            "durationMin": 1,
             "mode": "bike",
             "estimated": true
           },
@@ -1018,7 +1018,7 @@
           "transitionNote": null,
           "transition": {
             "distanceM": 257,
-            "durationMin": 3,
+            "durationMin": 1,
             "mode": "bike",
             "estimated": true
           },
@@ -1060,7 +1060,7 @@
           "transitionNote": "Reprendre le quai de Valmy vers le nord, piste cyclable sur la gauche.",
           "transition": {
             "distanceM": 2390,
-            "durationMin": 32,
+            "durationMin": 10,
             "mode": "bike",
             "estimated": true
           },
@@ -1152,7 +1152,7 @@
           "transitionNote": null,
           "transition": {
             "distanceM": 1422,
-            "durationMin": 19,
+            "durationMin": 6,
             "mode": "bike",
             "estimated": true
           },
@@ -4451,7 +4451,7 @@
       "reviews": [],
       "timeline": {
         "startsAt": "2026-09-25T12:00:00.000Z",
-        "endsAt": "2026-09-25T16:09:00.000Z",
+        "endsAt": "2026-09-25T15:28:00.000Z",
         "steps": [
           {
             "stepId": "01a0d794-1000-7619-8464-34f892940a7f",
@@ -4461,26 +4461,26 @@
           },
           {
             "stepId": "01a0d794-1000-7884-a823-c29041c938ad",
-            "arrivesAt": "2026-09-25T12:25:00.000Z",
-            "leavesAt": "2026-09-25T12:45:00.000Z",
+            "arrivesAt": "2026-09-25T12:21:00.000Z",
+            "leavesAt": "2026-09-25T12:41:00.000Z",
             "conflicts": []
           },
           {
             "stepId": "01a0d794-1000-7271-a599-23042d128b3d",
-            "arrivesAt": "2026-09-25T12:48:00.000Z",
-            "leavesAt": "2026-09-25T13:18:00.000Z",
+            "arrivesAt": "2026-09-25T12:42:00.000Z",
+            "leavesAt": "2026-09-25T13:12:00.000Z",
             "conflicts": []
           },
           {
             "stepId": "01a0d794-1000-77d8-8b09-9fe98669addc",
-            "arrivesAt": "2026-09-25T13:50:00.000Z",
-            "leavesAt": "2026-09-25T14:50:00.000Z",
+            "arrivesAt": "2026-09-25T13:22:00.000Z",
+            "leavesAt": "2026-09-25T14:22:00.000Z",
             "conflicts": []
           },
           {
             "stepId": "01a0d794-1000-7642-90e8-1f2ee858b1e8",
-            "arrivesAt": "2026-09-25T15:09:00.000Z",
-            "leavesAt": "2026-09-25T16:09:00.000Z",
+            "arrivesAt": "2026-09-25T14:28:00.000Z",
+            "leavesAt": "2026-09-25T15:28:00.000Z",
             "conflicts": []
           }
         ]
@@ -4503,7 +4503,7 @@
           "transitionNote": null,
           "transition": {
             "distanceM": 361,
-            "durationMin": 5,
+            "durationMin": 1,
             "mode": "bike",
             "estimated": true
           },
@@ -4581,7 +4581,7 @@
           "transitionNote": null,
           "transition": {
             "distanceM": 257,
-            "durationMin": 3,
+            "durationMin": 1,
             "mode": "bike",
             "estimated": true
           },
@@ -4623,7 +4623,7 @@
           "transitionNote": "Reprendre le quai de Valmy vers le nord, piste cyclable sur la gauche.",
           "transition": {
             "distanceM": 2390,
-            "durationMin": 32,
+            "durationMin": 10,
             "mode": "bike",
             "estimated": true
           },
@@ -4715,7 +4715,7 @@
           "transitionNote": null,
           "transition": {
             "distanceM": 1422,
-            "durationMin": 19,
+            "durationMin": 6,
             "mode": "bike",
             "estimated": true
           },
