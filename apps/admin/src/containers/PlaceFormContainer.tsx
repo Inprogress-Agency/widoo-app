@@ -2,9 +2,11 @@
 
 import { catalogPaths } from '@/components/catalog/CatalogTabs';
 import { PlaceForm } from '@/components/catalog/PlaceForm';
+import { PlacePositionMap } from '@/components/catalog/PlacePositionMap';
 import { BackLink } from '@/components/states/BackLink';
 import { usePlaceForm } from '@/hooks/usePlaceForm';
-import { emptyPlaceForm, placeFormOf } from '@/lib/place-form';
+import { publicEnv } from '@/config/public-env';
+import { coordinateText, emptyPlaceForm, placeFormOf, positionOfForm } from '@/lib/place-form';
 import { messages } from '@/messages/fr';
 import { WarningCircleIcon } from '@phosphor-icons/react/dist/ssr';
 import type { CatalogPlaceDetail } from '@widoo/shared';
@@ -12,6 +14,7 @@ import { Notice, showToast } from '@widoo/ui';
 import { useRouter } from 'next/navigation';
 
 const texts = messages.catalog.places.form;
+const mapToken = publicEnv.NEXT_PUBLIC_MAPBOX_TOKEN;
 
 /** Address of the list of places with the sheet of one of them open next to it. */
 export const placePanelPathOf = (placeId: string) =>
@@ -47,6 +50,18 @@ export function PlaceFormContainer({ place }: { place: CatalogPlaceDetail | null
             >
               <p>{texts.errors[form.failure]}</p>
             </Notice>
+          ) : null
+        }
+        positionMap={
+          mapToken ? (
+            <PlacePositionMap
+              token={mapToken}
+              position={positionOfForm(form.values)}
+              onMove={({ lat, lng }) => {
+                form.handleChange('latitude', coordinateText(lat));
+                form.handleChange('longitude', coordinateText(lng));
+              }}
+            />
           ) : null
         }
         values={form.values}

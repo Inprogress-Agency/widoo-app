@@ -53,6 +53,19 @@ export function placeFormOf(place: CatalogPlaceDetail): PlaceFormValues {
 const coordinateOf = (text: string) =>
   /^-?\d+([.,]\d+)?$/.test(text.trim()) ? Number(text.trim().replace(',', '.')) : Number.NaN;
 
+/** The position the form holds, when its latitude and its longitude can both be read. */
+export function positionOfForm(
+  values: Pick<PlaceFormValues, 'latitude' | 'longitude'>,
+): CatalogPlaceInput['location'] | null {
+  const lat = coordinateOf(values.latitude);
+  const lng = coordinateOf(values.longitude);
+  return Math.abs(lat) <= 90 && Math.abs(lng) <= 180 ? { lat, lng } : null;
+}
+
+/** A coordinate as the form writes it: six decimals at most (about 10 cm), with a comma. */
+export const coordinateText = (value: number) =>
+  String(Math.round(value * 1e6) / 1e6).replace('.', ',');
+
 /**
  * What to send to the API for a form, or which part of it cannot be read. The API checks the
  * rest (texts, link, phone): only what the form itself turns into another shape is checked here.
@@ -62,9 +75,8 @@ export function placeInputOf(
   values: PlaceFormValues,
   previousHours: readonly PlaceHours[],
 ): { input: CatalogPlaceInput } | { error: PlaceFormError } {
-  const lat = coordinateOf(values.latitude);
-  const lng = coordinateOf(values.longitude);
-  if (!(Math.abs(lat) <= 90) || !(Math.abs(lng) <= 180)) {
+  const location = positionOfForm(values);
+  if (!location) {
     return { error: 'position' };
   }
   const hours = dayTextsToHours(values.dayHours, previousHours);
@@ -76,7 +88,7 @@ export function placeInputOf(
       name: values.name.trim(),
       category: values.category,
       address: values.address.trim(),
-      location: { lat, lng },
+      location,
       isIndoor: values.isIndoor,
       priceRange: (values.priceRange || null) as CatalogPlaceInput['priceRange'],
       websiteUrl: values.websiteUrl.trim() || null,

@@ -9,6 +9,8 @@ const texts = messages.catalog.places.form;
 type PlaceFormProps = {
   /** An error of the form or of the API, above the fields. */
   notice: ReactNode;
+  /** The map that shows and moves the position, under its two fields; nothing without one. */
+  positionMap: ReactNode;
   values: PlaceFormValues;
   /** Changes one field of the form. */
   onChange: <Key extends keyof PlaceFormValues>(key: Key, value: PlaceFormValues[Key]) => void;
@@ -23,6 +25,7 @@ type PlaceFormProps = {
  */
 export function PlaceForm({
   notice,
+  positionMap,
   values,
   onChange,
   onSubmit,
@@ -101,6 +104,7 @@ export function PlaceForm({
       <p id="place-position-hint" className="text-label text-muted-foreground">
         {texts.positionHint}
       </p>
+      {positionMap}
       <Checkbox
         label={texts.indoor}
         description={texts.indoorHint}

@@ -278,6 +278,10 @@ export const messages = {
         longitude: 'Longitude',
         positionHint:
           'En degrés décimaux, par exemple 48,8785 et 2,3397. La ville du lieu est déduite de sa position.',
+        map: 'Carte de la position du lieu',
+        mapHint:
+          "Cliquez sur la carte ou déplacez l'épingle : la latitude et la longitude suivent.",
+        mapFailed: "La carte n'a pas pu être chargée. Saisissez la latitude et la longitude.",
         indoor: 'Lieu en intérieur',
         indoorHint: "Un lieu à l'abri compte pour les parcours « par temps de pluie ».",
         price: 'Niveau de prix',

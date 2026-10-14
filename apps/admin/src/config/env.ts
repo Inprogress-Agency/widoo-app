@@ -33,6 +33,16 @@ const Env = z.object({
   /** Exact pages of the Widoo project in PostHog and RevenueCat, linked from A-05. */
   NEXT_PUBLIC_POSTHOG_URL: OptionalHttpsUrl,
   NEXT_PUBLIC_REVENUECAT_URL: OptionalHttpsUrl,
+  /**
+   * Public token of Mapbox for the map of the form of a place (A-04), restricted to the addresses
+   * of the admin in the Mapbox account. Empty: the position is typed, without a map. A secret
+   * token (`sk.`) is refused: this value is sent to the browser.
+   */
+  NEXT_PUBLIC_MAPBOX_TOKEN: z
+    .string()
+    .optional()
+    .transform((value) => value || undefined)
+    .pipe(z.string().startsWith('pk.').optional()),
   /** Local Auth emulator; empty on staging and production. */
   NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL: z
     .string()

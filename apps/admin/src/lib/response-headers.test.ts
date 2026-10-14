@@ -3,6 +3,7 @@ import { contentSecurityPolicy, responseHeaders } from './response-headers';
 
 const production = {
   dev: false,
+  hasMap: false,
   apiOrigin: 'https://api.example',
   authDomain: 'widoo.firebaseapp.com',
 };
@@ -44,6 +45,15 @@ describe('contentSecurityPolicy', () => {
     });
     expect(policy).toContain("connect-src 'self' https://api.example http://127.0.0.1:9099 ws:;");
     expect(policy).not.toContain('identitytoolkit');
+  });
+
+  it('opens Mapbox and its worker only when the admin has a map', () => {
+    expect(contentSecurityPolicy(production)).not.toContain('mapbox');
+    expect(contentSecurityPolicy(production)).not.toContain('worker-src');
+
+    const policy = contentSecurityPolicy({ ...production, hasMap: true });
+    expect(policy).toContain('https://api.mapbox.com https://events.mapbox.com;');
+    expect(policy).toContain("worker-src 'self' blob:;");
   });
 
   it('allows neither eval nor a WebSocket in production', () => {
