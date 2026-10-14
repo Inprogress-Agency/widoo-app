@@ -50,6 +50,13 @@
       "when": 1791973828255,
       "tag": "0006_add_step_content",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791974962974,
+      "tag": "0007_add_route_unlocks",
+      "breakpoints": true
     }
   ]
 }

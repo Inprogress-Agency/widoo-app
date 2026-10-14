@@ -4,10 +4,12 @@
  */
 import type { PlannedRoute, UpdatePlannedRoute, ValidationIssue } from '@widoo/shared';
 import { DrizzleQueryError, eq } from 'drizzle-orm';
-import { canAccessRoute, type RouteViewer } from '../access/route-access';
+import { canAccessRoute } from '../access/route-access';
+import { routeViewerOf } from '../access/route-viewer';
 import type { Db } from '../db/client';
 import { plannedRoutes } from '../db/schema';
 import { bodyValidationError, httpError, premiumRequired } from '../errors';
+import type { User } from '../users/repository';
 import { ownedPlanned, readPlanned, snapshotOfRow, type PlannedRow } from './repository';
 import { timelineOf } from './snapshot';
 import { canMove, closingOf, isDatable } from './status';
@@ -48,14 +50,14 @@ function checklistOf(row: PlannedRow, items: UpdatePlannedRoute['checklist']) {
 
 export async function updatePlanned(
   db: Db,
-  viewer: RouteViewer & { id: string },
+  user: User,
   id: string,
   body: UpdatePlannedRoute,
   now: Date,
 ): Promise<PlannedRoute> {
   try {
     return await db.transaction(async (tx) => {
-      const row = await ownedPlanned(tx, viewer.id, id, true);
+      const row = await ownedPlanned(tx, user.id, id, true);
       const status = body.status ?? row.status;
       if (body.status && !canMove(row.status, body.status)) {
         throw httpError(409, `A ${row.status} planning cannot become ${body.status}`);
@@ -79,7 +81,10 @@ export async function updatePlanned(
       // A Premium route without the right to it: neither a new date nor a new Go (D-038).
       const isStarting = body.status === 'in_progress' && row.status !== 'in_progress';
       const snapshot = snapshotOfRow(row);
-      if ((body.startsAt || isStarting) && !canAccessRoute(snapshot, viewer, now)) {
+      if (
+        (body.startsAt || isStarting) &&
+        !canAccessRoute(snapshot, await routeViewerOf(tx, user, [snapshot]), now)
+      ) {
         throw premiumRequired('premium_route');
       }
       const startsAt = body.startsAt ? new Date(body.startsAt) : row.startsAt;

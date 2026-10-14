@@ -1,7 +1,7 @@
 import { eq, inArray } from 'drizzle-orm';
 import type { buildApp } from '../app';
 import type { TestTokenVerifier } from '../auth/test-verifier';
-import { routes, steps, users } from '../db/schema';
+import { routeUnlocks, routes, steps, users } from '../db/schema';
 import { seed, seedId } from '../db/seed';
 import { uuidv7 } from '../db/uuid';
 
@@ -56,10 +56,22 @@ export function plannedFixtures(app: () => App, verifier: TestTokenVerifier) {
     return { authorization: `Bearer ${token}` };
   }
 
+  /** The route bought alone by the signed-in account (D-073), with a fictitious transaction. */
+  async function unlock(headers: Record<string, string>, routeId: string) {
+    const me = await app().inject({ url: '/v1/me', headers });
+    await app()
+      .db.insert(routeUnlocks)
+      .values({
+        userId: me.json<{ id: string }>().id,
+        routeId,
+        storeTransactionId: `fictitious-${uuidv7()}`,
+      });
+  }
+
   async function cleanUp() {
     if (uids.length > 0) await app().db.delete(users).where(inArray(users.firebaseUid, uids));
     if (routeIds.length > 0) await app().db.delete(routes).where(inArray(routes.id, routeIds));
   }
 
-  return { copyDemoRoute, signIn, cleanUp };
+  return { copyDemoRoute, signIn, unlock, cleanUp };
 }

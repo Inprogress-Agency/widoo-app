@@ -7,7 +7,7 @@
 import { taxonomies, type LatLng, type RouteCard, type RouteSearchQuery } from '@widoo/shared';
 import { sql, type SQL } from 'drizzle-orm';
 import { z } from 'zod';
-import type { RouteViewer } from '../access/route-access';
+import { routeViewerOf } from '../access/route-viewer';
 import type { Db } from '../db/client';
 import type { BBox } from '../db/geography';
 import { ratingOf } from '../db/route-stats';
@@ -16,6 +16,7 @@ import { rankCandidates, type Candidate, type Ranked } from '../recommendation/r
 import { stableComponentsOf } from '../recommendation/stable';
 import type { RecommendationWeights } from '../recommendation/weights';
 import { httpError } from '../errors';
+import type { User } from '../users/repository';
 import { decodeCursor, encodeCursor } from './cursor';
 import { cardColumns, cardJoins, searchWhere, toCard, type CardRow } from './repository';
 
@@ -85,7 +86,7 @@ export async function searchRecommended(
   db: Db,
   query: RouteSearchQuery,
   settings: RecommendationSettings,
-  viewer: RouteViewer | null,
+  user: User | null,
 ): Promise<{ items: RouteCard[]; nextCursor: string | null }> {
   const [offset, at] = query.cursor
     ? decodeCursor(query.cursor, 'recommended', ['int', 'bigint'])
@@ -125,6 +126,7 @@ export async function searchRecommended(
 
   const reasons = new Map(page.map((item) => [item.id, item.reason]));
   const rows = await db.execute<CardRow>(cardsSql(page.map((item) => item.id)));
+  const viewer = await routeViewerOf(db, user, rows);
   return {
     items: rows.map((row) => ({
       ...toCard(row, viewer, settings.now),
