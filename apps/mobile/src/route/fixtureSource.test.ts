@@ -5,6 +5,7 @@ import fixtures from './generated/route-sheets.json';
 
 const source = createFixtureSource(fixtures, {
   latencyMs: 0,
+  timelineLatencyMs: 0,
   failures: { offline: { kind: 'network', delayMs: 0 }, broken: { kind: 'server', delayMs: 0 } },
 });
 
@@ -35,7 +36,7 @@ describe('fixture source of the route sheet', () => {
   it('refuses a sheet the schema does not accept', async () => {
     const broken = createFixtureSource(
       { routes: [{ ...fixtures.routes[0], effort: 'hard' }], removed: [] },
-      { latencyMs: 0, failures: {} },
+      { latencyMs: 0, timelineLatencyMs: 0, failures: {} },
     );
     await expect(broken.getRoute(fixtures.routes[0]?.id ?? '')).rejects.toMatchObject({
       kind: 'invalid_response',
@@ -47,5 +48,18 @@ describe('fixture source of the route sheet', () => {
     const pending = fixtureSource.getRoute('recette-chargement', { signal: controller.signal });
     controller.abort();
     await expect(pending).rejects.toBeDefined();
+  });
+
+  it('computes the timeline of a start, with the conflicts of the hours', async () => {
+    const id = fixtures.routes[0]?.id ?? '';
+    // Monday: the museums of the Marais are closed.
+    const timeline = await source.getTimeline(id, '2026-09-28T10:00:00+02:00');
+    expect(timeline.startsAt).toBe('2026-09-28T08:00:00.000Z');
+    expect(timeline.steps[0]?.conflicts).toEqual(['closed_that_day']);
+    const tuesday = await source.getTimeline(id, '2026-09-29T10:00:00+02:00');
+    expect(tuesday.steps.every((entry) => entry.conflicts.length === 0)).toBe(true);
+    await expect(source.getTimeline('offline', tuesday.startsAt)).rejects.toMatchObject({
+      kind: 'network',
+    });
   });
 });
