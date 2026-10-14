@@ -1,15 +1,21 @@
 import {
   AppConfig,
   GeocodeResult,
+  LegalDocument,
   Me,
+  MyDataExport,
   PlannedRoute,
   PlannedRouteList,
   RouteCount,
   RouteDetail,
   RouteSearchResult,
   RouteTimeline,
+  SupportMessageReceipt,
+  type AppLocale,
   type CreatePlannedRoute,
+  type LegalDoc,
   type RegisterDevice,
+  type SupportMessageInput,
   type UpdateMe,
   type UpdatePlannedRoute,
 } from '@widoo/shared';
@@ -157,6 +163,35 @@ export function createApiClient(options: ApiClientOptions) {
         schema: PlannedRoute,
         auth: true,
       }),
+
+    /**
+     * `GET /v1/legal/:doc`: the terms or the privacy policy in the language of the app, or in
+     * French while it is not translated (`locale` of the answer). Public: sent without token.
+     */
+    getLegalDocument: (doc: LegalDoc, locale: AppLocale, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/legal/${doc}?${new URLSearchParams({ locale }).toString()}`,
+        schema: LegalDocument,
+        signal,
+      }),
+
+    /**
+     * `POST /v1/support/messages`: « Nous écrire » (E-19), with the token of the signed-in user
+     * when `getToken` gives one, without otherwise.
+     */
+    sendSupportMessage: (message: SupportMessageInput) =>
+      request({
+        method: 'POST',
+        path: '/v1/support/messages',
+        body: message,
+        schema: SupportMessageReceipt,
+        auth: 'optional',
+      }),
+
+    /** `GET /v1/me/export`: every data of the account, for the file of E-19 › Confidentialité. */
+    exportMyData: (signal?: AbortSignal) =>
+      request({ method: 'GET', path: '/v1/me/export', schema: MyDataExport, auth: true, signal }),
 
     /** `DELETE /v1/me`: anonymizes the account; its token is refused afterwards. */
     deleteMe: () => requestEmpty({ method: 'DELETE', path: '/v1/me', auth: true }),
