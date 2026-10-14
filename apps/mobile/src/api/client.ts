@@ -1,5 +1,6 @@
 import { createApiClient } from '@widoo/api-client';
 import Constants from 'expo-constants';
+import { session } from '../auth';
 import { SEARCH_TIMEOUT_MS } from '../search/textSearch';
 import { resolveApiUrl } from './api-url';
 
@@ -10,8 +11,12 @@ export const apiUrl = resolveApiUrl({
   isDev: __DEV__,
 });
 
-/** No `getToken` until Firebase Auth reaches the app (E-10): authenticated routes answer 401. */
-export const api = createApiClient({ baseUrl: apiUrl });
+/**
+ * The Firebase token of the session goes with the authenticated requests, and with the public
+ * ones whose answer depends on the caller (`/routes/search`, D-075); after a 401, it is
+ * refreshed and the request tried once more (`@widoo/api-client`).
+ */
+export const api = createApiClient({ baseUrl: apiUrl, getToken: session.getToken });
 
 /**
  * The search of E-02, whose requests give up after 5 s (Ecrans › E-02, chargement): the group
