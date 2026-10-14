@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Step 1 of 3: APIs, Artifact Registry, service accounts, Workload Identity Federation for GitHub.
+# Step 1 of 4: APIs, Artifact Registry, service accounts, Workload Identity Federation for GitHub.
 # Idempotent: creates what is missing and leaves the rest. Usage: ./1-foundation.sh [--dry-run] [--yes]
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -15,7 +15,7 @@ step 'APIs'
 run gcloud services enable run.googleapis.com artifactregistry.googleapis.com \
   sqladmin.googleapis.com secretmanager.googleapis.com compute.googleapis.com \
   servicenetworking.googleapis.com iam.googleapis.com iamcredentials.googleapis.com \
-  sts.googleapis.com
+  sts.googleapis.com cloudscheduler.googleapis.com
 
 step 'Artifact Registry'
 if ! exists gcloud artifacts repositories describe "$AR_REPOSITORY" --location="$REGION"; then

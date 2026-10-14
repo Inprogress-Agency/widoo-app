@@ -9,13 +9,14 @@ API de staging sur Google Cloud ([#24](https://github.com/Inprogress-Agency/wido
 | `gcp/1-foundation.sh` | API Google, Artifact Registry, comptes de service, Workload Identity Federation |
 | `gcp/2-database.sh` | réseau, Cloud SQL, base, utilisateur, secrets (dont le jeton de service `internal-token`, généré) |
 | `gcp/3-run.sh` | service Cloud Run `widoo-api` et job de migration `widoo-api-migrate` |
+| `gcp/4-scheduler.sh` | jobs Cloud Scheduler des routes internes de l'API (recalcul nocturne de la recommandation) |
 | `gcp/demo-seed.sh` | chargement ou retrait du jeu de démonstration dans la base de staging, par une exécution du job de migration |
 | `gcp/artifact-cleanup.json` | nettoyage des images : les 10 plus récentes gardées, les autres supprimées après 30 jours |
 | `../.github/workflows/deploy-staging.yml` | build, migration et déploiement à chaque push sur `main` |
 
 ## Pourquoi des scripts `gcloud` plutôt que Terraform
 
-Pour une quinzaine de ressources, un environnement et deux personnes, Terraform imposerait un état distant à amorcer (bucket, verrou), un outil de plus et un `plan` à relire à chaque changement. Les scripts sont idempotents : relancés, ils créent ce qui manque et laissent le reste, sauf la condition WIF et la configuration Cloud Run qu'ils réalignent. Limite assumée : ils ne voient pas une modification faite à la main dans la console. Toute modification passe donc par le script, puis par une PR. Terraform redeviendra pertinent avec la production.
+Pour une quinzaine de ressources, un environnement et deux personnes, Terraform imposerait un état distant à amorcer (bucket, verrou), un outil de plus et un `plan` à relire à chaque changement. Les scripts sont idempotents : relancés, ils créent ce qui manque et laissent le reste, sauf la condition WIF, la configuration Cloud Run et les jobs Cloud Scheduler qu'ils réalignent. Limite assumée : ils ne voient pas une modification faite à la main dans la console. Toute modification passe donc par le script, puis par une PR. Terraform redeviendra pertinent avec la production.
 
 ## Prérequis
 
@@ -41,6 +42,8 @@ read -rs token && printf '%s' "$token" | gcloud secrets versions add mapbox-geoc
 read -rs token && printf '%s' "$token" | gcloud secrets versions add mapbox-directions-token --data-file=- --project=widoo-staging
 ./3-run.sh --dry-run
 ./3-run.sh                 # 2 minutes environ
+./4-scheduler.sh --dry-run
+./4-scheduler.sh           # quelques secondes
 ```
 
 Sans valeur dans `sentry-dsn`, le service démarre sans envoyer de rapports d'erreur. Relancer `3-run.sh` une fois le DSN ajouté.
@@ -120,6 +123,7 @@ Aucun rôle au niveau du projet, aucune clé de compte de service : chaque rôle
 | | Cloud Run Developer | service `widoo-api`, job `widoo-api-migrate` | déployer, lancer la migration |
 | | Service Account User | comptes `widoo-api-run`, `widoo-api-migrate` | déployer sous leur identité |
 | GitHub (fédération) | Workload Identity User | compte `widoo-deployer` | voir ci-dessous |
+| Cloud Scheduler | aucun | | le job porte le jeton dans son en-tête et appelle l'URL publique ; pas de compte de service |
 
 La fédération n'accepte que le jeton OIDC d'un run qui remplit les quatre conditions : dépôt n° `1379731427` (identifiant immuable de `Inprogress-Agency/widoo-app`), ref `refs/heads/main`, environnement GitHub `staging`, workflow `.github/workflows/deploy-staging.yml` de `main`. Une PR, une autre branche ou un fork n'obtient rien.
 
@@ -135,8 +139,45 @@ Ordre de grandeur mensuel en `europe-west9`, à confirmer dans le simulateur de 
 | Stockage SSD 10 Go, sauvegardes 7 jours, journaux PITR | 3 € environ |
 | Cloud Run (scale à zéro, quota gratuit) | 0 à 2 € |
 | Artifact Registry (10 images au plus, 2 Go environ) | moins de 0,50 € |
-| Secret Manager, fédération d'identité, réseau VPC | 0 € environ |
+| Secret Manager (5 secrets, une version active chacun ; 6 versions et 10 000 accès gratuits par mois et par compte de facturation, puis 0,06 $ par version et par mois) | 0 € environ |
+| Cloud Scheduler (1 job ; 3 jobs gratuits par compte de facturation, puis 0,10 $ par job et par mois) | 0 € |
+| Fédération d'identité, réseau VPC | 0 € environ |
 | **Total** | **13 à 16 € environ** |
+
+## Tâches planifiées (Cloud Scheduler)
+
+`4-scheduler.sh` crée ou met à jour les jobs qui appellent les routes internes de l'API ([API › Interne](https://github.com/Inprogress-Agency/widoo-app/wiki/API#interne-jeton-de-service-cloud-scheduler)), dans la région de l'API, `europe-west9` (Paris), que Cloud Scheduler prend en charge.
+
+| Job | Appel | Quand | Pourquoi |
+|---|---|---|---|
+| `widoo-recommendation-nightly` | `POST <URL du service>/v1/internal/recommendation`, corps `{}` | chaque nuit à 03:00, fuseau `Europe/Paris` (`0 3 * * *`) | recalcul des composantes stables du score de recommandation ([Filtres-et-Recherche › Recommandation](https://github.com/Inprogress-Agency/widoo-app/wiki/Filtres-et-Recherche#recommandation--autour-de-moi-)) ; après la sauvegarde Cloud SQL de 01:00 UTC, hors de sa fenêtre de maintenance |
+
+Réglages communs, dans `job_json` :
+
+- **Authentification** : `Authorization: Bearer <internal-token>`, sans jeton OIDC ni OAuth, qui remplacerait cet en-tête. Le service est public (`allUsers`) : c'est l'API qui contrôle le jeton.
+- **Corps** : `{}` avec `Content-Type: application/json` ; l'API refuse un corps JSON vide.
+- **Échec** : délai de 90 s par tentative (le service coupe à 60 s), 2 nouvelles tentatives espacées de 5 minutes au moins ; le recalcul est idempotent. Cloud Scheduler ne lance jamais deux exécutions d'un même job en parallèle.
+- **Heure** : en heure de Paris, 03:00 existe aux deux changements d'heure.
+
+Le script lit le jeton dans Secret Manager au moment de son exécution et passe par l'API REST de Cloud Scheduler, comme `2-database.sh` pour le mot de passe : avec `gcloud scheduler jobs create http --headers=…`, le jeton serait un argument de commande, que `gcloud` écrit dans ses journaux. Le corps de la requête passe par un descripteur de fichier, la réponse n'est pas affichée, et le script n'affiche que l'état, l'horaire, le fuseau et l'URL du job. Relancé, il met à jour le job existant (`PATCH`) au lieu d'en créer un second ; il ne change pas son état (un job en pause le reste).
+
+Le jeton reste lisible dans la configuration du job : `gcloud scheduler jobs describe` sans `--format` l'affiche, comme la console, à quiconque a le droit de lire les jobs du projet (Owner, Editor, Viewer). Ne jamais coller cette sortie, et réserver l'accès au projet à qui peut lire ce jeton.
+
+Ajouter un job (par exemple `/internal/recompute`, [#56](https://github.com/Inprogress-Agency/widoo-app/issues/56)) : un appel de plus à `schedule_internal_job` en fin de script, avec son nom, sa route, son horaire et sa description. Même jeton, aucun droit nouveau.
+
+Suivi : `gcloud scheduler jobs describe widoo-recommendation-nightly --location=europe-west9 --project=widoo-staging --format='yaml(state,lastAttemptTime,status,scheduleTime)'` ; la réponse de l'API (`recommendation components recomputed`, avec le nombre de parcours mis à jour) est dans les journaux du service.
+
+### Rotation du jeton de service
+
+Sans fenêtre de double jeton : l'API n'accepte qu'un jeton. Le faire hors de 03:00, dans l'ordre :
+
+1. nouvelle version, générée et écrite sans affichage : `printf '%s' "$(openssl rand -hex 32)" | gcloud secrets versions add internal-token --data-file=- --project=widoo-staging` ;
+2. nouvelle révision du service, qui lit `latest` : relancer `3-run.sh` ;
+3. mise à jour de l'en-tête du job : relancer `4-scheduler.sh` ;
+4. vérifier : `gcloud scheduler jobs run widoo-recommendation-nightly --location=europe-west9 --project=widoo-staging`, puis le statut du job (`status` sans code d'erreur) et le journal de l'API ;
+5. désactiver l'ancienne version (`gcloud secrets versions disable <ancienne version> --secret=internal-token --project=widoo-staging`), puis la détruire une fois la rotation vérifiée (`gcloud secrets versions destroy`) : une version désactivée reste facturée.
+
+Retour arrière avant l'étape 5 : `gcloud secrets versions enable` sur l'ancienne version, `disable` sur la nouvelle, puis les étapes 2 et 3. En cas de fuite, faire la rotation tout de suite.
 
 ## Déploiement
 
@@ -189,6 +230,22 @@ curl -s "$URL/v1/health"    # {"status":"ok","database":"up"}
 - **Retour arrière** : l'exercer une fois (section suivante), puis revenir avec `--to-latest`.
 - **`TRUST_PROXY`** : lancer trois fois `curl -s -D - -o /dev/null "$URL/v1/health" | grep -i x-ratelimit-remaining` depuis le poste, puis une fois depuis Cloud Shell. Cloud Shell a une autre adresse IP : si son compteur repart de 999, chaque client a bien sa propre limite. S'il prolonge le décompte du poste, le pair direct n'est pas en `linklocal`. Dans ce cas, poser la bonne plage (`TRUST_PROXY=<plage> ./3-run.sh`) et la reporter dans le script par une PR. Le compteur est tenu en mémoire, par instance : faire le test hors trafic.
 
+## Vérifier les critères de #277
+
+```bash
+URL=$(gcloud run services describe widoo-api --region=europe-west9 --project=widoo-staging --format='value(status.url)')
+# Sans jeton : 401
+curl -s -o /dev/null -w '%{http_code}\n' -X POST "$URL/v1/internal/recommendation" -H 'Content-Type: application/json' -d '{}'
+# Avec le jeton, passé par un descripteur de fichier : 200 et {"updated":<n>}
+curl -s -w '\n%{http_code}\n' -X POST "$URL/v1/internal/recommendation" -H 'Content-Type: application/json' -d '{}' \
+  -H @<(printf 'Authorization: Bearer %s\n' "$(gcloud secrets versions access latest --secret=internal-token --project=widoo-staging)")
+# Premier lancement du job, puis son résultat
+gcloud scheduler jobs run widoo-recommendation-nightly --location=europe-west9 --project=widoo-staging
+gcloud scheduler jobs describe widoo-recommendation-nightly --location=europe-west9 --project=widoo-staging --format='yaml(state,lastAttemptTime,status)'
+```
+
+Un 404 avec le jeton : le service n'a pas `INTERNAL_TOKEN` (relancer `3-run.sh`). Un 401 du job : son en-tête date d'un ancien jeton (relancer `4-scheduler.sh`).
+
 ## Retour arrière
 
 **Application** : revenir à la révision précédente, en quelques secondes et sans rebuild.
@@ -205,6 +262,8 @@ gcloud run services update-traffic widoo-api --region=europe-west9 --project=wid
 **Schéma** : les migrations sont additives ([Securite-et-RGPD](https://github.com/Inprogress-Agency/widoo-app/wiki/Securite-et-RGPD#propri%C3%A9t%C3%A9s-obligatoires)). L'ancienne révision fonctionne donc sur le nouveau schéma, et il n'y a pas de retour arrière de schéma. Une migration en échec est annulée par sa transaction et bloque le déploiement.
 
 **Données** : un retour arrière applicatif ne restaure aucune donnée. Pour restaurer : cloner l'instance à un instant donné, par exemple `gcloud sql instances clone widoo-db widoo-db-restore --point-in-time=2026-09-23T10:00:00Z`, vérifier le clone, puis pointer `database-url` dessus. C'est une action manuelle, à annoncer.
+
+**Tâches planifiées** : `gcloud scheduler jobs pause widoo-recommendation-nightly --location=europe-west9 --project=widoo-staging` (puis `resume`), ou `delete`. L'API garde les dernières composantes calculées. Pour couper les routes internes : retirer la variable (`gcloud run services update widoo-api --region=europe-west9 --project=widoo-staging --remove-secrets=INTERNAL_TOKEN`), elles répondent alors 404.
 
 **Accès de GitHub** : coupé immédiatement par `gcloud iam workload-identity-pools providers disable widoo-app --location=global --workload-identity-pool=github --project=widoo-staging`.
 
