@@ -30,6 +30,7 @@ const me: Me = {
   plan: 'free',
   planExpiresAt: null,
   isPublic: true,
+  locale: null,
   notificationPrefs: defaultNotificationPrefs,
   bio: null,
   neighborhood: null,

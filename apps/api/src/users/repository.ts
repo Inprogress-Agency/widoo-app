@@ -9,6 +9,7 @@ import {
   userFeaturedRoutes,
   users,
 } from '../db/schema';
+import { storedNotificationPrefs } from './notification-prefs';
 import { profileIssues, replaceProfileLists, type ProfileIssue } from './profile';
 
 export type User = typeof users.$inferSelect;
@@ -78,7 +79,7 @@ export async function updateUser(db: Db, userId: string, update: UpdateMe): Prom
     const set = {
       ...fields,
       ...(notificationPrefs && {
-        notificationPrefs: sql`${users.notificationPrefs} || ${JSON.stringify(notificationPrefs)}::jsonb`,
+        notificationPrefs: sql`${users.notificationPrefs} || ${JSON.stringify(storedNotificationPrefs(notificationPrefs))}::jsonb`,
       }),
     };
     const [user] =
@@ -93,7 +94,8 @@ export async function updateUser(db: Db, userId: string, update: UpdateMe): Prom
 
 /**
  * Account deletion (wiki Compte-et-Monetisation): `deleted_at` set, e-mail, first name, avatar,
- * bio, neighborhood and preferences erased, anecdotes, featured routes and plannings deleted,
+ * bio, neighborhood, language and preferences erased, anecdotes, featured routes and plannings
+ * deleted,
  * profile no longer public, so its routes show « Membre Widoo ». The row and its `firebase_uid`
  * stay until the purge, 30 days later (wiki Securite-et-RGPD), whose cascade finds nothing left
  * to delete.
@@ -111,6 +113,7 @@ export async function softDeleteUser(db: Db, userId: string): Promise<void> {
         neighborhood: null,
         isPublic: false,
         notificationPrefs: {},
+        locale: null,
       })
       .where(and(eq(users.id, userId), isNull(users.deletedAt)))
       .returning({ id: users.id });

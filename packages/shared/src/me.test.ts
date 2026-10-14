@@ -20,9 +20,18 @@ describe('UpdateMe', () => {
     const update = {
       firstName: ' Camille ',
       avatarUrl: null,
-      notificationPrefs: { creatorEmail: false },
+      locale: 'en',
+      notificationPrefs: { nextDay: false },
     };
     expect(UpdateMe.parse(update)).toEqual({ ...update, firstName: 'Camille' });
+  });
+
+  it('accepts the three notification switches of the wiki and the phone language', () => {
+    const update = {
+      locale: null,
+      notificationPrefs: { reminders: false, nextDay: true, myRoutes: false },
+    };
+    expect(UpdateMe.parse(update)).toEqual(update);
   });
 
   it('accepts the profile: bio, neighborhood, anecdotes and featured routes, or their removal', () => {
@@ -43,6 +52,11 @@ describe('UpdateMe', () => {
     ['an e-mail', { email: 'camille.test@example.com' }],
     ['an avatar URL, until avatars are uploaded', { avatarUrl: 'https://example.com/a.jpg' }],
     ['an unknown preference', { notificationPrefs: { marketing: true } }],
+    ['a provisional key of #385', { notificationPrefs: { plannedRouteReminders: false } }],
+    ['a snake_case key', { notificationPrefs: { next_day: false } }],
+    ['a preference that is not a boolean', { notificationPrefs: { reminders: 'no' } }],
+    ['a language the app does not ship', { locale: 'de' }],
+    ['a regional language tag', { locale: 'fr-FR' }],
     ['a bio over 150 characters', { bio: 'a'.repeat(151) }],
     ['an empty neighborhood', { neighborhood: ' ' }],
     ['an anecdote with markup', { anecdotes: [{ questionKey: 'hidden_gem', answer: '<b>' }] }],

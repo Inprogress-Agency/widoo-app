@@ -6,6 +6,7 @@
 import { directionsProfiles } from '@widoo/orchestration';
 import {
   anecdoteAnswerMaxLength,
+  appLocales,
   bioMaxLength,
   certifiedOverrides,
   openRevisionStatuses,
@@ -24,6 +25,7 @@ import {
   stepHighlightsMax,
   stepPhotosMax,
   taxonomies,
+  type AppLocale,
   type Audience,
   type Condition,
   type Mood,
@@ -155,12 +157,21 @@ export const users = pgTable(
     certifiedAt: timestamp('certified_at', { withTimezone: true }),
     /** Weight of the user's place signals. */
     trustScore: numeric('trust_score', { mode: 'number' }).notNull().default(1),
+    /**
+     * `{ reminders, next_day, my_routes }`, booleans; a missing key is `true` (D-062). Read and
+     * written by `users/notification-prefs`, the only place that knows these keys.
+     */
     notificationPrefs: jsonb('notification_prefs').notNull().default({}),
+    /** `fr` or `en` chosen in Réglages › Langue; null follows the phone (D-062). */
+    locale: text('locale').$type<AppLocale>(),
     createdAt: createdAt(),
     /** Soft delete, then purge (wiki Securite-et-RGPD). */
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
-  (t) => [check('users_bio_length_check', isAtMost(t.bio, bioMaxLength))],
+  (t) => [
+    check('users_bio_length_check', isAtMost(t.bio, bioMaxLength)),
+    check('users_locale_check', sql`${t.locale} is null or ${isOneOf(t.locale, appLocales)}`),
+  ],
 );
 
 export const places = pgTable(

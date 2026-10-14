@@ -11,7 +11,8 @@ export function testMe(overrides: Partial<Me> = {}): Me {
     plan: 'free',
     planExpiresAt: null,
     isPublic: true,
-    notificationPrefs: { plannedRouteReminders: true, creatorPush: true, creatorEmail: true },
+    locale: null,
+    notificationPrefs: { reminders: true, nextDay: true, myRoutes: true },
     bio: 'Parisienne de l’Est. Je cherche les coins calmes au bord de l’eau.',
     neighborhood: 'Paris 11e',
     anecdotes: [
