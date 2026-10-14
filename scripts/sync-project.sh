@@ -10,7 +10,7 @@
 # de sa liste cochable (prêts, en cours, attendent une maquette, à préparer, bloqués, faits). Le champ
 # se crée une fois, sur décision d'Ilan ; absent, le script le signale et n'écrit rien sur les epics.
 # --dry-run affiche les mêmes lignes qu'un vrai lancement, sans rien écrire. Idempotent.
-# Usage : scripts/sync-project.sh [--dry-run]
+# Usage : scripts/sync-project.sh [--dry-run | -h | --help] ; tout autre argument est refusé (code 2).
 # Chargé par source (validate-design.sh, sync-project.test.sh), il ne définit que les règles.
 set -euo pipefail
 
@@ -95,13 +95,33 @@ sync_plan() {
     | @tsv'
 }
 
+# Nom propre au script : validate-design.sh le charge par source et a son propre usage().
+sync_project_usage() { # builtins seuls : l'aide s'affiche même sans PATH
+  local line
+  while IFS= read -r line; do printf '%s\n' "$line"; done <<'USAGE'
+Usage : scripts/sync-project.sh [--dry-run]
+
+Aligne le Status du Project sur les labels et l'état des issues, sans faire reculer un ticket parti
+en développement, et écrit le champ « Préparation » des epics ouvertes.
+
+Options :
+  --dry-run     affiche les mêmes lignes qu'un vrai lancement, sans rien écrire
+  -h, --help    affiche cette aide et sort, sans appel à GitHub
+
+Variables :
+  REPO            dépôt visé (défaut : Inprogress-Agency/widoo-app)
+  PROJECT_TITLE   titre du Project (défaut : Widoo — MVP)
+USAGE
+}
+
 main() {
   local repo owner title dry pnum pid fields fid plan issues items prep_fid rplan changed=0 kept=0 same=0 prep_set=0 prep_same=0
   repo="${REPO:-Inprogress-Agency/widoo-app}"; owner="${repo%%/*}"; title="${PROJECT_TITLE:-Widoo — MVP}"
-  case "${1:-}" in
-    "") dry="" ;;
-    --dry-run) dry=1 ;;
-    *) echo "argument inconnu : $1 — usage : scripts/sync-project.sh [--dry-run]" >&2; exit 2 ;;
+  case "$#:${1:-}" in
+    0:) dry="" ;;
+    1:--dry-run) dry=1 ;;
+    1:-h | 1:--help) sync_project_usage; return 0 ;;
+    *) echo "argument refusé : $*" >&2; sync_project_usage >&2; exit 2 ;;
   esac
 
   pnum=$(gh project list --owner "$owner" --format json --jq ".projects[] | select(.title == \"$title\") | .number" | head -1)
