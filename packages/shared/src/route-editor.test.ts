@@ -15,8 +15,28 @@ describe('UpdateRoute', () => {
     ['the derived condition no_booking', { conditions: ['no_booking'] }],
     ['markup in the description', { description: '<script>' }],
     ['an unknown field', { access: 'premium' }],
+    ['a start with seconds', { suggestedStart: '10:00:00' }],
+    ['a fourth tip', { tips: ['a', 'b', 'c', 'd'] }],
+    ['a tip over 80 characters', { tips: ['x'.repeat(81)] }],
+    ['an empty tip', { tips: [' '] }],
+    ['a hidden suggestion twice', { tipsHidden: ['comfy_shoes', 'comfy_shoes'] }],
+    ['a hidden suggestion that is no key', { tipsHidden: ['Chaussures confortables'] }],
+    ['the getting there removed by D-050', { gettingThere: 'Métro Abbesses' }],
   ])('refuses %s', (_, body) => {
     expect(UpdateRoute.safeParse(body).success).toBe(false);
+  });
+
+  it('takes the suggested start, the tips and the hidden suggestions (D-048, D-050)', () => {
+    const body = {
+      suggestedStart: '10:30',
+      tips: [' Des espèces ', 'Une gourde'],
+      tipsHidden: ['comfy_shoes'],
+    };
+    expect(UpdateRoute.parse(body)).toEqual({ ...body, tips: ['Des espèces', 'Une gourde'] });
+    expect(UpdateRoute.parse({ suggestedStart: null, tips: [] })).toEqual({
+      suggestedStart: null,
+      tips: [],
+    });
   });
 
   it('creates an untitled draft, or a titled one', () => {
@@ -37,6 +57,9 @@ describe('StepInput', () => {
       bookingRequired: false,
       bookingUrl: null,
       bookingProvider: null,
+      bookingNote: null,
+      bookingIsAffiliate: false,
+      endsOn: null,
       transitionNote: null,
       transitionMode: null,
     });
@@ -48,6 +71,8 @@ describe('StepInput', () => {
     ['a booking link in http', { bookingUrl: 'http://example.com' }],
     ['a path over 200 characters', { transitionNote: 'x'.repeat(201) }],
     ['no duration', { durationMin: undefined }],
+    ['a booking note over 80 characters', { bookingNote: 'x'.repeat(81) }],
+    ['an end that is no date', { endsOn: '17/01/2027' }],
   ])('refuses %s', (_, fields) => {
     expect(StepInput.safeParse({ placeId, durationMin: 45, ...fields }).success).toBe(false);
   });
@@ -57,6 +82,13 @@ describe('PutRouteSteps', () => {
   it('saves more than ten steps, which only the submission blocks', () => {
     const steps = Array.from({ length: 12 }, () => ({ placeId, durationMin: 30 }));
     expect(PutRouteSteps.safeParse({ steps }).success).toBe(true);
+  });
+
+  it('refuses an affiliate link without its booking link (D-048)', () => {
+    const step = { placeId, durationMin: 30, bookingRequired: true, bookingIsAffiliate: true };
+    expect(PutRouteSteps.safeParse({ steps: [step] }).success).toBe(false);
+    const linked = { ...step, bookingUrl: 'https://example.com/book', bookingNote: 'Le soir' };
+    expect(PutRouteSteps.safeParse({ steps: [linked] }).success).toBe(true);
   });
 
   it('refuses the same step id twice', () => {

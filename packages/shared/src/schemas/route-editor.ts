@@ -21,6 +21,13 @@ export const stepTitleMaxLength = 60;
 export const bookingNoteMaxLength = 80;
 /** « Vos conseils » of « À prévoir »: three lines of the creator at most (D-048, D-050). */
 export const routeTipsMax = 3;
+/** One line of « À prévoir »: the wiki sets no length, this bound keeps a line a line. */
+export const routeTipMaxLength = 80;
+/**
+ * Keys of the computed « À prévoir » suggestions the creator switched off (D-050). The keys come
+ * from the orchestration (#35): stored as snake_case keys, this bound only keeps abuse out.
+ */
+export const routeTipsHiddenMax = 20;
 /** « Le chemin » of a trip, 200 characters at most (E-12). */
 export const transitionNoteMaxLength = 200;
 /**
@@ -37,6 +44,12 @@ export const enteredConditions = [
   'sunny',
   'rainy',
 ] as const satisfies readonly Condition[];
+
+/** `HH:MM`, a local time of the city, like the opening hours. */
+export const LocalTime = z.iso.time({ precision: -1 });
+
+/** A snake_case technical key. */
+const TechnicalKey = z.string().regex(/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/, 'snake_case key');
 
 /** A list of taxonomy keys, each once, in the order given (the first mood is the main one). */
 const uniqueKeys = <T extends readonly [string, ...string[]]>(keys: T) =>
@@ -59,6 +72,15 @@ export const UpdateRoute = z
     moods: uniqueKeys(taxonomies.moods),
     audiences: uniqueKeys(taxonomies.audiences),
     conditions: uniqueKeys(enteredConditions),
+    /** « Départ conseillé » chosen by the creator; null: computed (D-048, D-050). */
+    suggestedStart: LocalTime.nullable(),
+    /** « Vos conseils » of « À prévoir », in order (D-048, D-050). */
+    tips: z.array(plainText(routeTipMaxLength)).max(routeTipsMax),
+    /** Computed suggestions switched off, each once (D-050). */
+    tipsHidden: z
+      .array(TechnicalKey)
+      .max(routeTipsHiddenMax)
+      .refine((keys) => new Set(keys).size === keys.length, 'Each key once'),
   })
   .partial();
 export type UpdateRoute = z.infer<typeof UpdateRoute>;
@@ -77,6 +99,12 @@ export const StepInput = z.strictObject({
   bookingRequired: z.boolean().default(false),
   bookingUrl: HttpsUrl.nullable().default(null),
   bookingProvider: z.enum(taxonomies.bookingProviders).nullable().default(null),
+  /** « Précision », shown with the booking reminder (D-049). */
+  bookingNote: plainText(bookingNoteMaxLength).nullable().default(null),
+  /** « C'est un lien affilié »: the visitors see « Lien affilié » (D-048, D-050); needs the link. */
+  bookingIsAffiliate: z.boolean().default(false),
+  /** « Étape éphémère »: its last day, `YYYY-MM-DD` (D-050). */
+  endsOn: z.iso.date().nullable().default(null),
   transitionNote: plainText(transitionNoteMaxLength).nullable().default(null),
   /** Mode of the trip to the next step; null: the proposed one (D-048). */
   transitionMode: z.enum(taxonomies.transports).nullable().default(null),
@@ -91,7 +119,11 @@ export const PutRouteSteps = z.strictObject({
     .refine((steps) => {
       const ids = steps.flatMap((step) => (step.id ? [step.id] : []));
       return new Set(ids).size === ids.length;
-    }, 'Each step id once'),
+    }, 'Each step id once')
+    .refine(
+      (steps) => steps.every((step) => !step.bookingIsAffiliate || step.bookingUrl !== null),
+      'An affiliate link needs its booking link',
+    ),
 });
 export type PutRouteSteps = z.infer<typeof PutRouteSteps>;
 
@@ -182,6 +214,9 @@ export const OwnRoute = z.object({
   moods: z.array(z.enum(taxonomies.moods)),
   audiences: z.array(z.enum(taxonomies.audiences)),
   conditions: z.array(z.enum(taxonomies.conditions)),
+  suggestedStart: LocalTime.nullable(),
+  tips: z.array(z.string()),
+  tipsHidden: z.array(z.string()),
   /** Token of the private link, from the first move to `private` (`GET /routes/:id?token=`). */
   shareToken: z.string().nullable(),
   publishedAt: z.iso.datetime().nullable(),
