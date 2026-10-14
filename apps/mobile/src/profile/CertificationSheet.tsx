@@ -17,6 +17,7 @@ import { ModalSheetBackground, ModalSheetHandle, modalSheetBackdrop } from '../u
 import { setModalSheetOpen } from '../ui/ModalSheetShield';
 import { timing } from '../ui/motion';
 import { Text } from '../ui/Text';
+import { OverModals } from '../ui/OverModals';
 
 export interface CertificationSheetMethods {
   open: () => void;
@@ -60,6 +61,8 @@ export function CertificationSheet({ ref, certification, creatorName }: Certific
   return (
     <BottomSheetModal
       ref={sheet}
+      // Over the native modals too: E-16 opens over the route sheet (Ecrans › E-16).
+      containerComponent={OverModals}
       animationConfigs={openConfig}
       overrideReduceMotion={ReduceMotion.System}
       backdropComponent={modalSheetBackdrop(t('profile.certification.close'))}

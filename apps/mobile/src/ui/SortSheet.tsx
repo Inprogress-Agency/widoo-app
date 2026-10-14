@@ -13,6 +13,7 @@ import { setModalSheetOpen } from './ModalSheetShield';
 import { timing } from './motion';
 import { Radio } from './Radio';
 import { Text } from './Text';
+import { OverModals } from './OverModals';
 
 export interface SortOption<T extends string> {
   value: T;
@@ -76,6 +77,8 @@ export function SortSheet<T extends string>({
   return (
     <BottomSheetModal
       ref={sheet}
+      // Over the native modals too: E-16 opens over the route sheet (Ecrans › E-16).
+      containerComponent={OverModals}
       animationConfigs={openConfig}
       overrideReduceMotion={ReduceMotion.System}
       backdropComponent={modalSheetBackdrop(closeLabel)}
