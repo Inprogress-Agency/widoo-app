@@ -3,7 +3,7 @@ import { eq, inArray } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp, type BuildAppOptions } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
-import { routeUnlocks, userAnecdotes, userFeaturedRoutes, users } from '../db/schema';
+import { devices, routeUnlocks, userAnecdotes, userFeaturedRoutes, users } from '../db/schema';
 import { seed } from '../db/seed';
 import { testConfig } from '../test-config';
 
@@ -159,6 +159,10 @@ describe('DELETE /v1/me', () => {
     await app.db
       .insert(routeUnlocks)
       .values({ userId, routeId: routeIds[0] ?? '', storeTransactionId: `fictitious-${uid}` });
+    await app.db
+      .insert(devices)
+      .values({ userId, pushToken: `ExponentPushToken[deleted-${uid}]`, locale: 'en' });
+
     const response = await app.inject({ method: 'DELETE', url: '/v1/me', headers });
     expect(response.statusCode).toBe(204);
     expect(response.body).toBe('');
@@ -174,7 +178,7 @@ describe('DELETE /v1/me', () => {
       notificationPrefs: {},
       locale: null,
     });
-    for (const table of [userAnecdotes, userFeaturedRoutes, routeUnlocks]) {
+    for (const table of [userAnecdotes, userFeaturedRoutes, routeUnlocks, devices]) {
       expect(await app.db.select().from(table).where(eq(table.userId, userId))).toEqual([]);
     }
 

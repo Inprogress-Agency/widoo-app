@@ -6,6 +6,7 @@ import {
   RouteDetail,
   RouteSearchResult,
   RouteTimeline,
+  type RegisterDevice,
   type UpdateMe,
 } from '@widoo/shared';
 import {
@@ -114,6 +115,13 @@ export function createApiClient(options: ApiClientOptions) {
         auth: 'optional',
         signal,
       }),
+
+    /**
+     * `POST /v1/me/devices`: the push token of this phone and its language, the language of the
+     * push while the account follows the phone (D-062).
+     */
+    registerDevice: (device: RegisterDevice) =>
+      requestEmpty({ method: 'POST', path: '/v1/me/devices', body: device, auth: true }),
 
     /** `DELETE /v1/me`: anonymizes the account; its token is refused afterwards. */
     deleteMe: () => requestEmpty({ method: 'DELETE', path: '/v1/me', auth: true }),

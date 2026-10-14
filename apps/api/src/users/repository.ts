@@ -3,6 +3,7 @@ import { and, eq, isNull, sql } from 'drizzle-orm';
 import type { VerifiedIdentity } from '../auth/verifier';
 import type { Db } from '../db/client';
 import {
+  devices,
   plannedRoutes,
   routeUnlocks,
   userAnecdotes,
@@ -94,8 +95,8 @@ export async function updateUser(db: Db, userId: string, update: UpdateMe): Prom
 
 /**
  * Account deletion (wiki Compte-et-Monetisation): `deleted_at` set, e-mail, first name, avatar,
- * bio, neighborhood, language and preferences erased, anecdotes, featured routes and plannings
- * deleted,
+ * bio, neighborhood, language and preferences erased, anecdotes, featured routes, plannings and
+ * phones deleted (no push reaches a deleted account),
  * profile no longer public, so its routes show « Membre Widoo ». The row and its `firebase_uid`
  * stay until the purge, 30 days later (wiki Securite-et-RGPD), whose cascade finds nothing left
  * to delete.
@@ -124,5 +125,6 @@ export async function softDeleteUser(db: Db, userId: string): Promise<void> {
     await tx.delete(plannedRoutes).where(eq(plannedRoutes.userId, userId));
     // A route bought alone belongs to the account: nothing is left to unlock (D-073).
     await tx.delete(routeUnlocks).where(eq(routeUnlocks.userId, userId));
+    await tx.delete(devices).where(eq(devices.userId, userId));
   });
 }

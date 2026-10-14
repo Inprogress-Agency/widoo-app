@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FirstName, UpdateMe } from '.';
+import { ExpoPushToken, FirstName, RegisterDevice, UpdateMe } from '.';
 
 describe('FirstName', () => {
   it.each([
@@ -67,5 +67,27 @@ describe('UpdateMe', () => {
     ['a route id that is not a uuid', { featuredRouteIds: ['marais-gourmand'] }],
   ])('rejects %s', (_, update) => {
     expect(UpdateMe.safeParse(update).success).toBe(false);
+  });
+});
+
+describe('RegisterDevice', () => {
+  const pushToken = 'ExponentPushToken[fictitious-Token_0123]';
+
+  it('accepts an Expo push token and the language of the phone', () => {
+    expect(RegisterDevice.parse({ pushToken, locale: 'en' })).toEqual({ pushToken, locale: 'en' });
+    expect(ExpoPushToken.parse('ExpoPushToken[abc]')).toBe('ExpoPushToken[abc]');
+  });
+
+  it.each([
+    ['no language', { pushToken }],
+    ['the language of the account', { pushToken, locale: null }],
+    ['a language the app does not ship', { pushToken, locale: 'es' }],
+    ['a raw device token', { pushToken: 'f'.repeat(64), locale: 'fr' }],
+    ['an empty Expo token', { pushToken: 'ExponentPushToken[]', locale: 'fr' }],
+    ['a token with markup', { pushToken: 'ExponentPushToken[<b>]', locale: 'fr' }],
+    ['a token too long', { pushToken: `ExponentPushToken[${'a'.repeat(257)}]`, locale: 'fr' }],
+    ['an unknown field', { pushToken, locale: 'fr', userId: 'someone-else' }],
+  ])('rejects %s', (_, body) => {
+    expect(RegisterDevice.safeParse(body).success).toBe(false);
   });
 });

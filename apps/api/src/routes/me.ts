@@ -2,6 +2,7 @@ import {
   certificationCriteriaOf,
   isCertifiedWith,
   Me,
+  RegisterDevice,
   UpdateMe,
   type CertificationThresholds,
 } from '@widoo/shared';
@@ -11,6 +12,7 @@ import { z } from 'zod';
 import type { Db } from '../db/client';
 import { bodyValidationError, httpError } from '../errors';
 import { createCertificationThresholds } from '../users/certification';
+import { registerDevice } from '../users/devices';
 import { readNotificationPrefs } from '../users/notification-prefs';
 import { readAnecdotes, readCertificationValues, readFeaturedRoutes } from '../users/profile';
 import { softDeleteUser, updateUser, type User } from '../users/repository';
@@ -102,6 +104,27 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
         throw bodyValidationError(outcome.issues);
       }
       return meOf(outcome.user);
+    },
+  );
+
+  app.post(
+    '/me/devices',
+    {
+      schema: {
+        tags: ['account'],
+        summary:
+          'Register the push token of this phone and its language, the language of the push ' +
+          'while my account follows the phone',
+        security,
+        body: RegisterDevice,
+        response: { 204: z.null() },
+      },
+    },
+    async (request, reply) => {
+      if (!(await registerDevice(app.db, currentUser(request).id, request.body))) {
+        throw httpError(401, 'Account deleted');
+      }
+      return reply.status(204).send(null);
     },
   );
 
