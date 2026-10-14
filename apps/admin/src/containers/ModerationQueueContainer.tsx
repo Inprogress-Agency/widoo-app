@@ -35,7 +35,9 @@ const filterOfChoice: Record<ModerationFilterChoice, [ModerationFilter, string]>
   revisions: ['revision', onFilterValue],
 };
 
-const isLate = (item: ModerationQueueItem) => isWaitingLate(new Date(item.waitingSince));
+// Late counts for a route waiting for its first look; one sent back to its author is not late.
+const isLate = (item: ModerationQueueItem) =>
+  item.status === 'pending' && isWaitingLate(new Date(item.waitingSince));
 
 /**
  * A-02, the moderation queue: reads the page the address asks for, and writes the search, the

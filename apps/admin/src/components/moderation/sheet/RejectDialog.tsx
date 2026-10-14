@@ -53,7 +53,7 @@ export function RejectDialog({
         detail={message}
         onDetailChange={onMessageChange}
         detailLabel={texts.message}
-        detailHint={messages.moderation.decisions.requestChangesDialog.messageHint}
+        detailHint={texts.messageHint}
       />
     </ConfirmDialog>
   );
