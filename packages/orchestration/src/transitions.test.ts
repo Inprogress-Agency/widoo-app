@@ -121,7 +121,7 @@ describe('computeTransitions', () => {
     expect(await cache.get({ ...leg, profile: 'walking' })).toBeUndefined();
   });
 
-  it('falls back to 1.3 times the straight line at 4.5 km/h, estimated, uncached, without geometry', async () => {
+  it('falls back to the estimate of its mode, estimated, uncached, without geometry', async () => {
     const { cache } = memoryCache();
     const directions = provider(async () => {
       throw new DirectionsUnavailable();
@@ -138,6 +138,45 @@ describe('computeTransitions', () => {
       estimated: true,
     });
     expect(cache.set).not.toHaveBeenCalled();
+  });
+
+  // Orchestration › Transitions (D-088): coefficient, speed in km/h and access minutes per mode;
+  // bike and car to be confirmed by the product.
+  it.each([
+    ['walk', 1.3, 4.5, 0, true],
+    ['metro', 1.4, 20, 8, false],
+    ['bike', 1.3, 15, 0, true],
+    ['car', 1.4, 20, 8, true],
+  ] as const)(
+    'estimates a %s trip without the provider: × %s at %s km/h plus %s min',
+    async (mode, detour, speedKmH, accessMin, estimated) => {
+      const [transition] = await computeTransitions(trip(louvre, montmartre, mode), {
+        directions: null,
+        cache: null,
+      });
+      const distanceM = straightLineM(louvre, montmartre) * detour;
+      expect(transition).toEqual({
+        distanceM: Math.round(distanceM),
+        durationMin: Math.round((distanceM / 1000 / speedKmH) * 60 + accessMin),
+        mode,
+        estimated,
+      });
+    },
+  );
+
+  it('estimates 5 km in a straight line at about half an hour by car and by bike', async () => {
+    // About 5 km due north of the Louvre.
+    const north: LatLng = { lat: 48.9056, lng: 2.3376 };
+    const durationOf = async (mode: TransitionStep['mode']) => {
+      const [transition] = await computeTransitions(trip(louvre, north, mode), {
+        directions: null,
+        cache: null,
+      });
+      return transition?.durationMin;
+    };
+    expect(await durationOf('car')).toBe(29);
+    expect(await durationOf('bike')).toBe(26);
+    expect(await durationOf('walk')).toBe(87);
   });
 
   it('falls back without any provider set up, keeping the chosen mode', async () => {

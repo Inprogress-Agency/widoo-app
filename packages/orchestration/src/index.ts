@@ -11,8 +11,10 @@ export {
 export { COORDINATE_DECIMALS, roundedPoint, straightLineM } from './geo';
 export {
   computeTransitions,
+  estimateOfMode,
   proposedMode,
   WALK_PROPOSAL_MAX_M,
+  type ModeEstimate,
   type Transition,
   type TransitionStep,
   type TransitionTransport,
