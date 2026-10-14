@@ -3,9 +3,18 @@ import { inArray } from 'drizzle-orm';
 import type { buildApp } from '../app';
 import type { TestTokenVerifier } from '../auth/test-verifier';
 import { routes, users } from '../db/schema';
-import { seed } from '../db/seed';
+import { seed, seedId } from '../db/seed';
 
 type App = Awaited<ReturnType<typeof buildApp>>;
+
+/** Places of the demo, in the Marais, a few minutes apart on foot. */
+export const demoPlaceIds = ['maison-victor-hugo', 'musee-carnavalet', 'musee-cognacq-jay'].map(
+  (key) => seedId(`place:${key}`),
+);
+
+/** A description long enough to publish (80 characters at least), fictitious. */
+export const publishableDescription =
+  'Trois musées du Marais en une matinée, à pied, entre hôtels particuliers et cours pavées.';
 
 /**
  * Test data of the editor tests: shared database, parallel files. Every account made here and

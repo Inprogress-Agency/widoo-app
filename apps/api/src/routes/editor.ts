@@ -1,7 +1,7 @@
-import { CreateRoute, OwnRoute } from '@widoo/shared';
+import { CreateRoute, OwnRoute, PutRouteSteps, UpdateRoute } from '@widoo/shared';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { createRoute, readOwnRoute } from '../editor/repository';
+import { createRoute, putRouteSteps, readOwnRoute, updateRoute } from '../editor/repository';
 import { currentUser } from './me';
 
 const security = [{ firebaseIdToken: [] }];
@@ -47,5 +47,37 @@ export const editorRoutes: FastifyPluginAsyncZod = async (app) => {
       const route = await createRoute(app.db, currentUser(request), request.body.title, new Date());
       return reply.status(201).send(route);
     },
+  );
+
+  app.patch(
+    '/routes/:id',
+    {
+      schema: {
+        tags,
+        summary: 'Change the information of my route: title, description, moods, audiences',
+        security,
+        params: RouteParams,
+        body: UpdateRoute,
+        response: { 200: OwnRoute },
+      },
+    },
+    async (request) =>
+      updateRoute(app.db, currentUser(request).id, request.params.id, request.body, new Date()),
+  );
+
+  app.put(
+    '/routes/:id/steps',
+    {
+      schema: {
+        tags,
+        summary: 'Replace the ordered steps of my route; answers the orchestration result',
+        security,
+        params: RouteParams,
+        body: PutRouteSteps,
+        response: { 200: OwnRoute },
+      },
+    },
+    async (request) =>
+      putRouteSteps(app.db, currentUser(request).id, request.params.id, request.body, new Date()),
   );
 };
