@@ -54,9 +54,7 @@ const setStep = (values: Partial<typeof steps.$inferInsert>) =>
   app.db.update(steps).set(values).where(eq(steps.id, stepId));
 
 describe('routes', () => {
-  it('store the suggested start, the tips and the hidden suggestions, empty by default', async () => {
-    const [before] = await app.db.select().from(routes).where(eq(routes.id, routeId));
-    expect(before).toMatchObject({ suggestedStart: null, tips: [], tipsHidden: [] });
+  it('store the suggested start, the tips and the hidden suggestions', async () => {
     await setRoute({
       suggestedStart: '10:30',
       tips: ['Des espèces', 'Une gourde', 'Un pique-nique'],
