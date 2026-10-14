@@ -1,3 +1,4 @@
+import { notifyCountersStale } from '@/hooks/useAdminCounters';
 import { getSessionClients } from '@/lib/auth/clients';
 import { messages } from '@/messages/fr';
 import { ApiRequestError } from '@widoo/api-client';
@@ -17,15 +18,23 @@ const texts = messages.moderation.decisions.toasts;
  * called once the route has a decision, the moderator's own or the one another member of the
  * team took first (409 `already_decided`): the screen then moves on.
  */
-export function useModerationDecision(routeId: string, onSettled: () => void) {
+export function useModerationDecision(
+  routeId: string,
+  onSettled: (outcome: 'published' | 'other') => void,
+) {
   const [isBusy, setIsBusy] = useState(false);
 
-  const send = async (decide: () => Promise<ModerationDecision>, successTitle: string) => {
+  const send = async (
+    decide: () => Promise<ModerationDecision>,
+    successTitle: string,
+    outcome: 'published' | 'other',
+  ) => {
     setIsBusy(true);
     try {
       await decide();
       showToast('success', { title: successTitle });
-      onSettled();
+      notifyCountersStale();
+      onSettled(outcome);
     } catch (error) {
       const details =
         error instanceof ApiRequestError && error.code === 'already_decided'
@@ -35,7 +44,8 @@ export function useModerationDecision(routeId: string, onSettled: () => void) {
         showToast('info', {
           title: texts.alreadyDecided(labels.fr.routeStatuses[details.data.status]),
         });
-        onSettled();
+        notifyCountersStale();
+        onSettled('other');
       } else {
         const isInvalidMessage =
           error instanceof ApiRequestError && error.code === 'validation_error';
@@ -49,10 +59,10 @@ export function useModerationDecision(routeId: string, onSettled: () => void) {
   const { api } = getSessionClients();
   return {
     isBusy,
-    publish: () => send(() => api.publishRoute(routeId), texts.published),
+    publish: () => send(() => api.publishRoute(routeId), texts.published, 'published'),
     requestChanges: (message: string) =>
-      send(() => api.requestRouteChanges(routeId, { message }), texts.changesRequested),
+      send(() => api.requestRouteChanges(routeId, { message }), texts.changesRequested, 'other'),
     reject: (reasonCode: RejectionReason, message: string) =>
-      send(() => api.rejectRoute(routeId, { reasonCode, message }), texts.rejected),
+      send(() => api.rejectRoute(routeId, { reasonCode, message }), texts.rejected, 'other'),
   };
 }
