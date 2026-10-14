@@ -9,6 +9,8 @@ type HeaderOptions = {
   authDomain: string;
   /** Origin of the local Auth emulator, in development only. */
   authEmulatorOrigin?: string;
+  /** A Mapbox token is set: the form of a place shows a map (A-04). */
+  hasMap: boolean;
 };
 
 // Firebase Authentication from the browser: sign-in and token refresh, and the script of the
@@ -18,6 +20,8 @@ const firebaseAuthOrigins = [
   'https://securetoken.googleapis.com',
 ];
 const googleSignInScripts = 'https://apis.google.com';
+// Mapbox GL from the browser: style, tiles and fonts, and its usage events.
+const mapboxOrigins = ['https://api.mapbox.com', 'https://events.mapbox.com'];
 
 /**
  * Content Security Policy of the admin. The pages are static shells that render their data in the
@@ -26,7 +30,7 @@ const googleSignInScripts = 'https://apis.google.com';
  * admin itself, to the API and to Firebase Authentication only.
  */
 export function contentSecurityPolicy(options: HeaderOptions): string {
-  const { dev, apiOrigin, authDomain, authEmulatorOrigin } = options;
+  const { dev, apiOrigin, authDomain, authEmulatorOrigin, hasMap } = options;
   const authOrigins = authEmulatorOrigin ? [authEmulatorOrigin] : firebaseAuthOrigins;
   const directives: Record<string, string[]> = {
     'default-src': ["'self'"],
@@ -41,7 +45,15 @@ export function contentSecurityPolicy(options: HeaderOptions): string {
     // storage bucket of Widoo: any https image, nothing else.
     'img-src': ["'self'", 'data:', 'blob:', 'https:'],
     'font-src': ["'self'"],
-    'connect-src': ["'self'", apiOrigin, ...authOrigins, ...(dev ? ['ws:'] : [])],
+    'connect-src': [
+      "'self'",
+      apiOrigin,
+      ...authOrigins,
+      ...(hasMap ? mapboxOrigins : []),
+      ...(dev ? ['ws:'] : []),
+    ],
+    // Mapbox GL draws the map in a worker it starts from a blob.
+    ...(hasMap ? { 'worker-src': ["'self'", 'blob:'] } : {}),
     'frame-src': [`https://${authDomain}`, ...(authEmulatorOrigin ? [authEmulatorOrigin] : [])],
     'object-src': ["'none'"],
     'base-uri': ["'self'"],
