@@ -1,81 +1,56 @@
 import { ApiError, maxPendingRoutesKey, type RouteStatus } from '@widoo/shared';
-import { eq, inArray } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
-import { routes, settings, users } from '../db/schema';
-import { seed } from '../db/seed';
-import { uuidv7 } from '../db/uuid';
+import { routeRevisions, routes, settings } from '../db/schema';
+import { editorFixtures } from '../editor/test-fixtures';
 import { testConfig } from '../test-config';
-import { assertPendingRoom } from './pending-limit';
 
-// The submission is #48's: a test-only route stands for it, the check then the move to `pending`
-// in one transaction. Shared database, parallel files: only the accounts and routes made here
-// are deleted, and the `settings` row of the limit, which no other file writes.
+// Through `POST /routes/:id/submit`, which calls `assertPendingRoom` in its transaction. Shared
+// database, parallel files: the accounts and routes made here are deleted by the fixtures, and
+// the `settings` row of the limit, which no other file writes (a lower limit set here for a
+// moment refuses nothing to the other files, whose authors submit one route at a time).
 let app: Awaited<ReturnType<typeof buildApp>>;
-let cityId: string;
-const authorIds: string[] = [];
+const verifier = new TestTokenVerifier();
+const fixtures = editorFixtures(() => app, verifier);
 
 beforeAll(async () => {
-  app = await buildApp(testConfig(), { tokenVerifier: new TestTokenVerifier() });
-  app.post<{ Params: { id: string } }>('/v1/test/routes/:id/submit', async (request) => {
-    const { id } = request.params;
-    await app.db.transaction(async (tx) => {
-      const [route] = await tx
-        .select({ authorId: routes.authorId })
-        .from(routes)
-        .where(eq(routes.id, id));
-      if (!route?.authorId) throw new Error('Test route without author');
-      await assertPendingRoom(tx, route.authorId, id);
-      await tx.update(routes).set({ status: 'pending' }).where(eq(routes.id, id));
-    });
-    return { ok: true };
-  });
-  await app.ready();
-  ({ cityId } = await seed(app.db));
+  app = await buildApp(testConfig(), { tokenVerifier: verifier });
 });
 afterEach(async () => {
   await app.db.delete(settings).where(eq(settings.key, maxPendingRoutesKey));
 });
 afterAll(async () => {
-  if (authorIds.length > 0) {
-    await app.db.delete(routes).where(inArray(routes.authorId, authorIds));
-    await app.db.delete(users).where(inArray(users.id, authorIds));
-  }
+  await fixtures.cleanUp();
   await app.close();
 });
 
-/** A free account with one route per status given, fictitious titles. */
+/** A new account with one publishable route per status given. */
 async function authorWith(statuses: RouteStatus[]) {
-  const [author] = await app.db
-    .insert(users)
-    .values({ firebaseUid: `fictitious-${uuidv7()}` })
-    .returning({ id: users.id });
-  if (!author) throw new Error('Author not created');
-  authorIds.push(author.id);
-  const rows = await app.db
-    .insert(routes)
-    .values(statuses.map((status) => ({ cityId, authorId: author.id, status, title: 'Fictif' })))
-    .returning({ id: routes.id });
-  return rows.map((row) => row.id);
+  const headers = await fixtures.signIn();
+  const ids: string[] = [];
+  for (const status of statuses) {
+    const { id } = await fixtures.publishableDraft(headers);
+    await app.db.update(routes).set({ status }).where(eq(routes.id, id));
+    ids.push(id);
+  }
+  return { headers, ids };
 }
 
-const submit = (id: string) => app.inject({ method: 'POST', url: `/v1/test/routes/${id}/submit` });
-const statusOf = async (id: string) =>
+const submit = (headers: Record<string, string>, id = '') =>
+  app.inject({ method: 'POST', url: `/v1/routes/${id}/submit`, headers });
+const statusOf = async (id = '') =>
   (await app.db.select({ status: routes.status }).from(routes).where(eq(routes.id, id)))[0]?.status;
 
-describe('assertPendingRoom (max_pending_routes, D-073)', () => {
+describe('max_pending_routes (D-073)', () => {
   it('answers 429 rate_limited to the fourth submission, and leaves the route a draft', async () => {
-    const [first, second, third, fourth = ''] = await authorWith([
-      'draft',
-      'draft',
-      'draft',
-      'draft',
-    ]);
+    const { headers, ids } = await authorWith(['draft', 'draft', 'draft', 'draft']);
+    const [first, second, third, fourth] = ids;
     for (const id of [first, second, third]) {
-      expect((await submit(id ?? '')).statusCode).toBe(200);
+      expect((await submit(headers, id)).statusCode).toBe(200);
     }
-    const refused = await submit(fourth);
+    const refused = await submit(headers, fourth);
     expect(refused.statusCode).toBe(429);
     expect(ApiError.parse(refused.json())).toEqual({
       code: 'rate_limited',
@@ -86,40 +61,43 @@ describe('assertPendingRoom (max_pending_routes, D-073)', () => {
   });
 
   it('frees the place of a route that leaves the moderation', async () => {
-    const [pending = '', , , draft = ''] = await authorWith([
-      'pending',
-      'pending',
-      'pending',
-      'draft',
-    ]);
-    expect((await submit(draft)).statusCode).toBe(429);
+    const { headers, ids } = await authorWith(['pending', 'pending', 'pending', 'draft']);
+    const [pending = '', , , draft] = ids;
+    expect((await submit(headers, draft)).statusCode).toBe(429);
     await app.db.update(routes).set({ status: 'published' }).where(eq(routes.id, pending));
-    expect((await submit(draft)).statusCode).toBe(200);
+    expect((await submit(headers, draft)).statusCode).toBe(200);
+  });
+
+  it('counts the revision of a published route awaiting moderation', async () => {
+    const { headers, ids } = await authorWith(['pending', 'pending', 'published', 'draft']);
+    const [, , published = '', draft] = ids;
+    await app.db
+      .insert(routeRevisions)
+      .values({ routeId: published, status: 'pending', snapshot: {} });
+    expect((await submit(headers, draft)).statusCode).toBe(429);
   });
 
   it('counts neither the routes of other accounts nor the other statuses', async () => {
     await authorWith(['pending', 'pending', 'pending']);
-    const [draft = ''] = await authorWith(['draft', 'private', 'published', 'unpublished']);
-    expect((await submit(draft)).statusCode).toBe(200);
+    const { headers, ids } = await authorWith(['draft', 'private', 'unpublished', 'rejected']);
+    expect((await submit(headers, ids[0])).statusCode).toBe(200);
   });
 
   it('reads the limit from settings on each submission, without a restart', async () => {
-    const [first = '', second = ''] = await authorWith(['draft', 'draft']);
+    const { headers, ids } = await authorWith(['draft', 'draft']);
     await app.db.insert(settings).values({ key: maxPendingRoutesKey, value: 1 });
-    expect((await submit(first)).statusCode).toBe(200);
-    const refused = await submit(second);
+    expect((await submit(headers, ids[0])).statusCode).toBe(200);
+    const refused = await submit(headers, ids[1]);
     expect(refused.statusCode).toBe(429);
     expect(ApiError.parse(refused.json()).details).toEqual({ reason: 'pending_routes', limit: 1 });
   });
 
   it('lets only one of two submissions at once take the last place', async () => {
-    const [, , first = '', second = ''] = await authorWith([
-      'pending',
-      'pending',
-      'draft',
-      'draft',
-    ]);
-    const codes = (await Promise.all([submit(first), submit(second)])).map((r) => r.statusCode);
+    const { headers, ids } = await authorWith(['pending', 'pending', 'draft', 'draft']);
+    const [, , first, second] = ids;
+    const codes = (await Promise.all([submit(headers, first), submit(headers, second)])).map(
+      (response) => response.statusCode,
+    );
     expect(codes.toSorted()).toEqual([200, 429]);
   });
 });
