@@ -9,9 +9,10 @@ type Variant = 'primary' | 'secondary' | 'premium' | 'inverse';
 
 // Literal classes, so that Tailwind finds them. Premium is the ink button « Débloquer avec
 // Premium » (D-014), secondary the warm grey « Programmer », inverse the white « Voir plus » of
-// the map tooltip, on ink.
+// the map tooltip, on ink. An inactive primary button turns warm grey, its text `muted`
+// (« Continuer » of E-10, 4.35:1, out of requirement for an inactive control).
 const variants = {
-  primary: { className: 'bg-blue', label: 'on-blue', disabledLabel: 'blue-soft' },
+  primary: { className: 'bg-blue', label: 'on-blue', disabledLabel: 'muted' },
   secondary: { className: 'bg-surface', label: 'ink', disabledLabel: 'muted' },
   premium: { className: 'bg-surface-strong', label: 'on-strong', disabledLabel: 'on-strong-muted' },
   inverse: { className: 'bg-bg', label: 'ink', disabledLabel: 'muted' },
@@ -71,7 +72,7 @@ export function Button({
       }}
       // As wide as its container, its label centred: a narrower padding keeps it on one line in
       // half a bar at large text sizes (Ecrans › E-05, barre collée).
-      className={`min-h-button-h flex-row items-center justify-center gap-6 overflow-hidden rounded-pill py-12 ${isFullWidth ? 'self-stretch px-12' : 'self-center px-24'} ${variantStyle.className}`}
+      className={`min-h-button-h flex-row items-center justify-center gap-6 overflow-hidden rounded-pill py-12 ${isFullWidth ? 'self-stretch px-12' : 'self-center px-24'} ${isDisabled && variant === 'primary' ? 'bg-skeleton' : variantStyle.className}`}
     >
       {/* Animated style: out of NativeWind's reach, values from the generated theme. */}
       <Animated.View
