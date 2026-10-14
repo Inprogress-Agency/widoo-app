@@ -38,6 +38,17 @@ const pageTitles: Partial<Record<AdminSection, string>> = {
 /**
  * Where « Reconnectez-vous pour revenir… » sends back, after « revenir » (A-01, session expirée).
  */
+/** What each refusal reason means, under its label (A-02, « Refuser »). */
+const rejectionExplanations = {
+  not_a_route: 'Une liste de lieux sans enchaînement',
+  place_invalid: 'Fermé, privé, introuvable ou adresse fausse',
+  description_insufficient: 'Trop courte ou copiée',
+  photos_invalid: 'Droits, crédit, visages ou mineurs',
+  promotional: 'Publicité ou coordonnées personnelles',
+  policy_violation: 'Illicite, dangereux ou discriminatoire',
+  duplicate: 'Même parcours déjà publié',
+} as const;
+
 const returnTargets: Record<AdminSection, string> = {
   dashboard: 'au tableau de bord',
   moderation: 'à la file de modération',
@@ -310,12 +321,27 @@ export const messages = {
         confirm: 'Demander les modifications',
       },
       rejectDialog: {
+        reasonExplanations: rejectionExplanations,
+        revisionTitle: 'Refuser cette révision ?',
+        revisionDescription: (publishedOn: string) =>
+          `Cette révision ne sera pas publiée : la version du ${publishedOn} reste en ligne. Le motif et votre message sont gardés dans l'historique ; l'auteur n'est pas encore averti automatiquement.`,
+        revisionConfirm: 'Refuser la révision',
+        messageTo: (firstName: string) => `Message à ${firstName}`,
+        messagePlaceholder: 'Expliquez ce qui a conduit au refus.',
+        messageRequired: "Écrivez un message à l'auteur.",
         title: 'Refuser ce parcours ?',
         description:
           "Le parcours est refusé. Le motif et votre message sont gardés dans son historique ; l'auteur n'est pas encore averti automatiquement.",
         message: "Message à l'auteur",
         messageHint: "Texte brut, sans < ni >. Gardé dans l'historique du parcours.",
         confirm: 'Refuser le parcours',
+      },
+      published: {
+        title: "Publié à l'instant",
+        by: (firstName: string) => `par ${firstName}, les 6 règles vérifiées`,
+        text: 'Le parcours est en ligne.',
+        next: 'Parcours suivant',
+        toCatalog: 'Voir dans Lieux et parcours',
       },
       toasts: {
         published: 'Parcours publié',
