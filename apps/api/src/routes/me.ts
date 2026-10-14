@@ -51,7 +51,7 @@ async function toMe(db: Db, user: User, thresholds: CertificationThresholds): Pr
 }
 
 /** Set by `requireAuth`, which every route of this plugin runs first. */
-function currentUser(request: FastifyRequest): User {
+export function currentUser(request: FastifyRequest): User {
   if (!request.user) {
     throw httpError(401, 'Missing bearer token');
   }
