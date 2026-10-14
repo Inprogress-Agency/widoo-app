@@ -52,6 +52,8 @@ optional_secret MAPBOX_GEOCODING_TOKEN mapbox-geocoding-token \
   "the API offers no zone to the search in $ENVIRONMENT"
 optional_secret MAPBOX_DIRECTIONS_TOKEN mapbox-directions-token \
   "every transition between steps is estimated in a straight line in $ENVIRONMENT"
+optional_secret INTERNAL_TOKEN internal-token \
+  "the internal routes do not exist (404) and the recommendation is not recomputed in $ENVIRONMENT"
 secrets_arg=$(
   IFS=,
   echo "${secrets[*]}"
