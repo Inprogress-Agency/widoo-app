@@ -50,6 +50,7 @@ export { nearestNeighbourOrder, pathLengthM, reorderOf } from './order';
 export {
   computeRoute,
   isUnverifiedPlace,
+  routeTimelineOf,
   type ComputeOptions,
   type ComputedAggregates,
   type ComputedRoute,

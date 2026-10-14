@@ -1,7 +1,8 @@
 /**
  * The orchestration of a route (Orchestration): `evaluateRoute` completed by what needs the
  * places and the hours. Buckets, derived filters and transport join the aggregates; the start
- * and its timeline today in the city; the rules `step_has_place` and `unverified_place`.
+ * and its timeline today in the city; the rules `step_has_place`, `unverified_place`,
+ * `closed_at_arrival` with a start that fits, and `back_and_forth` with the order to propose.
  */
 import {
   budgetBucketOf,
@@ -26,6 +27,7 @@ import {
   type EvaluatedStep,
   type RouteAggregates,
 } from './evaluate';
+import { reorderOf } from './order';
 import { compatibleStart, defaultStartOf, instantAt } from './start';
 import { computeTimeline, localTimeOf, type TimelineStepInput } from './timeline';
 
@@ -81,6 +83,10 @@ export interface ComputedRoute {
   computed: ComputedAggregates | null;
   warnings: CoherenceIssue[];
   errors: CoherenceIssue[];
+  /** With `closed_at_arrival`: the closest start where every place is open, if one fits (D-049). */
+  proposedStart: string | null;
+  /** With `back_and_forth`: positions of the steps in the order « Réordonner » applies (D-049). */
+  proposedOrder: number[] | null;
   /** Timeline of the start, today in the city; null without any step. */
   timeline: RouteTimeline | null;
 }
@@ -102,6 +108,16 @@ const timelineStepsOf = (steps: readonly RouteStep[]): TimelineStepInput[] =>
     hours: step.place?.hours ?? [],
     alwaysOpen: step.place?.alwaysOpen ?? false,
   }));
+
+/** Timeline of the route for any start: the programming, the sheet (#36). */
+export function routeTimelineOf(
+  route: Pick<RouteInput, 'steps' | 'timeZone'>,
+  startsAt: Date,
+): RouteTimeline {
+  return computeTimeline(timelineStepsOf(route.steps), startsAt, route.timeZone);
+}
+
+const closedConflicts = new Set(['closed_at_arrival', 'closed_that_day']);
 
 /** The aggregates, the start and its timeline today, and every rule of the wiki with its level. */
 export function computeRoute(
@@ -128,6 +144,8 @@ export function computeRoute(
       computed: null,
       warnings,
       errors,
+      proposedStart: null,
+      proposedOrder: null,
       timeline: null,
     };
   }
@@ -143,6 +161,16 @@ export function computeRoute(
     instantAt(today, startTime, route.timeZone),
     route.timeZone,
   );
+  const closedPositions = timeline.steps.flatMap((entry, position) =>
+    entry.conflicts.some((conflict) => closedConflicts.has(conflict)) ? [position] : [],
+  );
+  for (const position of closedPositions) warnings.push(issue('closed_at_arrival', position));
+
+  const places = route.steps.flatMap((step) => (step.place ? [step.place.location] : []));
+  const proposedOrder =
+    places.length === route.steps.length ? reorderOf(places, thresholds.backAndForthMax) : null;
+  if (proposedOrder) warnings.push(issue('back_and_forth', null));
+
   return {
     computed: {
       ...base.computed,
@@ -160,6 +188,8 @@ export function computeRoute(
     },
     warnings,
     errors,
+    proposedStart: closedPositions.length > 0 ? compatible : null,
+    proposedOrder,
     timeline,
   };
 }
