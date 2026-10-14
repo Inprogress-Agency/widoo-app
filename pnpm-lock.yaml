@@ -149,6 +149,9 @@ importers:
       '@widoo/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
+      '@widoo/orchestration':
+        specifier: workspace:*
+        version: link:../../packages/orchestration
       '@widoo/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -9449,7 +9452,9 @@ snapshots:
       metro-runtime: 0.84.6
     transitivePeerDependencies:
       - '@babel/core'
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@react-native/normalize-colors@0.86.3': {}
 
