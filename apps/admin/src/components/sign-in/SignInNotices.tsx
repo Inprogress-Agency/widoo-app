@@ -10,13 +10,15 @@ type SignInNoticesProps = {
   returnSection: AdminSection | null;
   refusal: SignInRefusal | null;
   failure: SignInFailure | null;
+  /** The API ended the session: said first in the reminder of the page asked for. */
+  hasExpired: boolean;
 };
 
 /**
  * Messages above the choices of A-01. A refusal or an error replaces the reminder of the page
  * asked for: one message at a time.
  */
-export function SignInNotices({ returnSection, refusal, failure }: SignInNoticesProps) {
+export function SignInNotices({ returnSection, refusal, failure, hasExpired }: SignInNoticesProps) {
   const texts = messages.signIn;
   const errorIcon = <WarningCircleIcon aria-hidden weight="fill" className="size-20 shrink-0" />;
 
@@ -25,7 +27,7 @@ export function SignInNotices({ returnSection, refusal, failure }: SignInNotices
     return (
       <Notice tone="error" role="alert" icon={errorIcon}>
         <p className="font-bold">{title}</p>
-        {refusal.email ? <p>{refusal.email}</p> : null}
+        {refusal.email ? <p>{texts.signedInAs(refusal.email)}</p> : null}
         {detail ? <p>{detail}</p> : null}
       </Notice>
     );
@@ -37,13 +39,14 @@ export function SignInNotices({ returnSection, refusal, failure }: SignInNotices
       </Notice>
     );
   }
-  if (returnSection) {
+  if (returnSection || hasExpired) {
     return (
       <Notice
         tone="info"
         icon={<InfoIcon aria-hidden className="size-20 shrink-0 text-blue-ink" />}
       >
-        <p>{texts.returnTo(texts.returnTargets[returnSection])}</p>
+        {hasExpired ? <p className="font-bold">{texts.expired}</p> : null}
+        <p>{texts.returnTo(texts.returnTargets[returnSection ?? 'dashboard'])}</p>
       </Notice>
     );
   }

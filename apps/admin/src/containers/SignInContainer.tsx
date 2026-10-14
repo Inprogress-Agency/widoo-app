@@ -5,12 +5,12 @@ import { SignInForm } from '@/components/sign-in/SignInForm';
 import { SignInLayout } from '@/components/sign-in/SignInLayout';
 import { SignInNotices } from '@/components/sign-in/SignInNotices';
 import { PageMessage } from '@/components/states/PageMessage';
+import { UnavailableMessage } from '@/components/states/UnavailableMessage';
 import { SecondFactorContainer } from '@/containers/SecondFactorContainer';
 import { useSession } from '@/hooks/useSession';
 import { useSignIn } from '@/hooks/useSignIn';
 import { returnParam, returnSection, safeReturnPath } from '@/lib/return-path';
 import { messages } from '@/messages/fr';
-import { Button } from '@widoo/ui';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -18,7 +18,7 @@ import { useEffect } from 'react';
 export function SignInContainer() {
   const router = useRouter();
   const returnPath = safeReturnPath(useSearchParams().get(returnParam));
-  const { retry } = useSession();
+  const { retry, signOut, hasExpired } = useSession();
   const signIn = useSignIn(returnPath);
   const { session } = signIn;
 
@@ -29,13 +29,7 @@ export function SignInContainer() {
   }, [session.status, returnPath, router]);
 
   if (session.status === 'unavailable') {
-    return (
-      <PageMessage
-        role="alert"
-        title={messages.signIn.errors.unavailable}
-        action={<Button onClick={retry}>{messages.signIn.retry}</Button>}
-      />
-    );
+    return <UnavailableMessage onRetry={retry} onOtherAccount={() => void signOut()} />;
   }
   if (session.status === 'secondFactorChallenge' || session.status === 'secondFactorEnrollment') {
     return <SecondFactorContainer isEnrolling={session.status === 'secondFactorEnrollment'} />;
@@ -49,6 +43,7 @@ export function SignInContainer() {
       returnSection={returnSection(returnPath)}
       refusal={session.refusal}
       failure={signIn.failure}
+      hasExpired={hasExpired}
     />
   );
   return (
