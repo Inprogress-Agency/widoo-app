@@ -37,3 +37,11 @@ export {
   START_SEARCH,
 } from './start';
 export { coherenceSettingKeys, coherenceThresholdsOf } from './settings';
+export {
+  derivedConditionKeys,
+  derivedConditionsOf,
+  mainTransportOf,
+  type DerivedCondition,
+  type DerivedStep,
+} from './derived';
+export { nearestNeighbourOrder, pathLengthM, reorderOf } from './order';
