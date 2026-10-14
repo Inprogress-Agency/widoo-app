@@ -83,12 +83,13 @@ export function createApiClient(options: ApiClientOptions) {
 
     /**
      * `GET /v1/geocode`: the zones of a text typed in the search (E-02), each with its number of
-     * routes and the box to search. Public: sent without token, the text and nothing else.
+     * routes and the box to search, named in `locale`, the language of the app (French when not
+     * given). Public: sent without token, the text and the language and nothing else.
      */
-    geocode: (text: string, signal?: AbortSignal) =>
+    geocode: (text: string, signal?: AbortSignal, locale?: AppLocale) =>
       request({
         method: 'GET',
-        path: `/v1/geocode?${new URLSearchParams({ q: text }).toString()}`,
+        path: `/v1/geocode?${new URLSearchParams({ q: text, ...(locale && { locale }) }).toString()}`,
         schema: GeocodeResult,
         signal,
       }),
