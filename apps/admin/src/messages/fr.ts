@@ -393,6 +393,8 @@ export const messages = {
       sheet: {
         back: 'Parcours du catalogue',
         actions: 'Actions',
+        openInApp: "Ouvrir dans l'app",
+        openInAppHint: "Depuis un téléphone où l'app Widoo est installée.",
         unpublish: 'Dépublier',
         republish: 'Republier',
         reassign: "Réassigner à l'équipe Widoo",

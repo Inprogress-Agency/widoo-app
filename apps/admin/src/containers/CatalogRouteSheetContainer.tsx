@@ -17,6 +17,7 @@ import { useCatalogRouteActions } from '@/hooks/useCatalogRouteActions';
 import { useRemoteData } from '@/hooks/useRemoteData';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useSession } from '@/hooks/useSession';
+import { routeAppLink } from '@/lib/app-links';
 import { getSessionClients } from '@/lib/auth/clients';
 import { isRejectionReason } from '@/lib/rejection-reason';
 import { messages } from '@/messages/fr';
@@ -89,6 +90,7 @@ export function CatalogRouteSheetContainer({ routeId }: { routeId: string }) {
               isAdmin && route.status === 'unpublished' ? () => handleOpen('republish') : undefined
             }
             onReassign={isAdmin && route.author ? () => handleOpen('reassign') : undefined}
+            appHref={routeAppLink(routeId)}
             isBusy={actions.isBusy}
           />
           {route.author ? <AuthorCard author={route.author} /> : null}
