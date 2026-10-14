@@ -87,3 +87,22 @@ export const UpdateMe = z
   .partial()
   .refine((update) => Object.keys(update).length > 0, 'Nothing to update');
 export type UpdateMe = z.infer<typeof UpdateMe>;
+
+/**
+ * Push token of a phone, as Expo Notifications gives it (`ExponentPushToken[…]`): the API sends
+ * push through Expo (wiki Architecture-Technique). Personal data: never logged.
+ */
+export const ExpoPushToken = z
+  .string()
+  .regex(/^Expo(nent)?PushToken\[[\w-]{1,256}\]$/, 'Not an Expo push token');
+
+/**
+ * Body of `POST /me/devices`: the push token of the phone and its language, as the app resolved
+ * it among the languages it ships (D-062): the language of the push while `locale` of the
+ * account is null.
+ */
+export const RegisterDevice = z.strictObject({
+  pushToken: ExpoPushToken,
+  locale: AppLocale,
+});
+export type RegisterDevice = z.infer<typeof RegisterDevice>;

@@ -174,6 +174,32 @@ export const users = pgTable(
   ],
 );
 
+/**
+ * Push tokens of the phones of a user (`POST /me/devices`, D-062), with the language of each
+ * phone: the language of the push while `users.locale` is null. A token belongs to one phone,
+ * hence to the account last signed in on it. Personal data, erased with the account, never
+ * returned by the API.
+ */
+export const devices = pgTable(
+  'devices',
+  {
+    id: id(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    /** Expo push token (`ExponentPushToken[…]`). */
+    pushToken: text('push_token').notNull().unique(),
+    locale: text('locale').$type<AppLocale>().notNull(),
+    createdAt: createdAt(),
+    /** Last registration: the phone used last is the one with the latest. */
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    index('devices_user_updated_idx').on(t.userId, t.updatedAt),
+    check('devices_locale_check', isOneOf(t.locale, appLocales)),
+  ],
+);
+
 export const places = pgTable(
   'places',
   {

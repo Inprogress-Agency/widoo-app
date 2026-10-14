@@ -196,4 +196,17 @@ describe('authenticated routes', () => {
     await expect(client.deleteMe()).resolves.toBeUndefined();
     expect(fetch.mock.calls[1]?.[1]).toMatchObject({ method: 'DELETE', body: undefined });
   });
+
+  it('registers the phone as JSON, with the bearer token, and expects no body', async () => {
+    const getToken = async () => 'token-1';
+    const { client, fetch, header } = setup([new Response(null, { status: 204 })], { getToken });
+    const device = { pushToken: 'ExponentPushToken[fictitious]', locale: 'en' as const };
+    await expect(client.registerDevice(device)).resolves.toBeUndefined();
+    expect(fetch.mock.calls[0]?.[0]).toBe('http://10.0.2.2:8080/v1/me/devices');
+    expect(fetch.mock.calls[0]?.[1]).toMatchObject({
+      method: 'POST',
+      body: JSON.stringify(device),
+    });
+    expect(header(0, 'authorization')).toBe('Bearer token-1');
+  });
 });
