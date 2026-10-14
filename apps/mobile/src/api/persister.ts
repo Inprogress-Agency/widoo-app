@@ -10,7 +10,8 @@ import { OFFLINE_MAX_AGE_MS, shouldPersistQuery } from './search-cache';
 const storage = createMMKV({ id: 'query-cache' });
 
 /**
- * The last search answered, kept in MMKV so that the sheet shows it offline (Ecrans › E-01).
+ * The last search answered and the account without its e-mail, kept in MMKV so that the sheet
+ * and the profile show offline (Ecrans › E-01, E-09).
  * Read back, it is checked against the current schema of its answer, as an answer from the
  * network is: a shape of an older API is removed, whatever the version of the app (an OTA update,
  * a development reload). A new version of the app still starts from an empty cache.

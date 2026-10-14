@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-query-persist-client';
 import { RouteCard, type RouteSearchResult } from '@widoo/shared';
 import { describe, expect, it } from 'vitest';
+import { testMe } from '../test/me';
 import { readPersistedClient, validatingPersister } from './cache-restore';
 import { OFFLINE_MAX_AGE_MS, shouldPersistQuery } from './search-cache';
 
@@ -180,6 +181,47 @@ describe('restore of the cache kept on the device', () => {
     const { data, device } = await launchOn(undefined);
     expect(data).toBeUndefined();
     expect(device.removed).toBe(false);
+  });
+
+  it('writes the account without its e-mail, and shows it offline (E-09)', async () => {
+    const meKey = ['me', 'uid-1'];
+    const client = new QueryClient();
+    client.setQueryData(meKey, testMe());
+    const { device, persister } = memoryPersister();
+    await persistQueryClientSave({
+      queryClient: client,
+      persister: validatingPersister(persister),
+      buster,
+      dehydrateOptions: { shouldDehydrateQuery: (query) => shouldPersistQuery(client, query) },
+    });
+    expect(JSON.stringify(device.stored)).not.toContain('camille@exemple.fr');
+    expect(client.getQueryData(meKey)).toEqual(testMe());
+
+    const launched = new QueryClient();
+    await persistQueryClientRestore({
+      queryClient: launched,
+      persister: validatingPersister(memoryPersister(device.stored).persister),
+      buster,
+      maxAge: OFFLINE_MAX_AGE_MS,
+    });
+    expect(launched.getQueryData(meKey)).toEqual(testMe({ email: null }));
+  });
+
+  it('rewrites without its e-mail an account an older version kept', async () => {
+    const stored = await savedWith(answer([free]));
+    const search = stored.clientState.queries[0];
+    if (!search) throw new Error('No query');
+    const me = {
+      ...search,
+      queryKey: ['me', 'uid-1'],
+      queryHash: '["me","uid-1"]',
+      state: { ...search.state, data: testMe() },
+    };
+    const older = { ...stored, clientState: { ...stored.clientState, queries: [search, me] } };
+    const { device } = await launchOn(older);
+    expect(device.removed).toBe(false);
+    expect((device.stored as PersistedClient).clientState.queries).toHaveLength(2);
+    expect(JSON.stringify(device.stored)).not.toContain('camille@exemple.fr');
   });
 
   it('reads back every query the app writes on the device', async () => {

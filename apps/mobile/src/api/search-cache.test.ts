@@ -3,6 +3,7 @@ import type { RouteSearchResult } from '@widoo/shared';
 import { describe, expect, it } from 'vitest';
 import { testMe } from '../test/me';
 import {
+  deviceCopy,
   latestCachedResults,
   OFFLINE_MAX_AGE_MS,
   persistedQuerySchema,
@@ -47,6 +48,15 @@ describe('search cache', () => {
     expect(query && shouldPersistQuery(withMe, query)).toBe(true);
     expect(persistedQuerySchema(['me', 'uid-1'])?.safeParse(testMe()).success).toBe(true);
     expect(persistedQuerySchema(['me', 'uid-1'])?.safeParse({ id: 'x' }).success).toBe(false);
+  });
+
+  it('keeps the account on the device without its e-mail, and any other answer as it is', () => {
+    expect(deviceCopy(['me', 'uid-1'], testMe())).toEqual(testMe({ email: null }));
+    const withoutEmail = testMe({ email: null });
+    expect(deviceCopy(['me', 'uid-1'], withoutEmail)).toBe(withoutEmail);
+    const search = answer('a');
+    expect(deviceCopy(['routes', 'search', 'zone-a'], search)).toBe(search);
+    expect(deviceCopy(['me'], { email: 'x' })).toEqual({ email: 'x' });
   });
 
   it('gives the last results with the time they were fetched', () => {
