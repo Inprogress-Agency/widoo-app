@@ -72,6 +72,7 @@ export const fr = {
   },
   priceRanges: { free: 'Gratuit', low: 'Bon marché', medium: 'Prix moyen', high: 'Haut de gamme' },
   verificationStatuses: {
+    unverified: 'Pas encore vérifié',
     verified: 'Vérifié',
     stale: 'À vérifier',
     flagged: 'Signalé',

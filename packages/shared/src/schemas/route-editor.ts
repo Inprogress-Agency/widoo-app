@@ -17,6 +17,10 @@ export const routeDescriptionMaxLength = 2000;
 export const stepDescriptionMaxLength = 600;
 /** Title of a step, as long as a route title. */
 export const stepTitleMaxLength = 60;
+/** « Précision » of a booking, 80 characters at most (D-049). */
+export const bookingNoteMaxLength = 80;
+/** « Vos conseils » of « À prévoir »: three lines of the creator at most (D-048, D-050). */
+export const routeTipsMax = 3;
 /** « Le chemin » of a trip, 200 characters at most (E-12). */
 export const transitionNoteMaxLength = 200;
 /**
