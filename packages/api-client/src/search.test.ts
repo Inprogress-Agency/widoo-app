@@ -165,4 +165,13 @@ describe('geocode', () => {
     expect(fetch.mock.calls[0]?.[0]).toBe('http://10.0.2.2:8080/v1/geocode?q=Saint-Martin+%26+co');
     expect(getToken).not.toHaveBeenCalled();
   });
+
+  it('sends the language of the app with the text when given', async () => {
+    const fetch = vi.fn<typeof globalThis.fetch>(
+      async () => new Response(JSON.stringify({ zones: [zone] }), { status: 200 }),
+    );
+    const client = createApiClient({ baseUrl: 'http://10.0.2.2:8080', fetch });
+    await client.geocode('Montmartre', undefined, 'en');
+    expect(fetch.mock.calls[0]?.[0]).toBe('http://10.0.2.2:8080/v1/geocode?q=Montmartre&locale=en');
+  });
 });
