@@ -11,6 +11,11 @@ import { ApiRequestError, createApiClient, isAccountDeleted, type ApiClientOptio
 
 const config = {
   minAppVersion: '1.2.0',
+  appVersions: {
+    ios: { minVersion: '1.2.0', recommendedVersion: '1.2.0' },
+    android: { minVersion: '1.2.0', recommendedVersion: '1.2.0' },
+  },
+  legal: { terms: '2026-09-28', privacy: '2026-09-28' },
   taxonomies,
   labels,
   thresholds: defaultBucketThresholds,

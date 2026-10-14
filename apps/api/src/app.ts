@@ -21,6 +21,7 @@ import { editorRoutes } from './routes/editor';
 import { geocodeRoutes } from './routes/geocode';
 import { healthRoutes } from './routes/health';
 import { defaultInternalJobs, internalRoutes, type InternalJobs } from './routes/internal';
+import { legalRoutes } from './routes/legal';
 import { meRoutes } from './routes/me';
 import { plannedRoutesPlugin } from './routes/planned';
 import { searchRoutesPlugin } from './routes/search';
@@ -110,6 +111,7 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   }
   await app.register(healthRoutes, { prefix: '/v1' });
   await app.register(configRoutes, { prefix: '/v1', minAppVersion: config.minAppVersion });
+  await app.register(legalRoutes, { prefix: '/v1' });
   await app.register(meRoutes, { prefix: '/v1' });
   await app.register(plannedRoutesPlugin, { prefix: '/v1' });
   await app.register(searchRoutesPlugin, { prefix: '/v1' });

@@ -9,6 +9,11 @@ import {
 
 const config = {
   minAppVersion: '1.2.0',
+  appVersions: {
+    ios: { minVersion: '1.2.0', recommendedVersion: '1.3.0' },
+    android: { minVersion: '1.2.0', recommendedVersion: '1.2.0' },
+  },
+  legal: { terms: '2026-09-28', privacy: '2026-09-28' },
   taxonomies,
   labels,
   thresholds: defaultBucketThresholds,
@@ -35,5 +40,9 @@ describe('AppConfig', () => {
     const withoutMoods = { ...taxonomies, moods: undefined };
     expect(AppConfig.safeParse({ ...config, taxonomies: withoutMoods }).success).toBe(false);
     expect(AppConfig.safeParse({ ...config, minAppVersion: '1.2' }).success).toBe(false);
+    const appVersions = { ...config.appVersions, android: { minVersion: '1.2.0' } };
+    expect(AppConfig.safeParse({ ...config, appVersions }).success).toBe(false);
+    const legal = { terms: 'v1', privacy: '2026-09-28' };
+    expect(AppConfig.safeParse({ ...config, legal }).success).toBe(false);
   });
 });
