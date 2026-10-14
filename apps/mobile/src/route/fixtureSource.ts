@@ -1,4 +1,5 @@
 import { ApiRequestError, type RouteSheetAnswer } from '@widoo/api-client';
+import { computeTimeline } from '@widoo/orchestration';
 import { RouteDetail } from '@widoo/shared';
 import type { RouteSheetSource } from './source';
 import fixtures from './generated/route-sheets.json';
@@ -17,6 +18,8 @@ export interface RouteSheetFixtureData {
 interface FixtureSourceOptions {
   /** Time to answer, as a request over the network would take. */
   latencyMs: number;
+  /** Time to compute a timeline, which the API does without reading the network. */
+  timelineLatencyMs: number;
   /** Ids that fail, for the error states of the sheet. */
   failures: Record<string, FixtureFailure>;
 }
@@ -41,8 +44,23 @@ const failure = (kind: FixtureFailure['kind']) =>
  */
 export function createFixtureSource(
   data: RouteSheetFixtureData,
-  { latencyMs, failures }: FixtureSourceOptions,
+  { latencyMs, timelineLatencyMs, failures }: FixtureSourceOptions,
 ): RouteSheetSource {
+  /** The sheet of `id`, or the error the API would answer. */
+  const sheetOf = (id: string) => {
+    const raw = data.routes.find(
+      (route) => typeof route === 'object' && route !== null && 'id' in route && route.id === id,
+    );
+    if (!raw) {
+      throw new ApiRequestError('http', 404, { code: 'not_found', message: 'Route not found' });
+    }
+    const parsed = RouteDetail.safeParse(raw);
+    if (!parsed.success) {
+      throw new ApiRequestError('invalid_response', 200, null, { cause: parsed.error });
+    }
+    return parsed.data;
+  };
+
   return {
     getRoute: async (id, options = {}): Promise<RouteSheetAnswer> => {
       const failing = failures[id];
@@ -54,17 +72,23 @@ export function createFixtureSource(
       if (removed) {
         return { kind: 'removed', removedAt: removed.removedAt };
       }
-      const raw = data.routes.find(
-        (route) => typeof route === 'object' && route !== null && 'id' in route && route.id === id,
-      );
-      if (!raw) {
-        throw new ApiRequestError('http', 404, { code: 'not_found', message: 'Route not found' });
+      return { kind: 'route', route: sheetOf(id) };
+    },
+
+    // As the API: the steps of the sheet, their trips and the hours of their places, in Paris.
+    getTimeline: async (id, startsAt, signal) => {
+      await wait(timelineLatencyMs, signal);
+      const failing = failures[id];
+      if (failing) {
+        throw failure(failing.kind);
       }
-      const parsed = RouteDetail.safeParse(raw);
-      if (!parsed.success) {
-        throw new ApiRequestError('invalid_response', 200, null, { cause: parsed.error });
-      }
-      return { kind: 'route', route: parsed.data };
+      const steps = sheetOf(id).steps.map((step) => ({
+        id: step.id,
+        durationMin: step.durationMin,
+        transitionMin: step.transition?.durationMin ?? null,
+        hours: step.isLocked ? [] : step.place.hours,
+      }));
+      return computeTimeline(steps, new Date(startsAt), 'Europe/Paris');
     },
   };
 }
@@ -82,5 +106,6 @@ export const recetteFailures: Record<string, FixtureFailure> = {
 /** The demo route sheets of `pnpm --filter api fixtures:route-sheets`, until #36. */
 export const fixtureSource = createFixtureSource(fixtures, {
   latencyMs: 300,
+  timelineLatencyMs: 100,
   failures: recetteFailures,
 });
