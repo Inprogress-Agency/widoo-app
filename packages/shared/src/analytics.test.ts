@@ -313,3 +313,26 @@ describe('events of the discovery (D-067)', () => {
     expect(discoverySections).toEqual(['nearby', 'weather', 'signature']);
   });
 });
+
+describe('events of the planning (D-038)', () => {
+  it('says where a route was planned from', () => {
+    const planned = { route_id: 'route-1', days_ahead: 1, has_conflicts: false, bookings_count: 1 };
+    expect(checkAnalyticsEvent('route_planned', { ...planned, source: 'route' }).success).toBe(
+      true,
+    );
+    expect(checkAnalyticsEvent('route_planned', { ...planned, source: 'past' }).success).toBe(true);
+    expect(checkAnalyticsEvent('route_planned', planned).success).toBe(false);
+    expect(checkAnalyticsEvent('route_planned', { ...planned, source: 'push' }).success).toBe(
+      false,
+    );
+  });
+
+  it('counts the days a planning moved, earlier as negative', () => {
+    expect(
+      checkAnalyticsEvent('plan_changed', { route_id: 'route-1', days_moved: -2 }).success,
+    ).toBe(true);
+    expect(
+      checkAnalyticsEvent('plan_changed', { route_id: 'route-1', days_moved: 0.5 }).success,
+    ).toBe(false);
+  });
+});

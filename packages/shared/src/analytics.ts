@@ -121,12 +121,16 @@ export const analyticsEvents = {
   }),
   favorite_added: routeOnly,
   favorite_removed: routeOnly,
+  /** `past`: « Reprogrammer » of a past route (E-08, D-038); `route`: « Programmer » (E-06). */
   route_planned: z.strictObject({
     ...route,
     days_ahead: count,
     has_conflicts: z.boolean(),
     bookings_count: count,
+    source: z.enum(['route', 'past']),
   }),
+  /** « Modifier la sortie » (D-038): days from the old date to the new one, negative earlier. */
+  plan_changed: z.strictObject({ ...route, days_moved: z.number().int() }),
   plan_checklist_item_done: z.strictObject({ ...route, provider: bookingProvider }),
   booking_link_opened: z.strictObject({
     ...route,
