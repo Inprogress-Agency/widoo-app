@@ -78,6 +78,12 @@ describe('guard of /admin', () => {
     expect(ApiError.parse(response.json()).code).toBe('mfa_required');
   });
 
+  it('answers 403 mfa_required to a second factor other than the authenticator app', async () => {
+    const response = await getCounters(await signIn('admin', { secondFactor: 'phone' }));
+    expect(response.statusCode).toBe(403);
+    expect(ApiError.parse(response.json()).code).toBe('mfa_required');
+  });
+
   it('asks for no second factor with the local Auth emulator, which has none', async () => {
     const local = await buildApp(testConfig({ FIREBASE_AUTH_EMULATOR_HOST: '127.0.0.1:9099' }), {
       tokenVerifier: verifier,
