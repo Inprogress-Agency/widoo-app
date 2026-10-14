@@ -14,7 +14,7 @@ import { SignInSheet } from '../src/auth/SignInSheet';
 import { persistOptions } from '../src/api/persister';
 import { queryClient } from '../src/api/query-client';
 import { holdSplash } from '../src/launch/splash';
-import '../src/i18n';
+import '../src/i18n/language';
 import { initMonitoring } from '../src/monitoring';
 import { fonts } from '../src/ui/fonts';
 import { ToastHost } from '../src/ui/Toast';

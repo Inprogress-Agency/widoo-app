@@ -1,4 +1,4 @@
-import { labels, type RouteDetailStep, type RouteTimeline } from '@widoo/shared';
+import { type RouteDetailStep, type RouteTimeline } from '@widoo/shared';
 import { colors, filterIcons, size, spacing } from '@widoo/tokens';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +12,7 @@ import { TextLink } from '../ui/TextLink';
 import { clockOf, planMinuteOf } from './calendar';
 import { stepMark, type StepMark } from './notice';
 import { SectionTitle } from './PlanControls';
+import { taxonomyLabels } from '../i18n/labels';
 
 interface ProgrammeProps {
   steps: readonly RouteDetailStep[];
@@ -108,7 +109,7 @@ function ProgrammeRow({
 }) {
   const { t } = useTranslation();
   const name = step.title ?? step.place.name;
-  const category = labels.fr.placeCategories[step.place.category];
+  const category = taxonomyLabels().placeCategories[step.place.category];
   const until = step.endsOn ? t('plan.until', { date: parisDay(step.endsOn) }) : null;
   const marked = mark ? markText(t, mark) : null;
   const trip = step.transition ? transitionText(t, step.transition) : null;

@@ -1,12 +1,12 @@
-import { labels } from '@widoo/shared';
 import { filterIcons, moodChips, type IconName } from '@widoo/tokens';
 import type { TFunction } from 'i18next';
 import type { Filter } from '../discovery/filters';
 import type { ChipTint } from '../ui/Chip';
+import { taxonomyLabels } from '../i18n/labels';
 
 /** Label of a filter value, from packages/shared: « Jusqu'à 25 € », « Culture ». */
 export function filterLabel({ group, value }: Filter): string {
-  const groupLabels: Record<string, string> = labels.fr[group];
+  const groupLabels: Record<string, string> = taxonomyLabels()[group];
   return groupLabels[value] ?? value;
 }
 
