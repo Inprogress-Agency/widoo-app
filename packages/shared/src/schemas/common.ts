@@ -10,14 +10,18 @@ export type LatLng = z.infer<typeof LatLng>;
 /** Media and booking links: https only (wiki Securite-et-RGPD). */
 export const HttpsUrl = z.url({ protocol: /^https$/ });
 
+/** Text without markup nor control characters (wiki Securite-et-RGPD). */
+const plainTextPattern = /^[^<>\p{Cc}]*$/u;
+const plainTextMessage = 'Plain text only, without < > or control characters';
+
 /**
- * Free text typed by a user, displayed to others: trimmed, bounded, without markup or control
- * characters (wiki Securite-et-RGPD).
+ * Free text typed by a user, displayed to others: trimmed, without markup or control characters
+ * (wiki Securite-et-RGPD), and bounded unless the specification sets no length.
  */
-export const plainText = (maxLength: number) =>
-  z
-    .string()
-    .trim()
-    .min(1)
-    .max(maxLength)
-    .regex(/^[^<>\p{Cc}]*$/u, 'Plain text only, without < > or control characters');
+export const plainText = (maxLength?: number) => {
+  const text = z.string().trim().min(1);
+  return (maxLength === undefined ? text : text.max(maxLength)).regex(
+    plainTextPattern,
+    plainTextMessage,
+  );
+};

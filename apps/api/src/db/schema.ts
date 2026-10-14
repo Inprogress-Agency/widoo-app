@@ -11,6 +11,8 @@ import {
   plannedRouteClosers,
   plannedRouteStatuses,
   profileSlots,
+  stepHighlightsMax,
+  stepPhotosMax,
   taxonomies,
   type Audience,
   type Condition,
@@ -51,8 +53,11 @@ export const transport = pgEnum('transport', taxonomies.transports);
 export const durationBucket = pgEnum('duration_bucket', taxonomies.durations);
 export const budgetBucket = pgEnum('budget_bucket', taxonomies.budgets);
 export const bookingProvider = pgEnum('booking_provider', taxonomies.bookingProviders);
-/** Technical only, never displayed: no label in `shared`. */
-export const mediaOwnerType = pgEnum('media_owner_type', ['route', 'place']);
+/**
+ * Technical only, never displayed: no label in `shared`. `step`: photos of a step in E-07
+ * (D-029). Only ever appended: the constraints of `media` name `route` and `place`, never `step`.
+ */
+export const mediaOwnerType = pgEnum('media_owner_type', ['route', 'place', 'step']);
 /** Mapbox Directions profile of a cached trip; technical only, never displayed. */
 export const directionsProfile = pgEnum('directions_profile', directionsProfiles);
 /** Choice of the team in the admin over the nightly computation of the badge (D-023). */
@@ -274,19 +279,46 @@ export const steps = pgTable(
     transitionNote: text('transition_note'),
     /** Computed: `distance_m`, `duration_min`, `mode`, `estimated`. */
     transition: jsonb('transition'),
+    /** « À ne pas manquer » in E-07 (D-029): 1 to 3 points in order, null without any. */
+    highlights: text('highlights').array(),
+    /**
+     * Audio track of the creator, kept for later (D-029): out of the MVP, no route writes it and
+     * no answer of the API carries it. Both set or both null.
+     */
+    audioPath: text('audio_path'),
+    audioDurationS: smallint('audio_duration_s'),
   },
   (t) => [
     unique('steps_route_position_unique').on(t.routeId, t.position),
     index('steps_place_idx').on(t.placeId),
+    check(
+      'steps_highlights_check',
+      sql`${t.highlights} is null or (array_ndims(${t.highlights}) = 1
+        and cardinality(${t.highlights}) between 1 and ${sql.raw(String(stepHighlightsMax))}
+        and array_position(${t.highlights}, null) is null
+        and array_position(${t.highlights}, '') is null)`,
+    ),
+    check(
+      'steps_audio_check',
+      sql`(${t.audioPath} is null and ${t.audioDurationS} is null)
+        or (${t.audioPath} is not null and ${t.audioDurationS} is not null and ${t.audioDurationS} > 0)`,
+    ),
   ],
 );
+
+/**
+ * Photos of a step, 5 at most: positions 0 to 4, each once. A new enum value cannot be named in
+ * the transaction that adds it (Postgres), and the migrations run in one: the step is written as
+ * « not a route nor a place ». Another owner type changes these constraints in its migration.
+ */
+const isStepMedia = (ownerType: AnyPgColumn): SQL => sql`${ownerType} not in ('route', 'place')`;
 
 export const media = pgTable(
   'media',
   {
     id: id(),
     ownerType: mediaOwnerType('owner_type').notNull(),
-    /** Route or place id, depending on `owner_type`. */
+    /** Route, place or step id, depending on `owner_type`. */
     ownerId: uuid('owner_id').notNull(),
     storagePath: text('storage_path').notNull(),
     width: integer('width').notNull(),
@@ -295,7 +327,17 @@ export const media = pgTable(
     uploadedBy: uuid('uploaded_by').references(() => users.id, { onDelete: 'set null' }),
     createdAt: createdAt(),
   },
-  (t) => [index('media_owner_idx').on(t.ownerType, t.ownerId, t.position)],
+  (t) => [
+    index('media_owner_idx').on(t.ownerType, t.ownerId, t.position),
+    uniqueIndex('media_step_position_idx')
+      .on(t.ownerId, t.position)
+      .where(isStepMedia(t.ownerType)),
+    check(
+      'media_step_position_check',
+      sql`${t.ownerType} in ('route', 'place')
+        or ${t.position} between 0 and ${sql.raw(String(stepPhotosMax - 1))}`,
+    ),
+  ],
 );
 
 /**

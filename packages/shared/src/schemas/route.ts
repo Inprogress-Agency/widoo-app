@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { taxonomies } from '../taxonomies';
-import { HttpsUrl, LatLng } from './common';
+import { HttpsUrl, LatLng, plainText } from './common';
 import { Place } from './place';
 import { RecommendationReason } from './recommendation';
 
@@ -15,6 +15,18 @@ export const StepTransition = z.object({
   estimated: z.boolean(),
 });
 export type StepTransition = z.infer<typeof StepTransition>;
+
+/** « À ne pas manquer » of a step in E-07: 1 to 3 points, all optional (D-029). */
+export const stepHighlightsMax = 3;
+/** Photos of a step in E-07 (`media.owner_type = step`), at most (D-029). */
+export const stepPhotosMax = 5;
+
+/**
+ * The points « À ne pas manquer » of a step, in display order; a step without any has none, never
+ * an empty list (`steps.highlights` is then null).
+ */
+export const StepHighlights = z.array(plainText()).min(1).max(stepHighlightsMax);
+export type StepHighlights = z.infer<typeof StepHighlights>;
 
 export const Step = z.object({
   id: z.uuid(),
