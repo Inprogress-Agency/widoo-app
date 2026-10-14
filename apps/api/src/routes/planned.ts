@@ -1,6 +1,7 @@
 import {
   CreatePlannedRoute,
   PlannedRoute,
+  PlannedMapsUrl,
   PlannedRouteList,
   PlannedRouteQuery,
   UpdatePlannedRoute,
@@ -9,6 +10,7 @@ import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { canAccessRoute } from '../access/route-access';
 import { httpError, premiumRequired } from '../errors';
+import { markStepDone, nextStepMapsUrl } from '../planned/go';
 import { createPlanned, listPlanned, ownedPlanned, readPlanned } from '../planned/repository';
 import { snapshotOf } from '../planned/snapshot';
 import { updatePlanned } from '../planned/update';
@@ -17,6 +19,7 @@ import { currentUser } from './me';
 const security = [{ firebaseIdToken: [] }];
 const tags = ['planning'];
 const PlannedParams = z.strictObject({ id: z.uuid() });
+const PlannedStepParams = z.strictObject({ id: z.uuid(), stepId: z.uuid() });
 
 /**
  * The caller's plannings (E-06, E-07, E-08). Personal data: never cached, and only the owner of
@@ -102,5 +105,42 @@ export const plannedRoutesPlugin: FastifyPluginAsyncZod = async (app) => {
     },
     async (request) =>
       updatePlanned(app.db, currentUser(request), request.params.id, request.body, new Date()),
+  );
+
+  app.post(
+    '/me/planned/:id/steps/:stepId/done',
+    {
+      schema: {
+        tags,
+        summary: 'Mark a step of my Go done (« Étape suivante »)',
+        security,
+        params: PlannedStepParams,
+        // The on-site signal of the wiki waits for `place_signals`: no body until then.
+        body: z.strictObject({}).nullish(),
+        response: { 200: PlannedRoute },
+      },
+    },
+    async (request) =>
+      markStepDone(
+        app.db,
+        currentUser(request).id,
+        request.params.id,
+        request.params.stepId,
+        new Date(),
+      ),
+  );
+
+  app.get(
+    '/me/planned/:id/maps-url',
+    {
+      schema: {
+        tags,
+        summary: 'Google Maps on foot to the next step of my planning, never the whole route',
+        security,
+        params: PlannedParams,
+        response: { 200: PlannedMapsUrl },
+      },
+    },
+    async (request) => nextStepMapsUrl(app.db, currentUser(request).id, request.params.id),
   );
 };
