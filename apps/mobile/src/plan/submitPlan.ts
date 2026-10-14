@@ -71,12 +71,14 @@ export async function submitPlan(choice: PlanChoice, deps: SubmitPlanDeps): Prom
     const isPremium = error instanceof ApiRequestError && error.code === 'premium_required';
     deps.toast('error', t('plan.toast.failed'), {
       subtitle: isPremium ? t('plan.toast.premium') : t('plan.toast.failedBody'),
+      isAboveStickyBar: true,
     });
     return false;
   }
   deps.toast('success', planned ? t('plan.toast.moved') : t('plan.toast.planned'), {
     subtitle: plannedSubtitle(t, day, minute, today),
     action: { label: t('plan.toast.see'), onPress: deps.onSee },
+    isAboveStickyBar: true,
   });
   return true;
 }

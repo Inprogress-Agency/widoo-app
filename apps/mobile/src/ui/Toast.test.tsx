@@ -21,7 +21,7 @@ async function renderHost() {
 
 describe('Toast', () => {
   beforeEach(() => {
-    toastStore.setState({ toast: null, tabBarHeight: 0 });
+    toastStore.setState({ toast: null, tabBarHeight: 0, stickyBarHeight: 0 });
   });
 
   it('caps the whole toast at 1.3, below the largest standard setting (D-046)', async () => {
@@ -64,5 +64,13 @@ describe('Toast', () => {
     expect(status.props.accessibilityRole).toBe('text');
     expect(status.props.accessibilityLiveRegion).toBe('polite');
     expect(haptic).toHaveBeenCalledWith('toastSuccess');
+  });
+
+  it('stays above the bar stuck under the route sheet (E-06)', async () => {
+    toastStore.setState({ stickyBarHeight: 80 });
+    showToast('success', 'Sortie programmée', { isAboveStickyBar: true });
+    await renderHost();
+    // 8 points above the 80 of the bar.
+    expect(JSON.stringify(screen.toJSON())).toContain('"bottom":88');
   });
 });
