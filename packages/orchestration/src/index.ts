@@ -27,3 +27,12 @@ export {
   type EvaluatedRoute,
   type EvaluatedStep,
 } from './evaluate';
+export {
+  compatibleStart,
+  DAY_START,
+  defaultStartOf,
+  HALF_DAY_START,
+  instantAt,
+  opensEverywhere,
+  START_SEARCH,
+} from './start';

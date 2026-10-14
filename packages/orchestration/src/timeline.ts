@@ -12,6 +12,8 @@ export interface TimelineStepInput {
   transitionMin: number | null;
   /** Opening slots of its place; none at all: hours unknown. */
   hours: readonly PlaceHours[];
+  /** « Accessible à toute heure » (`places.always_open`): never a conflict (D-049). */
+  alwaysOpen?: boolean;
 }
 
 const MINUTE_MS = 60_000;
@@ -19,13 +21,13 @@ const DAY_MIN = 24 * 60;
 const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 /** Local date, weekday (0 = Monday) and minute of the day of an instant in a time zone. */
-interface LocalTime {
+export interface LocalTime {
   date: string;
   weekday: number;
   minute: number;
 }
 
-function localTimeOf(instant: Date, timeZone: string): LocalTime {
+export function localTimeOf(instant: Date, timeZone: string): LocalTime {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone,
     year: 'numeric',
@@ -133,7 +135,7 @@ export function computeTimeline(
       stepId: step.id,
       arrivesAt: arrival.toISOString(),
       leavesAt: departure.toISOString(),
-      conflicts: conflictsOf(step.hours, arrival, departure, timeZone),
+      conflicts: step.alwaysOpen ? [] : conflictsOf(step.hours, arrival, departure, timeZone),
     };
     arrival = new Date(departure.getTime() + (step.transitionMin ?? 0) * MINUTE_MS);
     return entry;
