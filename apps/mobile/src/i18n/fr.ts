@@ -349,6 +349,31 @@ export const fr = {
   // E-09, my profile as the others see it (D-023, D-025).
   profile: {
     title: 'Profil',
+    certification: {
+      close: 'Fermer',
+      titleCertified: 'Créateur certifié',
+      titleNotYet: 'Devenez créateur certifié',
+      body: "Le badge montre que vos parcours sont fiables. Il s'affiche sur votre profil et à côté de votre nom sur chacun de vos parcours.",
+      verifiedRoutes: {
+        title: '{{threshold}} parcours vérifiés ou plus',
+        help: 'Parcours avec le badge Vérifié : leurs lieux ont été confirmés sur place par des visiteurs.',
+      },
+      averageRating: {
+        title: 'Note moyenne de {{threshold}} ou plus',
+        help: "Sur l'ensemble de vos parcours.",
+      },
+      completedRoutes: {
+        title: '{{threshold}} parcours réalisés ou plus',
+        help: 'Des sorties lancées avec « C’est parti » et terminées.',
+      },
+      progress: '{{value}} sur {{threshold}}',
+      noRating: 'Pas encore de note',
+      met: 'rempli',
+      unmet: 'pas encore rempli',
+      footer:
+        "Le badge arrive tout seul dès que les trois critères sont remplis. L'équipe Widoo peut aussi l'attribuer.",
+      create: 'Créer un parcours',
+    },
     premium: {
       title: 'Widoo Premium',
       // Unbreakable spaces: « 2,99 € » and « 7 jours » never split over two lines.
