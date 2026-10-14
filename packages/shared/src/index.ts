@@ -1,4 +1,5 @@
 export * from './analytics';
+export * from './app-version';
 export * from './sections';
 export { assertNever } from './assert-never';
 export { budgetSumEur, displayedBudgetEur } from './budget';
@@ -17,6 +18,7 @@ export * from './schemas/common';
 export * from './schemas/config';
 export * from './schemas/error';
 export * from './schemas/geocode';
+export * from './schemas/legal';
 export * from './schemas/me';
 export * from './schemas/place';
 export * from './schemas/planned';
