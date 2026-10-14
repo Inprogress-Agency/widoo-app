@@ -21,11 +21,8 @@ export function usePlanTimeline(routeId: string, startsAt: string, isEnabled: bo
     staleTime: TIMELINE_STALE_TIME_MS,
     retry: 1,
   });
-  // A timeline kept from the previous start is shown, never mistaken for this one's.
-  const isCurrent = query.data?.startsAt === new Date(startsAt).toISOString();
   return {
     timeline: query.data ?? null,
-    isCurrent,
     isError: query.isError && !query.isFetching,
     retry: () => void query.refetch(),
   };
