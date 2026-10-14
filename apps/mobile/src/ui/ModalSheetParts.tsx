@@ -5,6 +5,7 @@ import {
   type BottomSheetBackgroundProps,
 } from '@gorhom/bottom-sheet';
 import { colors, radius } from '@widoo/tokens';
+import type { ReactElement } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
@@ -58,11 +59,23 @@ export function ModalSheetBackdrop({
   );
 }
 
-/** The veil of a sheet that always closes on a tap, as `backdropComponent`. */
+const closingBackdrops = new Map<string, (props: BottomSheetBackdropProps) => ReactElement>();
+
+/**
+ * The veil of a sheet that always closes on a tap, as `backdropComponent`: one component per
+ * label, kept, since a new one at each render of the sheet would remount the veil and lose a tap
+ * begun on it (seen on E-09, whose profile renders again as it refreshes).
+ */
 export function modalSheetBackdrop(closeLabel: string) {
-  return function ClosingBackdrop(props: BottomSheetBackdropProps) {
+  const kept = closingBackdrops.get(closeLabel);
+  if (kept) {
+    return kept;
+  }
+  const backdrop = function ClosingBackdrop(props: BottomSheetBackdropProps) {
     return <ModalSheetBackdrop {...props} closeLabel={closeLabel} />;
   };
+  closingBackdrops.set(closeLabel, backdrop);
+  return backdrop;
 }
 
 /** Decorative bar: the sheet closes by a swipe down or on the veil. */
