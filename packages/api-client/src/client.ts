@@ -2,13 +2,18 @@ import {
   AppConfig,
   GeocodeResult,
   Me,
+  PlannedRoute,
+  PlannedRouteList,
   RouteCount,
   RouteDetail,
   RouteSearchResult,
   RouteTimeline,
+  type CreatePlannedRoute,
   type RegisterDevice,
   type UpdateMe,
+  type UpdatePlannedRoute,
 } from '@widoo/shared';
+import { plannedPath, plannedQueryString, type PlannedListParams } from './planned';
 import {
   countQueryString,
   searchQueryString,
@@ -122,6 +127,36 @@ export function createApiClient(options: ApiClientOptions) {
      */
     registerDevice: (device: RegisterDevice) =>
       requestEmpty({ method: 'POST', path: '/v1/me/devices', body: device, auth: true }),
+
+    /** `GET /v1/me/planned`: the caller's plannings by start, one status or all. */
+    listPlanned: (params: PlannedListParams = {}, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/me/planned${plannedQueryString(params)}`,
+        schema: PlannedRouteList,
+        auth: true,
+        signal,
+      }),
+
+    /**
+     * `POST /v1/me/planned`: plans a route (E-06), its timeline and bookings computed by the API;
+     * 402 `premium_required` for a Premium route the caller has no right to.
+     */
+    createPlanned: (body: CreatePlannedRoute) =>
+      request({ method: 'POST', path: '/v1/me/planned', body, schema: PlannedRoute, auth: true }),
+
+    /**
+     * `PATCH /v1/me/planned/:id`: moves the start (timeline recomputed, reminders reset), ticks
+     * bookings or changes the status; 409 while its Go is under way.
+     */
+    updatePlanned: (id: string, update: UpdatePlannedRoute) =>
+      request({
+        method: 'PATCH',
+        path: plannedPath(id),
+        body: update,
+        schema: PlannedRoute,
+        auth: true,
+      }),
 
     /** `DELETE /v1/me`: anonymizes the account; its token is refused afterwards. */
     deleteMe: () => requestEmpty({ method: 'DELETE', path: '/v1/me', auth: true }),
