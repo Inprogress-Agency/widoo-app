@@ -154,4 +154,15 @@ describe('loadConfig', () => {
     expect(load({ NODE_ENV: 'production' })).not.toThrow();
     expect(load({ NODE_ENV: 'development', ...emulator, ...demo })).not.toThrow();
   });
+
+  it('refuses the Auth emulator with a real project, in every environment', () => {
+    const load = () =>
+      loadConfig({
+        DATABASE_URL: databaseUrl,
+        NODE_ENV: 'development',
+        FIREBASE_PROJECT_ID: 'widoo-staging',
+        FIREBASE_AUTH_EMULATOR_HOST: '127.0.0.1:9099',
+      });
+    expect(load).toThrow(/demo- project/);
+  });
 });
