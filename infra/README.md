@@ -7,7 +7,7 @@ API de staging sur Google Cloud ([#24](https://github.com/Inprogress-Agency/wido
 | `api.Dockerfile` | image de l'API (serveur et `dist/migrate.js`), image de base épinglée par digest |
 | `gcp/common.sh` | réglages (projet, région, noms des ressources) et fonctions communes |
 | `gcp/1-foundation.sh` | API Google, Artifact Registry, comptes de service, Workload Identity Federation |
-| `gcp/2-database.sh` | réseau, Cloud SQL, base, utilisateur, secrets |
+| `gcp/2-database.sh` | réseau, Cloud SQL, base, utilisateur, secrets (dont le jeton de service `internal-token`, généré) |
 | `gcp/3-run.sh` | service Cloud Run `widoo-api` et job de migration `widoo-api-migrate` |
 | `gcp/demo-seed.sh` | chargement ou retrait du jeu de démonstration dans la base de staging, par une exécution du job de migration |
 | `gcp/artifact-cleanup.json` | nettoyage des images : les 10 plus récentes gardées, les autres supprimées après 30 jours |
@@ -88,13 +88,15 @@ Rotation du mot de passe : désactiver la version active de `database-url` (`gcl
 | `CORS_ORIGINS` | vide | pas d'admin web en staging pour l'instant |
 | `MAPBOX_GEOCODING_PERMANENT` | `false` | valeur par défaut de l'API : résultats temporaires, que Mapbox interdit de garder, donc pas de cache ; variable ordinaire, pas un secret ; la valeur attend la décision sur le cache ([#306](https://github.com/Inprogress-Agency/widoo-app/issues/306)) |
 | `MAPBOX_DIRECTIONS_CACHE_DAYS` | `0` | valeur par défaut de l'API : pas de cache des réponses Directions, que les conditions de Mapbox interdisent de stocker (Product Terms, 2.10.1) ; 30 au plus (D-032), seulement si un contrat avec Mapbox l'autorise ; variable ordinaire, pas un secret |
-| Secrets | `DATABASE_URL`, `SENTRY_DSN`, `MAPBOX_GEOCODING_TOKEN`, `MAPBOX_DIRECTIONS_TOKEN` depuis Secret Manager | jamais en clair dans la configuration ; tous sauf `DATABASE_URL` passés seulement si leur secret a une valeur |
+| Secrets | `DATABASE_URL`, `SENTRY_DSN`, `MAPBOX_GEOCODING_TOKEN`, `MAPBOX_DIRECTIONS_TOKEN`, `INTERNAL_TOKEN` depuis Secret Manager | jamais en clair dans la configuration ; tous sauf `DATABASE_URL` passés seulement si leur secret a une valeur |
 
 Le job `widoo-api-migrate` lance `node --enable-source-maps dist/migrate.js` sur la même image, dans le même réseau, sans nouvelle tentative et avec 10 minutes au plus.
 
 Les deux ressources sont créées avec les images d'exemple de Google (`hello`, `job`). Le premier run du workflow les remplace par l'image de l'API. Relancé, `3-run.sh` met à jour la configuration et garde l'image déployée ; chaque mise à jour crée une révision.
 
 Le secret `mapbox-geocoding-token` ne sert qu'au géocodage de la recherche ([#30](https://github.com/Inprogress-Agency/widoo-app/issues/30)), `mapbox-directions-token` qu'aux trajets entre étapes ([#34](https://github.com/Inprogress-Agency/widoo-app/issues/34)) : seul le service les lit, le job de migration ne les reçoit pas. `--update-secrets` ajoute ou remplace les entrées nommées et garde les autres : un secret absent de la commande reste monté s'il l'était. Pas de clé Firebase (voir Droits).
+
+Le secret `internal-token` porte `INTERNAL_TOKEN`, le jeton de service des routes internes (`/v1/internal/*`, [API › Interne](https://github.com/Inprogress-Agency/widoo-app/wiki/API#interne-jeton-de-service-cloud-scheduler)) : Cloud Scheduler l'envoie en `Authorization: Bearer`, l'API le compare en temps constant et répond 401 sans lui. `2-database.sh` le génère (64 caractères hexadécimaux, `openssl rand -hex 32`) et l'écrit par l'entrée standard : il n'est ni affiché, ni passé en argument de commande, ni saisi par personne. Relancé, le script le garde tant que le secret a une version active. Sans valeur, les routes internes n'existent pas (404) et le tri recommandé lit les composantes déjà enregistrées, sans recalcul. Seul le service le lit ; le job de migration ne le reçoit pas.
 
 Rotation d'un jeton Mapbox, sans coupure (ici celui du géocodage ; pour Directions, `mapbox-directions-token` et `MAPBOX_DIRECTIONS_TOKEN`, vérifiés par un trajet calculé sans `estimated`) :
 
@@ -112,7 +114,7 @@ Aucun rôle au niveau du projet, aucune clé de compte de service : chaque rôle
 
 | Compte | Rôle | Sur | Pour |
 |---|---|---|---|
-| `widoo-api-run` (service) | Secret Manager Secret Accessor | secrets `database-url`, `sentry-dsn`, `mapbox-geocoding-token` | lire sa configuration |
+| `widoo-api-run` (service) | Secret Manager Secret Accessor | secrets `database-url`, `sentry-dsn`, `mapbox-geocoding-token`, `mapbox-directions-token`, `internal-token`, un droit par secret | lire sa configuration |
 | `widoo-api-migrate` (job) | Secret Manager Secret Accessor | secret `database-url` | appliquer les migrations |
 | `widoo-deployer` (GitHub) | Artifact Registry Writer | dépôt `widoo` | pousser l'image |
 | | Cloud Run Developer | service `widoo-api`, job `widoo-api-migrate` | déployer, lancer la migration |
