@@ -185,7 +185,7 @@ export function ProfileStats({ figures }: { figures: ProfileFigures }) {
           key={stat.key}
           accessible
           accessibilityLabel={stat.spoken}
-          className={`flex-1 items-center gap-4 px-8 ${index > 0 ? 'border-l border-line' : ''}`}
+          className={`flex-1 items-center gap-4 px-4 ${index > 0 ? 'border-l border-line' : ''}`}
         >
           <View className="flex-row items-center gap-4">
             {stat.hasStar && <Icon {...uiIcon('rating')} size="icon-m" />}
