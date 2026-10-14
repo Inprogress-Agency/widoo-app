@@ -82,7 +82,8 @@ module.exports = {
       // Sizes of the admin drawn on the reference boards (wiki Ecrans › Admin web, « Formes et
       // tailles », « Navigation », « En-tête », A-01) and missing from tokens.json: to move there
       // (DESIGN), then remove from here.
-      height: { header: '64px', screen: '100dvh', fit: 'fit-content' },
+      // `map`: the map of a position in a form (A-04, no board: to size with DESIGN).
+      height: { header: '64px', screen: '100dvh', fit: 'fit-content', map: '280px' },
       minHeight: { 0: '0px', field: '40px', screen: '100dvh', textarea: '72px' },
       // Zero, for what is pinned to an edge (`inset-0`): tokens.json starts at 4 px.
       spacing: { 0: '0px' },

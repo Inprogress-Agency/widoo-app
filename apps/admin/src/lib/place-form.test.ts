@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { emptyPlaceForm, placeFormOf, placeInputOf, type PlaceFormValues } from './place-form';
+import {
+  coordinateText,
+  emptyPlaceForm,
+  placeFormOf,
+  placeInputOf,
+  positionOfForm,
+  type PlaceFormValues,
+} from './place-form';
 
 const filled: PlaceFormValues = {
   ...emptyPlaceForm,
@@ -72,6 +79,27 @@ describe('placeFormOf', () => {
         phone: place.phone,
         hours: place.hours,
       },
+    });
+  });
+});
+
+describe('positionOfForm', () => {
+  it('reads the position the map shows, or none while a field cannot be read', () => {
+    expect(positionOfForm({ latitude: '48,8905', longitude: '2.3558' })).toEqual({
+      lat: 48.8905,
+      lng: 2.3558,
+    });
+    expect(positionOfForm({ latitude: '', longitude: '2.3558' })).toBeNull();
+    expect(positionOfForm({ latitude: '91', longitude: '2' })).toBeNull();
+  });
+});
+
+describe('coordinateText', () => {
+  it('writes a coordinate of the map as the form reads it', () => {
+    expect(coordinateText(48.87850012345)).toBe('48,8785');
+    expect(positionOfForm({ latitude: coordinateText(-33.8688197), longitude: '151,2' })).toEqual({
+      lat: -33.86882,
+      lng: 151.2,
     });
   });
 });
