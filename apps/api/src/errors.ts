@@ -42,6 +42,11 @@ export function pendingRoutesLimitReached(limit: number) {
   });
 }
 
+/** 409 `conflict` of a request the current state refuses, that state in `details`. */
+export function conflict(message: string, details: Record<string, unknown>) {
+  return Object.assign(new Error(message), { statusCode: 409, details });
+}
+
 /**
  * A body that is well formed but breaks a rule only the database can check (a retired
  * question, a route of another author): 422 `validation_error`, its issues in `details`.
