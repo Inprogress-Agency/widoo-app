@@ -17,7 +17,7 @@ import { Text } from '../ui/Text';
 import { CertificationSheet, type CertificationSheetMethods } from './CertificationSheet';
 import { useMe } from './me';
 import { PremiumCard } from './PremiumCard';
-import { ProfileHeader, ProfileStats } from './ProfileHeader';
+import { figuresOfMe, ProfileHeader, ProfileStats } from './ProfileHeader';
 import {
   Anecdotes,
   BecomeCertified,
@@ -106,7 +106,12 @@ export function ProfileScreen() {
                 }}
               />
             )}
-            <ProfileHeader me={me} onCertifiedPress={openCertification} onEditPress={openEdit} />
+            <ProfileHeader
+              identity={me}
+              isCertified={me.certification.isCertified}
+              onCertifiedPress={openCertification}
+              onEditPress={openEdit}
+            />
             {!me.certification.isCertified && (
               <BecomeCertified
                 gap={certificationGap(me.certification)}
@@ -114,7 +119,7 @@ export function ProfileScreen() {
               />
             )}
             <CompleteProfile steps={completionOf(me)} onOpen={openEdit} />
-            <ProfileStats me={me} />
+            <ProfileStats figures={figuresOfMe(me)} />
             <FeaturedRoutes routes={me.featuredRoutes} onOpen={openRoute} />
             <Anecdotes anecdotes={me.anecdotes} />
             {me.plan !== 'premium' && <PremiumCard />}

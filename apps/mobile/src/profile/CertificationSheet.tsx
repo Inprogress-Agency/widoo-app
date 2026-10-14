@@ -25,6 +25,11 @@ export interface CertificationSheetMethods {
 interface CertificationSheetProps {
   ref?: Ref<CertificationSheetMethods>;
   certification: Certification;
+  /**
+   * The creator whose public profile it is (E-16): the sheet tells a visitor why the badge is
+   * there, and closes on « Compris ».
+   */
+  creatorName?: string;
 }
 
 /**
@@ -33,7 +38,7 @@ interface CertificationSheetProps {
  * the screen at large text: it scrolls under the status bar, the button kept at the bottom
  * (D-028). « Créer un parcours » leads to the editor, not built yet: read dimmed until then.
  */
-export function CertificationSheet({ ref, certification }: CertificationSheetProps) {
+export function CertificationSheet({ ref, certification, creatorName }: CertificationSheetProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
@@ -46,9 +51,11 @@ export function CertificationSheet({ ref, certification }: CertificationSheetPro
     },
   }));
   useEffect(() => () => setModalSheetOpen(false), []);
-  const title = certification.isCertified
-    ? t('profile.certification.titleCertified')
-    : t('profile.certification.titleNotYet');
+  const isVisitor = creatorName !== undefined;
+  const title =
+    certification.isCertified || isVisitor
+      ? t('profile.certification.titleCertified')
+      : t('profile.certification.titleNotYet');
 
   return (
     <BottomSheetModal
@@ -76,30 +83,47 @@ export function CertificationSheet({ ref, certification }: CertificationSheetPro
             {title}
           </Text>
           <Text variant="body" color="muted" className="text-center">
-            {t('profile.certification.body')}
+            {isVisitor
+              ? t('creator.certification.body', { name: creatorName })
+              : t('profile.certification.body')}
           </Text>
         </View>
         <View>
           {certification.criteria.map((criterion) => (
-            <CriterionRow key={criterion.criterion} criterion={criterion} />
+            <CriterionRow key={criterion.criterion} criterion={criterion} isVisitor={isVisitor} />
           ))}
         </View>
         <Text variant="body-s" color="muted" className="text-center">
-          {t('profile.certification.footer')}
+          {isVisitor ? t('creator.certification.footer') : t('profile.certification.footer')}
         </Text>
-        <Button
-          isFullWidth
-          isDisabled
-          label={t('profile.certification.create')}
-          onPress={() => undefined}
-        />
+        {isVisitor ? (
+          <Button
+            isFullWidth
+            variant="secondary"
+            label={t('creator.certification.understood')}
+            onPress={() => sheet.current?.dismiss()}
+          />
+        ) : (
+          <Button
+            isFullWidth
+            isDisabled
+            label={t('profile.certification.create')}
+            onPress={() => undefined}
+          />
+        )}
       </BottomSheetScrollView>
     </BottomSheetModal>
   );
 }
 
 /** One criterion, one element: « 3 parcours vérifiés ou plus, 2 sur 3, pas encore rempli ». */
-function CriterionRow({ criterion }: { criterion: CertificationCriterion }) {
+function CriterionRow({
+  criterion,
+  isVisitor,
+}: {
+  criterion: CertificationCriterion;
+  isVisitor: boolean;
+}) {
   const { t } = useTranslation();
   const key = criterion.criterion;
   const isRating = key === 'averageRating';
@@ -130,7 +154,9 @@ function CriterionRow({ criterion }: { criterion: CertificationCriterion }) {
       <View className="flex-1 gap-4">
         <Text variant="body-medium">{label}</Text>
         <Text variant="body-s" color="muted">
-          {t(`profile.certification.${key}.help`)}
+          {isVisitor && key === 'averageRating'
+            ? t('creator.certification.averageRatingHelp')
+            : t(`profile.certification.${key}.help`)}
         </Text>
       </View>
       {/* « Pas encore de note » is a phrase, not a figure. */}

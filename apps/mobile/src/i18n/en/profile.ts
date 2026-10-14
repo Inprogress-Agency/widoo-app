@@ -15,6 +15,8 @@ export const profile = {
     certifiedMore: 'Certified creator, learn more',
     stats: {
       label: 'Figures',
+      published_one: 'route published',
+      published_other: 'routes published',
       completed_one: 'route done',
       completed_other: 'routes done',
       rating: 'average rating',
@@ -96,6 +98,14 @@ export const profile = {
     },
     saved: 'Profile saved.',
     deleted: 'Your account is deleted.',
+  },
+  creator: {
+    certification: {
+      body: '{{name}} offers reliable routes and meets the criteria of Widoo.',
+      averageRatingHelp: 'Across all their routes.',
+      footer: 'Criteria checked every night. The Widoo team can also grant or remove the badge.',
+      understood: 'Got it',
+    },
   },
   field: {
     counter_one: '{{count}} character of {{max}}',
@@ -228,4 +238,5 @@ export const profile = {
   | 'settings'
   | 'language'
   | 'deleteAccount'
+  | 'creator'
 >;

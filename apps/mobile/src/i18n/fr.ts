@@ -444,6 +444,8 @@ export const fr = {
     certifiedMore: 'Créateur certifié, en savoir plus',
     stats: {
       label: 'Chiffres',
+      published_one: 'parcours publié',
+      published_other: 'parcours publiés',
       completed_one: 'parcours réalisé',
       completed_other: 'parcours réalisés',
       rating: 'note moyenne',
@@ -525,6 +527,16 @@ export const fr = {
     },
     saved: 'Profil enregistré.',
     deleted: 'Votre compte est supprimé.',
+  },
+  // Public profile of a creator (E-16).
+  creator: {
+    certification: {
+      body: '{{name}} propose des parcours fiables et remplit les critères de Widoo.',
+      averageRatingHelp: "Sur l'ensemble de ses parcours.",
+      footer:
+        "Critères vérifiés chaque nuit. L'équipe Widoo peut aussi attribuer ou retirer le badge.",
+      understood: 'Compris',
+    },
   },
   field: {
     counter_one: '{{count}} caractère sur {{max}}',
