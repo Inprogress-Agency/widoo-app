@@ -138,6 +138,41 @@ describe('seed', () => {
     });
   });
 
+  it('shows the fields of the editor: booking, affiliate link, ephemeral step, start, tips', async () => {
+    const booked = await app.db
+      .select({
+        note: steps.bookingNote,
+        isAffiliate: steps.bookingIsAffiliate,
+        url: steps.bookingUrl,
+      })
+      .from(steps)
+      .where(and(inArray(steps.routeId, demoRouteIds), sql`${steps.bookingNote} is not null`));
+    expect(booked.length).toBeGreaterThanOrEqual(2);
+    expect(booked.filter((step) => step.isAffiliate)).toEqual([
+      expect.objectContaining({ url: expect.stringMatching(/^https:\/\/example\.com\//) }),
+    ]);
+    const [ephemeral] = await app.db
+      .select({ endsOn: steps.endsOn })
+      .from(steps)
+      .where(and(inArray(steps.routeId, demoRouteIds), sql`${steps.endsOn} is not null`));
+    expect(ephemeral?.endsOn).toBe('2027-06-27');
+    const [montmartre] = await app.db
+      .select({ suggestedStart: routes.suggestedStart })
+      .from(routes)
+      .where(eq(routes.id, routeId('montmartre-a-deux')));
+    expect(montmartre?.suggestedStart).toBe('15:30:00');
+    const withTips = await app.db
+      .select({ id: routes.id })
+      .from(routes)
+      .where(and(inArray(routes.id, demoRouteIds), sql`cardinality(${routes.tips}) > 0`));
+    expect(withTips.length).toBeGreaterThanOrEqual(1);
+    const [{ open } = { open: 0 }] = await app.db
+      .select({ open: count() })
+      .from(places)
+      .where(and(inArray(places.id, placeIds), eq(places.alwaysOpen, true)));
+    expect(open).toBeGreaterThanOrEqual(1);
+  });
+
   it('leaves the database identical on a second run', async () => {
     const snapshot = async () => ({
       users: await app.db.select().from(users).where(inArray(users.id, userIds)).orderBy(users.id),

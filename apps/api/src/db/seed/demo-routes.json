@@ -107,7 +107,8 @@
       },
       "isIndoor": false,
       "priceRange": "free",
-      "hours": []
+      "hours": [],
+      "alwaysOpen": true
     },
     {
       "key": "place-du-tertre",
@@ -122,7 +123,8 @@
       },
       "isIndoor": false,
       "priceRange": "free",
-      "hours": []
+      "hours": [],
+      "alwaysOpen": true
     },
     {
       "key": "musee-de-montmartre",
@@ -182,7 +184,8 @@
       },
       "isIndoor": false,
       "priceRange": "free",
-      "hours": []
+      "hours": [],
+      "alwaysOpen": true
     },
     {
       "key": "jardin-villemin",
@@ -230,7 +233,8 @@
       },
       "isIndoor": false,
       "priceRange": "free",
-      "hours": []
+      "hours": [],
+      "alwaysOpen": true
     },
     {
       "key": "petite-alsace",
@@ -260,7 +264,8 @@
       },
       "isIndoor": false,
       "priceRange": "free",
-      "hours": []
+      "hours": [],
+      "alwaysOpen": true
     },
     {
       "key": "piscine-butte-aux-cailles",
@@ -296,7 +301,8 @@
       },
       "isIndoor": false,
       "priceRange": "free",
-      "hours": []
+      "hours": [],
+      "alwaysOpen": true
     },
     {
       "key": "chez-gladines",
@@ -329,7 +335,8 @@
       },
       "isIndoor": false,
       "priceRange": "free",
-      "hours": []
+      "hours": [],
+      "alwaysOpen": true
     },
     {
       "key": "place-frehel",
@@ -344,7 +351,8 @@
       },
       "isIndoor": false,
       "priceRange": "free",
-      "hours": []
+      "hours": [],
+      "alwaysOpen": true
     },
     {
       "key": "belvedere-de-belleville",
@@ -704,7 +712,8 @@
       },
       "isIndoor": false,
       "priceRange": "free",
-      "hours": []
+      "hours": [],
+      "alwaysOpen": true
     },
     {
       "key": "parc-floral",
@@ -790,6 +799,7 @@
       "audiences": ["couple"],
       "conditions": ["outdoor", "sunny"],
       "transport": "walk",
+      "suggestedStart": "15:30",
       "photos": [
         {
           "url": "https://images.unsplash.com/photo-1561370665-7e266065fce1?w=1200&h=800&fit=crop&auto=format&q=80",
@@ -843,7 +853,10 @@
           "durationMin": 90,
           "costPerPerson": 35,
           "bookingRequired": true,
-          "bookingProvider": "restaurant"
+          "bookingUrl": "https://example.com/reserver/la-maison-rose",
+          "bookingProvider": "restaurant",
+          "bookingNote": "Demander une table en terrasse",
+          "bookingIsAffiliate": true
         }
       ]
     },
@@ -920,6 +933,7 @@
       "audiences": ["friends"],
       "conditions": ["no_booking", "outdoor", "sunny"],
       "transport": "walk",
+      "tips": ["Un maillot et un bonnet de bain pour la piscine"],
       "photos": [
         {
           "url": "https://images.unsplash.com/photo-1594676632059-b0707a8cca55?w=1200&h=800&fit=crop&auto=format&q=80",
@@ -1041,6 +1055,7 @@
       "audiences": ["family", "kids_friendly"],
       "conditions": ["no_booking", "wheelchair", "outdoor", "sunny"],
       "transport": "walk",
+      "tips": ["Un pique-nique pour le déjeuner", "Une gourde par enfant"],
       "photos": [
         {
           "url": "https://images.unsplash.com/photo-1578838389363-a62d9069d2c6?w=1200&h=800&fit=crop&auto=format&q=80",
@@ -1133,7 +1148,8 @@
           "costPerPerson": 13,
           "bookingRequired": true,
           "bookingUrl": "https://www.sainte-chapelle.fr/",
-          "bookingProvider": "ticketing"
+          "bookingProvider": "ticketing",
+          "bookingNote": "Créneau de 9 h, avant la foule"
         },
         {
           "place": "shakespeare-and-company",
@@ -1197,7 +1213,8 @@
           "place": "theatre-guignol-buttes-chaumont",
           "description": "Spectacle de marionnettes le mercredi, le samedi et le dimanche après-midi.",
           "durationMin": 45,
-          "costPerPerson": 6
+          "costPerPerson": 6,
+          "endsOn": "2027-06-27"
         },
         {
           "place": "grotte-buttes-chaumont",
@@ -1228,6 +1245,7 @@
       "audiences": ["couple", "friends"],
       "conditions": ["no_booking", "indoor"],
       "transport": "walk",
+      "tips": ["Des espèces pour les petites boutiques"],
       "photos": [
         {
           "url": "https://images.unsplash.com/photo-1788101841904-669e8b5924b4?w=1200&h=800&fit=crop&auto=format&q=80",

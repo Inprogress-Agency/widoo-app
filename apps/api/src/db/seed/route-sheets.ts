@@ -29,9 +29,13 @@ const day = datasetDate.slice(0, 10);
 const placeOf = new Map(places.map((place) => [place.key, place]));
 const minute = 60_000;
 
-/** The default start (Orchestration › Timeline): 14:00 for a half day, else 10:00, in Paris. */
+/**
+ * The start of the creator, or the default one (Orchestration › Timeline): 14:00 for a half day,
+ * else 10:00, in Paris.
+ */
 function startOf(route: DemoRoute): Date {
-  const hour = bucketsOf(route).durationBucket === 'half_day' ? 14 : 10;
+  const time =
+    route.suggestedStart ?? (bucketsOf(route).durationBucket === 'half_day' ? '14:00' : '10:00');
   const offset = new Intl.DateTimeFormat('en', {
     timeZone: 'Europe/Paris',
     timeZoneName: 'longOffset',
@@ -39,7 +43,7 @@ function startOf(route: DemoRoute): Date {
     .formatToParts(new Date(datasetDate))
     .find((part) => part.type === 'timeZoneName')
     ?.value.replace('GMT', '');
-  return new Date(`${day}T${String(hour).padStart(2, '0')}:00:00${offset ?? '+00:00'}`);
+  return new Date(`${day}T${time}:00${offset ?? '+00:00'}`);
 }
 
 function placeOfStep(key: string): DemoPlace {
@@ -78,9 +82,9 @@ async function sheetOf(route: DemoRoute): Promise<RouteDetail> {
       bookingRequired: step.bookingRequired,
       bookingUrl: step.bookingUrl ?? null,
       bookingProvider: step.bookingProvider ?? null,
-      bookingNote: null,
-      bookingIsAffiliate: false,
-      endsOn: null,
+      bookingNote: step.bookingNote ?? null,
+      bookingIsAffiliate: step.bookingIsAffiliate,
+      endsOn: step.endsOn ?? null,
       transitionNote: step.transitionNote ?? null,
       transition: transition && {
         distanceM: transition.distanceM,

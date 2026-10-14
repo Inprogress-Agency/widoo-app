@@ -6,10 +6,15 @@
  * The JSON is parsed at load, so a typo fails loudly instead of seeding a broken route.
  */
 import {
+  bookingNoteMaxLength,
   budgetBucketOf,
   durationBucketOf,
   HttpsUrl,
   LatLng,
+  routeTipMaxLength,
+  routeTipsMax,
+  routeTitleMaxLength,
+  stepDescriptionMaxLength,
   taxonomies,
   type BudgetBucket,
   type DurationBucket,
@@ -37,7 +42,7 @@ const DemoPlace = z.object({
   }),
   isIndoor: z.boolean(),
   priceRange: z.enum(taxonomies.priceRanges),
-  /** Empty: hours unknown (a street, a square). 0 = Monday. */
+  /** Empty: hours unknown, or a place open at any hour (`alwaysOpen`). 0 = Monday. */
   hours: z.array(
     z.object({
       weekdays: z.array(z.number().int().min(0).max(6)).min(1),
@@ -45,17 +50,24 @@ const DemoPlace = z.object({
       closes: LocalTime,
     }),
   ),
+  /** « Accessible à toute heure » (a street, a square, an open park): no hours (D-049). */
+  alwaysOpen: z.boolean().default(false),
 });
 
 const DemoStep = z.object({
   place: Key,
-  description: z.string().min(1),
+  description: z.string().min(1).max(stepDescriptionMaxLength),
   /** Rule `step_has_duration` (wiki Orchestration): 10 min to 6 h. */
   durationMin: z.number().int().min(10).max(360),
   costPerPerson: euros,
   bookingRequired: z.boolean().default(false),
   bookingUrl: HttpsUrl.optional(),
   bookingProvider: z.enum(taxonomies.bookingProviders).optional(),
+  bookingNote: z.string().min(1).max(bookingNoteMaxLength).optional(),
+  /** On a fictitious link only (example.com): no real affiliate programme in the demo. */
+  bookingIsAffiliate: z.boolean().default(false),
+  /** Last day of an ephemeral step (D-050). */
+  endsOn: z.iso.date().optional(),
   transitionNote: z.string().min(1).optional(),
 });
 
@@ -73,7 +85,7 @@ const Computed = z.object({
 
 const DemoRoute = z.object({
   key: Key,
-  title: z.string().min(1),
+  title: z.string().min(1).max(routeTitleMaxLength),
   /** Rule `missing_description`: 80 characters at least to publish. */
   description: z.string().min(80),
   /** Key of an author, or null for a route « Par Widoo ». */
@@ -82,6 +94,10 @@ const DemoRoute = z.object({
   audiences: z.array(z.enum(taxonomies.audiences)).min(1),
   conditions: z.array(z.enum(taxonomies.conditions)),
   transport: z.enum(taxonomies.transports),
+  /** « Départ conseillé » of the creator; absent: computed (D-050). */
+  suggestedStart: LocalTime.optional(),
+  /** « À prévoir », lines of the creator (D-048). */
+  tips: z.array(z.string().min(1).max(routeTipMaxLength)).max(routeTipsMax).default([]),
   photos: z
     .array(
       z.object({
@@ -127,6 +143,18 @@ export const DemoDataset = z
       return routes.every((route) => route.author === null || authorKeys.has(route.author));
     },
     { message: 'Every author of a route is in the dataset' },
+  )
+  .refine(({ places }) => places.every((place) => !place.alwaysOpen || place.hours.length === 0), {
+    message: 'A place open at any hour has no hours',
+  })
+  .refine(
+    ({ routes }) =>
+      routes.every((route) =>
+        route.steps.every(
+          (step) => !step.bookingIsAffiliate || step.bookingUrl?.startsWith('https://example.com/'),
+        ),
+      ),
+    { message: 'An affiliate link of the demo is a fictitious link' },
   );
 export type DemoDataset = z.infer<typeof DemoDataset>;
 export type DemoRoute = DemoDataset['routes'][number];
