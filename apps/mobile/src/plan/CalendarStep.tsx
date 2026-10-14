@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
+import { capitalize, dateFormat } from '../i18n/formats';
 import { DiscButton } from '../ui/DiscButton';
 import { Icon, uiIcon } from '../ui/Icon';
 import { Text } from '../ui/Text';
@@ -8,26 +9,17 @@ import { monthWeeks } from './calendar';
 
 /** How far ahead the calendar goes: a year of months. */
 const MONTHS_AHEAD = 12;
-const weekdayInitials = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
-const weekdayNames = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
-
-const monthTitle = new Intl.DateTimeFormat('fr-FR', {
-  timeZone: 'UTC',
-  month: 'long',
-  year: 'numeric',
-});
-const dayLabel = new Intl.DateTimeFormat('fr-FR', {
-  timeZone: 'UTC',
-  day: 'numeric',
-  month: 'long',
-});
+/** Monday 2 January 2023 at noon UTC, then the six days after it: the columns of the calendar. */
+const weekDays = Array.from(
+  { length: 7 },
+  (_, index) => new Date(Date.UTC(2023, 0, 2 + index, 12)),
+);
 
 const monthOf = (day: string) => ({
   year: Number(day.slice(0, 4)),
   month: Number(day.slice(5, 7)),
 });
 const indexOf = ({ year, month }: { year: number; month: number }) => year * 12 + month - 1;
-const capitalize = (text: string) => text.charAt(0).toLocaleUpperCase('fr-FR') + text.slice(1);
 
 interface CalendarStepProps {
   /** The day shown chosen, in ink. */
@@ -51,7 +43,11 @@ export function CalendarStep({ selected, today, onSelect, onBack }: CalendarStep
     const next = current + by;
     setShown({ year: Math.floor(next / 12), month: (next % 12) + 1 });
   };
-  const title = capitalize(monthTitle.format(new Date(Date.UTC(shown.year, shown.month - 1, 15))));
+  const title = capitalize(
+    dateFormat({ timeZone: 'UTC', month: 'long', year: 'numeric' }).format(
+      new Date(Date.UTC(shown.year, shown.month - 1, 15)),
+    ),
+  );
 
   return (
     <View className="gap-16">
@@ -93,10 +89,11 @@ export function CalendarStep({ selected, today, onSelect, onBack }: CalendarStep
           importantForAccessibility="no-hide-descendants"
           accessibilityElementsHidden
         >
-          {weekdayInitials.map((initial, index) => (
-            <View key={weekdayNames[index]} className="flex-1 items-center">
+          {weekDays.map((weekday) => (
+            <View key={weekday.getTime()} className="flex-1 items-center">
+              {/* « L M M J V S D », « M T W T F S S ». */}
               <Text variant="label-strong" color="muted" isDense>
-                {initial}
+                {dateFormat({ timeZone: 'UTC', weekday: 'narrow' }).format(weekday)}
               </Text>
             </View>
           ))}
@@ -139,7 +136,9 @@ function DayCell({
   isPast: boolean;
   onPress: () => void;
 }) {
-  const label = dayLabel.format(new Date(`${day}T12:00:00Z`));
+  const label = dateFormat({ timeZone: 'UTC', day: 'numeric', month: 'long' }).format(
+    new Date(`${day}T12:00:00Z`),
+  );
   return (
     <Pressable
       accessibilityRole="button"

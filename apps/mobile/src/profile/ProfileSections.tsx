@@ -2,6 +2,7 @@ import type { FeaturedRoute, ProfileAnecdote } from '@widoo/shared';
 import type { UiIconKey } from '@widoo/tokens';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
+import { numberFormat } from '../i18n/formats';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { Icon, uiIcon } from '../ui/Icon';
@@ -145,7 +146,7 @@ export function BecomeCertified({
     line = t(`profile.becomeCertified.${gap.criterion}`, { count: gap.count });
   } else if (gap.kind === 'rating') {
     line = t('profile.becomeCertified.rating', {
-      threshold: gap.threshold.toLocaleString('fr-FR'),
+      threshold: numberFormat().format(gap.threshold),
     });
   } else {
     line = t('profile.becomeCertified.several', { count: gap.count });

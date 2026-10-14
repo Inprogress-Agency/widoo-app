@@ -1,6 +1,5 @@
 import type { TFunction } from 'i18next';
-
-const kilometers = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 });
+import { numberFormat } from '../i18n/formats';
 
 /** Meters under a kilometer are rounded to this step: a position is never that precise. */
 const METER_STEP = 50;
@@ -17,5 +16,8 @@ export function formatDistance(t: TFunction, meters: number, form: 'short' | 'sp
   const km = meters / 1000;
   const shown = km >= 10 ? Math.round(km) : Math.round(km * 10) / 10;
   // The plural follows the figure said: « 1 kilomètre » for 1,01 km.
-  return t(`distance.${form}.kilometers`, { count: shown, value: kilometers.format(shown) });
+  return t(`distance.${form}.kilometers`, {
+    count: shown,
+    value: numberFormat({ maximumFractionDigits: 1 }).format(shown),
+  });
 }

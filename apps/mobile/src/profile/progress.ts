@@ -1,4 +1,5 @@
 import type { Certification, CertificationCriterionKey, Me } from '@widoo/shared';
+import { dateFormat } from '../i18n/formats';
 
 /**
  * What the « Devenez créateur certifié » card says is missing (Ecrans › E-09, pas encore
@@ -45,9 +46,7 @@ export function completionOf(me: Me): { step: CompletionStep; isDone: boolean }[
   return completionSteps.map((step) => ({ step, isDone: isDone[step] }));
 }
 
-const monthAndYear = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' });
-
-/** « mars 2026 », for « sur Widoo depuis mars 2026 », in local time. */
+/** « mars 2026 » or « March 2026 », for « sur Widoo depuis mars 2026 », in local time. */
 export function memberSince(createdAt: string): string {
-  return monthAndYear.format(new Date(createdAt));
+  return dateFormat({ month: 'long', year: 'numeric' }).format(new Date(createdAt));
 }
