@@ -43,7 +43,8 @@ const count = z.number().int().nonnegative();
 const ratio = z.number().min(0).max(1);
 const route = { route_id: id };
 const step = { ...route, step_index: count };
-const authIntent = z.enum(['favorite', 'plan', 'go', 'create', 'signal']);
+/** `profile`: « Créer un compte ou se connecter » of the Profil tab without account (E-09). */
+const authIntent = z.enum(['favorite', 'plan', 'go', 'create', 'signal', 'profile']);
 const purchase = z.strictObject({ plan: z.enum(['monthly', 'annual']) });
 const createSaved = z.strictObject({ steps_count: count, warnings_count: count });
 const bookingProvider = z.enum(taxonomies.bookingProviders);

@@ -128,6 +128,7 @@ describe('events of D-023, D-029 and D-033', () => {
   const valid: Partial<Record<AnalyticsEventName, unknown>> = {
     paywall_shown: { reason: 'premium_route', source: 'route' },
     certified_info_opened: { creator_id: 'user-1', own: false },
+    auth_prompted: { intent: 'profile' },
     profile_updated: { fields: ['photo', 'neighborhood'] },
     go_arrived: { route_id, step_index: 1, suggested: true },
     go_stopped: { route_id, steps_done_ratio: 0.5 },
