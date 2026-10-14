@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ModalSheetBackground, ModalSheetHandle, modalSheetBackdrop } from './ModalSheetParts';
 import { setModalSheetOpen } from './ModalSheetShield';
 import { timing } from './motion';
+import { Radio } from './Radio';
 import { Text } from './Text';
 
 export interface SortOption<T extends string> {
@@ -164,19 +165,5 @@ function SortRow<T extends string>({ option, isChecked, onPress }: SortRowProps<
         </Text>
       </View>
     </Pressable>
-  );
-}
-
-/** Radio of 24 points, decorative: its row carries the role and the state. */
-function Radio({ isChecked, isDisabled = false }: { isChecked: boolean; isDisabled?: boolean }) {
-  const ring = isDisabled
-    ? 'border-control-border-disabled'
-    : isChecked
-      ? 'border-blue bg-blue'
-      : 'border-control-border';
-  return (
-    <View className={`size-24 items-center justify-center rounded-pill border-2 ${ring}`}>
-      {isChecked && <View className="size-8 rounded-pill bg-bg" />}
-    </View>
   );
 }

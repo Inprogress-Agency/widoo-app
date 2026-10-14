@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Linking, ScrollView, View } from 'react-native';
 import { session } from '../auth';
 import { dateFormat } from '../i18n/formats';
+import { useLanguageChoice } from '../i18n/language';
 import { PRIVACY_URL, TERMS_URL } from '../auth/links';
 import { SettingsRow, SettingsSection, SwitchRow } from '../ui/SettingsRow';
 import { Text } from '../ui/Text';
@@ -18,9 +19,10 @@ import { appVersion, openStoreSubscriptions } from './store';
 
 /**
  * Réglages (Ecrans › E-09), pushed over my profile with the tab bar in place (M-03). The rows of
- * E-mail, Connexion, Notifications, Langue, Confidentialité and Aide et contact open the pages of
- * E-19 (#189): until then they are read as text, without chevron. The legal texts open on the
- * site, as E-10 does. Without account: the preferences, the information and the version.
+ * E-mail, Connexion, Notifications, Confidentialité and Aide et contact open the pages of E-19
+ * (#189): until then they are read as text, without chevron; Langue opens its page already. The
+ * legal texts open on the site, as E-10 does. Without account: the preferences, the information
+ * and the version.
  */
 export function SettingsScreen() {
   const { t } = useTranslation();
@@ -28,6 +30,7 @@ export function SettingsScreen() {
   const { state } = useMe();
   const me = state.status === 'ready' ? state.me : null;
   const { version, build } = appVersion();
+  const { choice } = useLanguageChoice();
 
   return (
     <View className="flex-1 bg-bg">
@@ -46,7 +49,8 @@ export function SettingsScreen() {
           <SettingsRow
             icon="language"
             label={t('settings.language')}
-            value={t('settings.languageValue')}
+            value={choice === 'device' ? t('language.device') : t(`language.${choice}`)}
+            onPress={() => router.push('/language')}
           />
           <SettingsRow icon="privacy-settings" label={t('settings.privacy')} />
         </SettingsSection>

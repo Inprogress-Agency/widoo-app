@@ -603,7 +603,6 @@ export const fr = {
     preferences: 'Préférences',
     notifications: 'Notifications',
     language: 'Langue',
-    languageValue: 'Français',
     privacy: 'Confidentialité',
     information: 'Informations',
     terms: "Conditions d'utilisation",
@@ -614,6 +613,18 @@ export const fr = {
     deleteAccount: 'Supprimer mon compte',
     version: 'Widoo, version {{version}}',
     versionBuild: 'Widoo, version {{version}} ({{build}})',
+  },
+  // Réglages › Langue (E-19, D-062, D-063): each language named in the language of the interface.
+  language: {
+    title: 'Langue',
+    back: 'Retour aux réglages',
+    group: 'Langue',
+    device: 'Langue du téléphone',
+    fr: 'Français',
+    en: 'Anglais',
+    note: "Les parcours sont traduits automatiquement. Leur version d'origine reste disponible.",
+    error: 'Modification impossible',
+    errorBody: 'Réessayez dans un instant.',
   },
   // Supprimer mon compte (E-09, D-025): no choice, the published routes stay online.
   deleteAccount: {
