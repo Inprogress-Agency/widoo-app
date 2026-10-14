@@ -28,3 +28,4 @@ export * from './schemas/route';
 export * from './schemas/route-detail';
 export * from './schemas/route-editor';
 export * from './schemas/search';
+export * from './schemas/support';

@@ -6,6 +6,7 @@ import {
   devices,
   plannedRoutes,
   routeUnlocks,
+  supportMessages,
   userAnecdotes,
   userFeaturedRoutes,
   users,
@@ -95,8 +96,8 @@ export async function updateUser(db: Db, userId: string, update: UpdateMe): Prom
 
 /**
  * Account deletion (wiki Compte-et-Monetisation): `deleted_at` set, e-mail, first name, avatar,
- * bio, neighborhood, language and preferences erased, anecdotes, featured routes, plannings and
- * phones deleted (no push reaches a deleted account),
+ * bio, neighborhood, language and preferences erased, anecdotes, featured routes, plannings,
+ * phones (no push reaches a deleted account) and messages to the support deleted,
  * profile no longer public, so its routes show « Membre Widoo ». The row and its `firebase_uid`
  * stay until the purge, 30 days later (wiki Securite-et-RGPD), whose cascade finds nothing left
  * to delete.
@@ -126,5 +127,7 @@ export async function softDeleteUser(db: Db, userId: string): Promise<void> {
     // A route bought alone belongs to the account: nothing is left to unlock (D-073).
     await tx.delete(routeUnlocks).where(eq(routeUnlocks.userId, userId));
     await tx.delete(devices).where(eq(devices.userId, userId));
+    // Their reply address and text are personal data of the account (D-063).
+    await tx.delete(supportMessages).where(eq(supportMessages.userId, userId));
   });
 }
