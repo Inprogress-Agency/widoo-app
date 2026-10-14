@@ -86,6 +86,8 @@ export default function RootLayout() {
               <Stack.Screen name="edit-profile" options={pageOptions} />
               <Stack.Screen name="delete-account" options={pageOptions} />
               <Stack.Screen name="language" options={pageOptions} />
+              {/* E-16, pushed from a card or from the route sheet, over it (M-03). */}
+              <Stack.Screen name="creator/[id]" options={pageOptions} />
             </Stack>
             {/* E-10, over whichever screen asks for an account. */}
             <SignInSheet flow={signInFlow} />

@@ -530,6 +530,14 @@ export const fr = {
   },
   // Public profile of a creator (E-16).
   creator: {
+    back: 'Retour',
+    loading: 'Chargement du profil',
+    offline: { title: 'Hors connexion', body: "Le profil s'affichera au retour du réseau." },
+    unavailable: {
+      title: "Ce profil n'est pas disponible",
+      body: 'Il a été masqué ou le compte a été supprimé.',
+      explore: 'Explorer les parcours',
+    },
     certification: {
       body: '{{name}} propose des parcours fiables et remplit les critères de Widoo.',
       averageRatingHelp: "Sur l'ensemble de ses parcours.",
