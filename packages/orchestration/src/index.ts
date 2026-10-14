@@ -18,3 +18,10 @@ export {
   type TransitionTransport,
 } from './transitions';
 export { computeTimeline, conflictsOf, type TimelineStepInput } from './timeline';
+export {
+  defaultCoherenceThresholds,
+  evaluateRoute,
+  type CoherenceThresholds,
+  type EvaluatedRoute,
+  type EvaluatedStep,
+} from './evaluate';
