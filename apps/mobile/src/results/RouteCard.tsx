@@ -1,9 +1,10 @@
 import { type LatLng, type RouteCard as RouteCardData } from '@widoo/shared';
-import { colors, filterIcons, motion } from '@widoo/tokens';
+import { colors, filterIcons, motion, size } from '@widoo/tokens';
 import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
 import {
   AccessibilityInfo,
+  Pressable,
   StyleSheet,
   View,
   type AccessibilityActionEvent,
@@ -18,6 +19,7 @@ import { MoodDot } from '../ui/MoodDot';
 import { RatingPill } from '../ui/Rating';
 import { Tag } from '../ui/Tag';
 import { Text } from '../ui/Text';
+import { openCreatorProfile } from '../creator/navigation';
 import { cardText } from './cardText';
 import { taxonomyLabels } from '../i18n/labels';
 
@@ -42,7 +44,15 @@ interface RouteCardProps {
   /** Height of the tallest card of the carousel, which the others take (Accessibilité). */
   minHeight?: number;
   onLayout?: (event: LayoutChangeEvent) => void;
+  /**
+   * « Par Camille » opens the creator's profile (E-16); not on that profile itself. A creator
+   * that is not public reads « Membre Widoo », without action.
+   */
+  isCreatorLinked?: boolean;
 }
+
+// The creator line is shorter than a finger: its hit slop brings it to 44 points.
+const creatorHitSlop = size['touch-min'] / 4;
 
 /**
  * Route card of the results (Ecrans › E-01, carte de parcours), for the sheet and « Voir tout »:
@@ -58,6 +68,7 @@ export function RouteCard({
   variant = 'carousel',
   minHeight,
   onLayout,
+  isCreatorLinked = true,
 }: RouteCardProps) {
   const { t } = useTranslation();
   const text = cardText(t, route, position);
@@ -67,9 +78,14 @@ export function RouteCard({
   const audience = isList ? route.audiences[0] : undefined;
   const audienceLabel = audience && taxonomyLabels().audiences[audience];
 
+  const creator = isCreatorLinked && !route.isOfficial ? route.author : null;
+  const openCreator = creator ? () => openCreatorProfile(creator, 'card') : undefined;
+
   const handleAccessibilityAction = (event: AccessibilityActionEvent) => {
     if (event.nativeEvent.actionName === 'favorite') {
       AccessibilityInfo.announceForAccessibility(t('favorite.comingSoon'));
+    } else if (event.nativeEvent.actionName === 'creator') {
+      openCreator?.();
     }
   };
 
@@ -83,7 +99,12 @@ export function RouteCard({
         onPress={onPress}
         accessibilityLabel={audienceLabel ? `${text.label}, ${audienceLabel}` : text.label}
         accessibilityHint={t('card.open')}
-        accessibilityActions={[{ name: 'favorite', label: t('favorite.add') }]}
+        accessibilityActions={[
+          { name: 'favorite', label: t('favorite.add') },
+          ...(creator
+            ? [{ name: 'creator', label: t('creator.seeProfileOf', { name: creator.firstName }) }]
+            : []),
+        ]}
         onAccessibilityAction={handleAccessibilityAction}
         className={`${isList ? 'min-h-card-list-h' : 'min-h-card-h'} flex-1 gap-12 p-8 pb-16`}
       >
@@ -125,7 +146,15 @@ export function RouteCard({
               </Text>
             </View>
           )}
-          <View className="flex-row items-center gap-8">
+          {/* An action of the card for screen readers, which read the card as one element. */}
+          <Pressable
+            accessible={false}
+            importantForAccessibility="no-hide-descendants"
+            disabled={!openCreator}
+            hitSlop={creatorHitSlop}
+            onPress={openCreator}
+            className="flex-row items-center gap-8 self-start"
+          >
             <Avatar
               url={route.author?.avatarUrl ?? null}
               name={route.isOfficial ? 'Widoo' : (route.author?.firstName ?? 'Widoo')}
@@ -134,7 +163,7 @@ export function RouteCard({
             <Text variant="body-s" color="muted" className="shrink">
               {text.creator}
             </Text>
-          </View>
+          </Pressable>
         </View>
         <View className="mt-auto gap-10 px-8">
           <View className="flex-row flex-wrap items-baseline gap-6">

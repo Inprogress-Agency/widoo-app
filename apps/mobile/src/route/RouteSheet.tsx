@@ -39,6 +39,8 @@ export interface RouteSheetProps {
   /** « Voir sur la carte », when the route is among the results of the home (E-04). */
   onSeeOnMap: (() => void) | null;
   onNearby: () => void;
+  /** « Voir le profil » of the creator box, to its public profile (E-16). */
+  onOpenCreator?: (author: NonNullable<RouteDetail['author']>) => void;
   onScrollDepth: (depth: ScrollDepth) => void;
   /** Opened at a step from « Voir plus » of the map, from 0: unfolded, scrolled to. */
   initialStep?: number;
@@ -62,6 +64,7 @@ export function RouteSheet({
   plannedDate,
   onSeeOnMap,
   onNearby,
+  onOpenCreator,
   onScrollDepth,
   initialStep,
   now = new Date(),
@@ -294,7 +297,7 @@ export function RouteSheet({
                       }}
                     />
                   </View>
-                  <CreatorBox route={route} />
+                  <CreatorBox route={route} onOpenCreator={onOpenCreator} />
                   <View
                     onLayout={(event) => {
                       layout.current.reviews = event.nativeEvent.layout.y;
