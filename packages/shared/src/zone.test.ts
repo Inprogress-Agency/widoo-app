@@ -33,8 +33,12 @@ describe('zoneSearchBox', () => {
 });
 
 describe('GeocodeQuery', () => {
-  it('trims the text', () => {
-    expect(GeocodeQuery.parse({ q: '  Montmartre ' })).toEqual({ q: 'Montmartre' });
+  it('trims the text, in French when no language is given', () => {
+    expect(GeocodeQuery.parse({ q: '  Montmartre ' })).toEqual({ q: 'Montmartre', locale: 'fr' });
+  });
+
+  it('takes a language of the app', () => {
+    expect(GeocodeQuery.parse({ q: 'Montmartre', locale: 'en' }).locale).toBe('en');
   });
 
   it.each([
@@ -43,6 +47,7 @@ describe('GeocodeQuery', () => {
     ['markup', { q: '<script>' }],
     ['a control character', { q: 'canal\u0000' }],
     ['an unknown key', { q: 'canal', types: 'address' }],
+    ['a language the app does not ship', { q: 'canal', locale: 'de' }],
   ])('refuses %s', (_, query) => {
     expect(GeocodeQuery.safeParse(query).success).toBe(false);
   });

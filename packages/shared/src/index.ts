@@ -1,5 +1,6 @@
 export * from './analytics';
 export * from './app-version';
+export { arrondissementLabel } from './arrondissement';
 export * from './sections';
 export { assertNever } from './assert-never';
 export { budgetSumEur, displayedBudgetEur } from './budget';
