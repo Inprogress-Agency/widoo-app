@@ -8,6 +8,7 @@ const day = 24 * hour;
 const relativeForDays = 7;
 
 const absoluteDate = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeZone });
+const dayMonth = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', timeZone });
 const fullDate = new Intl.DateTimeFormat('fr-FR', {
   weekday: 'long',
   day: 'numeric',
@@ -39,6 +40,11 @@ export function formatRelativeDate(date: Date, now = new Date()): string {
     return `il y a ${Math.floor(elapsed / day)} j`;
   }
   return absoluteDate.format(date);
+}
+
+/** A day without its year, inside a sentence: « 2 octobre ». */
+export function formatDayMonth(date: Date): string {
+  return dayMonth.format(date);
 }
 
 /** A date in full, as a record shows it: « jeudi 9 octobre à 8:12 », Paris time. */

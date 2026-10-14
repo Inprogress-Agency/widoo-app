@@ -4,6 +4,7 @@ import { AuthorCard } from '@/components/moderation/sheet/AuthorCard';
 import { CoherenceWarnings } from '@/components/moderation/sheet/CoherenceWarnings';
 import { DecisionPanel } from '@/components/moderation/sheet/DecisionPanel';
 import { HistoryCard } from '@/components/moderation/sheet/HistoryCard';
+import { PublishedPanel } from '@/components/moderation/sheet/PublishedPanel';
 import { RejectDialog } from '@/components/moderation/sheet/RejectDialog';
 import { RequestChangesDialog } from '@/components/moderation/sheet/RequestChangesDialog';
 import { RevisionChanges } from '@/components/moderation/sheet/RevisionChanges';
@@ -16,7 +17,7 @@ import { sectionPaths } from '@/config/navigation';
 import { useModerationDecision } from '@/hooks/useModerationDecision';
 import { useRemoteData } from '@/hooks/useRemoteData';
 import { getSessionClients } from '@/lib/auth/clients';
-import { isWaitingLate } from '@/lib/dates';
+import { formatDayMonth, isWaitingLate } from '@/lib/dates';
 import { messages } from '@/messages/fr';
 import { taxonomies, type RejectionReason } from '@widoo/shared';
 import { Button } from '@widoo/ui';
@@ -42,10 +43,20 @@ export function ModerationSheetContainer({ routeId }: { routeId: string }) {
   const [message, setMessage] = useState('');
   const [reasonCode, setReasonCode] = useState('');
 
+  // Set once the route is published: the sheet stays, with the way on, instead of moving away.
+  const [publishedTo, setPublishedTo] = useState<{ nextPath: string } | null>(null);
+
   const nextId = sheet.status === 'ready' ? sheet.data.queue?.nextId : null;
-  const decision = useModerationDecision(routeId, () => {
+  const nextPath = nextId ? sheetPathOf(nextId) : sectionPaths.moderation;
+  const reload = sheet.status === 'loading' ? undefined : sheet.reload;
+  const decision = useModerationDecision(routeId, (outcome) => {
     setOpenDialog(null);
-    router.push(nextId ? sheetPathOf(nextId) : sectionPaths.moderation);
+    if (outcome === 'published') {
+      setPublishedTo({ nextPath });
+      reload?.();
+      return;
+    }
+    router.push(nextPath);
   });
 
   if (sheet.status === 'loading') {
@@ -93,7 +104,13 @@ export function ModerationSheetContainer({ routeId }: { routeId: string }) {
           <StepList steps={route.steps} />
         </div>
         <aside className="flex w-full shrink-0 flex-col gap-16 lg:w-decision">
-          {route.status === 'pending' ? (
+          {publishedTo ? (
+            <PublishedPanel
+              publishedBy={route.history[0]?.actorFirstName ?? null}
+              onNext={() => router.push(publishedTo.nextPath)}
+              onBackToCatalog={() => router.push(sectionPaths.catalog)}
+            />
+          ) : route.status === 'pending' ? (
             <DecisionPanel
               checkedRules={checkedRules}
               onToggleRule={handleToggleRule}
@@ -117,6 +134,12 @@ export function ModerationSheetContainer({ routeId }: { routeId: string }) {
       />
       <RejectDialog
         isOpen={openDialog === 'reject'}
+        authorFirstName={route.author?.firstName ?? null}
+        publishedVersionOn={
+          route.isRevision && route.publishedVersionAt
+            ? formatDayMonth(new Date(route.publishedVersionAt))
+            : null
+        }
         reasonCode={reasonCode}
         onReasonCodeChange={setReasonCode}
         message={message}
