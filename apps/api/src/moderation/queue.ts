@@ -68,6 +68,8 @@ function filtersOf(query: ModerationQueueQuery, now: Date): SQL {
     filters.push(sql`r.city_id = ${query.city}`);
   }
   if (query.late) {
+    // Only a route waiting for its first look is late: one sent back to its author is not.
+    filters.push(sql`r.status = 'pending'`);
     filters.push(sql`${waitingSince} < ${lateBefore(now)}::timestamptz`);
   }
   if (query.revision) {
@@ -155,7 +157,9 @@ export async function readModerationQueue(
       (select count(*)::int ${queueFrom} where ${where}) as total,
       count(*) filter (where r.status = 'pending')::int as pending,
       count(*) filter (where r.status = 'changes_requested')::int as changes_requested,
-      count(*) filter (where ${waitingSince} < ${lateBefore(now)}::timestamptz)::int as late,
+      count(*) filter (
+        where r.status = 'pending' and ${waitingSince} < ${lateBefore(now)}::timestamptz
+      )::int as late,
       count(*) filter (where ${isRevision})::int as revisions
     from routes r
     where r.status in (${statusList})`);
