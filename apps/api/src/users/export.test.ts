@@ -1,0 +1,105 @@
+import { randomUUID } from 'node:crypto';
+import { MyDataExport } from '@widoo/shared';
+import { eq, inArray } from 'drizzle-orm';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { buildApp } from '../app';
+import { TestTokenVerifier } from '../auth/test-verifier';
+import { media, plannedRoutes, plannedSteps, userAnecdotes, users } from '../db/schema';
+import { editorFixtures } from '../editor/test-fixtures';
+import { testConfig } from '../test-config';
+import { exportUserData } from './export';
+
+// Shared database, parallel files: accounts of this file only, deleted with what they own.
+const verifier = new TestTokenVerifier();
+let app: Awaited<ReturnType<typeof buildApp>>;
+const fixtures = editorFixtures(() => app, verifier);
+const photoIds: string[] = [];
+
+beforeAll(async () => {
+  app = await buildApp(testConfig(), { tokenVerifier: verifier });
+});
+afterAll(async () => {
+  if (photoIds.length > 0) await app.db.delete(media).where(inArray(media.id, photoIds));
+  await fixtures.cleanUp();
+  await app.close();
+});
+
+async function accountOf(headers: Record<string, string>): Promise<string> {
+  return (await app.inject({ url: '/v1/me', headers })).json().id;
+}
+
+/** Fictitious data in every table of the account, `marker` in its free texts. */
+async function fillAccount(headers: Record<string, string>, marker: string) {
+  const userId = await accountOf(headers);
+  const db = app.db;
+  await db
+    .update(users)
+    .set({ bio: `Bio ${marker}`, locale: 'en' })
+    .where(eq(users.id, userId));
+  await db
+    .insert(userAnecdotes)
+    .values({ userId, questionKey: 'hidden_gem', answer: `Un bon plan ${marker}`, position: 1 });
+  const route = await fixtures.publishableDraft(headers);
+  const [photo] = await db
+    .insert(media)
+    .values({
+      ownerType: 'route',
+      ownerId: route.id,
+      storagePath: `https://images.example.com/${marker}.jpg`,
+      width: 1200,
+      height: 800,
+    })
+    .returning({ id: media.id });
+  if (photo) photoIds.push(photo.id);
+  const [planned] = await db
+    .insert(plannedRoutes)
+    .values({
+      userId,
+      routeId: route.id,
+      routeRevisionSnapshot: { title: 'Les musées du Marais' },
+      startsAt: new Date('2026-10-17T08:00:00Z'),
+      timeline: {},
+    })
+    .returning({ id: plannedRoutes.id });
+  const stepId = route.steps[0]?.id ?? randomUUID();
+  await db.insert(plannedSteps).values({ plannedRouteId: planned?.id ?? '', stepId, position: 1 });
+  return { userId, route };
+}
+
+describe('exportUserData', () => {
+  it('exports every personal data of the account', async () => {
+    const headers = await fixtures.signIn();
+    const marker = randomUUID();
+    const { userId, route } = await fillAccount(headers, marker);
+
+    const exported = MyDataExport.parse(await exportUserData(app.db, userId));
+    expect(exported.account).toMatchObject({ id: userId, bio: `Bio ${marker}` });
+    expect(exported.preferences).toMatchObject({ locale: 'en' });
+    expect(exported.anecdotes).toMatchObject([{ answer: `Un bon plan ${marker}` }]);
+    expect(exported.plannedRoutes).toMatchObject([
+      { routeId: route.id, title: 'Les musées du Marais', steps: [{ position: 1 }] },
+    ]);
+    expect(exported.createdRoutes).toMatchObject([
+      { id: route.id, photoUrls: [`https://images.example.com/${marker}.jpg`] },
+    ]);
+    expect(exported.createdRoutes[0]?.steps).toHaveLength(route.steps.length);
+  });
+
+  it('exports the data of the caller only', async () => {
+    const other = await fixtures.signIn();
+    const otherMarker = randomUUID();
+    await fillAccount(other, otherMarker);
+    const userId = await accountOf(await fixtures.signIn());
+
+    const exported = MyDataExport.parse(await exportUserData(app.db, userId));
+    expect(JSON.stringify(exported)).not.toContain(otherMarker);
+    expect(exported.createdRoutes).toEqual([]);
+  });
+
+  it('exports nothing for a deleted account', async () => {
+    const headers = await fixtures.signIn();
+    const userId = await accountOf(headers);
+    await app.inject({ method: 'DELETE', url: '/v1/me', headers });
+    expect(await exportUserData(app.db, userId)).toBeNull();
+  });
+});

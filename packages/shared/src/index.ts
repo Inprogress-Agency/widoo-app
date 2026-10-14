@@ -17,6 +17,7 @@ export { zoneMinSpanM, zoneSearchBox } from './zone';
 export * from './schemas/common';
 export * from './schemas/config';
 export * from './schemas/error';
+export * from './schemas/export';
 export * from './schemas/geocode';
 export * from './schemas/legal';
 export * from './schemas/me';
