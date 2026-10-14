@@ -349,6 +349,19 @@ export const fr = {
   // E-09, my profile as the others see it (D-023, D-025).
   profile: {
     title: 'Profil',
+    settings: 'Réglages',
+    edit: 'Modifier le profil',
+    memberSince: 'Sur Widoo depuis {{date}}',
+    placeAndSince: '{{place}}, sur Widoo depuis {{date}}',
+    certified: 'Créateur certifié',
+    certifiedMore: 'Créateur certifié, en savoir plus',
+    stats: {
+      label: 'Chiffres',
+      completed_one: 'parcours réalisé',
+      completed_other: 'parcours réalisés',
+      rating: 'note moyenne',
+      ratingSpoken: 'Note moyenne {{value}} sur 5',
+    },
     certification: {
       close: 'Fermer',
       titleCertified: 'Créateur certifié',
