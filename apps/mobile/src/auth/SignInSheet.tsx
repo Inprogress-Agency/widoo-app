@@ -91,7 +91,6 @@ export function SignInSheet({ flow }: { flow: SignInFlow }) {
       maxDynamicContentSize={height - insets.top}
       keyboardBehavior="interactive"
       keyboardBlurBehavior="restore"
-      android_keyboardInputMode="adjustResize"
       backdropComponent={parts.backdrop}
       backgroundComponent={ModalSheetBackground}
       handleComponent={parts.handle}
