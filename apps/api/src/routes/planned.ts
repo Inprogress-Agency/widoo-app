@@ -3,6 +3,7 @@ import {
   PlannedRoute,
   PlannedRouteList,
   PlannedRouteQuery,
+  UpdatePlannedRoute,
 } from '@widoo/shared';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
@@ -10,6 +11,7 @@ import { canAccessRoute } from '../access/route-access';
 import { httpError, premiumRequired } from '../errors';
 import { createPlanned, listPlanned, ownedPlanned, readPlanned } from '../planned/repository';
 import { snapshotOf } from '../planned/snapshot';
+import { updatePlanned } from '../planned/update';
 import { currentUser } from './me';
 
 const security = [{ firebaseIdToken: [] }];
@@ -83,5 +85,22 @@ export const plannedRoutesPlugin: FastifyPluginAsyncZod = async (app) => {
     },
     async (request) =>
       readPlanned(app.db, await ownedPlanned(app.db, currentUser(request).id, request.params.id)),
+  );
+
+  app.patch(
+    '/me/planned/:id',
+    {
+      schema: {
+        tags,
+        summary:
+          'Change the start (timeline recomputed), tick bookings or move the status of my planning',
+        security,
+        params: PlannedParams,
+        body: UpdatePlannedRoute,
+        response: { 200: PlannedRoute },
+      },
+    },
+    async (request) =>
+      updatePlanned(app.db, currentUser(request), request.params.id, request.body, new Date()),
   );
 };
