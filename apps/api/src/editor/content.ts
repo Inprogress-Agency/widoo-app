@@ -4,6 +4,7 @@
  */
 import { computeTransitions, type Transition } from '@widoo/orchestration';
 import {
+  LocalTime,
   StepInput,
   StepTransition,
   taxonomies,
@@ -28,6 +29,10 @@ export const RouteContent = z.object({
   moods: z.array(z.enum(taxonomies.moods)),
   audiences: z.array(z.enum(taxonomies.audiences)),
   conditions: z.array(z.enum(taxonomies.conditions)),
+  // Defaults: a revision saved before migration 0013 has none of these (D-048, D-050).
+  suggestedStart: LocalTime.nullable().default(null),
+  tips: z.array(z.string()).default([]),
+  tipsHidden: z.array(z.string()).default([]),
   steps: z.array(ContentStep),
 });
 export type RouteContent = z.infer<typeof RouteContent>;
@@ -52,10 +57,16 @@ async function stepsOf(tx: Tx, routeId: string): Promise<ContentStep[]> {
     bookingRequired: step.bookingRequired,
     bookingUrl: step.bookingUrl,
     bookingProvider: step.bookingProvider,
+    bookingNote: step.bookingNote,
+    bookingIsAffiliate: step.bookingIsAffiliate,
+    endsOn: step.endsOn,
     transitionNote: step.transitionNote,
     transitionMode: StepTransition.safeParse(step.transition).data?.mode ?? null,
   }));
 }
+
+/** `HH:MM` of a Postgres `time`, read as `HH:MM:SS`. */
+const localTimeOf = (time: string | null): string | null => time?.slice(0, 5) ?? null;
 
 /** The content of the route itself, published version included. */
 export async function routeContentOf(tx: Tx, route: RouteRow): Promise<RouteContent> {
@@ -65,6 +76,9 @@ export async function routeContentOf(tx: Tx, route: RouteRow): Promise<RouteCont
     moods: route.moods,
     audiences: route.audiences,
     conditions: route.conditions,
+    suggestedStart: localTimeOf(route.suggestedStart),
+    tips: route.tips,
+    tipsHidden: route.tipsHidden,
     steps: await stepsOf(tx, route.id),
   };
 }
@@ -137,6 +151,9 @@ export async function replaceSteps(
         bookingRequired: step.bookingRequired,
         bookingUrl: step.bookingUrl,
         bookingProvider: step.bookingProvider,
+        bookingNote: step.bookingNote,
+        bookingIsAffiliate: step.bookingIsAffiliate,
+        endsOn: step.endsOn,
         transitionNote: step.transitionNote,
         transition: trip && {
           distanceM: trip.distanceM,
