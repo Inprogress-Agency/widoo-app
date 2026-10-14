@@ -1,9 +1,17 @@
-/** Saving what the author edited into the route itself. */
-import { budgetBucketOf, durationBucketOf, routeEditModeOf } from '@widoo/shared';
+/**
+ * Saving what the author edited: into the route itself, or into the revision of a published
+ * route, the published version staying online until the revision is validated.
+ */
+import {
+  budgetBucketOf,
+  durationBucketOf,
+  isRevisionEditable,
+  routeEditModeOf,
+} from '@widoo/shared';
 import { eq } from 'drizzle-orm';
 import type { Tx } from '../db/client';
 import { envelopeOf } from '../db/geography';
-import { routes } from '../db/schema';
+import { routeRevisions, routes } from '../db/schema';
 import { conflict } from '../errors';
 import { mainTransportOf, replaceSteps, type RouteContent } from './content';
 import type { RouteRow } from './lifecycle';
@@ -58,9 +66,9 @@ export async function writeInPlace(
 }
 
 /**
- * Saves the content the author edited into the route. 409 `conflict` for a route awaiting
- * moderation, refused or withdrawn, and for a published route, which is edited through a
- * revision.
+ * Saves the content the author edited: into the route, or into the revision of a published
+ * route, created on its first edit. 409 `conflict` while the route or its revision awaits
+ * moderation, and for a refused or withdrawn route.
  */
 export async function saveContent(
   tx: Tx,
@@ -68,9 +76,28 @@ export async function saveContent(
   content: RouteContent,
   now: Date,
 ): Promise<Workspace> {
-  const { route } = workspace;
-  if (routeEditModeOf(route.status) !== 'in_place') {
+  const { route, revision } = workspace;
+  const mode = routeEditModeOf(route.status);
+  if (mode === null) {
     throw conflict(`A ${route.status} route cannot be edited`, { status: route.status });
   }
-  return { route: await writeInPlace(tx, route, content, now), revision: null, content };
+  if (mode === 'in_place') {
+    return { route: await writeInPlace(tx, route, content, now), revision: null, content };
+  }
+  if (revision && !isRevisionEditable(revision.status)) {
+    throw conflict('The revision awaits moderation', { revisionStatus: revision.status });
+  }
+  if (revision) {
+    await tx
+      .update(routeRevisions)
+      .set({ snapshot: content })
+      .where(eq(routeRevisions.id, revision.id));
+    return { route, revision: { ...revision, content }, content };
+  }
+  const [created] = await tx
+    .insert(routeRevisions)
+    .values({ routeId: route.id, authorId: route.authorId, snapshot: content })
+    .returning({ id: routeRevisions.id });
+  if (!created) throw new Error('Revision not created');
+  return { route, revision: { id: created.id, status: 'draft', content }, content };
 }
