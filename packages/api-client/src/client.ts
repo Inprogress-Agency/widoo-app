@@ -6,6 +6,7 @@ import {
   MyDataExport,
   PlannedRoute,
   PlannedRouteList,
+  PublicProfile,
   RouteCount,
   RouteDetail,
   RouteSearchResult,
@@ -14,6 +15,7 @@ import {
   type AppLocale,
   type CreatePlannedRoute,
   type LegalDoc,
+  type PublicProfileQuery,
   type RegisterDevice,
   type SupportMessageInput,
   type UpdateMe,
@@ -26,6 +28,7 @@ import {
   type RouteCountParams,
   type RouteSearchParams,
 } from './search';
+import { isProfileUnavailable, publicProfilePath, type PublicProfileAnswer } from './profile';
 import { removedOf, routePath, type GetRouteOptions, type RouteSheetAnswer } from './route';
 import { createTransport, type ApiClientOptions } from './transport';
 
@@ -113,6 +116,32 @@ export function createApiClient(options: ApiClientOptions) {
         const removed = removedOf(error);
         if (removed) {
           return removed;
+        }
+        throw error;
+      }
+    },
+
+    /**
+     * `GET /v1/users/:id/profile`: the public profile of a creator (E-16), with the token of the
+     * signed-in user when there is one, as the cards it holds depend on the caller (D-075).
+     */
+    getPublicProfile: async (
+      id: string,
+      query: PublicProfileQuery = {},
+      signal?: AbortSignal,
+    ): Promise<PublicProfileAnswer> => {
+      try {
+        const profile = await request({
+          method: 'GET',
+          path: publicProfilePath(id, query),
+          schema: PublicProfile,
+          auth: 'optional',
+          signal,
+        });
+        return { kind: 'profile', profile };
+      } catch (error) {
+        if (isProfileUnavailable(error)) {
+          return { kind: 'unavailable' };
         }
         throw error;
       }
