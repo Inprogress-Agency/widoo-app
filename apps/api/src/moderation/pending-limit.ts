@@ -1,11 +1,12 @@
 /**
  * Anti-spam limit of the submission (wiki Compte-et-Monetisation › Freemium, D-073): an account
- * has at most `max_pending_routes` routes awaiting moderation at once. Creation has no limit.
+ * has at most `max_pending_routes` routes awaiting moderation at once, a published route whose
+ * revision awaits it counting as one. Creation has no limit.
  */
 import { canSubmitRoute, maxPendingRoutesKey, maxPendingRoutesOf } from '@widoo/shared';
 import { and, count, eq, ne } from 'drizzle-orm';
 import type { Tx } from '../db/client';
-import { routes, users } from '../db/schema';
+import { routeRevisions, routes, users } from '../db/schema';
 import { pendingRoutesLimitReached } from '../errors';
 import { readSetting } from '../search/settings';
 
@@ -24,7 +25,19 @@ export async function assertPendingRoom(tx: Tx, authorId: string, routeId: strin
     .where(
       and(eq(routes.authorId, authorId), eq(routes.status, 'pending'), ne(routes.id, routeId)),
     );
-  if (!canSubmitRoute(pending?.count ?? 0, limit)) {
+  const [pendingRevisions] = await tx
+    .select({ count: count() })
+    .from(routeRevisions)
+    .innerJoin(routes, eq(routes.id, routeRevisions.routeId))
+    .where(
+      and(
+        eq(routes.authorId, authorId),
+        eq(routeRevisions.status, 'pending'),
+        ne(routes.id, routeId),
+      ),
+    );
+  const others = (pending?.count ?? 0) + (pendingRevisions?.count ?? 0);
+  if (!canSubmitRoute(others, limit)) {
     throw pendingRoutesLimitReached(limit);
   }
 }
