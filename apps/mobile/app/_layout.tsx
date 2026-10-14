@@ -79,8 +79,9 @@ export default function RootLayout() {
                     : motion.durations.page,
                 }}
               />
-              {/* Modifier le profil (E-09): a page of its own, without the tab bar. */}
+              {/* Modifier le profil and Supprimer mon compte (E-09): pages without the tab bar. */}
               <Stack.Screen name="edit-profile" options={pageOptions} />
+              <Stack.Screen name="delete-account" options={pageOptions} />
             </Stack>
             {/* E-10, over whichever screen asks for an account. */}
             <SignInSheet flow={signInFlow} />
