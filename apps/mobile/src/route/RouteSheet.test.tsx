@@ -44,11 +44,19 @@ async function renderSheet(state: RouteSheetState, props: Partial<RouteSheetProp
     onClose: jest.fn(),
     onShare: jest.fn(),
     onGo: jest.fn(),
+    onPlan: jest.fn(),
     onNearby: jest.fn(),
     onScrollDepth: jest.fn(),
   };
   const view = await render(
-    <RouteSheet state={state} onSeeOnMap={null} now={now} {...handlers} {...props} />,
+    <RouteSheet
+      state={state}
+      onSeeOnMap={null}
+      plannedDate={null}
+      now={now}
+      {...handlers}
+      {...props}
+    />,
   );
   return { ...handlers, view };
 }
@@ -168,6 +176,8 @@ describe('RouteSheet (E-05)', () => {
         onClose={jest.fn()}
         onShare={jest.fn()}
         onGo={jest.fn()}
+        onPlan={jest.fn()}
+        plannedDate={null}
         onNearby={jest.fn()}
         onScrollDepth={jest.fn()}
       />,
@@ -192,18 +202,24 @@ describe('RouteSheet (E-05)', () => {
 
   it('shares, goes and shows the route on the map', async () => {
     const onSeeOnMap = jest.fn();
-    const { onShare, onGo } = await renderSheet(ready(marais), { onSeeOnMap });
+    const { onShare, onGo, onPlan } = await renderSheet(ready(marais), { onSeeOnMap });
     await fireEvent.press(await screen.findByRole('button', { name: 'Partager le parcours' }));
     expect(onShare).toHaveBeenCalledWith(expect.objectContaining({ id: marais.id }));
     await fireEvent.press(screen.getByRole('button', { name: "C'est parti" }));
     expect(onGo).toHaveBeenCalled();
     await fireEvent.press(screen.getByRole('link', { name: 'Voir sur la carte' }));
     expect(onSeeOnMap).toHaveBeenCalled();
-    // Screens not built yet: shown, and disabled.
-    expect(
-      screen.getByRole('button', { name: 'Programmer' }).props.accessibilityState,
-    ).toMatchObject({
-      disabled: true,
-    });
+    await fireEvent.press(screen.getByRole('button', { name: 'Programmer' }));
+    expect(onPlan).toHaveBeenCalledWith(expect.objectContaining({ id: marais.id }));
+  });
+
+  it('shows the date of a planned route in place of « Programmer »', async () => {
+    const plannedDate = {
+      label: 'Sam. 26, 10:00',
+      spoken: 'Sortie programmée le samedi 26 septembre à 10:00, modifier la sortie',
+    };
+    await renderSheet(ready(marais), { plannedDate });
+    expect(await screen.findByRole('button', { name: plannedDate.spoken })).toBeTruthy();
+    expect(screen.getByText('Sam. 26, 10:00').props.maxFontSizeMultiplier).toBe(1.3);
   });
 });
