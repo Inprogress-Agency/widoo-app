@@ -2,9 +2,15 @@
  * Zones read from the answers of Mapbox (Filtres-et-Recherche › Recherche textuelle, D-010):
  * neighbourhoods, districts, postcodes and cities of the Geocoding API v6, stations of the Search
  * Box API. An address, or a point of interest that is not a station, is not a zone: dropped, as is
- * any feature of an unexpected shape.
+ * any feature of an unexpected shape. Mapbox names the zones in the language asked; the
+ * arrondissements are labelled here, in the same language, from their number.
  */
-import type { GeoBox, GeocodeZoneKind } from '@widoo/shared';
+import {
+  arrondissementLabel,
+  type AppLocale,
+  type GeoBox,
+  type GeocodeZoneKind,
+} from '@widoo/shared';
 import { z } from 'zod';
 import type { ZoneHit } from './geocoder';
 
@@ -57,27 +63,40 @@ const SearchBoxFeature = z.object({
 
 const Features = z.object({ features: z.array(z.unknown()) });
 
-/** « 11e arrondissement » (the locality Mapbox gives in Paris) → « 11e ». */
-const shortArea = (name: string) => name.replace(/\s+arrondissement$/i, '').trim();
+const isArrondissement = (name: string) => /arrondissement/i.test(name);
+
+/**
+ * Short label of the locality of an arrondissement, in the language asked: « 11e arrondissement »
+ * or « 11th Arrondissement » → « 11e » or « 11th », from its number whatever Mapbox wrote around
+ * it; a name without number loses « arrondissement » only.
+ */
+function shortArea(name: string, locale: AppLocale): string {
+  const number = Number(name.match(/\d{1,2}/)?.[0]);
+  if (number >= 1 && number <= 20) {
+    return arrondissementLabel(number, locale);
+  }
+  return name.replace(/\s+arrondissement$/i, '').trim();
+}
 
 /** An arrondissement of Paris from its postcode, 75001 to 75020 (75116 is the 16e). */
-function parisDistrictOf(postcode: string | undefined): string | null {
+function parisDistrictOf(postcode: string | undefined, locale: AppLocale): string | null {
   const match = postcode?.match(/^75(?:0(\d{2})|1(16))$/);
   const number = Number(match?.[1] ?? match?.[2]?.slice(1));
   if (!match || number < 1 || number > 20) {
     return null;
   }
-  return `Paris ${number === 1 ? '1er' : `${number}e`}`;
+  return `Paris ${arrondissementLabel(number, locale)}`;
 }
 
 /** « Paris 18e »: the city and the arrondissement, from the locality or else the postcode. */
-function districtArea(context: Context): string | null {
+function districtArea(context: Context, locale: AppLocale): string | null {
   const locality = context?.locality?.name;
   const place = context?.place?.name;
-  if (locality && /arrondissement/i.test(locality)) {
-    return place ? `${place} ${shortArea(locality)}` : shortArea(locality);
+  if (locality && isArrondissement(locality)) {
+    const short = shortArea(locality, locale);
+    return place ? `${place} ${short}` : short;
   }
-  return place === 'Paris' ? parisDistrictOf(context?.postcode?.name) : null;
+  return place === 'Paris' ? parisDistrictOf(context?.postcode?.name, locale) : null;
 }
 
 /** Kind of zone of a feature type of the Geocoding API. */
@@ -102,16 +121,16 @@ function envelopeOf(bbox: [number, number, number, number] | undefined): GeoBox 
 type Context = z.infer<typeof Context>;
 
 /** Where a zone lies: its district, else its city, else its region. */
-function areaOf(kind: GeocodeZoneKind, context: Context): string | null {
+function areaOf(kind: GeocodeZoneKind, context: Context, locale: AppLocale): string | null {
   const place = context?.place?.name ?? null;
   if (kind === 'district' || kind === 'city') {
     return kind === 'district' ? place : (context?.region?.name ?? null);
   }
-  return districtArea(context) ?? place;
+  return districtArea(context, locale) ?? place;
 }
 
-/** Zones of a Geocoding API answer; a feature of another shape is dropped. */
-export function zonesOfGeocoding(body: unknown): ZoneHit[] {
+/** Zones of a Geocoding API answer, asked in `locale`; a feature of another shape is dropped. */
+export function zonesOfGeocoding(body: unknown, locale: AppLocale): ZoneHit[] {
   return Features.parse(body).features.flatMap((raw) => {
     const feature = GeocodingFeature.safeParse(raw);
     if (!feature.success) {
@@ -119,17 +138,17 @@ export function zonesOfGeocoding(body: unknown): ZoneHit[] {
     }
     const { properties: p } = feature.data;
     // A locality of a city with districts is its arrondissement; any other, a neighbourhood.
-    const isOtherLocality = p.feature_type === 'locality' && !/arrondissement/i.test(p.name);
+    const isOtherLocality = p.feature_type === 'locality' && !isArrondissement(p.name);
     const kind = isOtherLocality ? 'neighborhood' : kindOf(p.feature_type);
     return [
       {
         id: p.mapbox_id,
         name:
           kind === 'district' && p.context?.place?.name
-            ? `${p.context.place.name} ${shortArea(p.name)}`
+            ? `${p.context.place.name} ${shortArea(p.name, locale)}`
             : p.name,
         kind,
-        area: areaOf(kind, p.context),
+        area: areaOf(kind, p.context, locale),
         center: { lat: p.coordinates.latitude, lng: p.coordinates.longitude },
         envelope: envelopeOf(p.bbox),
       },
@@ -137,8 +156,8 @@ export function zonesOfGeocoding(body: unknown): ZoneHit[] {
   });
 }
 
-/** Stations of a Search Box API answer: any other point of interest is dropped. */
-export function stationsOfSearchBox(body: unknown): ZoneHit[] {
+/** Stations of a Search Box API answer, asked in `locale`: any other point of interest is dropped. */
+export function stationsOfSearchBox(body: unknown, locale: AppLocale): ZoneHit[] {
   return Features.parse(body).features.flatMap((raw) => {
     const feature = SearchBoxFeature.safeParse(raw);
     if (!feature.success) {
@@ -156,7 +175,7 @@ export function stationsOfSearchBox(body: unknown): ZoneHit[] {
         id: p.mapbox_id,
         name: p.name,
         kind: 'station' as const,
-        area: areaOf('station', p.context),
+        area: areaOf('station', p.context, locale),
         center: { lat: p.coordinates.latitude, lng: p.coordinates.longitude },
         envelope: null,
       },

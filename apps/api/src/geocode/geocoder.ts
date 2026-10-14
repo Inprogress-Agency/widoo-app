@@ -1,6 +1,6 @@
-import type { GeoBox, GeocodeZoneKind, LatLng } from '@widoo/shared';
+import type { AppLocale, GeoBox, GeocodeZoneKind, LatLng } from '@widoo/shared';
 
-/** A zone found for a text, before its routes are counted. */
+/** A zone found for a text, named in the language asked, before its routes are counted. */
 export interface ZoneHit {
   id: string;
   name: string;
@@ -11,9 +11,12 @@ export interface ZoneHit {
   envelope: GeoBox | null;
 }
 
-/** Finds the zones of a text; throws `GeocoderUnavailable` when no source answered. */
+/**
+ * Finds the zones of a text, named in `locale`, the language of the app; throws
+ * `GeocoderUnavailable` when no source answered.
+ */
 export interface Geocoder {
-  find: (text: string) => Promise<ZoneHit[]>;
+  find: (text: string, locale: AppLocale) => Promise<ZoneHit[]>;
 }
 
 /** No source of zones answered: the search shows « Zones indisponibles pour le moment ». */

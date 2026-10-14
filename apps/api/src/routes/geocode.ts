@@ -17,9 +17,10 @@ export type GeocodeRoutesOptions = {
 const unavailable: ApiError = { code: 'internal_error', message: 'Geocoding unavailable' };
 
 /**
- * `GET /geocode?q=` (wiki API › découverte): the zones of a text, each with the number of routes
- * of the box the app will search, counted as `/routes/search/count` does, filters aside. Public,
- * without caller: the answer does not depend on who asks. The text is never logged (the logger
+ * `GET /geocode?q=&locale=` (wiki API › découverte): the zones of a text, named in the language
+ * of the app, each with the number of routes of the box the app will search, counted as
+ * `/routes/search/count` does, filters aside. Public, without caller: the answer depends on the
+ * text and the language only, not on who asks. The text is never logged (the logger
  * drops the query string) nor sent anywhere but Mapbox.
  */
 export const geocodeRoutes: FastifyPluginAsyncZod<GeocodeRoutesOptions> = async (
@@ -54,7 +55,7 @@ export const geocodeRoutes: FastifyPluginAsyncZod<GeocodeRoutesOptions> = async 
       }
       let hits;
       try {
-        hits = await geocoder.find(request.query.q);
+        hits = await geocoder.find(request.query.q, request.query.locale);
       } catch (error) {
         if (error instanceof GeocoderUnavailable) {
           return reply.code(502).send(unavailable);
