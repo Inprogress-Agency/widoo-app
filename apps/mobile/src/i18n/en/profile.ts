@@ -114,6 +114,8 @@ export const profile = {
       footer: 'Criteria checked every night. The Widoo team can also grant or remove the badge.',
       understood: 'Got it',
     },
+    seeProfile: 'See profile',
+    seeProfileOf: "See {{name}}'s profile",
   },
   field: {
     counter_one: '{{count}} character of {{max}}',

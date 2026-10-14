@@ -6,41 +6,60 @@ import { creatorText } from '../results/cardText';
 import { Avatar } from '../ui/Avatar';
 import { Icon, uiIcon } from '../ui/Icon';
 import { Text } from '../ui/Text';
+import { TextLink } from '../ui/TextLink';
 import { parisDay } from './sheetText';
 
 /**
  * The creator box: logo or avatar, name and the blue seal of a certified creator (D-023), its
- * published routes. One element for screen readers. Its profile (E-16) comes with #65.
+ * published routes, read as one element, and « Voir le profil » to its public profile (E-16). A
+ * creator that is not public reads « Membre Widoo », without link.
  */
-export function CreatorBox({ route }: { route: RouteDetail }) {
+export function CreatorBox({
+  route,
+  onOpenCreator,
+}: {
+  route: RouteDetail;
+  onOpenCreator?: (author: NonNullable<RouteDetail['author']>) => void;
+}) {
   const { t } = useTranslation();
   const name = route.isOfficial ? 'Widoo' : (route.author?.firstName ?? creatorText(t, route));
   const routes = t('route.creator.routes', { count: route.creator.routesPublished });
+  const author = route.isOfficial ? null : route.author;
   return (
-    <View
-      accessible
-      accessibilityLabel={[name, route.creator.isCertified && t('badges.certified'), routes]
-        .filter(Boolean)
-        .join(', ')}
-      className="flex-row items-center gap-12 rounded-section bg-surface p-16"
-    >
-      <Avatar
-        url={route.author?.avatarUrl ?? null}
-        name={name}
-        isWidoo={route.isOfficial}
-        size="avatar-l"
-      />
-      <View className="flex-1">
-        <View className="flex-row items-center gap-6">
-          <Text variant="title-s" className="shrink">
-            {name}
+    <View className="gap-12 rounded-section bg-surface p-16">
+      <View
+        accessible
+        accessibilityLabel={[name, route.creator.isCertified && t('badges.certified'), routes]
+          .filter(Boolean)
+          .join(', ')}
+        className="flex-row items-center gap-12"
+      >
+        <Avatar
+          url={route.author?.avatarUrl ?? null}
+          name={name}
+          isWidoo={route.isOfficial}
+          size="avatar-l"
+        />
+        <View className="flex-1">
+          <View className="flex-row items-center gap-6">
+            <Text variant="title-s" className="shrink">
+              {name}
+            </Text>
+            {route.creator.isCertified && <Icon {...uiIcon('certified')} size="icon-s" />}
+          </View>
+          <Text variant="body-s" color="muted">
+            {routes}
           </Text>
-          {route.creator.isCertified && <Icon {...uiIcon('certified')} size="icon-s" />}
         </View>
-        <Text variant="body-s" color="muted">
-          {routes}
-        </Text>
       </View>
+      {author && onOpenCreator && (
+        <TextLink
+          label={t('creator.seeProfile')}
+          accessibilityLabel={t('creator.seeProfileOf', { name: author.firstName })}
+          color="blue-ink"
+          onPress={() => onOpenCreator(author)}
+        />
+      )}
     </View>
   );
 }

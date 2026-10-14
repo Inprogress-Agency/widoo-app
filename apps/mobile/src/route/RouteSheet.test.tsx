@@ -123,6 +123,16 @@ describe('RouteSheet (E-05)', () => {
     expect(screen.getByLabelText('Note moyenne 4,7 sur 5, 3 avis')).toBeTruthy();
   });
 
+  it('opens the profile of its creator from « Voir le profil », not for a route of Widoo', async () => {
+    const camille = sheets[2] as RouteDetail;
+    const onOpenCreator = jest.fn();
+    await renderSheet(ready(camille), { onOpenCreator });
+    await fireEvent.press(await screen.findByRole('link', { name: 'Voir le profil de Camille' }));
+    expect(onOpenCreator).toHaveBeenCalledWith(camille.author);
+    await renderSheet(ready(marais), { onOpenCreator });
+    expect(screen.queryByRole('link', { name: /^Voir le profil/ })).toBeNull();
+  });
+
   it('marks a private route and who shared it, without Vérifié nor Signature', async () => {
     await renderSheet(ready(shared));
     expect(await screen.findByLabelText('Privé')).toBeTruthy();

@@ -545,6 +545,8 @@ export const fr = {
         "Critères vérifiés chaque nuit. L'équipe Widoo peut aussi attribuer ou retirer le badge.",
       understood: 'Compris',
     },
+    seeProfile: 'Voir le profil',
+    seeProfileOf: 'Voir le profil de {{name}}',
   },
   field: {
     counter_one: '{{count}} caractère sur {{max}}',

@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useRef } from 'react';
 import { Linking, Share } from 'react-native';
 import { analytics } from '../../src/analytics';
+import { openCreatorProfile } from '../../src/creator/navigation';
 import { signInFlow } from '../../src/auth/signIn';
 import { discoveryStore, useDiscovery, useIsOnline } from '../../src/discovery/useRouteSearch';
 import { usePlannedLookup, usePlannedRoute, usePlanActions } from '../../src/plan/planned';
@@ -83,6 +84,7 @@ export default function RouteScreen() {
             : null
         }
         onNearby={goHome}
+        onOpenCreator={(author) => openCreatorProfile(author, 'route')}
         onScrollDepth={(depth) => analytics.track('route_scrolled', { route_id: id, depth })}
         // Planning asks for an account (D-038): signed out, the sheet E-10 first, then E-06. A
         // planned route opens « Modifier la sortie » until « Votre sortie » exists (E-08).
