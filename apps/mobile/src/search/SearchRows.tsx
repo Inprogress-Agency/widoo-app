@@ -1,4 +1,4 @@
-import { labels, type GeocodeZone, type RouteCard } from '@widoo/shared';
+import { type GeocodeZone, type RouteCard } from '@widoo/shared';
 import { size, type UiIconKey } from '@widoo/tokens';
 import { Image } from 'expo-image';
 import { useEffect, type ReactNode } from 'react';
@@ -11,6 +11,7 @@ import { Rating } from '../ui/Rating';
 import { Text } from '../ui/Text';
 import { highlightParts } from './highlight';
 import type { RecentZone } from './recentZones';
+import { taxonomyLabels } from '../i18n/labels';
 
 // A link text is shorter than a finger: its hit slop brings it to 44 points.
 const linkHitSlop = size['touch-min'] / 4;
@@ -174,7 +175,7 @@ export function RouteRow({
 }) {
   const { t } = useTranslation();
   const mood = route.moods[0];
-  const place = [mood && labels.fr.moods[mood], route.district, route.neighborhood].filter(
+  const place = [mood && taxonomyLabels().moods[mood], route.district, route.neighborhood].filter(
     (part): part is string => Boolean(part),
   );
   const { average } = route.rating;

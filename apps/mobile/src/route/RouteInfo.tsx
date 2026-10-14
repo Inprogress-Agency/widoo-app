@@ -1,4 +1,4 @@
-import { labels, type RouteDetail } from '@widoo/shared';
+import { type RouteDetail } from '@widoo/shared';
 import { filterIcons, type UiIconKey } from '@widoo/tokens';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +10,7 @@ import { Icon, uiIcon } from '../ui/Icon';
 import { Skeleton } from '../ui/Skeleton';
 import { Text } from '../ui/Text';
 import { TextLink } from '../ui/TextLink';
+import { taxonomyLabels } from '../i18n/labels';
 
 /** Lines of the description before « Lire la suite » (Ecrans › E-05, haut). */
 const DESCRIPTION_LINES = 3;
@@ -114,7 +115,7 @@ export function RouteInfo({ route }: { route: RouteDetail }) {
             {route.audiences.map((audience) => (
               <InfoChip
                 key={audience}
-                label={labels.fr.audiences[audience]}
+                label={taxonomyLabels().audiences[audience]}
                 icon={filterIcons.audiences[audience]}
               />
             ))}
@@ -128,7 +129,7 @@ export function RouteInfo({ route }: { route: RouteDetail }) {
             {route.conditions.map((condition) => (
               <InfoChip
                 key={condition}
-                label={labels.fr.conditions[condition]}
+                label={taxonomyLabels().conditions[condition]}
                 icon={filterIcons.conditions[condition]}
               />
             ))}

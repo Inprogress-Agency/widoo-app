@@ -1,10 +1,11 @@
-import { labels, type LatLng, type RouteCard } from '@widoo/shared';
+import { type LatLng, type RouteCard } from '@widoo/shared';
 import type { TFunction } from 'i18next';
 import { formatBudget, type BudgetText } from '../format/budget';
 import { formatDistance } from '../format/distance';
 import { formatDuration } from '../format/duration';
 import { formatRating } from '../format/rating';
 import { distanceBetweenM } from '../map/geo';
+import { taxonomyLabels } from '../i18n/labels';
 
 /** Everything a card writes, and what a screen reader says of it in one label. */
 export interface CardText {
@@ -22,7 +23,7 @@ export interface CardText {
 /** « Nature · 10e · République »: main mood, arrondissement, neighbourhood, when known. */
 export function placeText(route: Pick<RouteCard, 'moods' | 'district' | 'neighborhood'>): string {
   const mood = route.moods[0];
-  return [mood && labels.fr.moods[mood], route.district, route.neighborhood]
+  return [mood && taxonomyLabels().moods[mood], route.district, route.neighborhood]
     .filter(Boolean)
     .join(' · ');
 }

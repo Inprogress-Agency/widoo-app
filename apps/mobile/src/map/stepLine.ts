@@ -1,6 +1,7 @@
-import { labels, type RouteCard } from '@widoo/shared';
+import { type RouteCard } from '@widoo/shared';
 import type { TFunction } from 'i18next';
 import { formatDuration } from '../format/duration';
+import { taxonomyLabels } from '../i18n/labels';
 
 type CardStep = RouteCard['steps'][number];
 
@@ -21,7 +22,7 @@ export interface StepLine {
  * does not repeat it.
  */
 export function stepLine(t: TFunction, step: CardStep, position: number, total: number): StepLine {
-  const category = labels.fr.placeCategories[step.category];
+  const category = taxonomyLabels().placeCategories[step.category];
   const name = step.name ?? category;
   const shown = step.name === null ? [] : [category];
   const detail = [

@@ -1,4 +1,4 @@
-import { labels, type LatLng, type RouteCard as RouteCardData } from '@widoo/shared';
+import { type LatLng, type RouteCard as RouteCardData } from '@widoo/shared';
 import { colors, filterIcons, motion } from '@widoo/tokens';
 import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +19,7 @@ import { RatingPill } from '../ui/Rating';
 import { Tag } from '../ui/Tag';
 import { Text } from '../ui/Text';
 import { cardText } from './cardText';
+import { taxonomyLabels } from '../i18n/labels';
 
 /**
  * Height of the card photo, as the maquettes draw it (Ecrans › E-04, planche 1): tokens.json
@@ -64,7 +65,7 @@ export function RouteCard({
   const isList = variant === 'list';
   // The public tag of the list: the first public the creator chose.
   const audience = isList ? route.audiences[0] : undefined;
-  const audienceLabel = audience && labels.fr.audiences[audience];
+  const audienceLabel = audience && taxonomyLabels().audiences[audience];
 
   const handleAccessibilityAction = (event: AccessibilityActionEvent) => {
     if (event.nativeEvent.actionName === 'favorite') {

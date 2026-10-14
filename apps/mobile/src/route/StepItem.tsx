@@ -1,4 +1,4 @@
-import { labels, type RouteDetailStep, type SheetStep, type StepTransition } from '@widoo/shared';
+import { type RouteDetailStep, type SheetStep, type StepTransition } from '@widoo/shared';
 import { colors, filterIcons, motion, size, spacing, type UiIconKey } from '@widoo/tokens';
 import { Image } from 'expo-image';
 import type { ReactNode } from 'react';
@@ -12,6 +12,7 @@ import { StepDot } from '../ui/StepDot';
 import { Text } from '../ui/Text';
 import { TextLink } from '../ui/TextLink';
 import { hoursLine, parisTime, transitionText, verificationText, type Spoken } from './sheetText';
+import { taxonomyLabels } from '../i18n/labels';
 
 /** M-08: a step unfolds in `base`, its detail fading in; with « Réduire les animations », in place. */
 export const stepLayout = LinearTransition.duration(motion.durations.base).reduceMotion(
@@ -208,7 +209,8 @@ function stepLabel(
   now: Date,
 ) {
   const position = step.position + 1;
-  const category = labels.fr.placeCategories[step.isLocked ? step.category : step.place.category];
+  const category =
+    taxonomyLabels().placeCategories[step.isLocked ? step.category : step.place.category];
   const duration = formatDuration(t, step.durationMin, 'spoken');
   if (step.isLocked) {
     return t('route.step.lockedLabel', { position, total, time: time.spoken, category, duration });
@@ -259,10 +261,12 @@ export function StepItem({
     <View className="flex-row items-start gap-8">
       <View className="flex-1">
         <Text variant="title-s">
-          {step.isLocked ? labels.fr.placeCategories[category] : (step.title ?? step.place.name)}
+          {step.isLocked
+            ? taxonomyLabels().placeCategories[category]
+            : (step.title ?? step.place.name)}
         </Text>
         <Text variant="body-s" color="muted">
-          {step.isLocked ? t('route.step.locked') : labels.fr.placeCategories[category]}
+          {step.isLocked ? t('route.step.locked') : taxonomyLabels().placeCategories[category]}
         </Text>
         {stale?.kind === 'stale' && (
           <View className="flex-row items-start gap-6 pt-4">
