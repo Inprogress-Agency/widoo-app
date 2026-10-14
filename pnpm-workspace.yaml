@@ -26,6 +26,12 @@ overrides:
   # bundles and the API image. Drop this line once react-native resolves shell-quote 1.11.0 or
   # later without it: check at each upgrade of react-native and at the audit exception review (#280).
   shell-quote@<1.11.0: ^1.11.0
+  # @grpc/grpc-js <1.13.6, high advisory GHSA-m9gg-hp2v-232j (#386). Reached through
+  # @react-native-firebase/app > firebase > @firebase/firestore only: the Node build of the
+  # Firebase JS SDK, which the app neither imports nor bundles (native SDKs, Auth only), absent from
+  # the API image. Drop this line once firebase resolves @grpc/grpc-js 1.13.6 or later without it:
+  # check at each upgrade of @react-native-firebase and at the audit exception review (#280).
+  '@grpc/grpc-js@<1.13.6': ^1.13.6
 
 # Install scripts stay blocked but for these: Skia copies its prebuilt native libraries there.
 onlyBuiltDependencies:
