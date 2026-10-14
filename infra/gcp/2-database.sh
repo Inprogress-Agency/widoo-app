@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Step 2 of 3: VPC, Cloud SQL Postgres 16 on a private IP, database, user, secrets.
+# Step 2 of 4: VPC, Cloud SQL Postgres 16 on a private IP, database, user, secrets.
 # Idempotent: creates what is missing and leaves the rest. Usage: ./2-database.sh [--dry-run] [--yes]
 set -euo pipefail
 cd "$(dirname "$0")"

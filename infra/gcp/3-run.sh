@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Step 3 of 3: Cloud Run service widoo-api and migration job, with their configuration.
+# Step 3 of 4: Cloud Run service widoo-api and migration job, with their configuration.
 # Creates them with Google sample images, which the deploy-staging workflow replaces; later runs
 # update the configuration and keep the deployed image. Usage: ./3-run.sh [--dry-run] [--yes]
 set -euo pipefail
