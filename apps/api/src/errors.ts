@@ -31,6 +31,18 @@ export function premiumRequired(reason: 'premium_route') {
 }
 
 /**
+ * 429 `rate_limited` of a submission over the anti-spam limit (D-073): `details.reason` tells it
+ * from the request rate limit, `details.limit` is the number the app says in « Avant de soumettre »
+ * (E-14).
+ */
+export function pendingRoutesLimitReached(limit: number) {
+  return Object.assign(new Error('Too many routes awaiting moderation'), {
+    statusCode: 429,
+    details: { reason: 'pending_routes', limit },
+  });
+}
+
+/**
  * A body that is well formed but breaks a rule only the database can check (a retired
  * question, a route of another author): 422 `validation_error`, its issues in `details`.
  */
