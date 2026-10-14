@@ -8,12 +8,15 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useReducedMotion } from 'react-native-reanimated';
 import '../global.css';
 import { useAppOpenedEvent } from '../src/analytics';
+import { signInFlow } from '../src/auth/signIn';
+import { SignInSheet } from '../src/auth/SignInSheet';
 import { persistOptions } from '../src/api/persister';
 import { queryClient } from '../src/api/query-client';
 import { holdSplash } from '../src/launch/splash';
 import '../src/i18n';
 import { initMonitoring } from '../src/monitoring';
 import { fonts } from '../src/ui/fonts';
+import { ToastHost } from '../src/ui/Toast';
 
 initMonitoring();
 // The home lets the launch screen go when it is ready (E-18), 2 s at most.
@@ -67,7 +70,11 @@ export default function RootLayout() {
                 }}
               />
             </Stack>
+            {/* E-10, over whichever screen asks for an account. */}
+            <SignInSheet flow={signInFlow} />
           </BottomSheetModalProvider>
+          {/* Toasts over everything, the modal sheets and the native modals included (M-06). */}
+          <ToastHost />
         </ThemeProvider>
       </PersistQueryClientProvider>
     </GestureHandlerRootView>
