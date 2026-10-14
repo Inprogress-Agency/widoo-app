@@ -99,6 +99,13 @@
       "when": 1791988861145,
       "tag": "0013_add_editor_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791990127311,
+      "tag": "0014_free_deleted_firebase_uid",
+      "breakpoints": true
     }
   ]
 }
