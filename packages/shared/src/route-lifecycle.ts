@@ -48,6 +48,15 @@ export type AuthorStatusTarget = (typeof authorStatusTargets)[number];
 export const publicRouteStatuses: readonly RouteStatus[] = ['published'];
 
 /**
+ * Statuses in which a route is online for everyone, `needs_fix` with its banner (wiki API ›
+ * Fiche): the routes of a deleted account that stay, signed « Membre Widoo » (D-025).
+ */
+export const onlineRouteStatuses = [
+  'published',
+  'needs_fix',
+] as const satisfies readonly RouteStatus[];
+
+/**
  * How the author edits a route of this status: `in_place` writes the route itself; `revision` a
  * working copy, the published version staying online until the copy is validated; `null` refuses
  * any edit (awaiting moderation, refused until « Reprendre », withdrawn).

@@ -1,11 +1,17 @@
-import { FirstName, type UpdateMe } from '@widoo/shared';
-import { and, eq, gte, isNull, sql } from 'drizzle-orm';
+import { FirstName, onlineRouteStatuses, type UpdateMe } from '@widoo/shared';
+import { and, eq, gte, inArray, isNull, ne, notInArray, or, sql } from 'drizzle-orm';
 import type { VerifiedIdentity } from '../auth/verifier';
-import type { Db } from '../db/client';
+import type { Db, Tx } from '../db/client';
 import {
   devices,
+  media,
+  notifications,
   plannedRoutes,
+  routeReports,
+  routeRevisions,
+  routes,
   routeUnlocks,
+  steps,
   supportMessages,
   userAnecdotes,
   userFeaturedRoutes,
@@ -120,12 +126,12 @@ export async function updateUser(db: Db, userId: string, update: UpdateMe): Prom
 }
 
 /**
- * Account deletion (wiki Compte-et-Monetisation): `deleted_at` set, e-mail, first name, avatar,
- * bio, neighborhood, language and preferences erased, anecdotes, featured routes, plannings,
- * phones (no push reaches a deleted account) and messages to the support deleted,
- * profile no longer public, so its routes show « Membre Widoo ». The row and its `firebase_uid`
- * stay until the purge, 30 days later (wiki Securite-et-RGPD), whose cascade finds nothing left
- * to delete.
+ * Account deletion (wiki Compte-et-Monetisation, D-025): `deleted_at` set, e-mail, first name,
+ * avatar, bio, neighborhood, language, preferences and store identifier erased, profile no longer
+ * public, and every row of the account deleted (`eraseAccountRows`). Its routes online stay,
+ * signed « Membre Widoo »; the others go with their steps and photos (`deleteOfflineRoutes`).
+ * The row and its `firebase_uid` stay until the purge, 30 days later (wiki Securite-et-RGPD), to
+ * refuse the sessions opened before; a new sign-in of the identity gets a new account (D-027).
  */
 export async function softDeleteUser(db: Db, userId: string): Promise<void> {
   await db.transaction(async (tx) => {
@@ -141,18 +147,71 @@ export async function softDeleteUser(db: Db, userId: string): Promise<void> {
         isPublic: false,
         notificationPrefs: {},
         locale: null,
+        revenuecatAppUserId: null,
       })
       .where(and(eq(users.id, userId), isNull(users.deletedAt)))
       .returning({ id: users.id });
     if (deleted.length === 0) return;
-    await tx.delete(userAnecdotes).where(eq(userAnecdotes.userId, userId));
-    await tx.delete(userFeaturedRoutes).where(eq(userFeaturedRoutes.userId, userId));
-    // Their progress rows go with them (cascade).
-    await tx.delete(plannedRoutes).where(eq(plannedRoutes.userId, userId));
-    // A route bought alone belongs to the account: nothing is left to unlock (D-073).
-    await tx.delete(routeUnlocks).where(eq(routeUnlocks.userId, userId));
-    await tx.delete(devices).where(eq(devices.userId, userId));
-    // Their reply address and text are personal data of the account (D-063).
-    await tx.delete(supportMessages).where(eq(supportMessages.userId, userId));
+    await eraseAccountRows(tx, userId);
+    await deleteOfflineRoutes(tx, userId);
   });
+}
+
+/** The rows that belong to the account alone: a new table of the account is added here. */
+async function eraseAccountRows(tx: Tx, userId: string): Promise<void> {
+  await tx.delete(userAnecdotes).where(eq(userAnecdotes.userId, userId));
+  await tx.delete(userFeaturedRoutes).where(eq(userFeaturedRoutes.userId, userId));
+  // Their progress rows go with them (cascade).
+  await tx.delete(plannedRoutes).where(eq(plannedRoutes.userId, userId));
+  // A route bought alone belongs to the account: nothing is left to unlock (D-073).
+  await tx.delete(routeUnlocks).where(eq(routeUnlocks.userId, userId));
+  await tx.delete(devices).where(eq(devices.userId, userId));
+  // Their reply address and text are personal data of the account (D-063).
+  await tx.delete(supportMessages).where(eq(supportMessages.userId, userId));
+  // Its reports of routes, open or decided (D-056); a `low_rating` report has no reporter.
+  await tx.delete(routeReports).where(eq(routeReports.userId, userId));
+  await tx.delete(notifications).where(eq(notifications.userId, userId));
+}
+
+/**
+ * Drafts, private routes and every route of the author not online (`onlineRouteStatuses`), with
+ * their steps, revisions (cascade) and photos (`media` has no foreign key), and the unfinished or
+ * refused revisions of the routes kept, with the photos of the steps they alone hold. The
+ * plannings of other users keep their snapshot (`planned_routes.route_id` set null).
+ */
+async function deleteOfflineRoutes(tx: Tx, userId: string): Promise<void> {
+  const ofAuthor = eq(routes.authorId, userId);
+  const offline = await tx
+    .select({ id: routes.id })
+    .from(routes)
+    .where(and(ofAuthor, notInArray(routes.status, [...onlineRouteStatuses])));
+  const offlineIds = offline.map((route) => route.id);
+  const offlineSteps =
+    offlineIds.length === 0
+      ? []
+      : await tx.select({ id: steps.id }).from(steps).where(inArray(steps.routeId, offlineIds));
+
+  const droppedRevisions = and(
+    eq(routeRevisions.authorId, userId),
+    ne(routeRevisions.status, 'published'),
+  );
+  // Steps added in a revision exist in its snapshot only, not in `steps`.
+  const revisionSteps = await tx.execute<{ id: string }>(sql`
+    select distinct step->>'id' as id
+    from ${routeRevisions}, jsonb_array_elements(${routeRevisions.snapshot}->'steps') as step
+    where ${droppedRevisions}
+      and not exists (select 1 from ${steps} where ${steps.id}::text = step->>'id')`);
+
+  const stepIds = [...offlineSteps.map((step) => step.id), ...revisionSteps.map((step) => step.id)];
+  const photos = [
+    ...(offlineIds.length > 0
+      ? [and(eq(media.ownerType, 'route'), inArray(media.ownerId, offlineIds))]
+      : []),
+    ...(stepIds.length > 0
+      ? [and(eq(media.ownerType, 'step'), inArray(media.ownerId, stepIds))]
+      : []),
+  ];
+  if (photos.length > 0) await tx.delete(media).where(or(...photos));
+  await tx.delete(routeRevisions).where(droppedRevisions);
+  if (offlineIds.length > 0) await tx.delete(routes).where(inArray(routes.id, offlineIds));
 }
