@@ -5,6 +5,7 @@ import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
 import { routes, steps } from '../db/schema';
 import { demoPlaceIds, editorFixtures, publishableDescription } from '../editor/test-fixtures';
+import { snapshotOf } from '../planned/snapshot';
 import { testConfig } from '../test-config';
 
 let app: Awaited<ReturnType<typeof buildApp>>;
@@ -156,7 +157,30 @@ describe('a route of another account', () => {
   });
 });
 
-describe('a route that cannot be edited', () => {
+describe('a published route edited by its author', () => {
+  it('keeps its published version online, the edits going to a revision', async () => {
+    const headers = await fixtures.signIn();
+    const draft = await fixtures.publishableDraft(headers);
+    await app.db.update(routes).set({ status: 'published' }).where(eq(routes.id, draft.id));
+
+    const edited = await patch(headers, draft.id, { title: 'Nouveau titre' });
+    expect(OwnRoute.parse(edited.json())).toMatchObject({
+      status: 'published',
+      title: 'Nouveau titre',
+      revision: { status: 'draft' },
+    });
+    const reordered = await putSteps(headers, draft.id, [
+      { placeId: demoPlaceIds[2], durationMin: 30 },
+    ]);
+    expect(OwnRoute.parse(reordered.json()).steps).toHaveLength(1);
+
+    expect((await rowOf(draft.id))?.title).toBe('Les musées du Marais');
+    const published = await snapshotOf(app.db, draft.id);
+    expect(published?.title).toBe('Les musées du Marais');
+    expect(published?.steps.map((step) => step.id)).toEqual(draft.steps.map((step) => step.id));
+    expect(OwnRoute.parse((await read(headers, draft.id)).json()).title).toBe('Nouveau titre');
+  });
+
   it('refuses any edit while the route awaits moderation, or once refused', async () => {
     const headers = await fixtures.signIn();
     for (const status of ['pending', 'rejected', 'unpublished'] as const) {
