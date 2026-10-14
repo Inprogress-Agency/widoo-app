@@ -17,3 +17,4 @@ export {
   type TransitionStep,
   type TransitionTransport,
 } from './transitions';
+export { computeTimeline, conflictsOf, type TimelineStepInput } from './timeline';
