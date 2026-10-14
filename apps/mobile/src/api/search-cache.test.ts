@@ -1,7 +1,13 @@
 import { QueryClient } from '@tanstack/react-query';
 import type { RouteSearchResult } from '@widoo/shared';
 import { describe, expect, it } from 'vitest';
-import { latestCachedResults, OFFLINE_MAX_AGE_MS, shouldPersistQuery } from './search-cache';
+import { testMe } from '../test/me';
+import {
+  latestCachedResults,
+  OFFLINE_MAX_AGE_MS,
+  persistedQuerySchema,
+  shouldPersistQuery,
+} from './search-cache';
 
 const answer = (cursor: string): RouteSearchResult => ({
   items: [],
@@ -29,10 +35,18 @@ describe('search cache', () => {
     return query;
   };
 
-  it('keeps on the device the last search answered, and nothing else', () => {
+  it('keeps on the device the last search answered, and no other search', () => {
     expect(shouldPersistQuery(client, queryOf(['routes', 'search', 'zone-b']))).toBe(true);
     expect(shouldPersistQuery(client, queryOf(['routes', 'search', 'zone-a']))).toBe(false);
     expect(shouldPersistQuery(client, queryOf(['me']))).toBe(false);
+  });
+
+  it('keeps the account of the user, read back with its schema (E-09, hors connexion)', () => {
+    const withMe = clientWith([[['me', 'uid-1'], testMe(), 1_000]]);
+    const query = withMe.getQueryCache().find({ queryKey: ['me', 'uid-1'], exact: true });
+    expect(query && shouldPersistQuery(withMe, query)).toBe(true);
+    expect(persistedQuerySchema(['me', 'uid-1'])?.safeParse(testMe()).success).toBe(true);
+    expect(persistedQuerySchema(['me', 'uid-1'])?.safeParse({ id: 'x' }).success).toBe(false);
   });
 
   it('gives the last results with the time they were fetched', () => {
