@@ -23,6 +23,7 @@ import { healthRoutes } from './routes/health';
 import { defaultInternalJobs, internalRoutes, type InternalJobs } from './routes/internal';
 import { legalRoutes } from './routes/legal';
 import { meRoutes } from './routes/me';
+import { meExportRoutes } from './routes/me-export';
 import { plannedRoutesPlugin } from './routes/planned';
 import { searchRoutesPlugin } from './routes/search';
 import { supportRoutes } from './routes/support';
@@ -115,6 +116,7 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   await app.register(legalRoutes, { prefix: '/v1' });
   await app.register(supportRoutes, { prefix: '/v1' });
   await app.register(meRoutes, { prefix: '/v1' });
+  await app.register(meExportRoutes, { prefix: '/v1' });
   await app.register(plannedRoutesPlugin, { prefix: '/v1' });
   await app.register(searchRoutesPlugin, { prefix: '/v1' });
   await app.register(editorRoutes, { prefix: '/v1' });
