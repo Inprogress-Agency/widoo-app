@@ -1,5 +1,7 @@
 import { z } from 'zod';
+import { defaultAppLocale } from '../locale';
 import { Latitude, LatLng, Longitude } from './common';
+import { AppLocale } from './me';
 
 /**
  * What the search of E-02 types, as `GET /geocode?q=` and `GET /routes/search?q=` take it:
@@ -12,8 +14,14 @@ export const SearchText = z
   .max(100)
   .regex(/^[^<>\p{Cc}]*$/u, 'Plain text only, without < > or control characters');
 
-/** Query string of `GET /geocode`. Strict, as every query of the API. */
-export const GeocodeQuery = z.strictObject({ q: SearchText });
+/**
+ * Query string of `GET /geocode`: the text, and the language of the app, which names the zones
+ * (« Paris 10e », « Paris 10th »), French when absent. Strict, as every query of the API.
+ */
+export const GeocodeQuery = z.strictObject({
+  q: SearchText,
+  locale: AppLocale.default(defaultAppLocale),
+});
 export type GeocodeQuery = z.infer<typeof GeocodeQuery>;
 
 /**
@@ -42,7 +50,7 @@ export const GeocodeZone = z.object({
   id: z.string().min(1).max(256),
   name: z.string().min(1).max(200),
   kind: z.enum(geocodeZoneKinds),
-  /** Where the zone lies, short: « Paris 10e », « Lyon »; null when nothing more is known. */
+  /** Where the zone lies, short, in the language asked: « Paris 10e », « Lyon »; null when nothing more is known. */
   area: z.string().min(1).max(200).nullable(),
   center: LatLng,
   /**
