@@ -57,6 +57,13 @@
       "when": 1791974962974,
       "tag": "0007_add_route_unlocks",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791976765635,
+      "tag": "0008_add_route_revisions",
+      "breakpoints": true
     }
   ]
 }
