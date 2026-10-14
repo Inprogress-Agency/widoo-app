@@ -9,6 +9,8 @@ const colorProps = {
   '#5A7FCF': 'color',
   '#FAF9F6': 'gradientFrom',
   '#BFD7EA': 'gradientTo',
+  // flag-fr.svg, flag-gb.svg: the ring, `ink` at 12 % (tokens.json › mappings.settings.language).
+  '#14171F': 'color',
 };
 
 // Every component takes the color props of the pipeline: those its source does not use are ignored.

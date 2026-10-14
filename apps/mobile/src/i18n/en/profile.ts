@@ -171,7 +171,6 @@ export const profile = {
     preferences: 'Preferences',
     notifications: 'Notifications',
     language: 'Language',
-    languageValue: 'English',
     privacy: 'Privacy',
     information: 'Information',
     terms: 'Terms of use',
@@ -182,6 +181,17 @@ export const profile = {
     deleteAccount: 'Delete my account',
     version: 'Widoo, version {{version}}',
     versionBuild: 'Widoo, version {{version}} ({{build}})',
+  },
+  language: {
+    title: 'Language',
+    back: 'Back to the settings',
+    group: 'Language',
+    device: 'Phone language',
+    fr: 'French',
+    en: 'English',
+    note: 'Routes are translated automatically. Their original version stays available.',
+    error: 'Could not change it',
+    errorBody: 'Try again in a moment.',
   },
   deleteAccount: {
     title: 'Delete my account',
@@ -210,5 +220,12 @@ export const profile = {
   },
 } satisfies Pick<
   Translation,
-  'routes' | 'profile' | 'field' | 'editProfile' | 'anecdote' | 'settings' | 'deleteAccount'
+  | 'routes'
+  | 'profile'
+  | 'field'
+  | 'editProfile'
+  | 'anecdote'
+  | 'settings'
+  | 'language'
+  | 'deleteAccount'
 >;

@@ -19,6 +19,8 @@ jest.mock('expo-router', () => ({
 jest.mock('expo-router/tabs', () => ({
   BottomTabBarHeightContext: jest.requireActual<typeof import('react')>('react').createContext(0),
 }));
+jest.mock('react-native-mmkv', () => jest.requireActual('../test/mmkv'));
+jest.mock('expo-localization', () => ({ getLocales: () => [{ languageCode: 'fr' }] }));
 jest.mock('../ui/haptics', () => ({ haptic: jest.fn() }));
 jest.mock('../analytics', () => ({
   analytics: { track: jest.fn(), setAuthenticated: jest.fn() },
