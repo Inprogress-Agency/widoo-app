@@ -60,7 +60,11 @@ export function SettingsScreen() {
             value={choice === 'device' ? t('language.device') : t(`language.${choice}`)}
             onPress={() => router.push('/language')}
           />
-          <SettingsRow icon="privacy-settings" label={t('settings.privacy')} />
+          <SettingsRow
+            icon="privacy-settings"
+            label={t('settings.privacy')}
+            onPress={() => router.push('/settings/privacy')}
+          />
         </SettingsSection>
         <SettingsSection title={t('settings.information')}>
           <SettingsRow

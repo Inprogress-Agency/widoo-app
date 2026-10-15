@@ -24,7 +24,14 @@ initMonitoring();
 holdSplash();
 
 /** The pages of the Réglages under `app/settings/` (E-19), pushed like Langue. */
-const settingsPages = ['notifications', 'terms', 'privacy-policy', 'help', 'contact'] as const;
+const settingsPages = [
+  'notifications',
+  'terms',
+  'privacy-policy',
+  'help',
+  'contact',
+  'privacy',
+] as const;
 
 const navigationTheme: Theme = {
   ...DefaultTheme,
