@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
+import { useCallback } from 'react';
 import { ApiRequestError } from '@widoo/api-client';
 import type { AppConfig, Me, UpdateMe } from '@widoo/shared';
 import { api } from '../api/client';
@@ -54,7 +55,16 @@ export function useMe() {
   } else {
     state = { status: 'loading' };
   }
-  return { state, refetch: () => void query.refetch(), isFetching: query.isFetching };
+  // Stable, so that a screen may ask again on focus without asking again at each render; and
+  // without account, nothing: `refetch` would send the request even with the query disabled.
+  const { refetch: refetchQuery } = query;
+  const isSignedIn = uid !== null;
+  const refetch = useCallback(() => {
+    if (isSignedIn) {
+      void refetchQuery();
+    }
+  }, [isSignedIn, refetchQuery]);
+  return { state, refetch, isFetching: query.isFetching };
 }
 
 /** `/config`: the active anecdote questions, in the order of the sheet. */
