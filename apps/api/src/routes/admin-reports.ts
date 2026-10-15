@@ -1,4 +1,6 @@
 import {
+  AdminRatings,
+  AdminRatingsQuery,
   AdminReportsQuery,
   AdminRouteReports,
   AdminSignaledPlaces,
@@ -14,6 +16,7 @@ import { z } from 'zod';
 import { httpError } from '../errors';
 import { readOpenRouteReports, resolveRouteReport } from '../reports/admin-reports';
 import { closePlace, readSignaledPlaces, verifyPlace } from '../reports/place-signals';
+import { readRatings } from '../reports/ratings';
 
 const security = [{ firebaseIdToken: [] }];
 const tags = ['admin'];
@@ -29,9 +32,10 @@ function actorIdOf(request: FastifyRequest): string {
 }
 
 /**
- * Signals and reports of the admin (A-03, wiki API › Admin): the places the community flagged and
- * what the team does with them, the open reports of routes and their resolution. Moderators and
- * admins only; each decision is written in the journal of the admin. Never cached.
+ * Signals, reports and ratings of the admin (A-03, wiki API › Admin): the places the community
+ * flagged and what the team does with them, the open reports of routes and their resolution, and
+ * the ratings. Moderators and admins only; each decision is written in the journal of the admin.
+ * Never cached.
  */
 export const adminReportsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.addHook('onRequest', app.requireAdminSection('reports'));
@@ -121,5 +125,19 @@ export const adminReportsRoutes: FastifyPluginAsyncZod = async (app) => {
         actorId: actorIdOf(request),
         reason: request.body.reason,
       }),
+  );
+
+  app.get(
+    '/admin/ratings',
+    {
+      schema: {
+        tags,
+        summary: 'Ratings with a comment',
+        security,
+        querystring: AdminRatingsQuery,
+        response: { 200: AdminRatings },
+      },
+    },
+    async (request) => readRatings(request.query),
   );
 };
