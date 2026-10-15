@@ -11,6 +11,7 @@
 import { certificationSettingKeys, defaultCertificationThresholds } from '@widoo/shared';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { stableRecommendationOf } from '../recommendation/stable';
+import { accessColumnOf } from '../transit/access';
 import type { Db } from './client';
 import { envelopeOf } from './geography';
 import {
@@ -199,7 +200,8 @@ function routeRow(route: DemoRoute, cityId: string) {
     tips: route.tips,
     startLocation: locations[0],
     bounds: envelopeOf(locations),
-    computed: route.computed,
+    // The access is computed like the editor does, from the reference stations (D-050).
+    computed: { ...route.computed, access: accessColumnOf(locations[0]) },
     ...bucketsOf(route),
     publishedAt: seedAt,
     // As the nightly job would compute it on the dataset date: no rating, every place verified.

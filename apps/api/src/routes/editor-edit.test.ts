@@ -128,6 +128,34 @@ describe('PUT /routes/:id/steps', () => {
     expect((await rowOf(id))?.transport).toBe('bike');
   });
 
+  // Criterion of #180: the access follows the first step (D-050).
+  it('computes the access of the first step, again when the first step changes', async () => {
+    const headers = await fixtures.signIn();
+    const { id } = OwnRoute.parse((await create(headers)).json());
+    const [victorHugo, carnavalet] = demoPlaceIds;
+    const accessOf = async () => ((await rowOf(id))?.computed as { access: unknown }).access;
+
+    await putSteps(headers, id, [
+      { placeId: victorHugo, durationMin: 30 },
+      { placeId: carnavalet, durationMin: 30 },
+    ]);
+    expect(await accessOf()).toEqual({
+      station: 'Bastille',
+      lines: ['1', '5', '8'].map((line) => ({ mode: 'metro', line })),
+      distance_m: 316,
+    });
+
+    await putSteps(headers, id, [
+      { placeId: carnavalet, durationMin: 30 },
+      { placeId: victorHugo, durationMin: 30 },
+    ]);
+    expect(await accessOf()).toEqual({
+      station: 'Saint-Paul',
+      lines: [{ mode: 'metro', line: '1' }],
+      distance_m: 333,
+    });
+  });
+
   it('answers 422 to the step of another route, or a place that does not exist', async () => {
     const headers = await fixtures.signIn();
     const { id } = OwnRoute.parse((await create(headers)).json());
