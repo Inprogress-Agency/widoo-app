@@ -717,6 +717,24 @@ export const fr = {
     writeBody: 'Une question, un problème, une idée ? Nous vous répondons par e-mail.',
     write: 'Nous écrire',
   },
+  // Nous écrire (E-19, D-063): the version of the app and the phone are joined.
+  contact: {
+    title: 'Nous écrire',
+    back: "Retour à l'aide",
+    topic: 'Sujet',
+    topics: { question: 'Question', problem: 'Problème', data: 'Données', other: 'Autre' },
+    message: 'Message',
+    replyEmail: 'E-mail de réponse',
+    emailInvalid: "Vérifiez l'adresse : elle semble incomplète.",
+    joined: "La version de l'app et le modèle du téléphone sont joints, pour nous aider.",
+    offline: 'Hors connexion : votre message est gardé, envoyez-le une fois reconnecté.',
+    send: 'Envoyer',
+    sent: 'Message envoyé',
+    sentBody: 'Nous vous répondons par e-mail.',
+    error: 'Envoi impossible',
+    errorBody: 'Votre message est gardé.',
+    retry: 'Réessayer',
+  },
   // Supprimer mon compte (E-09, D-025): no choice, the published routes stay online.
   deleteAccount: {
     title: 'Supprimer mon compte',
