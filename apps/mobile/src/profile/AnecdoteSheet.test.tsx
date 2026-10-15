@@ -1,6 +1,7 @@
 import { describe, expect, it, jest } from '@jest/globals';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { createRef } from 'react';
+import { Keyboard } from 'react-native';
 import { AnecdoteSheet, type AnecdoteSheetMethods } from './AnecdoteSheet';
 
 jest.mock('@gorhom/bottom-sheet', () => jest.requireActual('@gorhom/bottom-sheet/mock'));
@@ -70,5 +71,22 @@ describe('anecdote sheet', () => {
     expect(screen.getByDisplayValue('Belleville.')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Changer de question' })).toBeTruthy();
     expect(screen.getByRole('button', { name: "Supprimer l'anecdote" })).toBeTruthy();
+  });
+
+  it('closes the keyboard of the form before the sheet rises', async () => {
+    const { ref } = await renderSheet();
+    const { BottomSheetModal } = jest.requireMock<{
+      BottomSheetModal: { prototype: { present: () => void } };
+    }>('@gorhom/bottom-sheet');
+    const dismiss = jest.spyOn(Keyboard, 'dismiss');
+    const present = jest.spyOn(BottomSheetModal.prototype, 'present');
+    await act(async () => ref.current?.open(null));
+    expect(dismiss).toHaveBeenCalledTimes(1);
+    expect(present).toHaveBeenCalledTimes(1);
+    expect(dismiss.mock.invocationCallOrder[0]).toBeLessThan(
+      present.mock.invocationCallOrder[0] ?? 0,
+    );
+    dismiss.mockRestore();
+    present.mockRestore();
   });
 });
