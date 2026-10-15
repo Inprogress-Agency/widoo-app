@@ -3,6 +3,7 @@ import { taxonomies } from '../taxonomies';
 import { HttpsUrl } from './common';
 import { CertificationCriterion, ProfileAnecdote } from './profile';
 import { RouteCard } from './route';
+import { listOf } from './search';
 
 /** Sorts of « Tous ses parcours » on a public profile (E-16, as on E-09). */
 export const profileRouteSorts = ['recent', 'rating', 'duration'] as const;
@@ -14,6 +15,21 @@ export interface PublicProfileQuery {
   moods?: readonly (typeof taxonomies.moods)[number][];
   cursor?: string;
 }
+
+/**
+ * Query string of `GET /users/:id/profile` as the API reads it (wiki API › Découverte): the most
+ * recent first by default, `moods[]` as in the search (at least one of them), the page of
+ * « Tous ses parcours ». Strict: an unknown key or a value outside the taxonomy answers 400,
+ * never an unfiltered list.
+ */
+export const PublicProfileQueryParams = z.strictObject({
+  sort: z.enum(profileRouteSorts).default('recent'),
+  moods: listOf(taxonomies.moods),
+  /** Opaque, returned as `routes.nextCursor`. */
+  cursor: z.string().min(1).max(512).optional(),
+  limit: z.coerce.number().int().min(1).max(50).default(20),
+});
+export type PublicProfileQueryParams = z.infer<typeof PublicProfileQueryParams>;
 
 const count = z.number().int().nonnegative();
 

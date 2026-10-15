@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PublicProfile } from '.';
+import { PublicProfile, PublicProfileQueryParams } from '.';
 
 const card = {
   id: '0190a4b2-0000-7000-8000-000000000001',
@@ -67,5 +67,28 @@ describe('PublicProfile', () => {
     ['an unknown mood', { moodCounts: { disco: 2 } }],
   ])('rejects %s', (_case, override) => {
     expect(PublicProfile.safeParse({ ...minimal, ...override }).success).toBe(false);
+  });
+});
+
+describe('PublicProfileQueryParams', () => {
+  it('sorts the most recent first, twenty routes a page, by default', () => {
+    expect(PublicProfileQueryParams.parse({})).toEqual({ sort: 'recent', limit: 20 });
+  });
+
+  it('reads one mood or several, without duplicates', () => {
+    expect(PublicProfileQueryParams.parse({ moods: 'food' }).moods).toEqual(['food']);
+    expect(
+      PublicProfileQueryParams.parse({ moods: ['food', 'nature', 'food'], sort: 'rating' }),
+    ).toEqual({ moods: ['food', 'nature'], sort: 'rating', limit: 20 });
+  });
+
+  it.each([
+    ['an unknown sort', { sort: 'distance' }],
+    ['an unknown mood', { moods: ['disco'] }],
+    ['an unknown key', { mood: 'food' }],
+    ['an empty cursor', { cursor: '' }],
+    ['a page too large', { limit: '51' }],
+  ])('rejects %s', (_case, query) => {
+    expect(PublicProfileQueryParams.safeParse(query).success).toBe(false);
   });
 });
