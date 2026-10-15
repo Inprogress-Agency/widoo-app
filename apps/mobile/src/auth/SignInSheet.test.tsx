@@ -1,4 +1,6 @@
 import { describe, expect, it, jest } from '@jest/globals';
+// After `@jest/globals`: the mock of gorhom, hoisted, needs `jest`.
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { createFakeAuth } from '../test/fakeAuth';
 import { createSignInFlow, type SignInFlowDeps } from './flow';
@@ -39,6 +41,26 @@ async function renderSheet(overrides: Partial<SignInFlowDeps> = {}) {
 }
 
 describe('SignInSheet', () => {
+  it('opens again after a close on the veil, without dismissing the sheet twice', async () => {
+    let onDismiss: () => void = () => undefined;
+    const present = jest
+      .spyOn(BottomSheetModal.prototype, 'present')
+      .mockImplementation(function (this: { props: { onDismiss: () => void } }) {
+        onDismiss = this.props.onDismiss;
+      });
+    const dismiss = jest.spyOn(BottomSheetModal.prototype, 'dismiss');
+    const { flow } = await renderSheet();
+    await act(() => flow.requireAccount('profile', () => undefined));
+    // gorhom closes the sheet on the veil, then tells it.
+    await act(() => onDismiss());
+    expect(flow.store.getState().isOpen).toBe(false);
+    expect(dismiss).not.toHaveBeenCalled();
+    await act(() => flow.requireAccount('plan', () => undefined));
+    expect(present).toHaveBeenCalledTimes(2);
+    present.mockRestore();
+    dismiss.mockRestore();
+  });
+
   it('says the action waiting, with Google, the e-mail and the conditions', async () => {
     const { flow } = await renderSheet();
     await act(() => flow.requireAccount('go', () => undefined));
