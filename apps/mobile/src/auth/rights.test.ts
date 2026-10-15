@@ -43,17 +43,17 @@ describe('deleted account', () => {
       })
       .catch(() => undefined);
 
-  it('signs out on the 401 of a deleted account only', async () => {
-    const signOut = vi.fn(async () => undefined);
-    const unsubscribe = signOutOnDeletedAccount(client, signOut);
+  it('ends the session on the 401 of a deleted account only', async () => {
+    const endSession = vi.fn(async () => undefined);
+    const unsubscribe = signOutOnDeletedAccount(client, endSession);
     await failWith(
       new ApiRequestError('http', 401, { code: 'unauthorized', message: 'Invalid token' }),
     );
-    expect(signOut).not.toHaveBeenCalled();
+    expect(endSession).not.toHaveBeenCalled();
     await failWith(
       new ApiRequestError('http', 401, { code: 'unauthorized', message: 'Account deleted' }),
     );
-    expect(signOut).toHaveBeenCalledTimes(1);
+    expect(endSession).toHaveBeenCalledTimes(1);
     unsubscribe();
   });
 });

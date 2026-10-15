@@ -1,6 +1,13 @@
+import { isAccountDeleted } from '@widoo/api-client';
 import type { AnalyticsEventArgs } from '@widoo/shared';
 import { createStore } from 'zustand/vanilla';
-import { SignInError, type AuthProvider, type SignInFailure, type SignInResult } from './provider';
+import {
+  SignInError,
+  type AuthProvider,
+  type AuthUser,
+  type SignInFailure,
+  type SignInResult,
+} from './provider';
 
 /** Why the sheet opens: the action waiting for an account (`auth_prompted`, D-033). */
 export type AuthIntent = AnalyticsEventArgs<'auth_prompted'>[0]['intent'];
@@ -37,6 +44,10 @@ export interface PendingEmail {
 export interface SignInFlowDeps {
   provider: AuthProvider;
   isSignedIn: () => boolean;
+  /** A sign-in went through: the session takes its user before `/me` is asked. */
+  onSignedIn: (user: AuthUser) => void;
+  /** The account was deleted (401 « Account deleted »): the app becomes anonymous. */
+  endSession: () => Promise<void>;
   /** `firstName` of `/me`, created on the first call; null when the account has none yet. */
   getFirstName: () => Promise<string | null>;
   saveFirstName: (firstName: string) => Promise<void>;
@@ -118,6 +129,7 @@ export function createSignInFlow(deps: SignInFlowDeps) {
   async function signedIn(result: SignInResult) {
     const intent = store.getState().intent ?? deps.pendingEmail.get()?.intent ?? null;
     deps.pendingEmail.set(null);
+    deps.onSignedIn(result.user);
     if (intent) {
       deps.trackCompleted(result, intent);
     }
@@ -160,16 +172,20 @@ export function createSignInFlow(deps: SignInFlowDeps) {
      * sheet otherwise.
      */
     async requireAccount(intent: AuthIntent, action: () => void) {
-      if (deps.isSignedIn()) {
-        if (hasFirstName === null) {
-          try {
-            hasFirstName = (await deps.getFirstName()) !== null;
-          } catch {
+      if (deps.isSignedIn() && hasFirstName === null) {
+        try {
+          hasFirstName = (await deps.getFirstName()) !== null;
+        } catch (error) {
+          if (!isAccountDeleted(error)) {
             // Offline: the action tells its own failure; the name waits for the next one.
             action();
             return;
           }
+          // A deleted account is no account: anonymous, the sheet opens below.
+          await deps.endSession();
         }
+      }
+      if (deps.isSignedIn()) {
         if (hasFirstName) {
           action();
           return;

@@ -15,17 +15,18 @@ export function resetRightsDependentQueries(client: QueryClient): Promise<void> 
 }
 
 /**
- * Signs out when the API says the account was deleted (401 « Account deleted »): its token is
- * refused for good, refreshing it would not help.
+ * Ends the session when the API says the account was deleted (401 « Account deleted »): its token
+ * is refused for good, refreshing it would not help. `endSession` makes the app anonymous at once,
+ * which disables the account queries, and signs out only once however many queries fail.
  */
-export function signOutOnDeletedAccount(client: QueryClient, signOut: () => Promise<void>) {
+export function signOutOnDeletedAccount(client: QueryClient, endSession: () => Promise<void>) {
   return client.getQueryCache().subscribe((event) => {
     if (
       event.type === 'updated' &&
       event.action.type === 'error' &&
       isAccountDeleted(event.action.error)
     ) {
-      void signOut();
+      void endSession();
     }
   });
 }

@@ -24,6 +24,8 @@ async function renderSheet(overrides: Partial<SignInFlowDeps> = {}) {
   const flow = createSignInFlow({
     provider: auth.provider,
     isSignedIn: () => false,
+    onSignedIn: () => undefined,
+    endSession: async () => undefined,
     getFirstName: async () => null,
     saveFirstName: async () => undefined,
     pendingEmail: { get: () => null, set: () => undefined },

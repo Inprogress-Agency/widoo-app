@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { onlineManager, QueryClientProvider } from '@tanstack/react-query';
 import { act, render, screen } from '@testing-library/react-native';
+import { meQueryPrefix } from '../api/search-cache';
 import { queryClient } from '../api/query-client';
 import { fakeAuth } from '../test/fakeAuth';
 import type { createFakeAccountApi } from '../test/fakeApi';
@@ -102,5 +103,38 @@ describe('GET /me on the Profil tab', () => {
     await settle();
     expect(server.deleteMeCount).toBe(1);
     expect(server.getMeCount - before).toBeLessThanOrEqual(1);
+  });
+
+  it('signs out on the phone even when Firebase does not, and takes a new account after', async () => {
+    await renderSignedIn();
+    const signOut = jest
+      .spyOn(fakeAuth.provider, 'signOut')
+      .mockRejectedValue(new Error('auth/internal-error'));
+    const before = server.getMeCount;
+    await act(() => deleteAccount());
+    expect(await signedOutProfile()).toBeTruthy();
+    await settle();
+    expect(signOut).toHaveBeenCalledTimes(1);
+    expect(server.getMeCount - before).toBeLessThanOrEqual(1);
+
+    // Google again: a new account (D-027, #128).
+    fakeApi.signInAfresh();
+    await act(() => fakeAuth.setUser(user));
+    expect(await screen.findByRole('button', { name: 'Modifier le profil' })).toBeTruthy();
+  });
+
+  it('ends the session once on « Account deleted », Firebase silent, and asks no more', async () => {
+    await renderSignedIn();
+    // Deleted from another phone; Firebase keeps its user and says nothing.
+    const signOut = jest.spyOn(fakeAuth.provider, 'signOut').mockResolvedValue(undefined);
+    server.isDeleted = true;
+    const before = server.getMeCount;
+    await act(() => queryClient.invalidateQueries({ queryKey: meQueryPrefix }));
+    expect(await signedOutProfile()).toBeTruthy();
+    await settle();
+    await act(() => queryClient.invalidateQueries({ queryKey: meQueryPrefix }));
+    await settle();
+    expect(server.getMeCount - before).toBe(1);
+    expect(signOut).toHaveBeenCalledTimes(1);
   });
 });

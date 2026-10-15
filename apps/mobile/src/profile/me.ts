@@ -93,12 +93,13 @@ export function useUpdateMe() {
 }
 
 /**
- * Deletes the account (D-025): `DELETE /me`, then the sign-out, which brings the app back to its
- * anonymous state; the profile kept on the phone goes with the session.
+ * Deletes the account (D-025): `DELETE /me`, then the end of the session, which brings the app
+ * back to its anonymous state at once, even if Firebase fails to sign out; the profile kept on
+ * the phone goes with the session.
  */
 export async function deleteAccount(): Promise<void> {
   await api.deleteMe();
-  await session.signOut();
+  await session.endSession();
 }
 
 /** Forgets every profile kept on the phone and in memory. */

@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react-native';
 import { useStore } from 'zustand';
 import { analytics } from '../analytics';
 import { queryClient } from '../api/query-client';
@@ -14,10 +15,11 @@ export const session = createSession(authProvider, {
   onSignedInChange: () => {
     void resetRightsDependentQueries(queryClient);
   },
+  onSignOutFailed: (error) => Sentry.captureException(error),
 });
 
 session.store.subscribe((state) => analytics.setAuthenticated(state.status === 'signedIn'));
-signOutOnDeletedAccount(queryClient, session.signOut);
+signOutOnDeletedAccount(queryClient, session.endSession);
 
 export function useSession<T>(selector: (state: SessionState) => T): T {
   return useStore(session.store, selector);
