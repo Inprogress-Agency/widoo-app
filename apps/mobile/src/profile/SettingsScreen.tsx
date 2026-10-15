@@ -9,6 +9,7 @@ import { session } from '../auth';
 import { dateFormat } from '../i18n/formats';
 import { useLanguageChoice } from '../i18n/language';
 import { PRIVACY_URL, TERMS_URL } from '../auth/links';
+import { usePhoneNotifications } from '../settings/phoneNotifications';
 import { SettingsRow, SettingsSection, SwitchRow } from '../ui/SettingsRow';
 import { Text } from '../ui/Text';
 import { showToast } from '../ui/toastStore';
@@ -31,6 +32,7 @@ export function SettingsScreen() {
   const me = state.status === 'ready' ? state.me : null;
   const { version, build } = appVersion();
   const { choice } = useLanguageChoice();
+  const isPhoneOff = usePhoneNotifications() === 'off';
 
   return (
     <View className="flex-1 bg-bg">
@@ -45,7 +47,14 @@ export function SettingsScreen() {
       >
         {me && <AccountSettings me={me} />}
         <SettingsSection title={t('settings.preferences')}>
-          {me && <SettingsRow icon="notifications" label={t('settings.notifications')} />}
+          {me && (
+            <SettingsRow
+              icon="notifications"
+              label={t('settings.notifications')}
+              value={isPhoneOff ? t('settings.notificationsOff') : undefined}
+              onPress={() => router.push('/settings/notifications')}
+            />
+          )}
           <SettingsRow
             icon="language"
             label={t('settings.language')}

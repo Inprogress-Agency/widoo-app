@@ -101,6 +101,9 @@ export function SettingsRow({
   );
 }
 
+/** An inactive switch, which keeps its state (tokens.json › mappings.settings.notifications). */
+const DISABLED_OPACITY = 0.4;
+
 interface SwitchRowProps {
   icon: UiIconKey;
   label: string;
@@ -113,7 +116,8 @@ interface SwitchRowProps {
 /**
  * A switch of the settings (« Profil public »): the whole row is the switch for touch and
  * screen readers (« Profil public, interrupteur, activé »). Track `blue` on (4.51:1),
- * `control-border` off (3.49:1), white thumb (Direction-Artistique › Contrastes).
+ * `control-border` off (3.49:1), white thumb (Direction-Artistique › Contrastes). Inactive, it
+ * keeps its state: icon and label in `muted`, the switch at 40 % (Ecrans › E-19, D-061).
  */
 export function SwitchRow({
   icon,
@@ -133,9 +137,11 @@ export function SwitchRow({
       onPress={() => onValueChange(!value)}
       className="min-h-touch-min flex-row items-center gap-16 border-b border-line py-16"
     >
-      <Icon {...uiIcon(icon)} size="icon-l" />
+      <Icon {...uiIcon(icon)} {...(isDisabled && { color: 'muted' as const })} size="icon-l" />
       <View className="flex-1 gap-4">
-        <Text variant="body">{label}</Text>
+        <Text variant="body" color={isDisabled ? 'muted' : 'ink'}>
+          {label}
+        </Text>
         {help && (
           <Text variant="body-s" color="muted">
             {help}
@@ -143,7 +149,11 @@ export function SwitchRow({
         )}
       </View>
       {/* The row carries the role and the state: the native switch is not read twice. */}
-      <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+      <View
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        style={isDisabled ? { opacity: DISABLED_OPACITY } : undefined}
+      >
         <Switch
           value={value}
           onValueChange={onValueChange}

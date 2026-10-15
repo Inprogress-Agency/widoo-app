@@ -209,6 +209,7 @@ export const profile = {
     publicProfileErrorBody: 'Try again in a moment.',
     preferences: 'Preferences',
     notifications: 'Notifications',
+    notificationsOff: 'Off',
     language: 'Language',
     privacy: 'Privacy',
     information: 'Information',

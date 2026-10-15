@@ -23,6 +23,9 @@ initMonitoring();
 // The home lets the launch screen go when it is ready (E-18), 2 s at most.
 holdSplash();
 
+/** The pages of the Réglages under `app/settings/` (E-19), pushed like Langue. */
+const settingsPages = ['notifications'] as const;
+
 const navigationTheme: Theme = {
   ...DefaultTheme,
   colors: {
@@ -86,6 +89,10 @@ export default function RootLayout() {
               <Stack.Screen name="edit-profile" options={pageOptions} />
               <Stack.Screen name="delete-account" options={pageOptions} />
               <Stack.Screen name="language" options={pageOptions} />
+              {/* The other pages of the Réglages (E-19). */}
+              {settingsPages.map((page) => (
+                <Stack.Screen key={page} name={`settings/${page}`} options={pageOptions} />
+              ))}
               {/* E-16, pushed from a card or from the route sheet, over it (M-03). */}
               <Stack.Screen name="creator/[id]" options={pageOptions} />
             </Stack>
