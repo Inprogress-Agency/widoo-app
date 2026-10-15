@@ -41,6 +41,21 @@ const computed = (durationMin: number) => ({
 const profileOf = (id: string, query = '', headers: Record<string, string> = {}) =>
   app.inject({ url: `/v1/users/${id}/profile${query ? `?${query}` : ''}`, headers });
 
+/** The ids of every page of « Tous ses parcours », `limit` at a time. */
+async function walk(id: string, query: string, limit: number): Promise<string[]> {
+  const ids: string[] = [];
+  let cursor: string | null = null;
+  do {
+    const after: string = cursor ? `&cursor=${encodeURIComponent(cursor)}` : '';
+    const response = await profileOf(id, `${query}&limit=${limit}${after}`);
+    expect(response.statusCode, response.body).toBe(200);
+    const page = PublicProfile.parse(response.json()).routes;
+    ids.push(...page.items.map((item) => item.id));
+    cursor = page.nextCursor;
+  } while (cursor !== null && ids.length < 20);
+  return ids;
+}
+
 let camilleId = '';
 const camille = { r1: '', r2: '', r3: '', offline: [] as string[] };
 
@@ -166,6 +181,60 @@ describe('GET /v1/users/:id/profile', () => {
       routes: { items: [], nextCursor: null },
       moodCounts: {},
     });
+  });
+
+  it.each([
+    ['recent', () => [camille.r3, camille.r2, camille.r1]],
+    ['rating', () => [camille.r2, camille.r1, camille.r3]],
+    ['duration', () => [camille.r2, camille.r1, camille.r3]],
+  ])('sorts by %s and pages without duplicate nor gap', async (sort, expected) => {
+    expect(await walk(camilleId, `sort=${sort}`, 50)).toEqual(expected());
+    expect(await walk(camilleId, `sort=${sort}`, 1)).toEqual(expected());
+    expect(await walk(camilleId, `sort=${sort}`, 2)).toEqual(expected());
+  });
+
+  it('filters by moods, with or without brackets, the counts of the chips unchanged', async () => {
+    expect(await walk(camilleId, 'moods[]=food', 1)).toEqual([camille.r2, camille.r1]);
+    expect(await walk(camilleId, 'moods=culture&moods=nature&sort=duration', 50)).toEqual([
+      camille.r2,
+      camille.r3,
+    ]);
+    const filtered = PublicProfile.parse((await profileOf(camilleId, 'moods=culture')).json());
+    expect(filtered.moodCounts).toEqual({ food: 2, nature: 1, culture: 1 });
+    expect(filtered.routesPublished).toBe(3);
+  });
+
+  it('locks the Premium cards for the anonymous caller, opens them to a Premium account', async () => {
+    const anonymous = PublicProfile.parse((await profileOf(camilleId)).json());
+    expect(anonymous.featuredRoutes[0]?.isLocked).toBe(true);
+    expect(anonymous.routes.items[0]?.isLocked).toBe(true);
+
+    const premium = await fixtures.signIn({ firstName: 'Ana', plan: 'premium' });
+    const response = await profileOf(camilleId, '', premium);
+    expect(response.statusCode, response.body).toBe(200);
+    expect(response.headers['cache-control']).toBe('private, no-cache');
+    expect(response.headers.vary).toContain('Authorization');
+    const profile = PublicProfile.parse(response.json());
+    expect(profile.featuredRoutes[0]?.isLocked).toBe(false);
+    expect(profile.routes.items[0]?.isLocked).toBe(false);
+  });
+
+  it.each([
+    ['an unknown sort', 'sort=distance'],
+    ['an unknown mood', 'moods=disco'],
+    ['an unknown key', 'mood=food'],
+    ['a forged cursor', 'cursor=bm90LWEtY3Vyc29y'],
+  ])('refuses %s with 400', async (_case, query) => {
+    const response = await profileOf(camilleId, query);
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({ code: 'validation_error' });
+  });
+
+  it('refuses the cursor of another sort, and a malformed id, with 400', async () => {
+    const page = PublicProfile.parse((await profileOf(camilleId, 'sort=rating&limit=1')).json());
+    const cursor = encodeURIComponent(page.routes.nextCursor ?? '');
+    expect((await profileOf(camilleId, `sort=duration&cursor=${cursor}`)).statusCode).toBe(400);
+    expect((await profileOf('camille')).statusCode).toBe(400);
   });
 });
 
