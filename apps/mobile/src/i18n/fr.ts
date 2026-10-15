@@ -643,6 +643,7 @@ export const fr = {
     publicProfileErrorBody: 'Réessayez dans un instant.',
     preferences: 'Préférences',
     notifications: 'Notifications',
+    notificationsOff: 'Désactivées',
     language: 'Langue',
     privacy: 'Confidentialité',
     information: 'Informations',
@@ -664,6 +665,28 @@ export const fr = {
     fr: 'Français',
     en: 'Anglais',
     note: "Les parcours sont traduits automatiquement. Leur version d'origine reste disponible.",
+    error: 'Modification impossible',
+    errorBody: 'Réessayez dans un instant.',
+  },
+  // Réglages › Notifications (E-19, D-062): one switch per kind, D-061 for the phone cutting them.
+  notifications: {
+    title: 'Notifications',
+    back: 'Retour aux réglages',
+    intro: 'Choisissez ce que Widoo peut vous envoyer.',
+    reminders: {
+      label: 'Rappels de sortie',
+      help: 'La veille à 18:00 et une heure avant le départ.',
+    },
+    nextDay: {
+      label: "Le lendemain d'une sortie",
+      help: 'Pour noter une sortie restée ouverte.',
+    },
+    myRoutes: {
+      label: 'Vos parcours et signalements',
+      help: 'Publication, corrections demandées, suite donnée à vos signalements.',
+    },
+    phoneOff: 'Les notifications sont coupées dans les réglages du téléphone.',
+    openSettings: 'Ouvrir les réglages',
     error: 'Modification impossible',
     errorBody: 'Réessayez dans un instant.',
   },
