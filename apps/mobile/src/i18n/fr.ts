@@ -690,6 +690,12 @@ export const fr = {
     error: 'Modification impossible',
     errorBody: 'Réessayez dans un instant.',
   },
+  // Conditions d'utilisation and Politique de confidentialité in native pages (E-19, D-063).
+  legal: {
+    back: 'Retour aux réglages',
+    updated: 'Mise à jour le {{date}}',
+    summary: "L'essentiel",
+  },
   // Supprimer mon compte (E-09, D-025): no choice, the published routes stay online.
   deleteAccount: {
     title: 'Supprimer mon compte',

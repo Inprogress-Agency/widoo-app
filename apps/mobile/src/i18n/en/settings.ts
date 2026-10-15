@@ -23,4 +23,9 @@ export const settings = {
     error: 'Could not save',
     errorBody: 'Try again in a moment.',
   },
-} satisfies Pick<Translation, 'notifications'>;
+  legal: {
+    back: 'Back to the settings',
+    updated: 'Updated on {{date}}',
+    summary: 'In short',
+  },
+} satisfies Pick<Translation, 'notifications' | 'legal'>;

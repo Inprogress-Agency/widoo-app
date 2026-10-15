@@ -55,7 +55,9 @@ export function TopBar({ title, back, leading, trailing }: TopBarProps) {
       </View>
       <Text
         variant="title-s"
-        accessibilityRole="header"
+        // A page whose title is in the page (the legal texts) leaves the bar empty at rest.
+        accessibilityRole={title === '' ? undefined : 'header'}
+        accessibilityElementsHidden={title === ''}
         isDense
         numberOfLines={2}
         className="flex-1 text-center"
