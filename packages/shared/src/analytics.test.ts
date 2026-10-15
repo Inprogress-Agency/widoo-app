@@ -39,6 +39,7 @@ describe('AnalyticsEventArgs', () => {
 
   it('takes no properties for an event without any', () => {
     track('create_started');
+    track('analytics_consent_given');
     expectTypeOf<AnalyticsEventArgs<'reminder_tapped'>>().toEqualTypeOf<[]>();
   });
 

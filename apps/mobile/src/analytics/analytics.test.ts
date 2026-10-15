@@ -166,6 +166,34 @@ describe('createAnalytics', () => {
   });
 });
 
+describe("the answer of the « Mesure d'audience » sheet", () => {
+  it('sends analytics_consent_given first, right after « Accepter »', () => {
+    const { analytics, client, storage } = setup();
+    analytics.accept();
+    analytics.track('app_opened', { cold_start: true });
+    expect(storage.values.get('consent.analytics.v1')).toBe('granted');
+    expect(client.capture.mock.calls.map(([event]) => event)).toEqual([
+      'analytics_consent_given',
+      'app_opened',
+    ]);
+    expect(client.capture.mock.calls[0]?.[1]).toEqual({
+      app_version: '0.1.0',
+      platform: 'ios',
+      city: 'paris',
+      is_authenticated: false,
+    });
+  });
+
+  it('sends nothing after « Refuser », not even the refusal', () => {
+    const { analytics, client, createClient, storage } = setup();
+    analytics.refuse();
+    analytics.track('app_opened', { cold_start: true });
+    expect(storage.values.get('consent.analytics.v1')).toBe('denied');
+    expect(createClient).not.toHaveBeenCalled();
+    expect(client.capture).not.toHaveBeenCalled();
+  });
+});
+
 describe('createLogClient', () => {
   it('writes each event and its properties on one line', () => {
     const log = vi.fn();

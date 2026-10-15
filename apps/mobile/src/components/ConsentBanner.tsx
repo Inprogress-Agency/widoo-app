@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AccessibilityInfo, Platform, ScrollView, useWindowDimensions, View } from 'react-native';
-import { consent, useConsent } from '../analytics';
+import { analytics, useConsent } from '../analytics';
 import { Button } from '../ui/Button';
 import { Text } from '../ui/Text';
 
@@ -52,8 +52,8 @@ function ConsentPrompt() {
         <Text variant="body">{body}</Text>
       </ScrollView>
       <View className="flex-row flex-wrap justify-center gap-12">
-        <Button label={t('consent.refuse')} onPress={() => consent.set('denied')} />
-        <Button label={t('consent.accept')} onPress={() => consent.set('granted')} />
+        <Button label={t('consent.refuse')} onPress={analytics.refuse} />
+        <Button label={t('consent.accept')} onPress={analytics.accept} />
       </View>
     </View>
   );

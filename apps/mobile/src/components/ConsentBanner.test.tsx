@@ -16,6 +16,11 @@ jest.mock('../analytics', () => {
   let store: ConsentStore = createConsentStore(keyValues);
   return {
     storage,
+    // The answer as the analytics module records it; its events are tested with the module.
+    analytics: {
+      accept: () => store.set('granted'),
+      refuse: () => store.set('denied'),
+    },
     consent: {
       get: () => store.get(),
       set: (status: ConsentStatus) => store.set(status),

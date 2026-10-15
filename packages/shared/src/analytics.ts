@@ -58,6 +58,8 @@ const sheetLevel = z.enum(['rest', 'half', 'full']);
 export const analyticsEvents = {
   // Discovery
   app_opened: z.strictObject({ cold_start: z.boolean() }),
+  /** Right after « Accepter » of the first launch, the first event allowed; never after a refusal. */
+  analytics_consent_given: none,
   map_search_zone: z.strictObject({
     zoom: z.number().min(0).max(24),
     results_count: count,

@@ -60,20 +60,34 @@ export function createAnalytics(options: AnalyticsOptions) {
   applyConsent();
   consent.subscribe(applyConsent);
 
+  function track<E extends AnalyticsEventName>(event: E, ...args: AnalyticsEventArgs<E>) {
+    const check = checkAnalyticsEvent(event, args[0]);
+    if (!check.success) {
+      options.onInvalid(check.error);
+      return;
+    }
+    const common: AnalyticsCommonProperties = {
+      app_version: options.appVersion,
+      platform: options.platform,
+      ...context,
+    };
+    // The schemas only hold strings, numbers, booleans and arrays of them.
+    client?.capture(event, { ...(check.properties as Record<string, JsonValue>), ...common });
+  }
+
   return {
-    track<E extends AnalyticsEventName>(event: E, ...args: AnalyticsEventArgs<E>) {
-      const check = checkAnalyticsEvent(event, args[0]);
-      if (!check.success) {
-        options.onInvalid(check.error);
-        return;
-      }
-      const common: AnalyticsCommonProperties = {
-        app_version: options.appVersion,
-        platform: options.platform,
-        ...context,
-      };
-      // The schemas only hold strings, numbers, booleans and arrays of them.
-      client?.capture(event, { ...(check.properties as Record<string, JsonValue>), ...common });
+    track,
+    /**
+     * « Accepter » of the « Mesure d'audience » sheet (E-18): the consent, then
+     * `analytics_consent_given`, the first event it allows (wiki Analytics, D-060).
+     */
+    accept() {
+      consent.set('granted');
+      track('analytics_consent_given');
+    },
+    /** « Refuser »: the answer is kept, nothing is sent, not even the refusal. */
+    refuse() {
+      consent.set('denied');
     },
     /** City slug of the explored area; anything else, a position above all, is refused. */
     setCity(city: string) {
