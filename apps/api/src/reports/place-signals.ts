@@ -5,11 +5,11 @@ import {
   type PlaceActionResult,
   type PlaceAlreadyDecidedDetails,
 } from '@widoo/shared';
-import { eq, sql } from 'drizzle-orm';
+import { eq, inArray, sql } from 'drizzle-orm';
 import { neighbourCursors, offsetOfCursor } from '../admin/page-cursor';
 import { recordAdminAction } from '../admin/actions';
 import type { Db } from '../db/client';
-import { places } from '../db/schema';
+import { moderationActionsTable, places, routes } from '../db/schema';
 import { httpError } from '../errors';
 
 type PlaceRow = {
@@ -117,5 +117,65 @@ export async function verifyPlace(
       after: { status: 'verified' },
     });
     return { placeId: input.placeId, verificationStatus: 'verified', routesToFix: 0 };
+  });
+}
+
+/**
+ * Closes a place (A-03): its status becomes `closed`, and the published routes that go through it
+ * become `needs_fix`, each with a line in its history. The reason is required. A place that is
+ * already closed answers 409 `already_decided`.
+ */
+export async function closePlace(
+  db: Db,
+  input: PlaceActionInput & { reason: string },
+): Promise<PlaceActionResult> {
+  return db.transaction(async (tx) => {
+    const [place] = await tx
+      .select({ status: places.verificationStatus, name: places.name })
+      .from(places)
+      .where(eq(places.id, input.placeId))
+      .for('update');
+    if (!place) {
+      throw httpError(404, 'Place not found');
+    }
+    if (place.status === 'closed') {
+      throw alreadyIs(place.status);
+    }
+    await tx
+      .update(places)
+      .set({ verificationStatus: 'closed' })
+      .where(eq(places.id, input.placeId));
+
+    const concerned = await tx.execute<{ id: string }>(sql`
+      select r.id from routes r
+      where r.status = 'published'
+        and exists (select 1 from steps s where s.route_id = r.id and s.place_id = ${input.placeId})
+      for update`);
+    const routeIds = concerned.map((row) => row.id);
+    if (routeIds.length > 0) {
+      await tx.update(routes).set({ status: 'needs_fix' }).where(inArray(routes.id, routeIds));
+      await tx.insert(moderationActionsTable).values(
+        routeIds.map((routeId) => ({
+          routeId,
+          actorId: input.actorId,
+          action: 'request_changes' as const,
+          message: `Lieu fermé : ${place.name}. ${input.reason}`,
+        })),
+      );
+    }
+    await recordAdminAction(tx, {
+      actorId: input.actorId,
+      action: 'place.close',
+      targetType: 'place',
+      targetId: input.placeId,
+      before: { status: place.status },
+      after: { status: 'closed', routesToFix: routeIds },
+      reason: input.reason,
+    });
+    return {
+      placeId: input.placeId,
+      verificationStatus: 'closed',
+      routesToFix: routeIds.length,
+    };
   });
 }
