@@ -1,4 +1,9 @@
 import {
+  AdminRatings,
+  AdminRouteReports,
+  AdminSignaledPlaces,
+  PlaceActionResult,
+  ResolvedReport,
   PlaceImportResult,
   CatalogPlaces,
   CatalogPlaceDetail,
@@ -34,7 +39,12 @@ import {
   type RequestChangesBody,
   type CatalogRoutesQuery,
   type RepublishBody,
+  type AdminRatingsQuery,
+  type AdminReportsQuery,
+  type AdminSignalsQuery,
   type CatalogPlaceInput,
+  type ClosePlaceBody,
+  type ResolveReportBody,
   type CatalogPlacesQuery,
   type PlaceImportBody,
 } from '@widoo/shared';
@@ -50,6 +60,7 @@ import { removedOf, routePath, type GetRouteOptions, type RouteSheetAnswer } fro
 import { createTransport, type ApiClientOptions } from './transport';
 import { moderationQueryString, type ModerationQueueParams } from './moderation';
 import { catalogPlacesQueryString, catalogQueryString } from './catalog';
+import { ratingsQueryString, reportsQueryString, signalsQueryString } from './reports';
 
 /**
  * Typed client of the API, one method per route, answers validated by the `shared` schemas.
@@ -404,6 +415,65 @@ export function createApiClient(options: ApiClientOptions) {
         body,
         schema: PlaceImportResult,
         auth: true,
+      }),
+
+    /** `GET /v1/admin/reports`: the open reports of routes, oldest first (A-03). */
+    getAdminReports: (params: Partial<AdminReportsQuery>, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/admin/reports?${reportsQueryString(params)}`,
+        schema: AdminRouteReports,
+        auth: true,
+        signal,
+      }),
+
+    /** `POST /v1/admin/reports/:id/resolve`: accepts or rejects a report, with a note. */
+    resolveReport: (reportId: string, body: ResolveReportBody) =>
+      request({
+        method: 'POST',
+        path: `/v1/admin/reports/${reportId}/resolve`,
+        body,
+        schema: ResolvedReport,
+        auth: true,
+      }),
+
+    /** `GET /v1/admin/signals`: the places the community flagged, with their routes (A-03). */
+    getAdminSignals: (params: Partial<AdminSignalsQuery>, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/admin/signals?${signalsQueryString(params)}`,
+        schema: AdminSignaledPlaces,
+        auth: true,
+        signal,
+      }),
+
+    /** `POST /v1/admin/places/:id/verify`: marks a place verified by the team. */
+    verifyPlace: (placeId: string) =>
+      request({
+        method: 'POST',
+        path: `/v1/admin/places/${placeId}/verify`,
+        schema: PlaceActionResult,
+        auth: true,
+      }),
+
+    /** `POST /v1/admin/places/:id/close`: closes a place, its routes become `needs_fix`. */
+    closePlace: (placeId: string, body: ClosePlaceBody) =>
+      request({
+        method: 'POST',
+        path: `/v1/admin/places/${placeId}/close`,
+        body,
+        schema: PlaceActionResult,
+        auth: true,
+      }),
+
+    /** `GET /v1/admin/ratings`: the ratings with a comment, filtered by note and route (A-03). */
+    getAdminRatings: (params: Partial<AdminRatingsQuery>, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/admin/ratings?${ratingsQueryString(params)}`,
+        schema: AdminRatings,
+        auth: true,
+        signal,
       }),
 
     /** `DELETE /v1/me`: anonymizes the account; its token is refused afterwards. */
