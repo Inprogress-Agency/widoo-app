@@ -16,7 +16,9 @@ type DecidableAction = Exclude<ModerationAction, 'edit'>;
 /** What each decision asks of the route, and the status it gives it (wiki, cycle de vie). */
 const transitions: Record<DecidableAction, { from: readonly RouteStatus[]; to: RouteStatus }> = {
   publish: { from: ['pending'], to: 'published' },
-  request_changes: { from: ['pending'], to: 'changes_requested' },
+  // A route waiting for its first look goes back to its author; one already online stays online
+  // and is marked « à corriger » (a low rating or a report, A-03): see `statusAfter`.
+  request_changes: { from: ['pending', 'published'], to: 'changes_requested' },
   reject: { from: ['pending'], to: 'rejected' },
   unpublish: { from: ['published', 'needs_fix'], to: 'unpublished' },
 };
@@ -42,7 +44,7 @@ export async function decideRoute(
   input: ModerationDecisionInput,
   now = new Date(),
 ): Promise<ModerationDecision> {
-  const { from, to } = transitions[input.action];
+  const { from } = transitions[input.action];
 
   return db.transaction(async (tx) => {
     const [route] = await tx
@@ -57,6 +59,10 @@ export async function decideRoute(
       const details: AlreadyDecidedDetails = { status: route.status };
       throw httpError(409, 'Route already decided', 'already_decided', details);
     }
+    const to: RouteStatus =
+      input.action === 'request_changes' && route.status === 'published'
+        ? 'needs_fix'
+        : transitions[input.action].to;
 
     await tx
       .update(routes)
