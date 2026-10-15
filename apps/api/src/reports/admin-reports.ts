@@ -2,10 +2,15 @@ import {
   adminReportsPageSize,
   type AdminReportsQuery,
   type AdminRouteReports,
+  type ReportAlreadyDecidedDetails,
+  type ResolvedReport,
 } from '@widoo/shared';
-import { sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { neighbourCursors, offsetOfCursor } from '../admin/page-cursor';
+import { recordAdminAction } from '../admin/actions';
 import type { Db } from '../db/client';
+import { notifications, routeReports } from '../db/schema';
+import { httpError } from '../errors';
 
 type ReportRow = {
   id: string;
@@ -89,4 +94,66 @@ export async function readOpenRouteReports(
     offset,
     ...neighbourCursors(offset, total, adminReportsPageSize),
   };
+}
+
+type ResolveInput = {
+  reportId: string;
+  /** The member of the team who decides. */
+  actorId: string;
+  outcome: 'accepted' | 'rejected';
+  note?: string;
+};
+
+/**
+ * Decides an open report (A-03, D-056): `accepted` thanks the reporter with a notification
+ * (`report_resolved`), `rejected` sends nothing. The note stays in the journal of the admin. The
+ * report is locked while it is decided: a report that is no longer open answers 409
+ * `already_decided` with the status the first decision gave it. What happens to the route itself
+ * (unpublishing, a request for changes) is its own decision, made with the moderation actions.
+ */
+export async function resolveRouteReport(
+  db: Db,
+  input: ResolveInput,
+  now = new Date(),
+): Promise<ResolvedReport> {
+  return db.transaction(async (tx) => {
+    const [report] = await tx
+      .select({
+        status: routeReports.status,
+        userId: routeReports.userId,
+        routeId: routeReports.routeId,
+      })
+      .from(routeReports)
+      .where(eq(routeReports.id, input.reportId))
+      .for('update');
+    if (!report) {
+      throw httpError(404, 'Report not found');
+    }
+    if (report.status !== 'open') {
+      const details: ReportAlreadyDecidedDetails = { status: report.status };
+      throw httpError(409, 'Report already decided', 'already_decided', details);
+    }
+
+    await tx
+      .update(routeReports)
+      .set({ status: input.outcome, reviewedBy: input.actorId, reviewedAt: now })
+      .where(eq(routeReports.id, input.reportId));
+    if (input.outcome === 'accepted' && report.userId) {
+      await tx.insert(notifications).values({
+        userId: report.userId,
+        kind: 'report_resolved',
+        payload: { reportId: input.reportId, routeId: report.routeId },
+      });
+    }
+    await recordAdminAction(tx, {
+      actorId: input.actorId,
+      action: 'report.resolve',
+      targetType: 'route_report',
+      targetId: input.reportId,
+      before: { status: 'open' },
+      after: { status: input.outcome },
+      reason: input.note,
+    });
+    return { id: input.reportId, status: input.outcome };
+  });
 }
