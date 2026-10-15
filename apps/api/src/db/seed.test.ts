@@ -87,6 +87,23 @@ describe('seed', () => {
     }
   });
 
+  // Criterion of #180: the access of every demo route, from the reference stations (D-050).
+  it('computes the access of every demo route, the station nearest its first step', async () => {
+    const rows = await app.db
+      .select({ id: routes.id, access: sql<unknown>`${routes.computed}->'access'` })
+      .from(routes)
+      .where(inArray(routes.id, demoRouteIds));
+    expect(rows).toHaveLength(10);
+    for (const row of rows) {
+      expect(row.access, row.id).toMatchObject({ station: expect.any(String) });
+    }
+    expect(rows.find((row) => row.id === routeId('montmartre-a-deux'))?.access).toEqual({
+      station: 'Abbesses',
+      lines: [{ mode: 'metro', line: '12' }],
+      distance_m: 63,
+    });
+  });
+
   // Criterion of #32, with the operators of the central search query (wiki Modele-de-Donnees).
   describe('answers every filter value, except the assumed zeros', () => {
     const filters: Record<

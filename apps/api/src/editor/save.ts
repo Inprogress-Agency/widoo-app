@@ -14,12 +14,14 @@ import { envelopeOf } from '../db/geography';
 import { routeRevisions, routes } from '../db/schema';
 import { conflict } from '../errors';
 import { mainTransportOf, replaceSteps, type RouteContent } from './content';
+import { accessColumnOf } from '../transit/access';
 import type { RouteRow } from './lifecycle';
 import { evaluate, type Workspace } from './workspace';
 
 /**
  * Writes the content into the route itself, with what is derived from it: stored trips, transport,
- * start, envelope, city of the first step, `computed` and its buckets.
+ * start, envelope, city of the first step, `computed` with the access of the first step (D-050)
+ * and its buckets: the access follows the first step at every save.
  */
 export async function writeInPlace(
   tx: Tx,
@@ -57,6 +59,7 @@ export async function writeInPlace(
         walking_m: computed.walkingM,
         effort: computed.effort,
         warnings: warnings.map((issue) => issue.code),
+        access: accessColumnOf(located[0]?.location),
         computed_at: computed.computedAt,
       },
       durationBucket: computed && durationBucketOf(computed.durationMin),
