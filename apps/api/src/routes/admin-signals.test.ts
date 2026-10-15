@@ -146,6 +146,25 @@ describe('GET /v1/admin/signals', () => {
   });
 });
 
+describe('what waits in the navigation', () => {
+  it('counts a flagged place with the reports, until it is verified', async () => {
+    const moderator = await signIn('moderator');
+    const counted = async () =>
+      (
+        (await app.inject({ url: '/v1/admin/counters', headers: moderator.headers })).json() as {
+          reports?: { count: number };
+        }
+      ).reports?.count ?? 0;
+    const before = await counted();
+    const { placeId } = await addPlace('Compté', 'flagged');
+
+    expect(await counted()).toBe(before + 1);
+
+    await act(moderator.headers, placeId, 'verify');
+    expect(await counted()).toBe(before);
+  });
+});
+
 describe('POST /v1/admin/places/:id/verify', () => {
   it('marks the place verified, from zero, and writes it in the journal', async () => {
     const moderator = await signIn('moderator');
