@@ -1,3 +1,4 @@
+import type { TFunction } from 'i18next';
 import { type RouteDetailStep, type RouteTimeline } from '@widoo/shared';
 import { colors, filterIcons, size, spacing } from '@widoo/tokens';
 import { useState } from 'react';
@@ -88,7 +89,7 @@ function TimeColumn({
   );
 }
 
-function markText(t: ReturnType<typeof useTranslation>['t'], mark: StepMark): string {
+function markText(t: TFunction, mark: StepMark): string {
   return 'time' in mark
     ? t(`plan.marks.${mark.kind}`, { time: mark.time })
     : t(`plan.marks.${mark.kind}`);
