@@ -794,6 +794,16 @@ export const fr = {
         'Sur un nouveau téléphone, choisissez « Continuer avec un e-mail » et ouvrez le lien reçu à cette adresse.',
     },
   },
+  // Mise à jour (E-20, D-063): required under minVersion, recommended under recommendedVersion.
+  update: {
+    requiredTitle: 'Mettez à jour Widoo',
+    requiredBody:
+      "Cette version de l'app n'est plus prise en charge. Installez la dernière pour continuer.",
+    update: 'Mettre à jour',
+    recommendedTitle: 'Nouvelle version disponible',
+    recommendedBody: 'Des corrections et des nouveautés vous attendent.',
+    later: 'Plus tard',
+  },
   // Supprimer mon compte (E-09, D-025): no choice, the published routes stay online.
   deleteAccount: {
     title: 'Supprimer mon compte',

@@ -119,7 +119,15 @@ export const settings = {
         'On a new phone, choose "Continue with email" and open the link sent to this address.',
     },
   },
+  update: {
+    requiredTitle: 'Update Widoo',
+    requiredBody: 'This version of the app is no longer supported. Install the latest to go on.',
+    update: 'Update',
+    recommendedTitle: 'New version available',
+    recommendedBody: 'Fixes and new features are waiting for you.',
+    later: 'Later',
+  },
 } satisfies Pick<
   Translation,
-  'notifications' | 'legal' | 'help' | 'contact' | 'privacy' | 'email' | 'signInMethod'
+  'notifications' | 'legal' | 'help' | 'contact' | 'privacy' | 'email' | 'signInMethod' | 'update'
 >;

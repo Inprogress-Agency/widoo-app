@@ -18,6 +18,7 @@ import '../src/i18n/language';
 import { initMonitoring } from '../src/monitoring';
 import { fonts } from '../src/ui/fonts';
 import { ToastHost } from '../src/ui/Toast';
+import { UpdateGate } from '../src/update/UpdateGate';
 
 initMonitoring();
 // The home lets the launch screen go when it is ready (E-18), 2 s at most.
@@ -74,37 +75,39 @@ export default function RootLayout() {
           <StatusBar style="dark" />
           {/* Modal sheets, such as « Trier par », rise over the tab bar. */}
           <BottomSheetModalProvider>
-            <Stack screenOptions={{ headerShown: false }}>
-              {/*
+            <UpdateGate>
+              <Stack screenOptions={{ headerShown: false }}>
+                {/*
                 The route sheet rises from the bottom over the tabs, full screen (M-02, the
                 fallback of M-01 that the ticket accepts): `page` and the standard curve; with
                 « Réduire les animations », a fade in place. It closes by sliding down, its own pan.
               */}
-              <Stack.Screen
-                name="route/[id]"
-                options={{
-                  presentation: 'fullScreenModal',
-                  // `mappings.motion.modal.animation`, which the generated theme does not carry.
-                  animation: isReducedMotion ? 'fade' : 'slide_from_bottom',
-                  animationDuration: isReducedMotion
-                    ? motion.durations.fade
-                    : motion.durations.page,
-                }}
-              />
-              {/*
+                <Stack.Screen
+                  name="route/[id]"
+                  options={{
+                    presentation: 'fullScreenModal',
+                    // `mappings.motion.modal.animation`, which the generated theme does not carry.
+                    animation: isReducedMotion ? 'fade' : 'slide_from_bottom',
+                    animationDuration: isReducedMotion
+                      ? motion.durations.fade
+                      : motion.durations.page,
+                  }}
+                />
+                {/*
                 Modifier le profil, Supprimer mon compte (E-09) and Langue (E-19): pages without
                 the tab bar.
               */}
-              <Stack.Screen name="edit-profile" options={pageOptions} />
-              <Stack.Screen name="delete-account" options={pageOptions} />
-              <Stack.Screen name="language" options={pageOptions} />
-              {/* The other pages of the Réglages (E-19). */}
-              {settingsPages.map((page) => (
-                <Stack.Screen key={page} name={`settings/${page}`} options={pageOptions} />
-              ))}
-              {/* E-16, pushed from a card or from the route sheet, over it (M-03). */}
-              <Stack.Screen name="creator/[id]" options={pageOptions} />
-            </Stack>
+                <Stack.Screen name="edit-profile" options={pageOptions} />
+                <Stack.Screen name="delete-account" options={pageOptions} />
+                <Stack.Screen name="language" options={pageOptions} />
+                {/* The other pages of the Réglages (E-19). */}
+                {settingsPages.map((page) => (
+                  <Stack.Screen key={page} name={`settings/${page}`} options={pageOptions} />
+                ))}
+                {/* E-16, pushed from a card or from the route sheet, over it (M-03). */}
+                <Stack.Screen name="creator/[id]" options={pageOptions} />
+              </Stack>
+            </UpdateGate>
             {/* E-10, over whichever screen asks for an account. */}
             <SignInSheet flow={signInFlow} />
           </BottomSheetModalProvider>
