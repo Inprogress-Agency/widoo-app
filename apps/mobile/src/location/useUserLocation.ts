@@ -23,9 +23,14 @@ function currentPosition(): Promise<Location.LocationObject | null> {
   ]);
 }
 
-async function readLocation(shouldAsk: boolean): Promise<UserLocation> {
+/**
+ * The position, after asking for it when `onAsk` is given and the system never asked yet:
+ * `onAsk` is called just before the system dialog shows.
+ */
+async function readLocation(onAsk?: () => void): Promise<UserLocation> {
   let permission = await Location.getForegroundPermissionsAsync();
-  if (permission.status === Location.PermissionStatus.UNDETERMINED && shouldAsk) {
+  if (permission.status === Location.PermissionStatus.UNDETERMINED && onAsk) {
+    onAsk();
     permission = await Location.requestForegroundPermissionsAsync();
   }
   if (permission.status !== Location.PermissionStatus.GRANTED) {
@@ -41,25 +46,27 @@ async function readLocation(shouldAsk: boolean): Promise<UserLocation> {
 }
 
 /**
- * Position of the user, asked once « when the app is in use » at the first opening, and read
- * again when the app comes back from the system settings. It stays on the device: the app only
- * uses it to centre the map.
+ * Position of the user, asked once « when the app is in use » at the first display of the map,
+ * and read again when the app comes back from the system settings. It stays on the device: the
+ * app only uses it to centre the map. `isAsking` from the moment the system dialog shows: the
+ * launch screen goes away under it, the dialog shows over the loading home (Ecrans › E-18).
  */
 export function useUserLocation() {
   const [location, setLocation] = useState<UserLocation>({ status: 'pending' });
+  const [isAsking, setIsAsking] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
-    const update = (shouldAsk: boolean) =>
-      readLocation(shouldAsk).then((next) => {
+    const update = (onAsk?: () => void) =>
+      readLocation(onAsk).then((next) => {
         if (isMounted) {
           setLocation(next);
         }
       });
-    void update(true);
+    void update(() => setIsAsking(true));
     const subscription = AppState.addEventListener('change', (state) => {
       if (state === 'active') {
-        void update(false);
+        void update();
       }
     });
     return () => {
@@ -75,8 +82,8 @@ export function useUserLocation() {
       return;
     }
     await Location.requestForegroundPermissionsAsync();
-    setLocation(await readLocation(false));
+    setLocation(await readLocation());
   }, [location]);
 
-  return { location, enable };
+  return { location, isAsking, enable };
 }
