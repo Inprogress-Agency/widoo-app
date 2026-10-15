@@ -1,3 +1,4 @@
+import type { TFunction } from 'i18next';
 import { type GeocodeZone, type RouteCard } from '@widoo/shared';
 import { size, type UiIconKey } from '@widoo/tokens';
 import { Image } from 'expo-image';
@@ -75,7 +76,7 @@ function Row({ head, title, subtitle, accessibilityLabel, onPress, end }: RowPro
 
 /** « Quartier · Paris 10e », and the number of routes when known. */
 function zoneDetails(
-  t: ReturnType<typeof useTranslation>['t'],
+  t: TFunction,
   zone: Pick<GeocodeZone, 'kind' | 'area'>,
   routeCount?: number,
 ): string[] {

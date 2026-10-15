@@ -1,3 +1,4 @@
+import type { TFunction } from 'i18next';
 import { colors, size } from '@widoo/tokens';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -76,7 +77,7 @@ export function PanelFooter({ count, onApply, onReset, onRemoveGroup }: PanelFoo
 
 function statusLine(
   count: FilterCount,
-  t: ReturnType<typeof useTranslation>['t'],
+  t: TFunction,
 ): { icon: 'offline' | 'error'; text: string } | null {
   if (count.status === 'offline') {
     return { icon: 'offline', text: t('filters.offline') };
