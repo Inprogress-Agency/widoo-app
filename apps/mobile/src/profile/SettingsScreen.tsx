@@ -4,11 +4,10 @@ import { router } from 'expo-router';
 import { BottomTabBarHeightContext } from 'expo-router/tabs';
 import { use, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Linking, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { session } from '../auth';
 import { dateFormat } from '../i18n/formats';
 import { useLanguageChoice } from '../i18n/language';
-import { PRIVACY_URL, TERMS_URL } from '../auth/links';
 import { usePhoneNotifications } from '../settings/phoneNotifications';
 import { SettingsRow, SettingsSection, SwitchRow } from '../ui/SettingsRow';
 import { Text } from '../ui/Text';
@@ -67,14 +66,12 @@ export function SettingsScreen() {
           <SettingsRow
             icon="legal"
             label={t('settings.terms')}
-            isExternal
-            onPress={() => void Linking.openURL(TERMS_URL)}
+            onPress={() => router.push('/settings/terms')}
           />
           <SettingsRow
             icon="privacy"
             label={t('settings.privacyPolicy')}
-            isExternal
-            onPress={() => void Linking.openURL(PRIVACY_URL)}
+            onPress={() => router.push('/settings/privacy-policy')}
           />
           <SettingsRow icon="help" label={t('settings.help')} />
         </SettingsSection>
