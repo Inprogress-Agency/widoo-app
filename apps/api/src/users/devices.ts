@@ -44,7 +44,7 @@ export async function registerDevice(
 }
 
 /** Language of the phone the account registered last, null without any. */
-async function lastDeviceLocale(db: Db, userId: string): Promise<AppLocale | null> {
+export async function lastDeviceLocale(db: Db, userId: string): Promise<AppLocale | null> {
   const [last] = await db
     .select({ locale: devices.locale })
     .from(devices)
