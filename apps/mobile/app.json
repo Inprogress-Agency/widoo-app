@@ -7,6 +7,10 @@
     "scheme": "widoo",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "locales": {
+      "fr": "./locales/fr.json",
+      "en": "./locales/en.json"
+    },
     "icon": "./assets/icon.png",
     "ios": {
       "bundleIdentifier": "app.widoo",
@@ -56,7 +60,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Widoo utilise votre position pour centrer la carte sur les parcours autour de vous. Elle reste sur votre téléphone.",
+          "locationWhenInUsePermission": "Widoo s'en sert pour centrer la carte sur vous, trier les parcours par distance et vous guider pendant une sortie. Elle n'est jamais enregistrée sur nos serveurs.",
           "locationAlwaysAndWhenInUsePermission": false,
           "locationAlwaysPermission": false,
           "motionUsagePermission": false

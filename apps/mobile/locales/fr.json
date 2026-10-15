@@ -1,0 +1,5 @@
+{
+  "ios": {
+    "NSLocationWhenInUseUsageDescription": "Widoo s'en sert pour centrer la carte sur vous, trier les parcours par distance et vous guider pendant une sortie. Elle n'est jamais enregistrée sur nos serveurs."
+  }
+}

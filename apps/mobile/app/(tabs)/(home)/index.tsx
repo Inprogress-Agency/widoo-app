@@ -34,9 +34,10 @@ import { RecommendedUpdateSheet } from '../../../src/update/RecommendedUpdateShe
  * rises over everything.
  */
 export default function HomeScreen() {
-  const { location, enable } = useUserLocation();
-  // The home is ready once its map shows, at its centre (E-18: the launch screen until then).
-  useReleaseSplash(location.status !== 'pending');
+  const { location, isAsking, enable } = useUserLocation();
+  // The home is ready once its map shows, at its centre (E-18: the launch screen until then),
+  // or once the position is asked: the system dialog shows over the home, not the launch screen.
+  useReleaseSplash(location.status !== 'pending' || isAsking);
   const search = useRouteSearch();
   const { routes, clusters, status, isOnline } = search;
   const [height, setHeight] = useState(0);

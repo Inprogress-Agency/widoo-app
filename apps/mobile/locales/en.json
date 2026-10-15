@@ -1,0 +1,5 @@
+{
+  "ios": {
+    "NSLocationWhenInUseUsageDescription": "Widoo uses it to centre the map on you, sort the routes by distance and guide you during an outing. It is never stored on our servers."
+  }
+}
