@@ -21,6 +21,7 @@ import { parseQueryString } from './query-string';
 import { adminRoutes } from './routes/admin';
 import { adminCatalogRoutes } from './routes/admin-catalog';
 import { adminModerationRoutes } from './routes/admin-moderation';
+import { adminReportsRoutes } from './routes/admin-reports';
 import { configRoutes } from './routes/config';
 import { editorRoutes } from './routes/editor';
 import { geocodeRoutes } from './routes/geocode';
@@ -150,6 +151,7 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   await app.register(adminRoutes, { prefix: '/v1' });
   await app.register(adminModerationRoutes, { prefix: '/v1' });
   await app.register(adminCatalogRoutes, { prefix: '/v1' });
+  await app.register(adminReportsRoutes, { prefix: '/v1' });
   await app.register(searchRoutesPlugin, { prefix: '/v1' });
   await app.register(routeRatingsPlugin, { prefix: '/v1' });
   await app.register(routeSheetRoutes, {
