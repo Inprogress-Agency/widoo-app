@@ -54,17 +54,27 @@ export function allOf(predicates: readonly SQL[]): SQL {
 }
 
 /**
- * Published routes a card can show: a start, a computed duration and budget. A route belongs to
- * the zone when its envelope intersects it (GiST on `routes.bounds`).
+ * Published routes a card can show: a start, a computed duration and budget. Neither a draft, nor
+ * a private, pending or withdrawn route: the search and the public profile list these alone.
  */
-export function inZone(bbox: BBox): SQL {
-  const { west, south, east, north } = bbox;
+export function listedRoutes(): SQL {
   return allOf([
     sql`${routes.status} = 'published'`,
     sql`${routes.startLocation} is not null`,
     sql`${routes.computed} is not null`,
     sql`${routes.durationBucket} is not null`,
     sql`${routes.budgetBucket} is not null`,
+  ]);
+}
+
+/**
+ * Listed routes of a zone: a route belongs to the zone when its envelope intersects it (GiST on
+ * `routes.bounds`).
+ */
+export function inZone(bbox: BBox): SQL {
+  const { west, south, east, north } = bbox;
+  return allOf([
+    listedRoutes(),
     sql`ST_Intersects(${routes.bounds}, ST_MakeEnvelope(${west}, ${south}, ${east}, ${north}, 4326)::geography)`,
   ]);
 }

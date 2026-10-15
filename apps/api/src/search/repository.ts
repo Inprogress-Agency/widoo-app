@@ -162,13 +162,14 @@ export const cardColumns = sql`r.title, r.is_official, r.access, r.moods, r.audi
 export const cardJoins = sql`left join users u on u.id = r.author_id and u.deleted_at is null and u.is_public`;
 
 /**
- * SQL of one page of cards: the matching routes with their sort keys `k0…`, the page after the
+ * SQL of one page of cards: the routes of `where` with their sort keys `k0…`, the page after the
  * cursor, plus one row to tell whether another page follows, then the card fields of the page.
  */
-export function searchPageSql(
-  query: RouteSearchQuery,
+export function cardPageSql(
+  where: SQL,
   keys: readonly SortKey[],
   cursor: readonly SortKeyValue[] | undefined,
+  limit: number,
 ): SQL {
   const keyColumns = sql.join(
     keys.map((key, index) => sql`${key.expr} as ${keyColumn(index)}`),
@@ -176,13 +177,13 @@ export function searchPageSql(
   );
   return sql`
     with matched as (
-      select ${routes.id} as id, ${keyColumns} from ${routes} where ${searchWhere(query)}
+      select ${routes.id} as id, ${keyColumns} from ${routes} where ${where}
     ),
     page as (
       select * from matched
       where ${cursor ? after(keys, cursor) : sql`true`}
       order by ${orderBy(keys)}
-      limit ${query.limit + 1}
+      limit ${limit + 1}
     )
     select page.*, ${cardColumns}
     from page
@@ -192,30 +193,68 @@ export function searchPageSql(
   `;
 }
 
+/** SQL of one page of the search, after the cursor. */
+export function searchPageSql(
+  query: RouteSearchQuery,
+  keys: readonly SortKey[],
+  cursor: readonly SortKeyValue[] | undefined,
+): SQL {
+  return cardPageSql(searchWhere(query), keys, cursor, query.limit);
+}
+
+/**
+ * A keyset page of cards: the routes of `where` in the sort `keys`, named `sort` in the cursor so
+ * that a cursor of another sort answers 400.
+ */
+export type CardPage = {
+  where: SQL;
+  sort: string;
+  keys: readonly SortKey[];
+  cursor: string | undefined;
+  limit: number;
+};
+
+/** One page of cards for a caller, anonymous when null, after the cursor of the request. */
+export async function readCardPage(
+  db: Db,
+  { where, sort, keys, cursor, limit }: CardPage,
+  user: User | null,
+): Promise<{ items: RouteCard[]; nextCursor: string | null }> {
+  const position = cursor
+    ? decodeCursor(
+        cursor,
+        sort,
+        keys.map((key) => key.type),
+      )
+    : undefined;
+  const rows = await db.execute<CardRow>(cardPageSql(where, keys, position, limit));
+
+  const hasMore = rows.length > limit;
+  const pageRows = hasMore ? rows.slice(0, limit) : [...rows];
+  const last = pageRows.at(-1);
+  const nextCursor = hasMore && last ? encodeCursor(sort, keyValuesOf(last, keys.length)) : null;
+  const viewer = await routeViewerOf(db, user, pageRows);
+  const now = new Date();
+  return { items: pageRows.map((row) => toCard(row, viewer, now)), nextCursor };
+}
+
 /** One page of cards for a caller, anonymous when null, in a keyset sort, after the cursor. */
-export async function searchRoutes(
+export function searchRoutes(
   db: Db,
   query: RouteSearchQuery & { sort: KeysetSort },
   user: User | null,
 ): Promise<{ items: RouteCard[]; nextCursor: string | null }> {
-  const keys = sortKeys(query.sort, query.near);
-  const cursor = query.cursor
-    ? decodeCursor(
-        query.cursor,
-        query.sort,
-        keys.map((key) => key.type),
-      )
-    : undefined;
-  const rows = await db.execute<CardRow>(searchPageSql(query, keys, cursor));
-
-  const hasMore = rows.length > query.limit;
-  const pageRows = hasMore ? rows.slice(0, query.limit) : [...rows];
-  const last = pageRows.at(-1);
-  const nextCursor =
-    hasMore && last ? encodeCursor(query.sort, keyValuesOf(last, keys.length)) : null;
-  const viewer = await routeViewerOf(db, user, pageRows);
-  const now = new Date();
-  return { items: pageRows.map((row) => toCard(row, viewer, now)), nextCursor };
+  return readCardPage(
+    db,
+    {
+      where: searchWhere(query),
+      sort: query.sort,
+      keys: sortKeys(query.sort, query.near),
+      cursor: query.cursor,
+      limit: query.limit,
+    },
+    user,
+  );
 }
 
 /** Grid of 8 × 8 cells over the zone. */
