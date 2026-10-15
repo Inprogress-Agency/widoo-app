@@ -655,6 +655,9 @@ export const fr = {
     deleteAccount: 'Supprimer mon compte',
     version: 'Widoo, version {{version}}',
     versionBuild: 'Widoo, version {{version}} ({{build}})',
+    signedOutTitle: "Vous n'êtes pas connecté",
+    signedOutBody: 'Le compte garde vos favoris et vos sorties sur tous vos appareils.',
+    signedOutAction: 'Créer un compte ou se connecter',
   },
   // Réglages › Langue (E-19, D-062, D-063): each language named in the language of the interface.
   language: {
@@ -756,6 +759,40 @@ export const fr = {
     retry: 'Réessayer',
     learnMore: 'En savoir plus',
     writeAboutData: 'Nous écrire sur vos données',
+  },
+  // Réglages › E-mail (E-19, D-062); the change of address comes with #202.
+  email: {
+    title: 'E-mail',
+    back: 'Retour aux réglages',
+    section: 'Adresse e-mail',
+    current: 'Adresse actuelle',
+    hidden: 'Masquée par Apple',
+    usage: 'Pour vous connecter par e-mail et recevoir les messages importants sur votre compte.',
+  },
+  // Réglages › Connexion (E-19, D-062), read only.
+  signInMethod: {
+    title: 'Connexion',
+    back: 'Retour aux réglages',
+    address: 'Adresse',
+    relay: "Les messages de Widoo vous parviennent par le relais d'Apple.",
+    apple: {
+      title: 'Apple',
+      subtitle: 'Vous vous connectez avec Apple.',
+      newPhone:
+        'Sur un nouveau téléphone, choisissez « Continuer avec Apple » pour retrouver votre compte, vos favoris et vos sorties.',
+    },
+    google: {
+      title: 'Google',
+      subtitle: 'Vous vous connectez avec Google.',
+      newPhone:
+        'Sur un nouveau téléphone, choisissez « Se connecter avec Google » pour retrouver votre compte, vos favoris et vos sorties.',
+    },
+    email: {
+      title: 'E-mail',
+      subtitle: 'Un lien de connexion, sans mot de passe.',
+      newPhone:
+        'Sur un nouveau téléphone, choisissez « Continuer avec un e-mail » et ouvrez le lien reçu à cette adresse.',
+    },
   },
   // Supprimer mon compte (E-09, D-025): no choice, the published routes stay online.
   deleteAccount: {

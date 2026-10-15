@@ -19,6 +19,7 @@ import {
   statusCodes,
 } from '@react-native-google-signin/google-signin';
 import {
+  accountProviderOf,
   SignInError,
   type AuthProvider,
   type AuthUser,
@@ -50,6 +51,7 @@ const userOf = (user: User): AuthUser => ({
   uid: user.uid,
   email: user.email,
   displayName: user.displayName,
+  provider: accountProviderOf(user.providerData.map((info) => info.providerId)),
 });
 
 const resultOf = (credential: UserCredential, method: SignInMethod) => ({

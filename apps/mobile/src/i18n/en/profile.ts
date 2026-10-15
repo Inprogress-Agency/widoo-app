@@ -221,6 +221,9 @@ export const profile = {
     deleteAccount: 'Delete my account',
     version: 'Widoo, version {{version}}',
     versionBuild: 'Widoo, version {{version}} ({{build}})',
+    signedOutTitle: 'You are not signed in',
+    signedOutBody: 'An account keeps your favourites and your outings on all your devices.',
+    signedOutAction: 'Create an account or sign in',
   },
   language: {
     title: 'Language',
