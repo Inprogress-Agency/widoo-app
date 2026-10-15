@@ -609,6 +609,161 @@ export const messages = {
     title: "Vous n'avez pas accès à cette page",
     text: 'Votre rôle ne permet pas cette action. Adressez-vous à un admin si vous en avez besoin.',
   },
+  reports: {
+    tabs: { label: 'Signalements et avis', places: 'Lieux', routes: 'Parcours', ratings: 'Avis' },
+    reasons: {
+      place_changed: 'Lieu modifié',
+      inappropriate: 'Contenu inapproprié',
+      dangerous_place: 'Lieu dangereux',
+      hidden_ad: 'Publicité cachée',
+      copied_content: 'Contenu copié',
+      false_info: 'Informations fausses',
+      other: 'Autre',
+      low_rating: 'Note basse',
+    },
+    routes: {
+      filters: { label: 'Filtres des signalements', reason: 'Motif' },
+      total: (count: number) =>
+        count > 1 ? `${count} signalements ouverts` : `${count} signalement ouvert`,
+      columns: {
+        route: 'Parcours',
+        reason: 'Motif',
+        reporter: 'Signalé par',
+        author: 'Auteur',
+        since: 'Depuis',
+      },
+      stepOf: (position: number, placeName: string) => `Étape ${position + 1}, ${placeName}`,
+      noReporter: 'Note moyenne basse',
+      team: 'Équipe Widoo',
+      unknown: 'Compte supprimé',
+      otherOpen: (count: number) =>
+        count > 1 ? `${count - 1} autres signalements ouverts` : '1 autre signalement ouvert',
+      empty: { title: 'Aucun signalement ouvert', text: 'Rien à traiter pour le moment.' },
+      panel: {
+        title: (routeTitle: string) => routeTitle,
+        reportedBy: 'Signalé par',
+        author: 'Auteur',
+        city: 'Ville',
+        comment: 'Commentaire',
+        step: 'Étape concernée',
+        noComment: 'Aucun commentaire',
+        openRoute: 'Voir le parcours',
+        lowRatingHint:
+          'La note moyenne du parcours est passée sous 2,5 avec au moins 5 avis. Gardez-le, demandez des modifications ou dépubliez-le.',
+      },
+      actions: {
+        accept: 'Accepter',
+        reject: 'Rejeter',
+        keep: 'Garder',
+        requestChanges: 'Demander des modifications',
+        unpublish: 'Dépublier',
+      },
+      dialogs: {
+        accept: {
+          title: 'Accepter ce signalement ?',
+          description:
+            'Le signaleur est remercié. Le parcours lui-même ne change pas : corrigez-le ou dépubliez-le depuis sa fiche si besoin.',
+          confirm: 'Accepter le signalement',
+        },
+        reject: {
+          title: 'Rejeter ce signalement ?',
+          description: "Le signalement est classé sans suite. Le signaleur n'est pas prévenu.",
+          confirm: 'Rejeter le signalement',
+        },
+        keep: {
+          title: 'Garder ce parcours ?',
+          description:
+            'Le parcours reste en ligne. Un nouveau signalement ne reviendra qu’après cinq nouveaux avis.',
+          confirm: 'Garder le parcours',
+        },
+        requestChanges: {
+          title: 'Demander des modifications ?',
+          description:
+            "Le parcours reste en ligne et passe en « À corriger ». Votre message est gardé dans son historique ; l'auteur n'est pas encore averti automatiquement.",
+          message: "Message à l'auteur",
+          confirm: 'Demander les modifications',
+        },
+        unpublish: {
+          title: 'Dépublier ce parcours ?',
+          description:
+            "Le parcours n'est plus visible dans l'app. Le motif et votre message sont gardés dans son historique.",
+          message: "Message à l'auteur",
+          confirm: 'Dépublier le parcours',
+        },
+        note: 'Note',
+        noteHint: 'Facultative. Gardée dans le journal, visible par l’équipe.',
+      },
+      toasts: {
+        accepted: 'Signalement accepté',
+        rejected: 'Signalement rejeté',
+        kept: 'Parcours gardé',
+        changesRequested: 'Modifications demandées',
+        unpublished: 'Parcours dépublié',
+        failed: "La décision n'a pas pu être enregistrée.",
+        alreadyDecided: (status: string) =>
+          `Un autre membre de l'équipe a déjà tranché : ${status.toLowerCase()}.`,
+      },
+      statuses: { accepted: 'Accepté', rejected: 'Rejeté', open: 'Ouvert' },
+      error: 'Les signalements ne se sont pas chargés.',
+    },
+    places: {
+      total: (count: number) => (count > 1 ? `${count} lieux signalés` : `${count} lieu signalé`),
+      empty: {
+        title: 'Aucun lieu signalé',
+        text: 'Les lieux signalés par la communauté apparaissent ici. Le décompte des signalements arrive avec leur enregistrement.',
+      },
+      columns: {
+        place: 'Lieu',
+        status: 'Statut',
+        signals: 'Signalements',
+        confirmations: 'Confirmations',
+        routes: 'Parcours concernés',
+        verified: 'Dernière vérification',
+      },
+      neverVerified: 'Jamais',
+      noRoute: 'Aucun',
+      actions: { verify: 'Marquer vérifié', fix: 'Corriger le lieu', close: 'Fermer le lieu' },
+      closeDialog: {
+        title: 'Fermer ce lieu ?',
+        description: (count: number) =>
+          count === 0
+            ? "Le lieu est marqué fermé. Aucun parcours publié n'y passe."
+            : count === 1
+              ? 'Le lieu est marqué fermé. Le parcours publié qui y passe passe en « À corriger ».'
+              : `Le lieu est marqué fermé. Les ${count} parcours publiés qui y passent passent en « À corriger ».`,
+        reason: 'Motif',
+        reasonHint: 'Gardé dans le journal et dans l’historique des parcours concernés.',
+        confirm: 'Fermer le lieu',
+      },
+      toasts: {
+        verified: 'Lieu marqué vérifié',
+        closed: 'Lieu fermé',
+        failed: "L'action n'a pas pu être enregistrée.",
+        alreadyDecided: (status: string) =>
+          `Un autre membre de l'équipe a déjà tranché : ${status.toLowerCase()}.`,
+      },
+      error: 'Les lieux signalés ne se sont pas chargés.',
+    },
+    ratings: {
+      filters: { label: 'Filtres des avis', rating: 'Note' },
+      ratingOption: (value: number) => (value > 1 ? `${value} étoiles` : `${value} étoile`),
+      total: (count: number) => `${count} avis`,
+      columns: {
+        rating: 'Note',
+        comment: 'Commentaire',
+        route: 'Parcours',
+        author: 'Auteur',
+        date: 'Date',
+      },
+      empty: {
+        title: 'Aucun avis avec commentaire',
+        text: 'Les avis laissés par les utilisateurs après une sortie apparaissent ici.',
+      },
+      hidden: 'Masqué',
+      unknownAuthor: 'Compte supprimé',
+      error: 'Les avis ne se sont pas chargés.',
+    },
+  },
   notFound: {
     title: 'Page introuvable',
     text: "Cette adresse n'existe pas dans l'admin.",
