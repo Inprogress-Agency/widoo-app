@@ -21,7 +21,7 @@ export type RouteFilterGroup = (typeof routeFilterGroups)[number];
  * A repeated query parameter arrives as an array, a single one as a string. Duplicates are
  * dropped, so the list never holds more values than its taxonomy.
  */
-function listOf<const T extends readonly [string, ...string[]]>(values: T) {
+export function listOf<const T extends readonly [string, ...string[]]>(values: T) {
   const value = z.enum(values);
   return z
     .union([value, z.array(value)])
