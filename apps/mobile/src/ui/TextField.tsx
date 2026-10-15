@@ -6,7 +6,13 @@ import { Text } from './Text';
 
 type InputProps = Pick<
   TextInputProps,
-  'value' | 'onChangeText' | 'placeholder' | 'autoCapitalize' | 'autoComplete' | 'textContentType'
+  | 'value'
+  | 'onChangeText'
+  | 'placeholder'
+  | 'autoCapitalize'
+  | 'autoComplete'
+  | 'textContentType'
+  | 'keyboardType'
 >;
 
 interface TextFieldProps extends InputProps {

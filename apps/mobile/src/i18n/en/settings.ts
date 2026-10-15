@@ -48,4 +48,21 @@ export const settings = {
     writeBody: 'A question, a problem, an idea? We answer by e-mail.',
     write: 'Write to us',
   },
-} satisfies Pick<Translation, 'notifications' | 'legal' | 'help'>;
+  contact: {
+    title: 'Write to us',
+    back: 'Back to help',
+    topic: 'Subject',
+    topics: { question: 'Question', problem: 'Problem', data: 'Data', other: 'Other' },
+    message: 'Message',
+    replyEmail: 'Reply e-mail',
+    emailInvalid: 'Check the address: it looks incomplete.',
+    joined: 'The version of the app and the model of the phone are joined, to help us.',
+    offline: 'Offline: your message is kept, send it once you are back online.',
+    send: 'Send',
+    sent: 'Message sent',
+    sentBody: 'We answer by e-mail.',
+    error: 'Could not send',
+    errorBody: 'Your message is kept.',
+    retry: 'Try again',
+  },
+} satisfies Pick<Translation, 'notifications' | 'legal' | 'help' | 'contact'>;
