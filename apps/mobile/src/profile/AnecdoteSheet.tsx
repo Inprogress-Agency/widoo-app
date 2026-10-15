@@ -7,7 +7,7 @@ import { anecdoteAnswerMaxLength, type AnecdoteQuestion } from '@widoo/shared';
 import { size } from '@widoo/tokens';
 import { useEffect, useImperativeHandle, useRef, useState, type Ref } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, useWindowDimensions, View } from 'react-native';
+import { Alert, Keyboard, Pressable, useWindowDimensions, View } from 'react-native';
 import { ReduceMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '../ui/Button';
@@ -76,6 +76,9 @@ export function AnecdoteSheet({ ref, questions, usedKeys, onSave, onDelete }: An
         answer: anecdote?.answer ?? '',
         step: anecdote ? 'answer' : 'question',
       });
+      // A field of the form may still hold the keyboard: the sheet would rise under it, and
+      // would not follow the keyboard of its own answer either (Android).
+      Keyboard.dismiss();
       setModalSheetOpen(true);
       sheet.current?.present();
     },
