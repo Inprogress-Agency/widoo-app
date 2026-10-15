@@ -7,7 +7,7 @@ import {
 } from '@widoo/shared';
 import { eq, sql } from 'drizzle-orm';
 import type { Db } from '../db/client';
-import { routes } from '../db/schema';
+import { places, routeReports, routes } from '../db/schema';
 
 /**
  * Routes waiting for the team. Late after 72 hours without a change: until the history of a
@@ -27,8 +27,32 @@ async function countPendingRoutes(db: Db, now: Date): Promise<AdminCounter> {
 }
 
 /**
- * Counters of the navigation of the admin, for the sections `role` opens. Signals, support, AI
- * drafts and translations join as their tables arrive with their sections.
+ * What waits in A-03: the open reports of routes, late after 72 hours, and the places the
+ * community flagged. A flagged place has no date until its signals are stored (`place_signals`),
+ * so it is never late.
+ */
+async function countOpenReports(db: Db, now: Date): Promise<AdminCounter> {
+  const lateBefore = new Date(now.getTime() - adminLateAfterHours * 60 * 60 * 1000);
+  const [reports] = await db
+    .select({
+      count: sql<number>`count(*)::int`,
+      lateCount: sql<number>`(count(*) filter (where ${routeReports.createdAt} < ${lateBefore.toISOString()}::timestamptz))::int`,
+    })
+    .from(routeReports)
+    .where(eq(routeReports.status, 'open'));
+  const [flagged] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(places)
+    .where(eq(places.verificationStatus, 'flagged'));
+  return {
+    count: (reports?.count ?? 0) + (flagged?.count ?? 0),
+    lateCount: reports?.lateCount ?? 0,
+  };
+}
+
+/**
+ * Counters of the navigation of the admin, for the sections `role` opens. Support, AI drafts and
+ * translations join as their tables arrive with their sections.
  */
 export async function readAdminCounters(
   db: Db,
@@ -38,6 +62,9 @@ export async function readAdminCounters(
   const counters: AdminCounters = {};
   if (canOpenAdminSection(role, 'moderation')) {
     counters.moderation = await countPendingRoutes(db, now);
+  }
+  if (canOpenAdminSection(role, 'reports')) {
+    counters.reports = await countOpenReports(db, now);
   }
   return counters;
 }
