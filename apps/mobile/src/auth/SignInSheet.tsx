@@ -96,6 +96,9 @@ export function SignInSheet({ flow }: { flow: SignInFlow }) {
       handleComponent={parts.handle}
       onDismiss={() => {
         setModalSheetOpen(false);
+        // Already dismissed: the closed state must not dismiss it again, which would keep it
+        // from presenting at the next opening (gorhom).
+        wasOpen.current = false;
         // Closed by the user: by a swipe or on the veil.
         if (flow.store.getState().isOpen) {
           flow.dismiss();
