@@ -61,7 +61,7 @@ export const analytics = createAnalytics({
   },
 });
 
-/** Answer to the consent banner, re-rendering when it changes. */
+/** Answer to the « Mesure d'audience » sheet (E-18), re-rendering when it changes. */
 export function useConsent() {
   return useSyncExternalStore(consent.subscribe, consent.get);
 }

@@ -1,4 +1,4 @@
-/** Answer to the consent banner. Absent until the user answers: nothing is sent meanwhile. */
+/** Answer to the « Mesure d'audience » sheet (E-18). Absent until the user answers: nothing is sent meanwhile. */
 export type ConsentStatus = 'granted' | 'denied';
 
 /** Synchronous key-value storage: MMKV in the app, a map in the tests. */
