@@ -24,6 +24,7 @@ import { DiscoverySheet } from '../../../src/results/DiscoverySheet';
 import { openRoute, openSection } from '../../../src/results/navigation';
 import type { SheetLevel } from '../../../src/results/sheet';
 import { ModalSheetShield } from '../../../src/ui/ModalSheetShield';
+import { RecommendedUpdateSheet } from '../../../src/update/RecommendedUpdateSheet';
 
 /**
  * E-01: the map of the zone shown, around the user or around Paris without position, searched
@@ -134,6 +135,8 @@ export default function HomeScreen() {
         </View>
       </ModalSheetShield>
       <FiltersPanel />
+      {/* E-20: a recommended update waits for the loaded home, never over an error. */}
+      <RecommendedUpdateSheet isHomeReady={status === 'success'} />
     </>
   );
 }
