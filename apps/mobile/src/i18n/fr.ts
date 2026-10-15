@@ -735,6 +735,28 @@ export const fr = {
     errorBody: 'Votre message est gardé.',
     retry: 'Réessayer',
   },
+  // Réglages › Confidentialité (E-19, D-063): the switch of D-060, the export of the account.
+  privacy: {
+    title: 'Confidentialité',
+    back: 'Retour aux réglages',
+    analytics: "Mesure d'audience",
+    analyticsHelp: "Aide à améliorer l'app.",
+    analyticsOn: "Mesure d'audience activée",
+    analyticsOff: "Mesure d'audience coupée",
+    analyticsOffBody: "Plus aucune donnée d'usage n'est envoyée.",
+    withoutAccount:
+      'Sans compte, Widoo ne garde aucun profil sur vous : vos réglages restent sur ce téléphone.',
+    yourData: 'Vos données',
+    yourDataBody: 'Un fichier avec votre profil, vos favoris, vos sorties et vos parcours créés.',
+    download: 'Télécharger mes données',
+    preparing: 'Préparation du fichier…',
+    offline: 'Hors connexion : reconnectez-vous pour télécharger vos données.',
+    exportError: 'Téléchargement impossible',
+    exportErrorBody: 'Réessayez dans un instant.',
+    retry: 'Réessayer',
+    learnMore: 'En savoir plus',
+    writeAboutData: 'Nous écrire sur vos données',
+  },
   // Supprimer mon compte (E-09, D-025): no choice, the published routes stay online.
   deleteAccount: {
     title: 'Supprimer mon compte',

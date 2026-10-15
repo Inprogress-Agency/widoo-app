@@ -65,4 +65,26 @@ export const settings = {
     errorBody: 'Your message is kept.',
     retry: 'Try again',
   },
-} satisfies Pick<Translation, 'notifications' | 'legal' | 'help' | 'contact'>;
+  privacy: {
+    title: 'Privacy',
+    back: 'Back to the settings',
+    analytics: 'Audience measurement',
+    analyticsHelp: 'Helps improve the app.',
+    analyticsOn: 'Audience measurement on',
+    analyticsOff: 'Audience measurement off',
+    analyticsOffBody: 'No usage data is sent any more.',
+    withoutAccount:
+      'Without an account, Widoo keeps no profile about you: your settings stay on this phone.',
+    yourData: 'Your data',
+    yourDataBody:
+      'A file with your profile, your favourites, your outings and the routes you created.',
+    download: 'Download my data',
+    preparing: 'Preparing the file…',
+    offline: 'Offline: reconnect to download your data.',
+    exportError: 'Could not download',
+    exportErrorBody: 'Try again in a moment.',
+    retry: 'Try again',
+    learnMore: 'Learn more',
+    writeAboutData: 'Write to us about your data',
+  },
+} satisfies Pick<Translation, 'notifications' | 'legal' | 'help' | 'contact' | 'privacy'>;
