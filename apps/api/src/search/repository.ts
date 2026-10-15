@@ -67,7 +67,7 @@ export type CardRow = {
  * Seed photos are stored as their https URL until the storage bucket exists; a storage path
  * has no public URL yet. Anything but https is dropped rather than sent to the app.
  */
-const httpsOrNull = (url: string | null) => (url?.startsWith('https://') ? url : null);
+export const httpsOrNull = (url: string | null) => (url?.startsWith('https://') ? url : null);
 
 /** Card of a search row, for a caller at `now`. Exported for its tests. */
 export function toCard(row: CardRow, viewer: RouteViewer | null, now: Date): RouteCard {

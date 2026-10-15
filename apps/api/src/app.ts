@@ -27,6 +27,7 @@ import { meExportRoutes } from './routes/me-export';
 import { plannedRoutesPlugin } from './routes/planned';
 import { searchRoutesPlugin } from './routes/search';
 import { supportRoutes } from './routes/support';
+import { usersRoutes } from './routes/users';
 import { registerSecurity } from './security';
 
 export type BuildAppOptions = {
@@ -119,6 +120,7 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   await app.register(meExportRoutes, { prefix: '/v1' });
   await app.register(plannedRoutesPlugin, { prefix: '/v1' });
   await app.register(searchRoutesPlugin, { prefix: '/v1' });
+  await app.register(usersRoutes, { prefix: '/v1' });
   await app.register(editorRoutes, { prefix: '/v1' });
   await app.register(geocodeRoutes, {
     prefix: '/v1',
