@@ -73,7 +73,11 @@ export function SettingsScreen() {
             label={t('settings.privacyPolicy')}
             onPress={() => router.push('/settings/privacy-policy')}
           />
-          <SettingsRow icon="help" label={t('settings.help')} />
+          <SettingsRow
+            icon="help"
+            label={t('settings.help')}
+            onPress={() => router.push('/settings/help')}
+          />
         </SettingsSection>
         {me && (
           <SettingsSection title={t('settings.session')}>

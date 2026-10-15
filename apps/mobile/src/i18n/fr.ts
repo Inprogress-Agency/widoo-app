@@ -696,6 +696,27 @@ export const fr = {
     updated: 'Mise à jour le {{date}}',
     summary: "L'essentiel",
   },
+  // Réglages › Aide et contact (E-19, D-063): answers written by the team.
+  help: {
+    title: 'Aide et contact',
+    back: 'Retour aux réglages',
+    faq: 'Questions fréquentes',
+    planQuestion: 'Comment programmer une sortie ?',
+    planAnswer:
+      "Sur la fiche d'un parcours, touchez « Programmer », choisissez le jour et l'heure de départ. Nous vous le rappelons la veille à 18:00 et une heure avant.",
+    premiumQuestion: 'Pourquoi certains parcours sont-ils Premium ?',
+    premiumAnswer:
+      "Ce sont des parcours plus travaillés, qui font vivre Widoo. Ils s'ouvrent avec l'abonnement Premium, un pass de 7 jours, ou un par un.",
+    closedPlaceQuestion: 'Un lieu est fermé, que faire ?',
+    closedPlaceAnswer:
+      'Dites-le-nous avec « Nous écrire », sujet « Problème » : nous vérifions et prévenons le créateur du parcours.',
+    deleteAccountQuestion: 'Comment supprimer mon compte ?',
+    deleteAccountAnswer:
+      'Dans les Réglages, tout en bas : « Supprimer mon compte ». Vos parcours publiés restent en ligne, signés « Membre Widoo ».',
+    writeTitle: 'Nous écrire',
+    writeBody: 'Une question, un problème, une idée ? Nous vous répondons par e-mail.',
+    write: 'Nous écrire',
+  },
   // Supprimer mon compte (E-09, D-025): no choice, the published routes stay online.
   deleteAccount: {
     title: 'Supprimer mon compte',
