@@ -3,6 +3,7 @@ import {
   AdminRouteReports,
   AdminSignaledPlaces,
   AdminSignalsQuery,
+  ClosePlaceBody,
   PlaceActionResult,
   ResolvedReport,
   ResolveReportBody,
@@ -12,7 +13,7 @@ import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { httpError } from '../errors';
 import { readOpenRouteReports, resolveRouteReport } from '../reports/admin-reports';
-import { readSignaledPlaces, verifyPlace } from '../reports/place-signals';
+import { closePlace, readSignaledPlaces, verifyPlace } from '../reports/place-signals';
 
 const security = [{ firebaseIdToken: [] }];
 const tags = ['admin'];
@@ -100,5 +101,25 @@ export const adminReportsRoutes: FastifyPluginAsyncZod = async (app) => {
     },
     async (request) =>
       verifyPlace(app.db, { placeId: request.params.id, actorId: actorIdOf(request) }),
+  );
+
+  app.post(
+    '/admin/places/:id/close',
+    {
+      schema: {
+        tags,
+        summary: 'Close a place, and mark the routes that go through it to correct',
+        security,
+        params: PlaceParams,
+        body: ClosePlaceBody,
+        response: { 200: PlaceActionResult },
+      },
+    },
+    async (request) =>
+      closePlace(app.db, {
+        placeId: request.params.id,
+        actorId: actorIdOf(request),
+        reason: request.body.reason,
+      }),
   );
 };

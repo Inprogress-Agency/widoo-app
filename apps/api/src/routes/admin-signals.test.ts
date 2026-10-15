@@ -12,7 +12,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
 import { createCatalogPlace } from '../catalog/place-writes';
-import { adminActions, places, routes, steps, users } from '../db/schema';
+import { adminActions, moderationActionsTable, places, routes, steps, users } from '../db/schema';
 import { seed, seedId } from '../db/seed';
 import { uuidv7 } from '../db/uuid';
 import { testConfig } from '../test-config';
@@ -110,6 +110,8 @@ const act = (
   action: 'verify' | 'close',
   payload?: object,
 ) => app.inject({ method: 'POST', url: `/v1/admin/places/${placeId}/${action}`, headers, payload });
+const routeStatusOf = async (id: string) =>
+  (await app.db.select({ status: routes.status }).from(routes).where(eq(routes.id, id)))[0]?.status;
 
 describe('GET /v1/admin/signals', () => {
   it('is for moderators and admins, not for an editor', async () => {
@@ -181,5 +183,78 @@ describe('POST /v1/admin/places/:id/verify', () => {
   it('answers 404 to a place that does not exist', async () => {
     const moderator = await signIn('moderator');
     expect((await act(moderator.headers, uuidv7(), 'verify')).statusCode).toBe(404);
+  });
+});
+
+describe('POST /v1/admin/places/:id/close', () => {
+  it('closes the place and marks the published routes that go through it to correct', async () => {
+    const moderator = await signIn('moderator');
+    const online = await addPlace('Fermé', 'flagged', 'published');
+    const offline = await addPlace('Fermé aussi', 'flagged', 'unpublished');
+    // A second route through the first place, already out of the catalog: left as it is.
+    expect(offline.routeId).not.toBeNull();
+
+    const response = await act(moderator.headers, online.placeId, 'close', {
+      reason: 'Fermé définitivement depuis septembre.',
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(PlaceActionResult.parse(response.json())).toEqual({
+      placeId: online.placeId,
+      verificationStatus: 'closed',
+      routesToFix: 1,
+    });
+    expect(await routeStatusOf(online.routeId ?? '')).toBe('needs_fix');
+    expect(await routeStatusOf(offline.routeId ?? '')).toBe('unpublished');
+    const history = await app.db
+      .select()
+      .from(moderationActionsTable)
+      .where(eq(moderationActionsTable.routeId, online.routeId ?? ''));
+    expect(history).toHaveLength(1);
+    expect(history[0]).toMatchObject({ action: 'request_changes', actorId: moderator.id });
+    expect(history[0]?.message).toContain('Fermé définitivement');
+    const [entry] = await app.db
+      .select()
+      .from(adminActions)
+      .where(
+        and(eq(adminActions.targetId, online.placeId), eq(adminActions.action, 'place.close')),
+      );
+    expect(entry).toMatchObject({
+      action: 'place.close',
+      reason: 'Fermé définitivement depuis septembre.',
+    });
+  });
+
+  it('needs a reason, and leaves the place and its routes as they were', async () => {
+    const moderator = await signIn('moderator');
+    const { placeId, routeId } = await addPlace('Sans motif', 'flagged', 'published');
+
+    expect((await act(moderator.headers, placeId, 'close', {})).statusCode).toBe(422);
+    expect(
+      (await act(moderator.headers, placeId, 'close', { reason: '<b>x</b>' })).statusCode,
+    ).toBe(422);
+
+    const [row] = await app.db.select().from(places).where(eq(places.id, placeId));
+    expect(row?.verificationStatus).toBe('flagged');
+    expect(await routeStatusOf(routeId ?? '')).toBe('published');
+  });
+
+  it('answers 409 already_decided to a place that is already closed', async () => {
+    const moderator = await signIn('moderator');
+    const { placeId } = await addPlace('Deux fois', 'flagged');
+    await act(moderator.headers, placeId, 'close', { reason: 'Fermé.' });
+
+    const response = await act(moderator.headers, placeId, 'close', { reason: 'Encore.' });
+
+    expect(response.statusCode).toBe(409);
+    expect(PlaceAlreadyDecidedDetails.parse(ApiError.parse(response.json()).details)).toEqual({
+      status: 'closed',
+    });
+  });
+
+  it('is refused to an editor', async () => {
+    const editor = await signIn('editor');
+    const { placeId } = await addPlace('Éditeur', 'flagged');
+    expect((await act(editor.headers, placeId, 'close', { reason: 'Non.' })).statusCode).toBe(403);
   });
 });
