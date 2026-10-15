@@ -1,5 +1,7 @@
 import {
+  AdminCounters,
   AdminRouteReports,
+  AdminStats,
   ApiError,
   ReportAlreadyDecidedDetails,
   ResolvedReport,
@@ -181,6 +183,28 @@ describe('GET /v1/admin/reports', () => {
   it('refuses a reason it does not know', async () => {
     const moderator = await signIn('moderator');
     expect((await list(moderator.headers, '?reason=spam')).statusCode).toBe(400);
+  });
+});
+
+describe('what waits in the navigation and on the dashboard', () => {
+  it('counts the open reports, and the ones waiting for more than 72 hours', async () => {
+    const moderator = await signIn('moderator');
+    const route = await addRoute('published', 'Compteur');
+    await addReport(route, 'inappropriate', 80);
+    await addReport(route, 'false_info', 1);
+
+    const counters = AdminCounters.parse(
+      (await app.inject({ url: '/v1/admin/counters', headers: moderator.headers })).json(),
+    );
+    const stats = AdminStats.parse(
+      (await app.inject({ url: '/v1/admin/stats', headers: moderator.headers })).json(),
+    );
+
+    expect(counters.reports?.count).toBeGreaterThanOrEqual(2);
+    expect(counters.reports?.lateCount).toBeGreaterThanOrEqual(1);
+    expect(stats.toHandle.reports?.count).toBeGreaterThanOrEqual(2);
+    const oldest = new Date(stats.toHandle.reports?.oldestSince ?? '').getTime();
+    expect(Date.now() - oldest).toBeGreaterThanOrEqual(80 * hour - 60_000);
   });
 });
 
