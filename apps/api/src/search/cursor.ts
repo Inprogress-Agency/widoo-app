@@ -1,4 +1,3 @@
-import type { RouteSort } from '@widoo/shared';
 import { z } from 'zod';
 import { httpError } from '../errors';
 
@@ -22,17 +21,18 @@ const Payload = z.strictObject({
 });
 
 /**
- * Opaque cursor of a search page: the sort it belongs to and the sort key values of the last
- * route of the page, in base64url JSON. Not signed: it carries no right, only a position.
+ * Opaque cursor of a page of cards: the sort it belongs to (a search sort, or a sort of the
+ * public profile) and the sort key values of the last route of the page, in base64url JSON. Not
+ * signed: it carries no right, only a position.
  */
-export function encodeCursor(sort: RouteSort, keys: readonly SortKeyValue[]): string {
+export function encodeCursor(sort: string, keys: readonly SortKeyValue[]): string {
   return Buffer.from(JSON.stringify({ sort, keys })).toString('base64url');
 }
 
 /** Sort key values of a cursor, checked against the sort and the key types: 400 otherwise. */
 export function decodeCursor(
   cursor: string,
-  sort: RouteSort,
+  sort: string,
   types: readonly SortKeyType[],
 ): SortKeyValue[] {
   const invalid = () => httpError(400, 'Invalid cursor');
