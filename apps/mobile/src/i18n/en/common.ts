@@ -143,6 +143,7 @@ export const common = {
   consent: {
     title: 'Audience measurement',
     body: 'With your consent, Widoo measures how the app is used to improve it, with PostHog, hosted in the European Union. Crash reports are still sent, with no information about you.',
+    changeLater: 'You can change your mind in Settings.',
     accept: 'Accept',
     refuse: 'Refuse',
   },

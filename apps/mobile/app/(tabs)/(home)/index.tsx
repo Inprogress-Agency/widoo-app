@@ -14,6 +14,7 @@ import { useDiscovery, useRouteSearch } from '../../../src/discovery/useRouteSea
 import { FiltersPanel } from '../../../src/filters/FiltersPanel';
 import { QuickChips } from '../../../src/filters/QuickChips';
 import { SearchPill } from '../../../src/filters/SearchPill';
+import { ConsentSheet } from '../../../src/launch/ConsentSheet';
 import { useReleaseSplash } from '../../../src/launch/splash';
 import { useUserLocation } from '../../../src/location/useUserLocation';
 import { parisCenter } from '../../../src/map/geo';
@@ -135,6 +136,8 @@ export default function HomeScreen() {
         </View>
       </ModalSheetShield>
       <FiltersPanel />
+      {/* E-18: on the first loaded home, never over an error, offline or the position request. */}
+      <ConsentSheet isHomeReady={status === 'success' && isOnline} />
       {/* E-20: a recommended update waits for the loaded home, never over an error. */}
       <RecommendedUpdateSheet isHomeReady={status === 'success'} />
     </>

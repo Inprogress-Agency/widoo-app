@@ -1,6 +1,6 @@
 import { shadow, spacing, type UiIconKey } from '@widoo/tokens';
 import { BottomTabBarHeightCallbackContext, type BottomTabBarProps } from 'expo-router/tabs';
-import { use, type ReactNode } from 'react';
+import { use } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Icon, uiIcon } from '../ui/Icon';
 import { setTabBarHeight } from '../ui/toastStore';
@@ -17,22 +17,14 @@ const icons: Record<string, UiIconKey> = {
   profile: 'tab-profile',
 };
 
-interface TabBarProps extends BottomTabBarProps {
-  /**
-   * Floats with the bar, just above the pill, such as the consent banner. An accessory that
-   * must never be covered by the pill puts itself in front of it (`z-10`).
-   */
-  accessory?: ReactNode;
-}
-
 /**
  * Tab bar of E-01: a white pill with the only shadow of the app, floating over the screens,
  * which run edge to edge behind it (the map of E-01). Inactive tabs are warm grey discs showing
  * their icon only, the active tab an ink pill with its blue icon and its label. Labels come from
- * each screen's `title`; the bar is a dense component, capped at 1.3 times. Its height, pill and
- * accessory, is what the screens read as the tab bar height, to keep their content above it.
+ * each screen's `title`; the bar is a dense component, capped at 1.3 times. Its height is what
+ * the screens read as the tab bar height, to keep their content above it.
  */
-export function TabBar({ state, descriptors, navigation, insets, accessory }: TabBarProps) {
+export function TabBar({ state, descriptors, navigation, insets }: BottomTabBarProps) {
   const onHeightChange = use(BottomTabBarHeightCallbackContext);
   return (
     <View
@@ -47,7 +39,6 @@ export function TabBar({ state, descriptors, navigation, insets, accessory }: Ta
       // Safe area measured at runtime.
       style={[styles.floating, { paddingBottom: Math.max(insets.bottom, spacing['space-12']) }]}
     >
-      {accessory}
       <View
         accessibilityRole="tablist"
         className="flex-row gap-8 rounded-pill bg-bg p-6"
