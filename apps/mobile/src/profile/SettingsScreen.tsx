@@ -6,6 +6,8 @@ import { use, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { session } from '../auth';
+import { signInFlow } from '../auth/signIn';
+import { Button } from '../ui/Button';
 import { dateFormat } from '../i18n/formats';
 import { useLanguageChoice } from '../i18n/language';
 import { usePhoneNotifications } from '../settings/phoneNotifications';
@@ -18,11 +20,9 @@ import { PremiumCard } from './PremiumCard';
 import { appVersion, openStoreSubscriptions } from './store';
 
 /**
- * Réglages (Ecrans › E-09), pushed over my profile with the tab bar in place (M-03). The rows of
- * E-mail, Connexion, Notifications, Confidentialité and Aide et contact open the pages of E-19
- * (#189): until then they are read as text, without chevron; Langue opens its page already. The
- * legal texts open on the site, as E-10 does. Without account: the preferences, the information
- * and the version.
+ * Réglages (Ecrans › E-09), pushed over my profile with the tab bar in place (M-03); each row
+ * opens its page of E-19. Without account (D-063): a card to sign in, the preferences, the
+ * information and the version.
  */
 export function SettingsScreen() {
   const { t } = useTranslation();
@@ -44,6 +44,7 @@ export function SettingsScreen() {
         // Tab bar height measured at runtime.
         contentContainerStyle={{ paddingBottom: spacing['space-32'] + tabBarHeight }}
       >
+        {state.status === 'anonymous' && <SignedOutCard />}
         {me && <AccountSettings me={me} />}
         <SettingsSection title={t('settings.preferences')}>
           {me && (
@@ -161,8 +162,19 @@ function AccountSettings({ me }: { me: Me }) {
         <PremiumCard />
       )}
       <SettingsSection title={t('settings.account')}>
-        {me.email && <SettingsRow icon="email" label={t('settings.email')} value={me.email} />}
-        <SettingsRow icon="login-method" label={t('settings.signIn')} />
+        {me.email && (
+          <SettingsRow
+            icon="email"
+            label={t('settings.email')}
+            value={me.email}
+            onPress={() => router.push('/settings/email')}
+          />
+        )}
+        <SettingsRow
+          icon="login-method"
+          label={t('settings.signIn')}
+          onPress={() => router.push('/settings/sign-in')}
+        />
         <SwitchRow
           icon="public-profile"
           label={t('settings.publicProfile')}
@@ -172,5 +184,25 @@ function AccountSettings({ me }: { me: Me }) {
         />
       </SettingsSection>
     </>
+  );
+}
+
+/** Without account (Ecrans › E-19, D-063): what the account brings, and the way to E-10. */
+function SignedOutCard() {
+  const { t } = useTranslation();
+  return (
+    <View className="gap-12 rounded-card bg-surface p-16">
+      <View className="gap-4">
+        <Text variant="title-s">{t('settings.signedOutTitle')}</Text>
+        <Text variant="body-s" color="muted">
+          {t('settings.signedOutBody')}
+        </Text>
+      </View>
+      <Button
+        label={t('settings.signedOutAction')}
+        isFullWidth
+        onPress={() => void signInFlow.requireAccount('profile', () => undefined)}
+      />
+    </View>
   );
 }

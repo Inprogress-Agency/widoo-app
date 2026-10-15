@@ -1,9 +1,23 @@
+/** How an account signs in, as Réglages › Connexion tells it (Ecrans › E-19). */
+export type AccountProvider = 'apple' | 'google' | 'email';
+
 /** The signed-in Firebase user, as the app reads it: never the token. */
 export interface AuthUser {
   uid: string;
   email: string | null;
   /** Name given by Google, often a full name; the API keeps the first word (D-025). */
   displayName: string | null;
+  /** How the account signs in; absent when Firebase does not say. */
+  provider?: AccountProvider | null;
+}
+
+/** The provider of an account from the `providerId`s Firebase lists for it, Apple first. */
+export function accountProviderOf(providerIds: readonly string[]): AccountProvider | null {
+  if (providerIds.includes('apple.com')) return 'apple';
+  if (providerIds.includes('google.com')) return 'google';
+  // The e-mail link is a method of the `password` provider in Firebase.
+  if (providerIds.includes('password') || providerIds.includes('emailLink')) return 'email';
+  return null;
 }
 
 /** How the user signed in, as `auth_completed` names it. Apple arrives with #388. */

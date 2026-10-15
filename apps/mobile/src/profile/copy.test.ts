@@ -12,7 +12,8 @@ describe('E-09 copy', () => {
 
   it('addresses the user as « vous », never « tu » (D-015)', () => {
     for (const text of texts) {
-      expect(text).not.toMatch(/\b(tu|te|toi|ton|ta|tes|t')\b/i);
+      // Letters of any alphabet bound the words: « êtes » holds no « tes ».
+      expect(text).not.toMatch(/(?<!\p{L})(?:(?:tu|te|toi|ton|ta|tes)(?!\p{L})|t')/iu);
     }
   });
 

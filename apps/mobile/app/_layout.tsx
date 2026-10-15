@@ -31,6 +31,8 @@ const settingsPages = [
   'help',
   'contact',
   'privacy',
+  'email',
+  'sign-in',
 ] as const;
 
 const navigationTheme: Theme = {

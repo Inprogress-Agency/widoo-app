@@ -87,4 +87,39 @@ export const settings = {
     learnMore: 'Learn more',
     writeAboutData: 'Write to us about your data',
   },
-} satisfies Pick<Translation, 'notifications' | 'legal' | 'help' | 'contact' | 'privacy'>;
+  email: {
+    title: 'E-mail',
+    back: 'Back to the settings',
+    section: 'E-mail address',
+    current: 'Current address',
+    hidden: 'Hidden by Apple',
+    usage: 'To sign in by e-mail and receive the important messages about your account.',
+  },
+  signInMethod: {
+    title: 'Sign-in',
+    back: 'Back to the settings',
+    address: 'Address',
+    relay: "Widoo's messages reach you through Apple's relay.",
+    apple: {
+      title: 'Apple',
+      subtitle: 'You sign in with Apple.',
+      newPhone:
+        'On a new phone, choose "Continue with Apple" to find your account, your favourites and your outings again.',
+    },
+    google: {
+      title: 'Google',
+      subtitle: 'You sign in with Google.',
+      newPhone:
+        'On a new phone, choose "Sign in with Google" to find your account, your favourites and your outings again.',
+    },
+    email: {
+      title: 'E-mail',
+      subtitle: 'A sign-in link, no password.',
+      newPhone:
+        'On a new phone, choose "Continue with email" and open the link sent to this address.',
+    },
+  },
+} satisfies Pick<
+  Translation,
+  'notifications' | 'legal' | 'help' | 'contact' | 'privacy' | 'email' | 'signInMethod'
+>;

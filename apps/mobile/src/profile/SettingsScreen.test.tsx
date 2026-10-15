@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import type { Me, UpdateMe } from '@widoo/shared';
+import { router } from 'expo-router';
 import { api } from '../api/client';
 import { fakeAuth } from '../test/fakeAuth';
 import { testMe } from '../test/me';
@@ -96,5 +97,16 @@ describe('Réglages', () => {
     expect(screen.queryByText('Compte')).toBeNull();
     expect(screen.queryByText('Se déconnecter')).toBeNull();
     expect(screen.getByRole('link', { name: "Conditions d'utilisation" })).toBeTruthy();
+    expect(screen.getByText("Vous n'êtes pas connecté")).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Créer un compte ou se connecter' })).toBeTruthy();
+  });
+
+  it('opens the page of each row (E-19)', async () => {
+    await renderWith(<SettingsScreen />);
+    expect(screen.queryByText("Vous n'êtes pas connecté")).toBeNull();
+    await fireEvent.press(screen.getByRole('link', { name: 'E-mail, camille@exemple.fr' }));
+    expect(router.push).toHaveBeenCalledWith('/settings/email');
+    await fireEvent.press(screen.getByRole('link', { name: 'Confidentialité' }));
+    expect(router.push).toHaveBeenCalledWith('/settings/privacy');
   });
 });
