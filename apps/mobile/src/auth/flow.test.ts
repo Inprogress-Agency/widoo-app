@@ -1,3 +1,4 @@
+import { ApiRequestError } from '@widoo/api-client';
 import { describe, expect, it, vi } from 'vitest';
 import { createFakeAuth } from '../test/fakeAuth';
 import { createSignInFlow, type PendingEmail, type SignInFlowDeps } from './flow';
@@ -17,6 +18,10 @@ function setup(overrides: Partial<SignInFlowDeps> = {}) {
   const deps: SignInFlowDeps = {
     provider: auth.provider,
     isSignedIn: () => signedIn,
+    onSignedIn: vi.fn(),
+    endSession: vi.fn(async () => {
+      signedIn = false;
+    }),
     getFirstName: vi.fn(async () => 'Camille'),
     saveFirstName: vi.fn(async () => undefined),
     pendingEmail: { get: () => kept, set: (value) => (kept = value) },
@@ -55,6 +60,7 @@ describe('sign-in flow', () => {
     expect(deps.trackPrompted).toHaveBeenCalledWith('go');
     auth.provider.signInWithGoogle = async () => googleResult;
     await flow.signInWithGoogle();
+    expect(deps.onSignedIn).toHaveBeenCalledWith(googleResult.user);
     expect(deps.trackCompleted).toHaveBeenCalledWith(googleResult, 'go');
     expect(action).toHaveBeenCalledTimes(1);
     expect(state().isOpen).toBe(false);
@@ -164,5 +170,34 @@ describe('sign-in flow', () => {
     await flow.requireAccount('go', action);
     expect(state()).toMatchObject({ isOpen: true, step: 'welcome' });
     expect(action).not.toHaveBeenCalled();
+  });
+
+  it('opens the sheet for an account deleted, never runs the action as signed in', async () => {
+    const deleted = new ApiRequestError('http', 401, {
+      code: 'unauthorized',
+      message: 'Account deleted',
+    });
+    const { flow, deps, signIn, state } = setup({
+      getFirstName: vi.fn(async () => Promise.reject(deleted)),
+    });
+    signIn();
+    const action = vi.fn();
+    await flow.requireAccount('plan', action);
+    expect(deps.endSession).toHaveBeenCalledTimes(1);
+    expect(state()).toMatchObject({ isOpen: true, intent: 'plan', step: 'choices' });
+    expect(deps.trackPrompted).toHaveBeenCalledWith('plan');
+    expect(action).not.toHaveBeenCalled();
+  });
+
+  it('runs the action when /me is out of reach, without ending the session', async () => {
+    const offline = new ApiRequestError('network', null, null);
+    const { flow, deps, signIn } = setup({
+      getFirstName: vi.fn(async () => Promise.reject(offline)),
+    });
+    signIn();
+    const action = vi.fn();
+    await flow.requireAccount('plan', action);
+    expect(action).toHaveBeenCalledTimes(1);
+    expect(deps.endSession).not.toHaveBeenCalled();
   });
 });

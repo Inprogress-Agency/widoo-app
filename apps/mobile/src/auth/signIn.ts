@@ -29,6 +29,8 @@ function readPendingEmail(): PendingEmail | null {
 export const signInFlow = createSignInFlow({
   provider: authProvider,
   isSignedIn: session.isSignedIn,
+  onSignedIn: session.signedIn,
+  endSession: session.endSession,
   getFirstName: async () => (await api.getMe()).firstName,
   saveFirstName: async (firstName) => {
     await api.updateMe({ firstName });

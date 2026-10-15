@@ -71,4 +71,35 @@ describe('session', () => {
     expect(error).toBeInstanceOf(ApiRequestError);
     expect(error).toMatchObject({ kind: 'network' });
   });
+
+  it('ends a deleted session at once and once, even when Firebase fails to sign out', async () => {
+    const { provider, setUser } = fakeProvider();
+    const failure = new Error('auth/internal-error');
+    vi.mocked(provider.signOut).mockRejectedValue(failure);
+    const onSignedInChange = vi.fn();
+    const onSignOutFailed = vi.fn();
+    const session = createSession(provider, { onSignedInChange, onSignOutFailed });
+    setUser(null);
+    setUser(camille);
+    await Promise.all([session.endSession(), session.endSession()]);
+    expect(session.store.getState()).toEqual({ status: 'anonymous', user: null });
+    expect(await session.getToken({ forceRefresh: false })).toBeNull();
+    expect(provider.signOut).toHaveBeenCalledTimes(1);
+    expect(onSignOutFailed).toHaveBeenCalledWith(failure);
+    expect(onSignedInChange.mock.calls).toEqual([[true], [false]]);
+    await session.endSession();
+    expect(provider.signOut).toHaveBeenCalledTimes(1);
+  });
+
+  it('takes a new sign-in after the end of the session, Firebase silent or not', () => {
+    const { provider, setUser } = fakeProvider();
+    const onSignedInChange = vi.fn();
+    const session = createSession(provider, { onSignedInChange });
+    setUser(camille);
+    void session.endSession();
+    session.signedIn(camille);
+    setUser(camille);
+    expect(session.store.getState()).toEqual({ status: 'signedIn', user: camille });
+    expect(onSignedInChange.mock.calls).toEqual([[false], [true]]);
+  });
 });
