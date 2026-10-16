@@ -50,7 +50,7 @@ describe('after planning', () => {
       plannedDateText(t, '2026-09-26T10:00:00+02:00', new Date('2026-09-25T10:00:00Z')),
     ).toEqual({
       label: 'Sam. 26, 10:00',
-      spoken: 'Sortie programmée le samedi 26 septembre à 10:00, modifier la sortie',
+      spoken: 'Sortie programmée le samedi 26 septembre à 10:00, voir votre sortie',
     });
   });
 });

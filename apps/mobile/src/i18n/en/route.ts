@@ -216,6 +216,6 @@ export const route = {
       premium: 'This route is for Premium only.',
     },
     plannedDate: '{{day}}, {{time}}',
-    plannedDateSpoken: 'Outing planned on {{day}} at {{time}}, edit the outing',
+    plannedDateSpoken: 'Outing planned on {{day}} at {{time}}, see your outing',
   },
 } satisfies Pick<Translation, 'route' | 'plan'>;

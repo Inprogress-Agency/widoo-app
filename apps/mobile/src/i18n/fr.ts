@@ -434,7 +434,7 @@ export const fr = {
       premium: 'Ce parcours est réservé à Premium.',
     },
     plannedDate: '{{day}}, {{time}}',
-    plannedDateSpoken: 'Sortie programmée le {{day}} à {{time}}, modifier la sortie',
+    plannedDateSpoken: 'Sortie programmée le {{day}} à {{time}}, voir votre sortie',
   },
   // The route under way (Ecrans › E-07, D-029, D-033, D-034).
   go: {
@@ -592,6 +592,40 @@ export const fr = {
         title: 'Aucune sortie prévue',
         body: 'Programmez un parcours depuis sa fiche : il vous attendra ici.',
         discover: 'Découvrir des parcours',
+      },
+    },
+    // « Votre sortie », pushed from « À venir » (D-035, D-038).
+    outing: {
+      title: 'Votre sortie',
+      back: 'Retour',
+      hours: 'Départ {{start}}, fin vers {{end}}',
+      change: 'Changer',
+      changeSpoken: 'Changer la date',
+      seeRoute: 'Voir la fiche du parcours',
+      cancel: 'Annuler la sortie',
+      cancelAlert: {
+        title: 'Annuler la sortie ?',
+        body: 'Les rappels seront supprimés. Vous pourrez la reprogrammer depuis la fiche du parcours.',
+        confirm: 'Annuler la sortie',
+        keep: 'Garder',
+      },
+      toast: {
+        cancelled: 'Sortie annulée',
+        restore: 'Rétablir',
+        restored: 'Sortie rétablie',
+        cancelFailed: "La sortie n'a pas pu être annulée",
+        restoreFailed: "La sortie n'a pas pu être rétablie",
+        failedBody: 'Vérifiez la connexion, puis réessayez.',
+        checkFailed: "La case n'a pas pu être enregistrée",
+      },
+      error: {
+        title: 'Votre sortie ne se charge pas',
+        body: 'Vérifiez la connexion, puis réessayez.',
+        retry: 'Réessayer',
+      },
+      gone: {
+        title: "Cette sortie n'est plus à venir",
+        body: 'Retrouvez vos sorties dans Parcours.',
       },
     },
     favorites: {
