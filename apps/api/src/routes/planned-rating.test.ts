@@ -1,4 +1,4 @@
-import { MyRouteRating, PlannedRoute } from '@widoo/shared';
+import { MyRouteRating, PlannedRoute, PlannedRouteList } from '@widoo/shared';
 import { and, eq, inArray } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
@@ -118,6 +118,16 @@ describe('POST /v1/me/planned/:id/rating', () => {
     const updated = await rate(headers, second.id, { rating: 5 });
     expect(MyRouteRating.parse(updated.json())).toMatchObject({ rating: 5, comment: null });
     expect(await statsOf(routeId)).toEqual({ average: 5, count: 1 });
+
+    // Each outing of the route carries the rating, read and changed from any of them.
+    for (const id of [first.id, second.id]) {
+      const read = await app.inject({ url: `/v1/me/planned/${id}`, headers });
+      expect(PlannedRoute.parse(read.json()).myRating).toMatchObject({ rating: 5, comment: null });
+    }
+    const list = await app.inject({ url: '/v1/me/planned?status=completed', headers });
+    expect(PlannedRouteList.parse(list.json()).items.map((item) => item.myRating?.rating)).toEqual([
+      5, 5,
+    ]);
   });
 
   it('refuses a personal note, a rating out of 1 to 5 and a comment over 280', async () => {

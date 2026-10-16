@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { taxonomies } from '../taxonomies';
 import { HttpsUrl, LatLng } from './common';
 import { PlaceHours } from './place';
+import { MyRouteRating } from './rating';
 import { Step } from './route';
 import { RouteTimeline } from './route-detail';
 
@@ -100,6 +101,11 @@ export const PlannedRoute = z.object({
   timeline: RouteTimeline,
   checklist: z.array(PlannedChecklistItem),
   steps: z.array(PlannedStepProgress),
+  /**
+   * The caller's rating of the route, from this outing or an earlier one (one per route, E-15);
+   * null before it, and once the route is deleted.
+   */
+  myRating: MyRouteRating.nullable(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });

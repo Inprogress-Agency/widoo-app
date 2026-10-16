@@ -81,6 +81,7 @@ export function plannedFixture(
       skippedAt: null,
       ...progress[index],
     })),
+    myRating: null,
     createdAt: at,
     updatedAt: at,
   };
