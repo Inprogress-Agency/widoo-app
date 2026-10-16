@@ -46,10 +46,11 @@ export function useOutingChecklist(outing: PlannedRoute | null, onFailed: () => 
   const client = useQueryClient();
   const uid = useSession((state) => state.user?.uid ?? '');
   const [checked, setChecked] = useState<ReadonlySet<string>>(new Set());
-  // Read once per outing opened: a refetch must not undo a box ticked meanwhile.
-  const [readId, setReadId] = useState<string | null>(null);
-  if (outing && outing.id !== readId) {
-    setReadId(outing.id);
+  // Read again at each version of the outing (a box saved, a move with its boxes), not between.
+  const version = outing ? `${outing.id}:${outing.updatedAt}` : null;
+  const [readVersion, setReadVersion] = useState<string | null>(null);
+  if (outing && version !== readVersion) {
+    setReadVersion(version);
     setChecked(new Set(outing.checklist.filter((item) => item.isChecked).map((i) => i.stepId)));
   }
 

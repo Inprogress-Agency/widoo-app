@@ -22,6 +22,8 @@ function deps(overrides: Partial<OutingActionDeps> = {}): OutingActionDeps {
     trackCancelled: vi.fn(),
     trackRestored: vi.fn(),
     toast: vi.fn(),
+    onChanged: vi.fn(),
+    onCancelled: vi.fn(),
     now: () => now,
     ...overrides,
   };
@@ -50,6 +52,8 @@ describe('cancelOuting', () => {
     await expect(cancelOuting(outing, given)).resolves.toBe(true);
     expect(given.update).toHaveBeenCalledWith('planned-1', { status: 'cancelled' });
     expect(given.trackCancelled).toHaveBeenCalledWith({ route_id: 'route-1', days_ahead: 2 });
+    expect(given.onCancelled).toHaveBeenCalledTimes(1);
+    expect(given.onChanged).toHaveBeenCalledTimes(1);
     const [kind, title, options] = vi.mocked(given.toast).mock.calls[0] ?? [];
     expect([kind, title, options?.subtitle]).toEqual([
       'success',
@@ -62,12 +66,15 @@ describe('cancelOuting', () => {
     await vi.waitFor(() => expect(given.trackRestored).toHaveBeenCalled());
     expect(given.update).toHaveBeenLastCalledWith('planned-1', { status: 'planned' });
     expect(given.trackRestored).toHaveBeenCalledWith({ route_id: 'route-1', days_ahead: 2 });
+    expect(given.onCancelled).toHaveBeenCalledTimes(1);
+    expect(given.onChanged).toHaveBeenCalledTimes(2);
   });
 
   it('keeps the outing and says so when the cancel fails', async () => {
     const given = deps({ update: vi.fn(async () => Promise.reject(new Error('offline'))) });
     await expect(cancelOuting(outing, given)).resolves.toBe(false);
     expect(given.trackCancelled).not.toHaveBeenCalled();
+    expect(given.onCancelled).not.toHaveBeenCalled();
     expect(given.toast).toHaveBeenCalledWith(
       'error',
       "La sortie n'a pas pu être annulée",

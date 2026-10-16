@@ -9,6 +9,10 @@ export interface OutingActionDeps {
   trackCancelled: (properties: AnalyticsEventArgs<'plan_cancelled'>[0]) => void;
   trackRestored: (properties: AnalyticsEventArgs<'plan_restored'>[0]) => void;
   toast: (kind: ToastKind, title: string, options?: ToastOptions) => void;
+  /** The lists of E-08 and the outing ask again. */
+  onChanged: () => void;
+  /** The outing is cancelled: the page closes before the lists change under it. */
+  onCancelled: () => void;
   now: () => Date;
 }
 
@@ -35,6 +39,7 @@ export async function restoreOuting(outing: PlannedRoute, deps: OutingActionDeps
     deps.toast('error', t('routes.outing.toast.restoreFailed'), failedOptions(t));
     return false;
   }
+  deps.onChanged();
   deps.trackRestored(eventOf(outing, deps.now()));
   deps.toast('success', t('routes.outing.toast.restored'), {
     subtitle: outing.route.title,
@@ -56,6 +61,8 @@ export async function cancelOuting(outing: PlannedRoute, deps: OutingActionDeps)
     deps.toast('error', t('routes.outing.toast.cancelFailed'), failedOptions(t));
     return false;
   }
+  deps.onCancelled();
+  deps.onChanged();
   deps.trackCancelled(eventOf(outing, deps.now()));
   deps.toast('success', t('routes.outing.toast.cancelled'), {
     subtitle: outing.route.title,
