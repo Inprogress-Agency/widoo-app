@@ -204,6 +204,10 @@ export function createApiClient(options: ApiClientOptions) {
         signal,
       }),
 
+    /** `GET /v1/me/planned/:id`: one planning of the caller, « Votre sortie » (E-08); 404 else. */
+    getPlanned: (id: string, signal?: AbortSignal) =>
+      request({ method: 'GET', path: plannedPath(id), schema: PlannedRoute, auth: true, signal }),
+
     /**
      * `POST /v1/me/planned`: plans a route (E-06), its timeline and bookings computed by the API;
      * 402 `premium_required` for a Premium route the caller has no right to.

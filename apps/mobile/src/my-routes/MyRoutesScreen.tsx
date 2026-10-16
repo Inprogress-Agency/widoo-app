@@ -90,13 +90,21 @@ function SignedInRoutes({ segment }: { segment: Segment }) {
       openRoute(outing.routeId, 'planned');
     }
   };
+  // An outing to come opens « Votre sortie » (Ecrans › E-08), a page pushed over the tabs.
+  const openOuting = (outing: PlannedRoute) =>
+    router.push({ pathname: '/outing/[id]', params: { id: outing.id } });
   const onPastAction = (outing: PlannedRoute, action: PastAction) => {
     if (action === 'rate') {
       router.push({ pathname: '/rate/[id]', params: { id: outing.id } });
     } else if (action === 'relaunch' && outing.routeId) {
       void startGo(outing.routeId);
-    } else {
-      openPlanned(outing);
+    } else if (action === 'reschedule' && outing.routeId) {
+      // « Reprogrammer » reopens E-06 over the route sheet (D-038).
+      analytics.track('route_opened', routeOpenedEvent({ id: outing.routeId }, 'planned'));
+      router.push({
+        pathname: '/route/[id]',
+        params: { id: outing.routeId, reschedule: outing.id },
+      });
     }
   };
 
@@ -111,7 +119,7 @@ function SignedInRoutes({ segment }: { segment: Segment }) {
             <UpcomingList
               outings={items}
               now={now}
-              onOpen={openPlanned}
+              onOpen={openOuting}
               onGo={(outing) => outing.routeId && void startGo(outing.routeId)}
             />
           )}

@@ -42,6 +42,40 @@ export const routes = {
         discover: 'Discover routes',
       },
     },
+    // « Votre sortie », pushed from « À venir » (D-035, D-038).
+    outing: {
+      title: 'Your outing',
+      back: 'Back',
+      hours: 'Start {{start}}, ends around {{end}}',
+      change: 'Change',
+      changeSpoken: 'Change the date',
+      seeRoute: 'See the route page',
+      cancel: 'Cancel the outing',
+      cancelAlert: {
+        title: 'Cancel the outing?',
+        body: 'The reminders will be removed. You can plan it again from the route page.',
+        confirm: 'Cancel the outing',
+        keep: 'Keep',
+      },
+      toast: {
+        cancelled: 'Outing cancelled',
+        restore: 'Restore',
+        restored: 'Outing restored',
+        cancelFailed: 'The outing could not be cancelled',
+        restoreFailed: 'The outing could not be restored',
+        failedBody: 'Check the connection, then try again.',
+        checkFailed: 'The box could not be saved',
+      },
+      error: {
+        title: 'Your outing is not loading',
+        body: 'Check the connection, then try again.',
+        retry: 'Try again',
+      },
+      gone: {
+        title: 'This outing is no longer upcoming',
+        body: 'Find your outings in Routes.',
+      },
+    },
     favorites: {
       empty: {
         title: 'No favourites yet',
