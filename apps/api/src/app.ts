@@ -25,6 +25,7 @@ import { legalRoutes } from './routes/legal';
 import { meRoutes } from './routes/me';
 import { meExportRoutes } from './routes/me-export';
 import { plannedRoutesPlugin } from './routes/planned';
+import { routeRatingsPlugin } from './routes/ratings';
 import { searchRoutesPlugin } from './routes/search';
 import { supportRoutes } from './routes/support';
 import { usersRoutes } from './routes/users';
@@ -120,6 +121,7 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   await app.register(meExportRoutes, { prefix: '/v1' });
   await app.register(plannedRoutesPlugin, { prefix: '/v1' });
   await app.register(searchRoutesPlugin, { prefix: '/v1' });
+  await app.register(routeRatingsPlugin, { prefix: '/v1' });
   await app.register(usersRoutes, { prefix: '/v1' });
   await app.register(editorRoutes, { prefix: '/v1' });
   await app.register(geocodeRoutes, {
