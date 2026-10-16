@@ -6,10 +6,11 @@ import { session, useSession } from '../auth';
 /** The plannings of `uid`: another account signed in on the phone never reads them. */
 export const plannedQueryKey = (uid: string) => ['planned', uid] as const;
 
-/** E-08 lists them by pages; the sheet only needs to know whether a route is planned. */
+/** The sheet only needs to know whether a route is planned; E-08 shows the first ones. */
 const PLANNED_PAGE = 50;
 
-const listPlanned = ({ signal }: { signal?: AbortSignal }) =>
+/** The plannings to come, by start: the first page, enough for the sheet and E-08. */
+export const listPlanned = ({ signal }: { signal?: AbortSignal }) =>
   api.listPlanned({ status: 'planned', limit: PLANNED_PAGE }, signal);
 
 /**
