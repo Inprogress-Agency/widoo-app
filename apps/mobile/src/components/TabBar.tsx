@@ -2,6 +2,7 @@ import { shadow, spacing, type UiIconKey } from '@widoo/tokens';
 import { BottomTabBarHeightCallbackContext, type BottomTabBarProps } from 'expo-router/tabs';
 import { use } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
+import { MiniPlayer } from '../go/MiniPlayer';
 import { Icon, uiIcon } from '../ui/Icon';
 import { setTabBarHeight } from '../ui/toastStore';
 import { Text } from '../ui/Text';
@@ -39,6 +40,8 @@ export function TabBar({ state, descriptors, navigation, insets }: BottomTabBarP
       // Safe area measured at runtime.
       style={[styles.floating, { paddingBottom: Math.max(insets.bottom, spacing['space-12']) }]}
     >
+      {/* The route under way, folded over the tabs (E-07, M-11). */}
+      <MiniPlayer />
       <View
         accessibilityRole="tablist"
         className="flex-row gap-8 rounded-pill bg-bg p-6"
