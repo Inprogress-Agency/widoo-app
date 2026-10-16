@@ -1,3 +1,4 @@
+export * from './admin-sections';
 export * from './analytics';
 export * from './app-version';
 export { arrondissementLabel } from './arrondissement';
@@ -17,6 +18,7 @@ export * from './taxonomies';
 export * from './thresholds';
 export { hasRole } from './roles';
 export { zoneMinSpanM, zoneSearchBox } from './zone';
+export * from './schemas/admin';
 export * from './schemas/common';
 export * from './schemas/config';
 export * from './schemas/error';

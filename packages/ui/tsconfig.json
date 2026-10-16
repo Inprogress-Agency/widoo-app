@@ -1,0 +1,10 @@
+{
+  // Strict options shared by the monorepo, then what React components need: DOM types and JSX.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "types": ["node"]
+  },
+  "include": ["src"]
+}

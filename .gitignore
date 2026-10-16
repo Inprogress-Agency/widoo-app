@@ -3,6 +3,9 @@ dist/
 coverage/
 .turbo/
 *.tsbuildinfo
+# Next.js build output, and the route types written by `next typegen`.
+.next/
+next-env.d.ts
 *.log
 
 .env

@@ -123,6 +123,18 @@ const Env = z.object({
 
 /** Guards against local settings that would weaken production: token checks, report transport. */
 const ProductionEnv = Env.superRefine((env, context) => {
+  // The emulator accepts unsigned tokens: with a demo project only, which exists nowhere else.
+  // The admin applies the same rule on its side.
+  if (
+    env.FIREBASE_AUTH_EMULATOR_HOST !== undefined &&
+    !env.FIREBASE_PROJECT_ID?.startsWith('demo-')
+  ) {
+    context.addIssue({
+      code: 'custom',
+      path: ['FIREBASE_AUTH_EMULATOR_HOST'],
+      message: 'The Auth emulator needs a demo- project',
+    });
+  }
   if (env.NODE_ENV !== 'production') {
     return;
   }
@@ -160,6 +172,11 @@ export const Config = ProductionEnv.transform((env) => ({
   trustedProxies: env.TRUST_PROXY,
   rateLimitMax: env.RATE_LIMIT_MAX,
   firebaseProjectId: env.FIREBASE_PROJECT_ID,
+  /**
+   * The local Auth emulator signs the tokens (never in production, refused above). It has no
+   * TOTP second factor, so the admin routes cannot ask for one there.
+   */
+  usesAuthEmulator: Boolean(env.FIREBASE_AUTH_EMULATOR_HOST),
   sentryDsn: env.SENTRY_DSN,
   sentryEnvironment: env.SENTRY_ENVIRONMENT ?? env.NODE_ENV,
   internalToken: env.INTERNAL_TOKEN,

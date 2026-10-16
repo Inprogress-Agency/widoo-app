@@ -18,6 +18,7 @@ describe('loadConfig', () => {
       trustedProxies: [],
       rateLimitMax: 1000,
       firebaseProjectId: undefined,
+      usesAuthEmulator: false,
       sentryDsn: undefined,
       sentryEnvironment: 'development',
       internalToken: undefined,
@@ -152,5 +153,16 @@ describe('loadConfig', () => {
     expect(load({ NODE_ENV: 'production', ...demo })).toThrow(/FIREBASE_PROJECT_ID/);
     expect(load({ NODE_ENV: 'production' })).not.toThrow();
     expect(load({ NODE_ENV: 'development', ...emulator, ...demo })).not.toThrow();
+  });
+
+  it('refuses the Auth emulator with a real project, in every environment', () => {
+    const load = () =>
+      loadConfig({
+        DATABASE_URL: databaseUrl,
+        NODE_ENV: 'development',
+        FIREBASE_PROJECT_ID: 'widoo-staging',
+        FIREBASE_AUTH_EMULATOR_HOST: '127.0.0.1:9099',
+      });
+    expect(load).toThrow(/demo- project/);
   });
 });

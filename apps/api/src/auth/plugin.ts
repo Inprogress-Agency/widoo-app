@@ -1,8 +1,8 @@
-import { hasRole, type UserRole } from '@widoo/shared';
+import { canOpenAdminSection, hasRole, type AdminSection, type UserRole } from '@widoo/shared';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { httpError } from '../errors';
 import { findOrCreateUser, type User } from '../users/repository';
-import { InvalidTokenError, type TokenVerifier } from './verifier';
+import { InvalidTokenError, type TokenVerifier, type VerifiedIdentity } from './verifier';
 
 /** Hook of an authenticated route, to use as `onRequest`: runs before the body is parsed. */
 type AuthHook = (request: FastifyRequest) => Promise<void>;
@@ -14,6 +14,12 @@ declare module 'fastify' {
     /** `requireAuth`, then refuses a role that does not hold `role` (403). */
     requireRole: (role: Exclude<UserRole, 'user'>) => AuthHook;
     /**
+     * Guard of the admin routes (wiki Admin-Web › Rôles et Principes): `requireAuth`, then refuses
+     * a role that does not open `section` (403), a session older than 12 hours (401) and a
+     * session opened without the code of an authenticator app (403 `mfa_required`, D-087).
+     */
+    requireAdminSection: (section: AdminSection) => AuthHook;
+    /**
      * Optional authentication (wiki API › conventions): without an `Authorization` header the
      * caller stays anonymous; with one, the same checks as `requireAuth`, 401 included.
      */
@@ -22,11 +28,24 @@ declare module 'fastify' {
   interface FastifyRequest {
     /** The account of the caller, read from the database; null until an auth hook ran. */
     user: User | null;
+    /** What the verified token says of the session; null until an auth hook ran. */
+    identity: VerifiedIdentity | null;
   }
 }
 
+// Wiki Admin-Web › Principes: a session of the admin lasts 12 hours at most, then A-01.
+const adminSessionMaxMs = 12 * 60 * 60 * 1000;
+
 // A Firebase ID token is about 1 KB; the bound keeps oversized headers away from the verifier.
 const BEARER = /^Bearer ([^\s]{1,4096})$/i;
+
+export type AuthOptions = {
+  /**
+   * False only with the local Auth emulator, which has no TOTP: the admin routes then let a
+   * session without a second factor in. Always true on staging and production.
+   */
+  isSecondFactorRequired: boolean;
+};
 
 /**
  * Authentication on demand: public routes stay public, authenticated routes declare
@@ -34,8 +53,13 @@ const BEARER = /^Bearer ([^\s]{1,4096})$/i;
  * the caller `app.optionalAuth`. The role always comes from the database, read again on every
  * request, never from the token.
  */
-export function registerAuth(app: FastifyInstance, verifier: TokenVerifier): void {
+export function registerAuth(
+  app: FastifyInstance,
+  verifier: TokenVerifier,
+  options: AuthOptions,
+): void {
   app.decorateRequest('user', null);
+  app.decorateRequest('identity', null);
 
   async function authenticate(request: FastifyRequest): Promise<User> {
     if (request.user) {
@@ -62,7 +86,12 @@ export function registerAuth(app: FastifyInstance, verifier: TokenVerifier): voi
     if (signedIn.kind === 'signed_out') {
       throw httpError(401, 'Account deleted');
     }
+    // Refused everywhere, the app included: the account can no longer sign in (A-06).
+    if (signedIn.user.suspendedAt) {
+      throw httpError(403, 'Account suspended', 'account_suspended');
+    }
     request.user = signedIn.user;
+    request.identity = identity;
     return signedIn.user;
   }
 
@@ -84,4 +113,19 @@ export function registerAuth(app: FastifyInstance, verifier: TokenVerifier): voi
       }
     },
   );
+  app.decorate('requireAdminSection', (section: AdminSection) => async (request) => {
+    const user = await authenticate(request);
+    // The role first: an account outside the team learns nothing about the admin.
+    if (!canOpenAdminSection(user.role, section)) {
+      throw httpError(403, 'Insufficient role');
+    }
+    const identity = request.identity;
+    if (!identity || Date.now() - identity.authTime.getTime() > adminSessionMaxMs) {
+      throw httpError(401, 'Admin session expired');
+    }
+    // The authenticator app only (D-087): a text message is not a second factor of the admin.
+    if (options.isSecondFactorRequired && identity.secondFactor !== 'totp') {
+      throw httpError(403, 'Second factor required', 'mfa_required');
+    }
+  });
 }
