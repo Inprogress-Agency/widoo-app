@@ -15,6 +15,7 @@ import {
   plannedRouteClosers,
   notificationKinds,
   plannedRouteStatuses,
+  planSources,
   profileSlots,
   ratingCommentMaxLength,
   reportStatuses,
@@ -86,6 +87,8 @@ export const mediaSource = pgEnum('media_source', mediaSources);
 export const directionsProfile = pgEnum('directions_profile', directionsProfiles);
 /** Choice of the team in the admin over the nightly computation of the badge (D-023). */
 export const certifiedOverride = pgEnum('certified_override', certifiedOverrides);
+/** Origin of a right to Premium: the store, or a gift of the team (A-06). */
+export const planSource = pgEnum('plan_source', planSources);
 /** Status of a planned route (D-029, D-033, D-038); its labels belong to the app. */
 export const plannedRouteStatus = pgEnum('planned_route_status', plannedRouteStatuses);
 /** Who closed a Go (D-033). */
@@ -175,6 +178,8 @@ export const users = pgTable(
     /** Updated by the RevenueCat webhooks. */
     plan: plan('plan').notNull().default('free'),
     planExpiresAt: timestamp('plan_expires_at', { withTimezone: true }),
+    /** `gift` when the team offered the Premium plan (A-06): the store webhooks leave it alone. */
+    planSource: planSource('plan_source').notNull().default('store'),
     revenuecatAppUserId: text('revenuecat_app_user_id'),
     isPublic: boolean('is_public').notNull().default(true),
     bio: text('bio'),
@@ -677,13 +682,22 @@ export const routeUnlocks = pgTable(
     routeId: uuid('route_id')
       .notNull()
       .references(() => routes.id, { onDelete: 'cascade' }),
-    /** One unlock per purchase: a webhook delivered twice writes nothing more. */
-    storeTransactionId: text('store_transaction_id').notNull().unique(),
+    /**
+     * One unlock per purchase: a webhook delivered twice writes nothing more. Null for a gift,
+     * which has no transaction.
+     */
+    storeTransactionId: text('store_transaction_id').unique(),
+    /** `gift`: a route offered by the team from A-06, without the store. */
+    source: planSource('source').notNull().default('store'),
     createdAt: createdAt(),
   },
   (t) => [
     primaryKey({ name: 'route_unlocks_pkey', columns: [t.userId, t.routeId] }),
     index('route_unlocks_route_idx').on(t.routeId),
+    check(
+      'route_unlocks_transaction_check',
+      sql`${t.source} = 'gift' or ${t.storeTransactionId} is not null`,
+    ),
   ],
 );
 

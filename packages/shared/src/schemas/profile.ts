@@ -58,6 +58,14 @@ export const certifiedOverrides = ['none', 'granted', 'revoked'] as const;
 export const CertifiedOverride = z.enum(certifiedOverrides);
 export type CertifiedOverride = z.infer<typeof CertifiedOverride>;
 
+/**
+ * Where a right to Premium comes from: the store (subscription, pass, route bought alone) or a gift
+ * of the team (A-06, support), which never goes through the store. Technical only.
+ */
+export const planSources = ['store', 'gift'] as const;
+export const PlanSource = z.enum(planSources);
+export type PlanSource = z.infer<typeof PlanSource>;
+
 /** Key of the `settings` row of each criterion of the badge; a value is a JSON number. */
 export const certificationSettingKeys = {
   minVerifiedRoutes: 'certification.min_verified_routes',
