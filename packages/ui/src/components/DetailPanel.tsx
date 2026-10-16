@@ -41,7 +41,7 @@ export function DetailPanel({
       tabIndex={-1}
       aria-label={title}
       onKeyDown={(event) => event.key === 'Escape' && onClose()}
-      className="flex h-full w-detail-panel shrink-0 flex-col gap-16 border-l border-border p-24"
+      className="sticky top-0 flex max-h-detail-panel w-detail-panel shrink-0 flex-col gap-16 self-start border-l border-border p-24"
     >
       <header className="flex items-start justify-between gap-12">
         <div className="flex min-w-0 flex-col items-start gap-8">
