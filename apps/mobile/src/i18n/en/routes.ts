@@ -5,6 +5,7 @@ export const routes = {
   routes: {
     title: 'Routes',
     segments: 'Your routes',
+    segmentSpoken: '{{label}}, {{position}} of {{total}}',
     segment: {
       upcoming: 'Upcoming',
       favorites: 'Favourites',

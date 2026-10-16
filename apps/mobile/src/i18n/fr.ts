@@ -557,6 +557,7 @@ export const fr = {
   routes: {
     title: 'Parcours',
     segments: 'Vos parcours',
+    segmentSpoken: '{{label}}, {{position}} sur {{total}}',
     segment: {
       upcoming: 'À venir',
       favorites: 'Favoris',
