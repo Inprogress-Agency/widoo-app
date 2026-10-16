@@ -1068,6 +1068,41 @@ export const messages = {
       failed: "Le réglage n'a pas pu être enregistré.",
     },
   },
+  affiliation: {
+    tabs: { label: 'Affiliation', programs: 'Programmes', steps: 'Étapes réservables' },
+    programs: {
+      add: 'Ajouter un programme',
+      total: (count: number) => (count > 1 ? `${count} programmes` : `${count} programme`),
+      columns: {
+        program: 'Programme',
+        network: 'Réseau',
+        commission: 'Commission',
+        cookie: 'Cookie',
+        places: 'Lieux',
+        status: 'Statut',
+      },
+      cookieDays: (days: number) => `${days} j`,
+      noCommission: 'Non renseignée',
+      status: { active: 'Actif', inactive: 'Inactif' },
+      empty: {
+        title: 'Aucun programme',
+        text: "Ajoutez les programmes d'affiliation auxquels Widoo est inscrit.",
+      },
+      error: 'Les programmes ne se sont pas chargés.',
+      panel: {
+        network: 'Réseau',
+        commission: 'Commission',
+        cookie: 'Durée du cookie',
+        places: 'Lieux avec son lien',
+        status: 'Statut',
+        inactiveHint:
+          "Un programme inactif ne prête plus ses liens : un lieu qui le nomme n'affiche plus son lien partenaire.",
+        edit: 'Modifier',
+        deactivate: 'Désactiver',
+        activate: 'Activer',
+      },
+    },
+  },
   notFound: {
     title: 'Page introuvable',
     text: "Cette adresse n'existe pas dans l'admin.",
