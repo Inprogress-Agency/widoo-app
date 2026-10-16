@@ -29,14 +29,9 @@ interface GoProps {
 function Go({ planned, progress, onEnded }: GoProps) {
   const isOnline = useIsOnline();
   const { state } = useRouteSheet(planned.route.id);
-  const actions = useGoActions(planned, progress);
+  const actions = useGoActions(planned, progress, onEnded);
   const route = state.status === 'ready' ? state.route : null;
-  const finish = () =>
-    void actions.finish().then((outing) => {
-      if (outing) {
-        onEnded(outing);
-      }
-    });
+  const finish = () => void actions.finish();
   return (
     <>
       <GoPage
