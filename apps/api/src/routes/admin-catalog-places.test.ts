@@ -8,7 +8,15 @@ import { eq, inArray, like } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
-import { adminActions, placeHours, places, routes, steps, users } from '../db/schema';
+import {
+  adminActions,
+  affiliatePrograms,
+  placeHours,
+  places,
+  routes,
+  steps,
+  users,
+} from '../db/schema';
 import { seed, seedId } from '../db/seed';
 import { uuidv7 } from '../db/uuid';
 import { testConfig } from '../test-config';
@@ -168,6 +176,79 @@ describe('PATCH /v1/admin/places/:id', () => {
     const updateEntry = journal.find((entry) => entry.action === 'place.update');
     expect(updateEntry?.before).toMatchObject({ category: 'cafe', phone: '+33 1 42 00 00 00' });
     expect(updateEntry?.after).toMatchObject({ category: 'restaurant', phone: null });
+  });
+
+  it('sets the partner link of Widoo with its program, and leaves it alone when not sent', async () => {
+    const editor = await signIn('editor');
+    const created = CatalogPlaceDetail.parse(
+      (await create(editor.headers, sheet('Partenaire'))).json(),
+    );
+    expect(created).toMatchObject({ partnerBookingUrl: null, partnerProgramId: null });
+    const [program] = await app.db
+      .insert(affiliatePrograms)
+      .values({ name: `${marker} programme`, network: 'Awin', cookieDays: 30 })
+      .returning({ id: affiliatePrograms.id });
+    if (!program) throw new Error('Program not created');
+    try {
+      const withLink = sheet('Partenaire', {
+        partnerBookingUrl: 'https://partner.example/reserver',
+        partnerProgramId: program.id,
+      });
+      const linked = CatalogPlaceDetail.parse(
+        (await update(editor.headers, created.id, withLink)).json(),
+      );
+      expect(linked).toMatchObject({
+        partnerBookingUrl: 'https://partner.example/reserver',
+        partnerProgramId: program.id,
+      });
+      // A sheet without the two fields keeps them.
+      const kept = CatalogPlaceDetail.parse(
+        (await update(editor.headers, created.id, sheet('Partenaire', { phone: null }))).json(),
+      );
+      expect(kept).toMatchObject({ partnerBookingUrl: 'https://partner.example/reserver' });
+      const journal = await app.db
+        .select()
+        .from(adminActions)
+        .where(eq(adminActions.targetId, created.id));
+      const setLink = journal.find(
+        (entry) =>
+          (entry.after as Record<string, unknown> | null)?.partnerBookingUrl ===
+          'https://partner.example/reserver',
+      );
+      expect(setLink?.before).toMatchObject({ partnerBookingUrl: null, partnerProgramId: null });
+      // Both null removes the link.
+      const removed = CatalogPlaceDetail.parse(
+        (
+          await update(editor.headers, created.id, {
+            ...withLink,
+            partnerBookingUrl: null,
+            partnerProgramId: null,
+          })
+        ).json(),
+      );
+      expect(removed).toMatchObject({ partnerBookingUrl: null, partnerProgramId: null });
+    } finally {
+      await app.db.update(places).set({ partnerProgramId: null }).where(eq(places.id, created.id));
+      await app.db.delete(affiliatePrograms).where(eq(affiliatePrograms.id, program.id));
+    }
+  });
+
+  it('refuses a program without a link, a link without its program field, a link that is not https and an unknown program', async () => {
+    const editor = await signIn('editor');
+    const created = CatalogPlaceDetail.parse((await create(editor.headers, sheet('Refus'))).json());
+    const bodies = [
+      sheet('Refus', { partnerBookingUrl: null, partnerProgramId: uuidv7() }),
+      sheet('Refus', { partnerBookingUrl: 'https://partner.example' }),
+      sheet('Refus', { partnerBookingUrl: 'http://partner.example', partnerProgramId: null }),
+    ];
+    for (const body of bodies) {
+      expect((await update(editor.headers, created.id, body)).statusCode).toBe(422);
+    }
+    const unknown = sheet('Refus', {
+      partnerBookingUrl: 'https://partner.example',
+      partnerProgramId: uuidv7(),
+    });
+    expect((await update(editor.headers, created.id, unknown)).statusCode).toBe(400);
   });
 
   it('answers 404 for a place that does not exist', async () => {

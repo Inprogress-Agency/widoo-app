@@ -28,6 +28,8 @@ type DetailRow = PlaceRow & {
   price_range: CatalogPlaceDetail['priceRange'];
   website_url: string | null;
   phone: string | null;
+  partner_booking_url: string | null;
+  partner_program_id: string | null;
 };
 
 type HoursRow = {
@@ -113,6 +115,7 @@ export async function readCatalogPlace(
 ): Promise<CatalogPlaceDetail | undefined> {
   const [place] = await db.execute<DetailRow>(sql`
     select ${columns}, p.address, p.is_indoor, p.price_range, p.website_url, p.phone,
+      p.partner_booking_url, p.partner_program_id,
       ST_Y(p.location::geometry) as lat, ST_X(p.location::geometry) as lng
     ${from}
     where p.id = ${placeId}`);
@@ -137,6 +140,8 @@ export async function readCatalogPlace(
     priceRange: place.price_range,
     websiteUrl: place.website_url,
     phone: place.phone,
+    partnerBookingUrl: place.partner_booking_url,
+    partnerProgramId: place.partner_program_id,
     hours: hours.map((slot) => ({
       weekday: slot.weekday,
       opens: hourAndMinute(slot.opens),
