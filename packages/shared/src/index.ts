@@ -1,4 +1,5 @@
 export * from './admin-sections';
+export * from './booking-link';
 export * from './analytics';
 export * from './app-version';
 export { arrondissementLabel } from './arrondissement';

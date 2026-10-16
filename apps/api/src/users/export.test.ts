@@ -168,6 +168,9 @@ describe('exportUserData', () => {
       'user_featured_routes.user_id',
     ];
     const setAside = [
+      // A click on « Réserver », a statistic of the link and not a record of the person: never
+      // written with an account while the redirect opens in the browser, cut at purge.
+      'booking_clicks.user_id',
       // Journal of the writes of the team, kept when an account is purged (A-12): the work of a
       // member of the team, not data of the person.
       'admin_actions.actor_id',
