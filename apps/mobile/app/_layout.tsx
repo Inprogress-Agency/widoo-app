@@ -110,6 +110,17 @@ export default function RootLayout() {
                       : motion.durations.page,
                   }}
                 />
+                {/* E-15 from « Noter » of Parcours › Passés (E-08): the same rise as the Go's. */}
+                <Stack.Screen
+                  name="rate/[id]"
+                  options={{
+                    presentation: 'fullScreenModal',
+                    animation: isReducedMotion ? 'fade' : 'slide_from_bottom',
+                    animationDuration: isReducedMotion
+                      ? motion.durations.fade
+                      : motion.durations.page,
+                  }}
+                />
                 {/*
                 Modifier le profil, Supprimer mon compte (E-09) and Langue (E-19): pages without
                 the tab bar.
