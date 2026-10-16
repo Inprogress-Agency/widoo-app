@@ -6,6 +6,7 @@ import { UserRoleBadge } from '@/components/users/UserRoleBadge';
 import { UsersTable } from '@/components/users/UsersTable';
 import { toUsersParams, usersListOptions } from '@/config/users-list';
 import { catalogRoutePathOf } from '@/containers/CatalogRoutesContainer';
+import { UserDecisionsContainer } from '@/containers/UserDecisionsContainer';
 import { useDebouncedCallback } from '@/hooks/useDebouncedCallback';
 import { useListQuery } from '@/hooks/useListQuery';
 import { useRemoteData } from '@/hooks/useRemoteData';
@@ -51,6 +52,10 @@ export function UsersContainer() {
     router.replace(address ? `${sectionPaths.users}?${address}` : sectionPaths.users, {
       scroll: false,
     });
+  };
+  const reloadAll = () => {
+    if (users.status !== 'loading') users.reload();
+    if (card.status !== 'loading') card.reload();
   };
 
   const renderList = () => {
@@ -115,6 +120,16 @@ export function UsersContainer() {
           status={<UserRoleBadge role={openUser.role} />}
           closeLabel={messages.confirm.close}
           onClose={() => showUser(null)}
+          actions={
+            <UserDecisionsContainer
+              user={openUser}
+              onSettled={reloadAll}
+              onDeleted={() => {
+                showUser(null);
+                if (users.status !== 'loading') users.reload();
+              }}
+            />
+          }
         >
           <UserPanelContent user={openUser} routePathOf={catalogRoutePathOf} />
         </DetailPanel>
