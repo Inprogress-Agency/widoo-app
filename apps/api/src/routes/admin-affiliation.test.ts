@@ -1,9 +1,17 @@
-import { AffiliateProgram, AffiliatePrograms, ApiError, type UserRole } from '@widoo/shared';
+import {
+  AffiliateProgram,
+  AffiliatePrograms,
+  ApiError,
+  BookableSteps,
+  type BookableStep,
+  type UserRole,
+} from '@widoo/shared';
 import { eq, inArray, like } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { createStepFixtures } from '../affiliation/test-fixtures';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
-import { adminActions, affiliatePrograms, places, users } from '../db/schema';
+import { adminActions, affiliatePrograms, bookingClicks, places, users } from '../db/schema';
 import { seed } from '../db/seed';
 import { uuidv7 } from '../db/uuid';
 import { testConfig } from '../test-config';
@@ -16,14 +24,17 @@ const marker = `affitest${uuidv7().slice(-10)}`;
 
 let app: Awaited<ReturnType<typeof buildApp>>;
 let placeId: string;
+let fixtures: ReturnType<typeof createStepFixtures>;
 beforeAll(async () => {
   app = await buildApp(testConfig(), { tokenVerifier: verifier });
   await seed(app.db);
   const [place] = await app.db.select({ id: places.id }).from(places).limit(1);
   if (!place) throw new Error('No place in the seed');
   placeId = place.id;
+  fixtures = createStepFixtures(app.db);
 });
 afterAll(async () => {
+  await fixtures.cleanUp();
   const ids = await app.db
     .select({ id: affiliatePrograms.id })
     .from(affiliatePrograms)
@@ -172,5 +183,89 @@ describe('/v1/admin/affiliate-programs', () => {
       (await send('PATCH', admin.headers, `/affiliate-programs/${uuidv7()}`, { isActive: false }))
         .statusCode,
     ).toBe(404);
+  });
+});
+
+/** Every page of the bookable steps the query gives, followed by its cursors. */
+async function bookableSteps(headers: Record<string, string>, query = ''): Promise<BookableStep[]> {
+  const items: BookableStep[] = [];
+  let cursor: string | null = null;
+  do {
+    const url: string = `/bookable-steps?${query}${cursor ? `&cursor=${cursor}` : ''}`;
+    const page = BookableSteps.parse((await send('GET', headers, url)).json());
+    items.push(...page.items);
+    cursor = page.nextCursor;
+  } while (cursor);
+  return items;
+}
+
+describe('GET /v1/admin/bookable-steps', () => {
+  it('is for editors and admins, not for a moderator', async () => {
+    const moderator = await signIn('moderator');
+    expect((await send('GET', moderator.headers, '/bookable-steps')).statusCode).toBe(403);
+  });
+
+  it('lists the steps that can be booked, with the link shown and where it comes from', async () => {
+    const editor = await signIn('editor');
+    const creator = await fixtures.addStep({ creatorUrl: 'https://creator.example/a' });
+    const affiliate = await fixtures.addStep({
+      creatorUrl: 'https://creator.example/b',
+      isAffiliate: true,
+    });
+    const partner = await fixtures.addStep({
+      partnerUrl: 'https://partner.example/c',
+      programIsActive: true,
+    });
+    const required = await fixtures.addStep({ bookingRequired: true });
+    const free = await fixtures.addStep({});
+    const draft = await fixtures.addStep({
+      creatorUrl: 'https://creator.example/d',
+      routeStatus: 'draft',
+    });
+
+    const items = await bookableSteps(editor.headers);
+    const byStep = new Map(items.map((item) => [item.stepId, item]));
+    expect(byStep.get(creator)?.link).toEqual({
+      url: 'https://creator.example/a',
+      origin: 'creator',
+    });
+    expect(byStep.get(affiliate)?.link?.origin).toBe('creator_affiliate');
+    expect(byStep.get(partner)).toMatchObject({
+      link: { url: 'https://partner.example/c', origin: 'partner' },
+      place: { hasPartnerLink: true },
+    });
+    expect(byStep.get(required)).toMatchObject({ link: null, place: { hasPartnerLink: false } });
+    expect(byStep.has(free)).toBe(false);
+    expect(byStep.has(draft)).toBe(false);
+  });
+
+  it('keeps the places without a partner link when asked', async () => {
+    const admin = await signIn('admin');
+    const withoutLink = await fixtures.addStep({ creatorUrl: 'https://creator.example/e' });
+    const withLink = await fixtures.addStep({ partnerUrl: 'https://partner.example/f' });
+    const ids = (await bookableSteps(admin.headers, 'withoutPartnerLink=true')).map(
+      (item) => item.stepId,
+    );
+    expect(ids).toContain(withoutLink);
+    expect(ids).not.toContain(withLink);
+  });
+
+  it('counts the clicks of the last 30 days, and puts the most clicked first', async () => {
+    const admin = await signIn('admin');
+    const popular = await fixtures.addStep({ creatorUrl: 'https://creator.example/g' });
+    const old = await fixtures.addStep({ creatorUrl: 'https://creator.example/h' });
+    const now = Date.now();
+    const day = 24 * 60 * 60 * 1000;
+    await app.db.insert(bookingClicks).values([
+      { stepId: popular, linkOrigin: 'creator', createdAt: new Date(now - day) },
+      { stepId: popular, linkOrigin: 'creator', createdAt: new Date(now - 29 * day) },
+      { stepId: old, linkOrigin: 'creator', createdAt: new Date(now - 31 * day) },
+    ]);
+    const items = await bookableSteps(admin.headers);
+    expect(items.find((item) => item.stepId === popular)?.clicks30Days).toBe(2);
+    expect(items.find((item) => item.stepId === old)?.clicks30Days).toBe(0);
+    expect(items.findIndex((item) => item.stepId === popular)).toBeLessThan(
+      items.findIndex((item) => item.stepId === old),
+    );
   });
 });
