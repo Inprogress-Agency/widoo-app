@@ -1,12 +1,13 @@
 import {
   allowedUserActions,
   type AdminUserDetail,
+  type GiftBody,
   type UserAction,
   type UserRole,
 } from '@widoo/shared';
 import { and, eq, isNull } from 'drizzle-orm';
 import type { Db, Tx } from '../db/client';
-import { users } from '../db/schema';
+import { routeUnlocks, routes, users } from '../db/schema';
 import { httpError } from '../errors';
 import { recordAdminAction } from './actions';
 import { readUserDetail } from './users-read';
@@ -132,6 +133,90 @@ export async function reactivateUser(
       before: { suspended: true, suspensionReason: target.suspensionReason },
       after: { suspended: false },
       reason,
+    });
+  });
+  return detailOf(db, targetId);
+}
+
+/** True while the right to Premium of an account comes from the store and has not ended. */
+const hasActiveStorePremium = (target: Target, now: Date) =>
+  target.plan === 'premium' &&
+  target.planSource === 'store' &&
+  (target.planExpiresAt === null || target.planExpiresAt.getTime() > now.getTime());
+
+/**
+ * Offers Premium until a date, or one Premium route (support, `source = gift`, without the
+ * store). An account whose store plan runs keeps it: the gift would shorten what it paid for (409).
+ * Past the date, the plan ends by itself (`canAccessRoute`).
+ */
+export async function giftUser(
+  db: Db,
+  actor: Actor,
+  targetId: string,
+  gift: GiftBody,
+  now = new Date(),
+): Promise<AdminUserDetail> {
+  await db.transaction(async (tx) => {
+    const target = await lockTarget(tx, actor, targetId, 'gift');
+    if (gift.until !== undefined) {
+      const until = new Date(gift.until);
+      if (until.getTime() <= now.getTime()) {
+        throw httpError(400, 'The end date must be in the future');
+      }
+      if (hasActiveStorePremium(target, now)) {
+        throw httpError(409, 'The account has a running subscription or pass', 'conflict', {
+          reason: 'active_store_plan',
+        });
+      }
+      await tx
+        .update(users)
+        .set({ plan: 'premium', planSource: 'gift', planExpiresAt: until })
+        .where(eq(users.id, targetId));
+      await recordAdminAction(tx, {
+        actorId: actor.id,
+        action: 'user.gift_premium',
+        targetType: 'user',
+        targetId,
+        before: { plan: target.plan, source: target.planSource, expiresAt: target.planExpiresAt },
+        after: { plan: 'premium', source: 'gift', expiresAt: until },
+      });
+      return;
+    }
+    const routeId = gift.routeId;
+    if (routeId === undefined) {
+      throw httpError(400, 'Give exactly one of until and routeId');
+    }
+    const [route] = await tx
+      .select({ access: routes.access, status: routes.status, authorId: routes.authorId })
+      .from(routes)
+      .where(eq(routes.id, routeId));
+    if (!route || route.status !== 'published') {
+      throw httpError(404, 'Route not found');
+    }
+    if (route.authorId === targetId) {
+      throw httpError(409, 'A creator already has their own routes', 'conflict', {
+        reason: 'own_route',
+      });
+    }
+    if (route.access !== 'premium') {
+      throw httpError(409, 'The route is free', 'conflict', { reason: 'free_route' });
+    }
+    const [inserted] = await tx
+      .insert(routeUnlocks)
+      .values({ userId: targetId, routeId, source: 'gift', storeTransactionId: null })
+      .onConflictDoNothing()
+      .returning({ routeId: routeUnlocks.routeId });
+    if (!inserted) {
+      throw httpError(409, 'The route is already unlocked', 'conflict', {
+        reason: 'route_already_unlocked',
+      });
+    }
+    await recordAdminAction(tx, {
+      actorId: actor.id,
+      action: 'user.gift_route',
+      targetType: 'user',
+      targetId,
+      after: { routeId },
     });
   });
   return detailOf(db, targetId);
