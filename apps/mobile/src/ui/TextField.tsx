@@ -13,6 +13,7 @@ type InputProps = Pick<
   | 'autoComplete'
   | 'textContentType'
   | 'keyboardType'
+  | 'onFocus'
 >;
 
 interface TextFieldProps extends InputProps {
