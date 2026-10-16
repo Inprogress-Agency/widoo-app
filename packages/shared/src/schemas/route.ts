@@ -28,6 +28,28 @@ export const stepPhotosMax = 5;
 export const StepHighlights = z.array(plainText()).min(1).max(stepHighlightsMax);
 export type StepHighlights = z.infer<typeof StepHighlights>;
 
+/**
+ * Credit of a free photo of Wikimedia Commons (D-050, D-052): « © Auteur » on the photo, its
+ * licence and source page on a tap. All three or none (`media_credit_check`).
+ */
+export const PhotoCredit = z.object({
+  author: z.string().min(1),
+  license: z.string().min(1),
+  sourceUrl: HttpsUrl,
+});
+export type PhotoCredit = z.infer<typeof PhotoCredit>;
+
+/** A photo as the API serves it (D-052): its credit for a free photo, null for the creator's. */
+export const Photo = z.object({ url: HttpsUrl, credit: PhotoCredit.nullable() });
+export type Photo = z.infer<typeof Photo>;
+
+/**
+ * What E-07 shows of a step besides its advice (D-029), served on a step the caller may see in
+ * full: « À ne pas manquer », empty for a step without any, and « En images », in order.
+ */
+export const StepHighlightList = z.array(z.string().min(1)).max(stepHighlightsMax);
+export const StepPhotos = z.array(Photo).max(stepPhotosMax);
+
 export const Step = z.object({
   id: z.uuid(),
   position: z.number().int().nonnegative(),

@@ -61,6 +61,8 @@ export function plannedFixture(
           isIndoor: index === 1,
           hours: [],
         },
+        highlights: [],
+        photos: [],
       })),
     },
     timeline: {
