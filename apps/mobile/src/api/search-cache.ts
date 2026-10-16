@@ -1,5 +1,5 @@
 import type { Query, QueryClient, QueryKey } from '@tanstack/react-query';
-import { Me, RouteSearchResult } from '@widoo/shared';
+import { Me, PlannedRoute, RouteSearchResult } from '@widoo/shared';
 import type { CachedResults } from '../discovery/store';
 
 /** What reads back a query kept on the device: a schema of `@widoo/shared`. */
@@ -22,6 +22,16 @@ export const meQueryPrefix = ['me'] as const;
 
 const isMeKey = (queryKey: QueryKey) => queryKey[0] === meQueryPrefix[0] && queryKey.length === 2;
 
+/**
+ * Key prefix of the Go in progress of the signed-in account, `['go', uid]`: kept on the device so
+ * that the outing goes on offline (Ecrans › E-07, hors connexion), forgotten at the sign-out.
+ */
+export const goQueryPrefix = ['go'] as const;
+
+const isGoKey = (queryKey: QueryKey) => queryKey[0] === goQueryPrefix[0] && queryKey.length === 2;
+
+const GoAnswer = PlannedRoute.nullable();
+
 const isSearchKey = (queryKey: QueryKey) =>
   queryKey[0] === searchQueryKey[0] && queryKey[1] === searchQueryKey[1];
 
@@ -34,6 +44,9 @@ const isSearch = (query: Query) => isSearchKey(query.queryKey);
 export function persistedQuerySchema(queryKey: QueryKey): PersistedQuerySchema | null {
   if (isSearchKey(queryKey)) {
     return RouteSearchResult;
+  }
+  if (isGoKey(queryKey)) {
+    return GoAnswer;
   }
   return isMeKey(queryKey) ? Me : null;
 }
@@ -66,10 +79,11 @@ function latestSearchQuery(client: QueryClient): Query | null {
 
 /**
  * What the persister writes: the last answered search, public data with no position (the zone
- * only), and the account of the user, on their own phone. Any other query stays in memory.
+ * only), and the account of the user and its Go in progress, on their own phone. Any other query
+ * stays in memory.
  */
 export function shouldPersistQuery(client: QueryClient, query: Query): boolean {
-  if (isMeKey(query.queryKey)) {
+  if (isMeKey(query.queryKey) || isGoKey(query.queryKey)) {
     return query.state.status === 'success';
   }
   return isSearch(query) && query === latestSearchQuery(client);

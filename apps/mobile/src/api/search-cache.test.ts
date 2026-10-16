@@ -1,6 +1,7 @@
 import { QueryClient } from '@tanstack/react-query';
 import type { RouteSearchResult } from '@widoo/shared';
 import { describe, expect, it } from 'vitest';
+import { plannedFixture } from '../go/testPlanned';
 import { testMe } from '../test/me';
 import {
   deviceCopy,
@@ -48,6 +49,20 @@ describe('search cache', () => {
     expect(query && shouldPersistQuery(withMe, query)).toBe(true);
     expect(persistedQuerySchema(['me', 'uid-1'])?.safeParse(testMe()).success).toBe(true);
     expect(persistedQuerySchema(['me', 'uid-1'])?.safeParse({ id: 'x' }).success).toBe(false);
+  });
+
+  it('keeps the Go in progress, or its absence, read back with its schema (E-07)', () => {
+    const withGo = clientWith([
+      [['go', 'uid-1'], plannedFixture(), 1_000],
+      [['go', 'uid-2'], null, 1_000],
+    ]);
+    for (const uid of ['uid-1', 'uid-2']) {
+      const query = withGo.getQueryCache().find({ queryKey: ['go', uid], exact: true });
+      expect(query && shouldPersistQuery(withGo, query)).toBe(true);
+    }
+    expect(persistedQuerySchema(['go', 'uid-1'])?.safeParse(plannedFixture()).success).toBe(true);
+    expect(persistedQuerySchema(['go', 'uid-1'])?.safeParse(null).success).toBe(true);
+    expect(persistedQuerySchema(['go', 'uid-1'])?.safeParse({ id: 'x' }).success).toBe(false);
   });
 
   it('keeps the account on the device without its e-mail, and any other answer as it is', () => {
