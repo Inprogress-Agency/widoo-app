@@ -1,4 +1,4 @@
-import { AdminUserDetail, AdminUsers, ApiError, type UserRole } from '@widoo/shared';
+import { AdminUserDetail, AdminUsers, ApiError, MyDataExport, type UserRole } from '@widoo/shared';
 import { eq, inArray } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { canAccessRoute } from '../access/route-access';
@@ -209,6 +209,24 @@ describe('role, suspension and the other actions by role', () => {
     });
     expect(notSuspended.statusCode).toBe(409);
   });
+
+  it('keeps the other actions for the admin', async () => {
+    const moderator = await signIn('moderator');
+    const target = await signIn('user');
+    const route = await addRoute('premium');
+    const attempts = [
+      send('POST', moderator.headers, `/users/${target.id}/gift`, {
+        until: new Date(Date.now() + day).toISOString(),
+      }),
+      send('POST', moderator.headers, `/users/${target.id}/gift`, { routeId: route }),
+      send('POST', moderator.headers, `/users/${target.id}/certification`, { override: 'granted' }),
+      get(moderator.headers, `/users/${target.id}/export`),
+      send('DELETE', moderator.headers, `/users/${target.id}`),
+    ];
+    for (const response of await Promise.all(attempts)) {
+      expect(response.statusCode).toBe(403);
+    }
+  });
 });
 
 describe('offering Premium', () => {
@@ -310,5 +328,52 @@ describe('offering Premium', () => {
       routeId: await addRoute('premium', 'draft'),
     });
     expect(draft.statusCode).toBe(404);
+  });
+});
+
+describe('certification, export and deletion', () => {
+  it('awards and removes the badge, which wins over the computation', async () => {
+    const admin = await signIn('admin');
+    const target = await signIn('user');
+    const granted = await send('POST', admin.headers, `/users/${target.id}/certification`, {
+      override: 'granted',
+    });
+    expect(AdminUserDetail.parse(granted.json()).certification).toMatchObject({
+      isCertified: true,
+      computed: false,
+      override: 'granted',
+    });
+    const revoked = await send('POST', admin.headers, `/users/${target.id}/certification`, {
+      override: 'revoked',
+    });
+    expect(AdminUserDetail.parse(revoked.json()).certification.isCertified).toBe(false);
+    expect(await journalOf(target.id)).toEqual(['user.certification', 'user.certification']);
+  });
+
+  it('exports the data of an account, and keeps a trace of it', async () => {
+    const admin = await signIn('admin');
+    const target = await signIn('user', 'Exporté');
+    const response = await get(admin.headers, `/users/${target.id}/export`);
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['cache-control']).toBe('no-store');
+    expect(response.headers['content-disposition']).toContain('widoo-donnees-');
+    expect(MyDataExport.parse(response.json()).account.id).toBe(target.id);
+    expect(await journalOf(target.id)).toEqual(['user.export']);
+  });
+
+  it('deletes a user with the rule of the app, but not an account of the team nor their own', async () => {
+    const admin = await signIn('admin');
+    const target = await signIn('user', 'Partante');
+    const editor = await signIn('editor');
+    expect((await send('DELETE', admin.headers, `/users/${editor.id}`)).statusCode).toBe(403);
+    expect((await send('DELETE', admin.headers, `/users/${admin.id}`)).statusCode).toBe(403);
+    const response = await send('DELETE', admin.headers, `/users/${target.id}`);
+    expect(response.statusCode).toBe(204);
+    const [row] = await app.db.select().from(users).where(eq(users.id, target.id));
+    expect(row).toMatchObject({ firstName: null, email: null, isPublic: false });
+    expect(row?.deletedAt).not.toBeNull();
+    expect((await get(admin.headers, `/users/${target.id}`)).statusCode).toBe(404);
+    expect((await send('DELETE', admin.headers, `/users/${target.id}`)).statusCode).toBe(404);
+    expect(await journalOf(target.id)).toEqual(['user.delete']);
   });
 });
