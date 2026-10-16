@@ -3,12 +3,19 @@ import {
   AdminUsers,
   AdminUsersQuery,
   ChangeUserRoleBody,
+  GiftBody,
   UserReasonBody,
 } from '@widoo/shared';
 import type { FastifyRequest } from 'fastify';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { changeUserRole, reactivateUser, suspendUser, type Actor } from '../admin/users-actions';
+import {
+  changeUserRole,
+  giftUser,
+  reactivateUser,
+  suspendUser,
+  type Actor,
+} from '../admin/users-actions';
 import { readUserDetail, readUsers } from '../admin/users-read';
 import { httpError } from '../errors';
 
@@ -115,5 +122,20 @@ export const adminUsersRoutes: FastifyPluginAsyncZod = async (app) => {
     },
     async (request) =>
       reactivateUser(app.db, actorOf(request), request.params.id, request.body.reason),
+  );
+
+  app.post(
+    '/admin/users/:id/gift',
+    {
+      schema: {
+        tags,
+        summary: 'Offer Premium until a date, or one Premium route',
+        security,
+        params: UserParams,
+        body: GiftBody,
+        response: { 200: AdminUserDetail },
+      },
+    },
+    async (request) => giftUser(app.db, actorOf(request), request.params.id, request.body),
   );
 };

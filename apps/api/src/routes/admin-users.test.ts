@@ -1,10 +1,11 @@
 import { AdminUserDetail, AdminUsers, ApiError, type UserRole } from '@widoo/shared';
 import { eq, inArray } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { canAccessRoute } from '../access/route-access';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
-import { adminActions, routes, users } from '../db/schema';
-import { seed } from '../db/seed';
+import { adminActions, routeUnlocks, routes, users } from '../db/schema';
+import { seed, seedId } from '../db/seed';
 import { uuidv7 } from '../db/uuid';
 import { testConfig } from '../test-config';
 
@@ -13,6 +14,10 @@ const verifier = new TestTokenVerifier();
 const createdUids: string[] = [];
 const createdRouteIds: string[] = [];
 const marker = `userstest${uuidv7().slice(-12)}`;
+const templateId = seedId('route:marais-gourmand');
+const farAway = { lat: 33, lng: 33 };
+const farAwayBounds = { west: 33, south: 33, east: 33.001, north: 33.001 };
+const day = 24 * 60 * 60 * 1000;
 
 let app: Awaited<ReturnType<typeof buildApp>>;
 beforeAll(async () => {
@@ -45,6 +50,25 @@ async function signIn(role: UserRole, name = 'Membre') {
     .returning();
   if (!user) throw new Error('User not created');
   return { id: user.id, headers: { authorization: `Bearer ${token}` } };
+}
+
+async function addRoute(access: 'free' | 'premium', status: 'published' | 'draft' = 'published') {
+  const [template] = await app.db.select().from(routes).where(eq(routes.id, templateId));
+  if (!template) throw new Error('Demo route missing from the seed');
+  const id = uuidv7();
+  createdRouteIds.push(id);
+  await app.db.insert(routes).values({
+    ...template,
+    id,
+    authorId: null,
+    shareToken: null,
+    startLocation: farAway,
+    bounds: farAwayBounds,
+    status,
+    access,
+    title: `Parcours ${marker}`,
+  });
+  return id;
 }
 
 type Headers = Record<string, string>;
@@ -184,5 +208,107 @@ describe('role, suspension and the other actions by role', () => {
       reason: 'Encore',
     });
     expect(notSuspended.statusCode).toBe(409);
+  });
+});
+
+describe('offering Premium', () => {
+  it('gives Premium until a date, then stops by itself', async () => {
+    const admin = await signIn('admin');
+    const target = await signIn('user');
+    const until = new Date(Date.now() + 7 * day);
+    const response = await send('POST', admin.headers, `/users/${target.id}/gift`, {
+      until: until.toISOString(),
+    });
+    expect(response.statusCode).toBe(200);
+    expect(AdminUserDetail.parse(response.json()).plan).toEqual({
+      plan: 'premium',
+      source: 'gift',
+      expiresAt: until.toISOString(),
+    });
+    const [row] = await app.db.select().from(users).where(eq(users.id, target.id));
+    if (!row) throw new Error('User missing');
+    const premiumRoute = { id: uuidv7(), access: 'premium' as const };
+    const viewer = {
+      plan: row.plan,
+      planExpiresAt: row.planExpiresAt,
+      unlockedRouteIds: new Set<string>(),
+    };
+    expect(canAccessRoute(premiumRoute, viewer, new Date())).toBe(true);
+    expect(canAccessRoute(premiumRoute, viewer, new Date(until.getTime() + 1000))).toBe(false);
+    expect(await journalOf(target.id)).toEqual(['user.gift_premium']);
+  });
+
+  it('refuses a past date, both fields, neither, and a running store plan', async () => {
+    const admin = await signIn('admin');
+    const target = await signIn('user');
+    const route = await addRoute('premium');
+    const bodies = [
+      { until: new Date(Date.now() - day).toISOString() },
+      { until: new Date(Date.now() + day).toISOString(), routeId: route },
+      {},
+    ];
+    const codes = [400, 422, 422];
+    for (const [index, body] of bodies.entries()) {
+      const response = await send('POST', admin.headers, `/users/${target.id}/gift`, body);
+      expect(response.statusCode).toBe(codes[index]);
+    }
+    await app.db
+      .update(users)
+      .set({ plan: 'premium', planExpiresAt: new Date(Date.now() + 30 * day) })
+      .where(eq(users.id, target.id));
+    const running = await send('POST', admin.headers, `/users/${target.id}/gift`, {
+      until: new Date(Date.now() + day).toISOString(),
+    });
+    expect(running.statusCode).toBe(409);
+    expect(ApiError.parse(running.json()).details).toEqual({ reason: 'active_store_plan' });
+  });
+
+  it('replaces a store plan that has ended', async () => {
+    const admin = await signIn('admin');
+    const target = await signIn('user');
+    await app.db
+      .update(users)
+      .set({ plan: 'premium', planExpiresAt: new Date(Date.now() - day) })
+      .where(eq(users.id, target.id));
+    const response = await send('POST', admin.headers, `/users/${target.id}/gift`, {
+      until: new Date(Date.now() + day).toISOString(),
+    });
+    expect(response.statusCode).toBe(200);
+  });
+
+  it('offers one Premium route, once', async () => {
+    const admin = await signIn('admin');
+    const target = await signIn('user');
+    const route = await addRoute('premium');
+    const response = await send('POST', admin.headers, `/users/${target.id}/gift`, {
+      routeId: route,
+    });
+    expect(response.statusCode).toBe(200);
+    expect(AdminUserDetail.parse(response.json()).unlockedRoutes).toMatchObject([
+      { id: route, source: 'gift' },
+    ]);
+    const [unlock] = await app.db
+      .select()
+      .from(routeUnlocks)
+      .where(eq(routeUnlocks.userId, target.id));
+    expect(unlock).toMatchObject({ routeId: route, source: 'gift', storeTransactionId: null });
+    const twice = await send('POST', admin.headers, `/users/${target.id}/gift`, { routeId: route });
+    expect(twice.statusCode).toBe(409);
+    expect(ApiError.parse(twice.json()).details).toEqual({ reason: 'route_already_unlocked' });
+    const free = await send('POST', admin.headers, `/users/${target.id}/gift`, {
+      routeId: await addRoute('free'),
+    });
+    expect(free.statusCode).toBe(409);
+    const ownRoute = await addRoute('premium');
+    await app.db.update(routes).set({ authorId: target.id }).where(eq(routes.id, ownRoute));
+    const own = await send('POST', admin.headers, `/users/${target.id}/gift`, {
+      routeId: ownRoute,
+    });
+    expect(own.statusCode).toBe(409);
+    expect(ApiError.parse(own.json()).details).toEqual({ reason: 'own_route' });
+    const draft = await send('POST', admin.headers, `/users/${target.id}/gift`, {
+      routeId: await addRoute('premium', 'draft'),
+    });
+    expect(draft.statusCode).toBe(404);
   });
 });
