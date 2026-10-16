@@ -1147,6 +1147,26 @@ export const messages = {
         failed: "Le programme n'a pas pu être enregistré.",
       },
     },
+    steps: {
+      filters: { label: 'Filtres des étapes', withoutPartner: 'Lieux sans lien partenaire' },
+      total: (count: number) => (count > 1 ? `${count} étapes` : `${count} étape`),
+      columns: { route: 'Parcours', place: 'Lieu', link: 'Lien affiché', clicks: 'Clics sur 30 j' },
+      stepOf: (position: number) => `Étape ${position + 1}`,
+      origins: {
+        creator: 'Créateur',
+        creator_affiliate: 'Créateur · lien affilié',
+        partner: 'Partenaire Widoo',
+      },
+      noLink: 'Aucun lien',
+      hasPartner: 'Lien partenaire',
+      addPartner: 'Ajouter le lien partenaire',
+      editPlace: 'Modifier le lieu',
+      empty: {
+        title: 'Aucune étape réservable',
+        text: 'Les étapes avec un lien de réservation apparaissent ici.',
+      },
+      error: 'Les étapes ne se sont pas chargées.',
+    },
   },
   notFound: {
     title: 'Page introuvable',
