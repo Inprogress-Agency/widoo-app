@@ -21,6 +21,15 @@ const place = {
   hours: [],
 };
 const transition = { distanceM: 600, durationMin: 8, mode: 'walk', estimated: true };
+const creatorPhoto = { url: 'https://example.com/photos/etape.jpg', credit: null };
+const freePhoto = {
+  url: 'https://example.com/photos/libre.jpg',
+  credit: {
+    author: 'Auteur Fictif',
+    license: 'CC BY-SA 4.0',
+    sourceUrl: 'https://example.com/commons/libre',
+  },
+};
 const fullStep = (id: string, position: number) => ({
   id,
   position,
@@ -39,6 +48,8 @@ const fullStep = (id: string, position: number) => ({
   transition,
   place,
   verification: { confirmations: 12, lastConfirmedAt: '2026-09-20T10:00:00.000Z', reports: null },
+  highlights: ['Point fictif'],
+  photos: [creatorPhoto, freePhoto],
 });
 const lockedStep = (id: string, position: number) => ({
   id,
@@ -121,6 +132,28 @@ describe('RouteDetail', () => {
     const leaking = { ...lockedStep(ids[1], 1), place };
     expect(SheetStep.safeParse(leaking).success).toBe(false);
     expect(SheetStep.safeParse({ ...lockedStep(ids[1], 1), description: 'x' }).success).toBe(false);
+  });
+
+  it('serves the points and photos of a full step, never of a locked one (D-014, D-052)', () => {
+    const [step] = RouteDetail.parse(detail).steps;
+    expect(step).toMatchObject({ highlights: ['Point fictif'], photos: [creatorPhoto, freePhoto] });
+    expect(SheetStep.parse({ ...fullStep(ids[0], 0), highlights: [], photos: [] })).toMatchObject({
+      highlights: [],
+      photos: [],
+    });
+    for (const content of [{ highlights: ['Point fictif'] }, { photos: [creatorPhoto] }]) {
+      expect(SheetStep.safeParse({ ...lockedStep(ids[1], 1), ...content }).success).toBe(false);
+    }
+  });
+
+  it.each([
+    ['a fourth point', { highlights: ['Un', 'Deux', 'Trois', 'Quatre'] }],
+    ['an empty point', { highlights: [''] }],
+    ['a sixth photo', { photos: Array(6).fill(creatorPhoto) }],
+    ['a photo in http', { photos: [{ ...creatorPhoto, url: 'http://example.com/a.jpg' }] }],
+    ['a credit without its author', { photos: [{ ...freePhoto, credit: { license: 'CC0' } }] }],
+  ])('refuses a step with %s', (_, content) => {
+    expect(SheetStep.safeParse({ ...fullStep(ids[0], 0), ...content }).success).toBe(false);
   });
 
   it.each([

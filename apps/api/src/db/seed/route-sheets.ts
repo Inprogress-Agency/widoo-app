@@ -110,6 +110,8 @@ async function sheetOf(route: DemoRoute): Promise<RouteDetail> {
         lastConfirmedAt: datasetDate,
         reports: null,
       },
+      highlights: step.highlights ?? [],
+      photos: step.photos.map(({ url, credit }) => ({ url, credit: credit ?? null })),
     };
   });
 
