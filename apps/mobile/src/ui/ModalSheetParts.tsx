@@ -51,8 +51,10 @@ export function ModalSheetBackdrop({
         opacity={1}
         style={[props.style, styles.veil]}
         accessible={isClosing}
-        accessibilityLabel={isClosing ? closeLabel : undefined}
-        accessibilityRole={isClosing ? 'button' : undefined}
+        // null, not undefined: gorhom would put back its own « Bottom sheet backdrop » button,
+        // which TalkBack reads over a veil that does nothing (E-18).
+        accessibilityLabel={isClosing ? closeLabel : null}
+        accessibilityRole={isClosing ? 'button' : null}
         accessibilityHint=""
       />
     </GestureDetector>
