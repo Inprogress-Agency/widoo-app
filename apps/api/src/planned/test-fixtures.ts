@@ -1,7 +1,7 @@
-import { eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import type { buildApp } from '../app';
 import type { TestTokenVerifier } from '../auth/test-verifier';
-import { routeUnlocks, routes, steps, users } from '../db/schema';
+import { media, routeUnlocks, routes, steps, users } from '../db/schema';
 import { seed, seedId } from '../db/seed';
 import { uuidv7 } from '../db/uuid';
 
@@ -17,9 +17,16 @@ export const saturdayTen = '2026-10-24T10:00:00+02:00';
 export function plannedFixtures(app: () => App, verifier: TestTokenVerifier) {
   const routeIds: string[] = [];
   const uids: string[] = [];
+  const stepIds: string[] = [];
 
-  /** A copy of the demo route, its first step to book (fictitious link). */
-  async function copyDemoRoute(values: Partial<typeof routes.$inferInsert> = {}) {
+  /**
+   * A copy of the demo route, its first step to book (fictitious link); with `stepPhotos`, the
+   * photos of its steps too, deleted by `cleanUp`.
+   */
+  async function copyDemoRoute(
+    values: Partial<typeof routes.$inferInsert> = {},
+    { stepPhotos = false } = {},
+  ) {
     await seed(app().db);
     const demoId = seedId('route:marais-gourmand');
     const [demo] = await app().db.select().from(routes).where(eq(routes.id, demoId));
@@ -30,12 +37,19 @@ export function plannedFixtures(app: () => App, verifier: TestTokenVerifier) {
       .db.insert(routes)
       .values({ ...demo, id, shareToken: null, ...values });
     const demoSteps = await app().db.select().from(steps).where(eq(steps.routeId, demoId));
+    const copies = new Map(demoSteps.map((step) => [step.id, uuidv7()]));
+    const copyOf = (stepId: string) => {
+      const copy = copies.get(stepId);
+      if (!copy) throw new Error(`Step ${stepId} was not copied`);
+      return copy;
+    };
+    stepIds.push(...copies.values());
     await app()
       .db.insert(steps)
       .values(
         demoSteps.map((step) => ({
           ...step,
-          id: uuidv7(),
+          id: copyOf(step.id),
           routeId: id,
           ...(step.position === 0 && {
             bookingRequired: true,
@@ -43,6 +57,19 @@ export function plannedFixtures(app: () => App, verifier: TestTokenVerifier) {
           }),
         })),
       );
+    const photos = !stepPhotos
+      ? []
+      : await app()
+          .db.select()
+          .from(media)
+          .where(and(eq(media.ownerType, 'step'), inArray(media.ownerId, [...copies.keys()])));
+    if (photos.length > 0) {
+      await app()
+        .db.insert(media)
+        .values(
+          photos.map((photo) => ({ ...photo, id: uuidv7(), ownerId: copyOf(photo.ownerId) })),
+        );
+    }
     return id;
   }
 
@@ -71,6 +98,11 @@ export function plannedFixtures(app: () => App, verifier: TestTokenVerifier) {
   async function cleanUp() {
     if (uids.length > 0) await app().db.delete(users).where(inArray(users.firebaseUid, uids));
     if (routeIds.length > 0) await app().db.delete(routes).where(inArray(routes.id, routeIds));
+    if (stepIds.length > 0) {
+      await app()
+        .db.delete(media)
+        .where(and(eq(media.ownerType, 'step'), inArray(media.ownerId, stepIds)));
+    }
   }
 
   return { copyDemoRoute, signIn, unlock, cleanUp };

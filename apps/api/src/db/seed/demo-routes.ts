@@ -11,10 +11,13 @@ import {
   durationBucketOf,
   HttpsUrl,
   LatLng,
+  PhotoCredit,
   routeTipMaxLength,
   routeTipsMax,
   routeTitleMaxLength,
   stepDescriptionMaxLength,
+  StepHighlights,
+  stepPhotosMax,
   taxonomies,
   type BudgetBucket,
   type DurationBucket,
@@ -54,6 +57,18 @@ const DemoPlace = z.object({
   alwaysOpen: z.boolean().default(false),
 });
 
+const DemoPhoto = z.object({
+  url: HttpsUrl,
+  width: z.number().int().positive(),
+  height: z.number().int().positive(),
+});
+
+/**
+ * A photo of « En images » (D-029). With a credit, it stands for a free photo of Wikimedia
+ * Commons (D-050): the photo stays an Unsplash one, the author and the source page are fictitious.
+ */
+const DemoStepPhoto = DemoPhoto.extend({ credit: PhotoCredit.optional() });
+
 const DemoStep = z.object({
   place: Key,
   description: z.string().min(1).max(stepDescriptionMaxLength),
@@ -69,6 +84,9 @@ const DemoStep = z.object({
   /** Last day of an ephemeral step (D-050). */
   endsOn: z.iso.date().optional(),
   transitionNote: z.string().min(1).optional(),
+  /** « À ne pas manquer » of E-07 (D-029). */
+  highlights: StepHighlights.optional(),
+  photos: z.array(DemoStepPhoto).max(stepPhotosMax).default([]),
 });
 
 /** Stored as is in `routes.computed`: snake_case keys, like the other computed jsonb columns. */
@@ -98,15 +116,7 @@ const DemoRoute = z.object({
   suggestedStart: LocalTime.optional(),
   /** « À prévoir », lines of the creator (D-048). */
   tips: z.array(z.string().min(1).max(routeTipMaxLength)).max(routeTipsMax).default([]),
-  photos: z
-    .array(
-      z.object({
-        url: HttpsUrl,
-        width: z.number().int().positive(),
-        height: z.number().int().positive(),
-      }),
-    )
-    .min(1),
+  photos: z.array(DemoPhoto).min(1),
   computed: Computed,
   steps: z.array(DemoStep).min(3).max(6),
 });
@@ -155,6 +165,17 @@ export const DemoDataset = z
         ),
       ),
     { message: 'An affiliate link of the demo is a fictitious link' },
+  )
+  .refine(
+    ({ routes }) =>
+      routes.every((route) =>
+        route.steps.every((step) =>
+          step.photos.every(
+            ({ credit }) => !credit || credit.sourceUrl.startsWith('https://example.com/'),
+          ),
+        ),
+      ),
+    { message: 'The credit of a demo photo is fictitious' },
   );
 export type DemoDataset = z.infer<typeof DemoDataset>;
 export type DemoRoute = DemoDataset['routes'][number];
