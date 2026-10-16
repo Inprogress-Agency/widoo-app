@@ -237,7 +237,7 @@ describe('RouteSheet (E-05)', () => {
   it('shows the date of a planned route in place of « Programmer »', async () => {
     const plannedDate = {
       label: 'Sam. 26, 10:00',
-      spoken: 'Sortie programmée le samedi 26 septembre à 10:00, modifier la sortie',
+      spoken: 'Sortie programmée le samedi 26 septembre à 10:00, voir votre sortie',
     };
     await renderSheet(ready(marais), { plannedDate });
     expect(await screen.findByRole('button', { name: plannedDate.spoken })).toBeTruthy();
