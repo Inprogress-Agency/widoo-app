@@ -2,7 +2,7 @@ import type { CatalogPlaceInput } from '@widoo/shared';
 import { eq, sql } from 'drizzle-orm';
 import { recordAdminAction } from '../admin/actions';
 import type { Db } from '../db/client';
-import { placeHours, places } from '../db/schema';
+import { affiliatePrograms, placeHours, places } from '../db/schema';
 import { httpError } from '../errors';
 
 type Transaction = Parameters<Parameters<Db['transaction']>[0]>[0];
@@ -40,7 +40,28 @@ const fieldsOf = (input: CatalogPlaceInput) => ({
   priceRange: input.priceRange,
   websiteUrl: input.websiteUrl,
   phone: input.phone,
+  // Left out, the partner link is left as it is (a creation or an import never sends it).
+  ...(input.partnerBookingUrl === undefined
+    ? {}
+    : {
+        partnerBookingUrl: input.partnerBookingUrl,
+        partnerProgramId: input.partnerProgramId ?? null,
+      }),
 });
+
+/** 400 when the program a partner link names does not exist. */
+async function assertProgramExists(tx: Transaction, programId: string | null | undefined) {
+  if (!programId) {
+    return;
+  }
+  const [program] = await tx
+    .select({ id: affiliatePrograms.id })
+    .from(affiliatePrograms)
+    .where(eq(affiliatePrograms.id, programId));
+  if (!program) {
+    throw httpError(400, 'Unknown affiliate program');
+  }
+}
 
 async function replaceHours(tx: Transaction, placeId: string, hours: CatalogPlaceInput['hours']) {
   await tx.delete(placeHours).where(eq(placeHours.placeId, placeId));
@@ -98,6 +119,7 @@ export async function updateCatalogPlace(
     }
     const hoursBefore = await tx.select().from(placeHours).where(eq(placeHours.placeId, placeId));
     const cityId = await cityOf(tx, input.location);
+    await assertProgramExists(tx, input.partnerProgramId);
     await tx
       .update(places)
       .set({ ...fieldsOf(input), cityId })
@@ -117,6 +139,8 @@ export async function updateCatalogPlace(
         priceRange: before.priceRange,
         websiteUrl: before.websiteUrl,
         phone: before.phone,
+        partnerBookingUrl: before.partnerBookingUrl,
+        partnerProgramId: before.partnerProgramId,
         hours: hoursBefore.map(({ weekday, opens, closes, validFrom, validTo }) => ({
           weekday,
           opens,
