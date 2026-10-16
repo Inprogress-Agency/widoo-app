@@ -123,6 +123,8 @@ export default function RootLayout() {
                 ))}
                 {/* E-16, pushed from a card or from the route sheet, over it (M-03). */}
                 <Stack.Screen name="creator/[id]" options={pageOptions} />
+                {/* Every review of a route, pushed from its sheet (M-03). */}
+                <Stack.Screen name="reviews/[id]" options={pageOptions} />
               </Stack>
             </UpdateGate>
             {/* E-10, over whichever screen asks for an account. */}
