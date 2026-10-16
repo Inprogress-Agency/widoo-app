@@ -1,6 +1,10 @@
 import {
+  AdminActionFilters,
+  AdminActions,
   AdminRatings,
   RatingActionResult,
+  AdminSetting,
+  AdminSettings,
   AdminUserDetail,
   AdminUsers,
   AdminRouteReports,
@@ -49,7 +53,9 @@ import {
   type RepublishBody,
   type AdminRatingsQuery,
   type AdminReportsQuery,
+  type AdminActionsQuery,
   type AdminSignalsQuery,
+  type UpdateSettingBody,
   type AdminUsersQuery,
   type CertificationBody,
   type ChangeUserRoleBody,
@@ -93,6 +99,7 @@ import { myRoutesQueryString, type MyRoutesParams } from './my-routes';
 import { createTransport, type ApiClientOptions } from './transport';
 import { moderationQueryString, type ModerationQueueParams } from './moderation';
 import { catalogPlacesQueryString, catalogQueryString } from './catalog';
+import { actionsQueryString } from './actions';
 import { usersQueryString } from './users';
 import { ratingsQueryString, reportsQueryString, signalsQueryString } from './reports';
 
@@ -708,6 +715,46 @@ export function createApiClient(options: ApiClientOptions) {
     /** `DELETE /v1/admin/users/:id`: deletes an account with the rule of the app. */
     deleteUser: (userId: string) =>
       requestEmpty({ method: 'DELETE', path: `/v1/admin/users/${userId}`, auth: true }),
+
+    /** `GET /v1/admin/settings`: the settings the team changes, with the value in force (A-11). */
+    getAdminSettings: (signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: '/v1/admin/settings',
+        schema: AdminSettings,
+        auth: true,
+        signal,
+      }),
+
+    /** `PATCH /v1/admin/settings/:key`: changes a setting, with a reason (admin only). */
+    updateAdminSetting: (key: string, body: UpdateSettingBody) =>
+      request({
+        method: 'PATCH',
+        path: `/v1/admin/settings/${encodeURIComponent(key)}`,
+        body,
+        schema: AdminSetting,
+        auth: true,
+      }),
+
+    /** `GET /v1/admin/actions`: the journal of the admin, most recent first (A-12). */
+    getAdminActions: (params: Partial<AdminActionsQuery>, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/admin/actions?${actionsQueryString(params)}`,
+        schema: AdminActions,
+        auth: true,
+        signal,
+      }),
+
+    /** `GET /v1/admin/actions/filters`: the authors, actions and targets the journal holds. */
+    getAdminActionFilters: (signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: '/v1/admin/actions/filters',
+        schema: AdminActionFilters,
+        auth: true,
+        signal,
+      }),
 
     /** `GET /v1/admin/ratings`: the ratings with a comment, filtered by note and route (A-03). */
     getAdminRatings: (params: Partial<AdminRatingsQuery>, signal?: AbortSignal) =>
