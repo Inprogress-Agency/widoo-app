@@ -93,7 +93,7 @@ export interface DemoRemoval {
 
 /**
  * Deletes the demo dataset and nothing else, inside the caller's transaction: the ten routes
- * (steps cascade) and their photos, the demo places no other route uses (hours cascade) and
+ * (steps cascade), their photos and those of their steps, the demo places no other route uses (hours cascade) and
  * their photos, the two fictitious authors. Paris stays: other places may belong to it. A
  * second run deletes nothing.
  */
@@ -106,6 +106,17 @@ export async function removeDemoDataset(tx: Tx): Promise<DemoRemoval> {
   await tx
     .delete(media)
     .where(and(eq(media.ownerType, 'route'), inArray(media.ownerId, demoRouteIds)));
+  await tx
+    .delete(media)
+    .where(
+      and(
+        eq(media.ownerType, 'step'),
+        inArray(
+          media.ownerId,
+          tx.select({ id: steps.id }).from(steps).where(inArray(steps.routeId, demoRouteIds)),
+        ),
+      ),
+    );
   const deletedRoutes = await tx
     .delete(routes)
     .where(inArray(routes.id, demoRouteIds))

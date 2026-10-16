@@ -136,6 +136,18 @@ async function seedRoutes(tx: Tx, cityId: string) {
       .onConflictDoUpdate({ target: routes.id, set: row });
   }
 
+  // Photos of the steps first: `media` has no foreign key, they would outlive their steps.
+  await tx
+    .delete(media)
+    .where(
+      and(
+        eq(media.ownerType, 'step'),
+        inArray(
+          media.ownerId,
+          tx.select({ id: steps.id }).from(steps).where(inArray(steps.routeId, demoRouteIds)),
+        ),
+      ),
+    );
   await tx.delete(steps).where(inArray(steps.routeId, demoRouteIds));
   await tx.insert(steps).values(
     demoDataset.routes.flatMap((route) =>
@@ -154,6 +166,7 @@ async function seedRoutes(tx: Tx, cityId: string) {
         bookingIsAffiliate: step.bookingIsAffiliate,
         endsOn: step.endsOn ?? null,
         transitionNote: step.transitionNote ?? null,
+        highlights: step.highlights ?? null,
       })),
     ),
   );
@@ -176,6 +189,25 @@ async function seedRoutes(tx: Tx, cityId: string) {
       })),
     ),
   );
+  const stepPhotos = demoDataset.routes.flatMap((route) =>
+    route.steps.flatMap((step, stepPosition) =>
+      step.photos.map(({ url, width, height, credit }, position) => ({
+        id: seedId(`media:${route.key}:${stepPosition}:${position}`),
+        ownerType: 'step' as const,
+        ownerId: seedId(`step:${route.key}:${stepPosition}`),
+        storagePath: url,
+        width,
+        height,
+        position,
+        source: credit ? ('commons' as const) : ('upload' as const),
+        author: credit?.author ?? null,
+        license: credit?.license ?? null,
+        sourceUrl: credit?.sourceUrl ?? null,
+        createdAt: seedAt,
+      })),
+    ),
+  );
+  if (stepPhotos.length > 0) await tx.insert(media).values(stepPhotos);
 }
 
 function routeRow(route: DemoRoute, cityId: string) {

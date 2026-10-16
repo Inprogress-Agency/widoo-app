@@ -18,6 +18,9 @@ import { uuidv7 } from './uuid';
 
 const staging: DemoSeedTarget = { optIn: 'staging', projectId: stagingProjectId };
 const placeIds = demoDataset.places.map((place) => seedId(`place:${place.key}`));
+const demoStepIds = demoDataset.routes.flatMap((route) =>
+  route.steps.map((_, position) => seedId(`step:${route.key}:${position}`)),
+);
 const authorIds = demoDataset.authors.map((author) => seedId(`user:${author.key}`));
 /** Seeds wait for those of the other test files, behind the same lock. */
 const seedTimeout = { timeout: 30_000 };
@@ -129,7 +132,7 @@ describe('runDemoSeed', () => {
     media: await app.db
       .select()
       .from(media)
-      .where(inArray(media.ownerId, demoRouteIds))
+      .where(inArray(media.ownerId, [...demoRouteIds, ...demoStepIds]))
       .orderBy(media.id),
   });
 
@@ -146,6 +149,11 @@ describe('runDemoSeed', () => {
       const id = seedId(`route:${route.key}`);
       expect(first.steps.filter((step) => step.routeId === id)).toHaveLength(route.steps.length);
       expect(first.media.filter((photo) => photo.ownerId === id)).toHaveLength(route.photos.length);
+      route.steps.forEach((step, position) => {
+        const stepId = seedId(`step:${route.key}:${position}`);
+        const photos = first.media.filter((photo) => photo.ownerId === stepId);
+        expect(photos).toHaveLength(step.photos.length);
+      });
     }
   });
 });
@@ -239,6 +247,9 @@ describe('removeDemoDataset', () => {
           .from(media)
           .where(and(eq(media.ownerType, 'route'), inArray(media.ownerId, demoRouteIds))),
       ).toHaveLength(0);
+      expect(await tx.select().from(media).where(inArray(media.ownerId, demoStepIds))).toHaveLength(
+        0,
+      );
       // A demo place stays only while another route uses it.
       const kept = await tx
         .select({ id: places.id })

@@ -87,6 +87,24 @@ describe('seed', () => {
     }
   });
 
+  // What E-07 shows of a step (D-029, D-052), for the recette of the Go: fictitious credits.
+  it('writes the points and the photos of the demo steps, a free photo with its credit', async () => {
+    const [merci] = await app.db
+      .select()
+      .from(steps)
+      .where(and(eq(steps.routeId, routeId('marais-gourmand')), eq(steps.position, 0)));
+    expect(merci?.highlights).toHaveLength(3);
+    const photos = await app.db
+      .select()
+      .from(media)
+      .where(and(eq(media.ownerType, 'step'), eq(media.ownerId, merci?.id ?? '')))
+      .orderBy(media.position);
+    expect(photos.map(({ position, source, author }) => [position, source, author])).toEqual([
+      [0, 'upload', null],
+      [1, 'commons', 'J. Moreau'],
+    ]);
+  });
+
   // Criterion of #180: the access of every demo route, from the reference stations (D-050).
   it('computes the access of every demo route, the station nearest its first step', async () => {
     const rows = await app.db

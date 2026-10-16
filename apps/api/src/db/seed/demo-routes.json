@@ -767,14 +767,47 @@
           "place": "maison-victor-hugo",
           "description": "L’appartement de l’écrivain, sur la place des Vosges. Collections permanentes gratuites.",
           "durationMin": 45,
-          "costPerPerson": 0
+          "costPerPerson": 0,
+          "highlights": [
+            "Le salon chinois dessiné par Victor Hugo",
+            "La vue sur la place des Vosges"
+          ],
+          "photos": [
+            {
+              "url": "https://images.unsplash.com/photo-1775210676191-f450802fa51e?w=1200&h=800&fit=crop&auto=format&q=80",
+              "width": 1200,
+              "height": 800
+            },
+            {
+              "url": "https://images.unsplash.com/photo-1691472898646-7011d4d0ad55?w=1200&h=800&fit=crop&auto=format&q=80",
+              "width": 1200,
+              "height": 800,
+              "credit": {
+                "author": "J. Moreau",
+                "license": "CC BY-SA 4.0",
+                "sourceUrl": "https://example.com/commons/cour-du-marais"
+              }
+            }
+          ]
         },
         {
           "place": "musee-carnavalet",
           "description": "Le musée de l’histoire de Paris : enseignes anciennes, salons reconstitués, chambre de Proust.",
           "durationMin": 75,
           "costPerPerson": 0,
-          "transitionNote": "Passer sous les arcades de la place, puis rue des Francs-Bourgeois."
+          "transitionNote": "Passer sous les arcades de la place, puis rue des Francs-Bourgeois.",
+          "highlights": [
+            "Les enseignes anciennes de l’entrée",
+            "La chambre de Marcel Proust",
+            "Le jardin des cours"
+          ],
+          "photos": [
+            {
+              "url": "https://images.unsplash.com/photo-1691472898646-7011d4d0ad55?w=1200&h=800&fit=crop&auto=format&q=80",
+              "width": 1200,
+              "height": 800
+            }
+          ]
         },
         {
           "place": "musee-cognacq-jay",
@@ -1272,14 +1305,49 @@
           "place": "merci",
           "description": "Café au Used Book Café, au milieu des livres d’occasion.",
           "durationMin": 30,
-          "costPerPerson": 8
+          "costPerPerson": 8,
+          "highlights": [
+            "Le Used Book Café, au fond à gauche",
+            "La petite voiture rouge de la cour",
+            "Le rayon papeterie, à l’étage"
+          ],
+          "photos": [
+            {
+              "url": "https://images.unsplash.com/photo-1788101841904-669e8b5924b4?w=1200&h=800&fit=crop&auto=format&q=80",
+              "width": 1200,
+              "height": 800
+            },
+            {
+              "url": "https://images.unsplash.com/photo-1563896171319-a5534fcf465f?w=1200&h=800&fit=crop&auto=format&q=80",
+              "width": 1200,
+              "height": 800,
+              "credit": {
+                "author": "J. Moreau",
+                "license": "CC BY-SA 4.0",
+                "sourceUrl": "https://example.com/commons/cour-du-marais"
+              }
+            }
+          ]
         },
         {
           "place": "as-du-fallafel",
           "description": "Le sandwich falafel à emporter. Fermé le samedi.",
           "durationMin": 30,
           "costPerPerson": 12,
-          "transitionNote": "Rejoindre la rue des Rosiers par la rue du Pas-de-la-Mule."
+          "transitionNote": "Rejoindre la rue des Rosiers par la rue du Pas-de-la-Mule.",
+          "highlights": ["La file avance vite : commander en attendant"],
+          "photos": [
+            {
+              "url": "https://images.unsplash.com/photo-1691472898646-7011d4d0ad55?w=1200&h=800&fit=crop&auto=format&q=80",
+              "width": 1200,
+              "height": 800,
+              "credit": {
+                "author": "A. Martin",
+                "license": "CC BY 4.0",
+                "sourceUrl": "https://example.com/commons/rue-des-rosiers"
+              }
+            }
+          ]
         },
         {
           "place": "village-saint-paul",
@@ -1291,7 +1359,8 @@
           "place": "berthillon",
           "description": "Glace au caramel au beurre salé, à déguster sur le quai d’Orléans.",
           "durationMin": 20,
-          "costPerPerson": 6
+          "costPerPerson": 6,
+          "highlights": ["Le sorbet au cacao amer", "Notre-Dame depuis le pont Saint-Louis"]
         }
       ]
     },
