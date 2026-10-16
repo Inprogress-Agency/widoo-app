@@ -3,7 +3,7 @@ import { and, eq, inArray } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
-import { plannedSteps, routes } from '../db/schema';
+import { plannedSteps, routeReports, routes } from '../db/schema';
 import { ratingOf } from '../db/route-stats';
 import { plannedFixtures, saturdayTen } from '../planned/test-fixtures';
 import { testConfig } from '../test-config';
@@ -132,6 +132,42 @@ describe('POST /v1/me/planned/:id/rating', () => {
     ).toBe(422);
     expect((await rate(headers, planned.id, { rating: 6 })).statusCode).toBe(422);
   });
+
+  // Eleven accounts, each with a whole outing: slower than the others.
+  it('opens one low_rating report under 2.5 with 5 ratings, again after 5 new ones', async () => {
+    const routeId = await fixtures.copyDemoRoute();
+    const rateLow = async (ratings: number[]) => {
+      for (const rating of ratings) {
+        const headers = await fixtures.signIn();
+        const planned = await outing(headers, routeId);
+        expect((await rate(headers, planned.id, { rating })).statusCode).toBe(200);
+      }
+    };
+    const lowReports = () =>
+      app.db
+        .select({ status: routeReports.status, userId: routeReports.userId })
+        .from(routeReports)
+        .where(and(eq(routeReports.routeId, routeId), eq(routeReports.reason, 'low_rating')))
+        .orderBy(routeReports.createdAt);
+
+    await rateLow([1, 2, 3, 2]);
+    expect(await lowReports()).toEqual([]);
+    await rateLow([1, 1]);
+    expect(await lowReports()).toEqual([{ status: 'open', userId: null }]);
+
+    // « Garder » in A-03: closed, it opens again only after 5 new ratings.
+    await app.db
+      .update(routeReports)
+      .set({ status: 'rejected', reviewedAt: new Date() })
+      .where(eq(routeReports.routeId, routeId));
+    await rateLow([1, 1, 1, 1]);
+    expect(await lowReports()).toHaveLength(1);
+    await rateLow([1]);
+    expect(await lowReports()).toEqual([
+      { status: 'rejected', userId: null },
+      { status: 'open', userId: null },
+    ]);
+  }, 30_000);
 
   it('erases the rating with the account and recomputes the route', async () => {
     const routeId = await fixtures.copyDemoRoute();
