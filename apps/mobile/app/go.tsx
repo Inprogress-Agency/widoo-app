@@ -20,7 +20,7 @@ const collapse = () => {
 function Go({ planned, progress }: { planned: PlannedRoute; progress: GoProgress }) {
   const isOnline = useIsOnline();
   const { state } = useRouteSheet(planned.route.id);
-  const actions = useGoActions(planned, progress, collapse);
+  const actions = useGoActions(planned, progress);
   const route = state.status === 'ready' ? state.route : null;
   return (
     <>
