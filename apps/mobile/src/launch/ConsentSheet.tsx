@@ -131,7 +131,9 @@ export function ConsentSheet({ isHomeReady }: { isHomeReady: boolean }) {
           <TextLink
             label={t('settings.privacyPolicy')}
             color="blue-ink"
-            onPress={() => router.push('/settings/privacy-policy')}
+            onPress={() =>
+              router.push({ pathname: '/settings/privacy-policy', params: { from: 'home' } })
+            }
           />
           {/* Side by side at every text size, « Accepter » on the right (E-18, D-061). */}
           <View className="flex-row gap-12">

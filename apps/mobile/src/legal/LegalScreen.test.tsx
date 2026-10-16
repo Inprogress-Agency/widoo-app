@@ -26,11 +26,11 @@ const served: LegalDocument = {
   sections: [{ title: '1. Nouvel article', body: 'Texte **servi** par l’API.' }],
 };
 
-async function renderScreen(doc: LegalDoc) {
+async function renderScreen(doc: LegalDoc, backTo?: 'settings' | 'home') {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   await render(
     <QueryClientProvider client={client}>
-      <LegalScreen doc={doc} />
+      <LegalScreen doc={doc} backTo={backTo} />
     </QueryClientProvider>,
   );
 }
@@ -57,5 +57,14 @@ describe('Textes légaux', () => {
     expect(await screen.findByRole('header', { name: '1. Nouvel article' })).toBeTruthy();
     expect(screen.getByText('Mise à jour le 15 octobre 2026')).toBeTruthy();
     expect(screen.queryByRole('header', { name: "L'essentiel" })).toBeNull();
+  });
+
+  it.each<['settings' | 'home' | undefined, string]>([
+    [undefined, 'Retour aux réglages'],
+    ['home', "Retour à l'accueil"],
+  ])('names where its back button goes (%s)', async (backTo, label) => {
+    getLegalDocument.mockRejectedValue(new Error('offline'));
+    await renderScreen('privacy', backTo);
+    expect(screen.getByRole('button', { name: label })).toBeTruthy();
   });
 });

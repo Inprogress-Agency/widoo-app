@@ -25,6 +25,7 @@ export const settings = {
   },
   legal: {
     back: 'Back to the settings',
+    backHome: 'Back to the home',
     updated: 'Updated on {{date}}',
     summary: 'In short',
   },

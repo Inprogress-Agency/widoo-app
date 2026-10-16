@@ -20,9 +20,16 @@ const barTitleKey = { terms: 'settings.terms', privacy: 'settings.privacyPolicy'
  * Conditions d'utilisation and Politique de confidentialité in native pages (Ecrans › E-19,
  * D-063): the text served by the API in the language of the app and kept on the phone, so it
  * reads offline. The bar has no title at rest; it gets it once the big title has scrolled under
- * it. Big title and articles are headers, for the navigation by headings.
+ * it. Big title and articles are headers, for the navigation by headings. Its back button says
+ * where it goes: the Réglages, or the home for the policy opened from the consent sheet (E-18).
  */
-export function LegalScreen({ doc }: { doc: LegalDoc }) {
+export function LegalScreen({
+  doc,
+  backTo = 'settings',
+}: {
+  doc: LegalDoc;
+  backTo?: 'settings' | 'home';
+}) {
   const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
   const document = useLegalDocument(doc);
@@ -40,7 +47,10 @@ export function LegalScreen({ doc }: { doc: LegalDoc }) {
     <View className="flex-1 bg-bg">
       <TopBar
         title={isTitleUnder ? t(barTitleKey[doc]) : ''}
-        back={{ label: t('legal.back'), onPress: () => router.back() }}
+        back={{
+          label: t(backTo === 'home' ? 'legal.backHome' : 'legal.back'),
+          onPress: () => router.back(),
+        }}
       />
       <ScrollView
         contentContainerClassName="gap-16 px-16 pt-16"
