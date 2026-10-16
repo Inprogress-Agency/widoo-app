@@ -4,6 +4,7 @@ import {
   LegalDocument,
   Me,
   MyDataExport,
+  PlannedMapsUrl,
   PlannedRoute,
   PlannedRouteList,
   PublicProfile,
@@ -21,7 +22,13 @@ import {
   type UpdateMe,
   type UpdatePlannedRoute,
 } from '@widoo/shared';
-import { plannedPath, plannedQueryString, type PlannedListParams } from './planned';
+import {
+  plannedMapsUrlPath,
+  plannedPath,
+  plannedQueryString,
+  plannedStepDonePath,
+  type PlannedListParams,
+} from './planned';
 import {
   countQueryString,
   searchQueryString,
@@ -192,6 +199,31 @@ export function createApiClient(options: ApiClientOptions) {
         body: update,
         schema: PlannedRoute,
         auth: true,
+      }),
+
+    /**
+     * `POST /v1/me/planned/:id/steps/:stepId/done`: « Étape suivante » of the Go (E-07); a step
+     * already done stays as it was, a skipped one becomes done; 409 outside a Go.
+     */
+    markPlannedStepDone: (id: string, stepId: string) =>
+      request({
+        method: 'POST',
+        path: plannedStepDonePath(id, stepId),
+        schema: PlannedRoute,
+        auth: true,
+      }),
+
+    /**
+     * `GET /v1/me/planned/:id/maps-url`: « Itinéraire » of the Go, Google Maps on foot to the
+     * first step neither done nor skipped (D-032); 409 when none is left.
+     */
+    getPlannedMapsUrl: (id: string, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: plannedMapsUrlPath(id),
+        schema: PlannedMapsUrl,
+        auth: true,
+        signal,
       }),
 
     /**

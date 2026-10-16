@@ -23,3 +23,10 @@ export function plannedQueryString({ status, cursor, limit }: PlannedListParams)
 }
 
 export const plannedPath = (id: string) => `/v1/me/planned/${encodeURIComponent(id)}` as const;
+
+/** « Étape suivante » of a Go (E-07): the step marked done, once. */
+export const plannedStepDonePath = (id: string, stepId: string) =>
+  `${plannedPath(id)}/steps/${encodeURIComponent(stepId)}/done` as const;
+
+/** « Itinéraire » of a Go (E-07, D-032): Google Maps on foot to the next step, never the route. */
+export const plannedMapsUrlPath = (id: string) => `${plannedPath(id)}/maps-url` as const;
