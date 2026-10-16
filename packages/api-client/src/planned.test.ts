@@ -115,3 +115,32 @@ describe('updatePlanned', () => {
     expect(call()?.[1]?.body).toBe(JSON.stringify(update));
   });
 });
+
+describe('markPlannedStepDone', () => {
+  it('posts « Étape suivante » of a step, without a body', async () => {
+    const { client, call, headers } = setup(json(200, planned));
+    await client.markPlannedStepDone(id, stepId);
+    expect(call()?.[0]).toBe(`http://10.0.2.2:8080/v1/me/planned/${id}/steps/${stepId}/done`);
+    expect(call()?.[1]?.method).toBe('POST');
+    expect(call()?.[1]?.body).toBeUndefined();
+    expect(headers().authorization).toBe('Bearer token-1');
+  });
+});
+
+describe('getPlannedMapsUrl', () => {
+  it('reads Google Maps to the next step', async () => {
+    const url =
+      'https://www.google.com/maps/dir/?api=1&destination=48.86%2C2.35&travelmode=walking';
+    const { client, call } = setup(json(200, { stepId, url }));
+    await expect(client.getPlannedMapsUrl(id)).resolves.toEqual({ stepId, url });
+    expect(call()?.[0]).toBe(`http://10.0.2.2:8080/v1/me/planned/${id}/maps-url`);
+  });
+
+  it('throws the 409 of a Go without a step left', async () => {
+    const body = { code: 'conflict', message: 'No step left to go to', details: {} };
+    const error = await setup(json(409, body))
+      .client.getPlannedMapsUrl(id)
+      .catch((caught: unknown) => caught);
+    expect((error as ApiRequestError).status).toBe(409);
+  });
+});
