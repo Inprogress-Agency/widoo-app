@@ -81,7 +81,10 @@ describe('ConsentSheet', () => {
     expect(screen.getByRole('button', { name: 'Refuser' })).toBeOnTheScreen();
     expect(screen.getByRole('button', { name: 'Accepter' })).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole('link', { name: 'Politique de confidentialité' }));
-    expect(router.push).toHaveBeenCalledWith('/settings/privacy-policy');
+    expect(router.push).toHaveBeenCalledWith({
+      pathname: '/settings/privacy-policy',
+      params: { from: 'home' },
+    });
   });
 
   it.each<[string, 'accept' | 'refuse', ConsentStatus]>([

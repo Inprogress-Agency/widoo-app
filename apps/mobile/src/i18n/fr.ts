@@ -696,6 +696,8 @@ export const fr = {
   // Conditions d'utilisation and Politique de confidentialité in native pages (E-19, D-063).
   legal: {
     back: 'Retour aux réglages',
+    // Opened from the « Mesure d'audience » sheet of the home (E-18).
+    backHome: "Retour à l'accueil",
     updated: 'Mise à jour le {{date}}',
     summary: "L'essentiel",
   },
