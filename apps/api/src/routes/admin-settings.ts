@@ -1,9 +1,13 @@
-import { AdminSettings } from '@widoo/shared';
+import { AdminSetting, AdminSettings, UpdateSettingBody } from '@widoo/shared';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
+import { z } from 'zod';
 import { readAdminSettings } from '../admin/settings-catalog';
+import { updateSetting } from '../admin/settings-update';
+import { httpError } from '../errors';
 
 const security = [{ firebaseIdToken: [] }];
 const tags = ['admin'];
+const SettingParams = z.object({ key: z.string().min(1).max(100) });
 
 /**
  * Settings of the admin (A-11, wiki API › Admin): the values the team changes without a
@@ -26,5 +30,25 @@ export const adminSettingsRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async () => ({ items: await readAdminSettings(app.db) }),
+  );
+
+  app.patch(
+    '/admin/settings/:key',
+    {
+      schema: {
+        tags,
+        summary: 'Change a setting, with a reason kept in the journal',
+        security,
+        params: SettingParams,
+        body: UpdateSettingBody,
+        response: { 200: AdminSetting },
+      },
+    },
+    async (request) => {
+      if (!request.user) {
+        throw httpError(401, 'Missing bearer token');
+      }
+      return updateSetting(app.db, request.user.id, request.params.key, request.body);
+    },
   );
 };
