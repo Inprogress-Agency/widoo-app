@@ -9,7 +9,7 @@ import { sql } from 'drizzle-orm';
 import type { Db } from '../db/client';
 import { readSetting } from '../search/settings';
 
-const premiumMinStepsKey = 'premium.min_steps';
+export const premiumMinStepsKey = 'premium.min_steps';
 
 type RouteRow = {
   id: string;
