@@ -123,6 +123,17 @@ describe('RouteSheet (E-05)', () => {
     expect(screen.getByLabelText('Note moyenne 4,7 sur 5, 3 avis')).toBeTruthy();
   });
 
+  it('links to every review once there are more than the last three', async () => {
+    const onOpenReviews = jest.fn();
+    await renderSheet(ready(reported), { onOpenReviews });
+    await screen.findByRole('header', { name: 'Avis' });
+    expect(screen.queryByRole('link', { name: /^Voir les/ })).toBeNull();
+    const many = { ...reported, rating: { average: 4.7, count: 128 } };
+    await renderSheet(ready(many), { onOpenReviews });
+    await fireEvent.press(await screen.findByRole('link', { name: 'Voir les 128 avis' }));
+    expect(onOpenReviews).toHaveBeenCalledWith(reported.id);
+  });
+
   it('opens the profile of its creator from « Voir le profil », not for a route of Widoo', async () => {
     const camille = sheets[2] as RouteDetail;
     const onOpenCreator = jest.fn();

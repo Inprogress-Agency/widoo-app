@@ -1,4 +1,4 @@
-import type { RouteDetail } from '@widoo/shared';
+import type { RouteDetail, RouteReview } from '@widoo/shared';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { formatRating } from '../format/rating';
@@ -65,11 +65,51 @@ export function CreatorBox({
 }
 
 /**
+ * A review: initial, first name, date and its rating as a figure after a star (« ★ 5 »), then its
+ * comment, read as one element « Camille, 17 sept., note 5 sur 5 ». No reply nor thread.
+ */
+export function ReviewItem({ review }: { review: RouteReview }) {
+  const { t } = useTranslation();
+  const date = parisDay(review.createdAt);
+  const spoken = t('route.reviews.item', { name: review.firstName, date, rating: review.rating });
+  return (
+    <View
+      accessible
+      accessibilityLabel={review.comment ? `${spoken}, ${review.comment}` : spoken}
+      className="gap-8 border-t border-line pt-16"
+    >
+      <View className="flex-row items-center gap-12">
+        <Avatar url={null} name={review.firstName} size="avatar-l" />
+        <View className="flex-1">
+          <Text variant="item">{review.firstName}</Text>
+          <Text variant="body-s" color="muted">
+            {date}
+          </Text>
+        </View>
+        <View className="flex-row items-center gap-4">
+          <Icon {...uiIcon('rating')} size="icon-s" />
+          <Text variant="number-m">{review.rating}</Text>
+        </View>
+      </View>
+      {review.comment && <Text variant="body">{review.comment}</Text>}
+    </View>
+  );
+}
+
+/**
  * « Avis »: the average and the count, the last three reviews, each with its initial, first name,
  * date and its rating as a figure after a star (« ★ 5 »), read « note 5 sur 5 ». No reply nor
- * thread. Shown once the route has a review: before, the rating says « Nouveau » (D-023).
+ * thread, then « Voir les 128 avis » when there are more. Shown once the route has a review:
+ * before, the rating says « Nouveau » (D-023).
  */
-export function RouteReviews({ route }: { route: RouteDetail }) {
+export function RouteReviews({
+  route,
+  onOpenReviews,
+}: {
+  route: RouteDetail;
+  /** « Voir les 128 avis », to every review of the route. */
+  onOpenReviews?: (routeId: string) => void;
+}) {
   const { t } = useTranslation();
   const { average, count } = route.rating;
   if (average === null || count === 0 || route.reviews.length === 0) {
@@ -92,37 +132,15 @@ export function RouteReviews({ route }: { route: RouteDetail }) {
           {t('route.reviews.count', { count })}
         </Text>
       </View>
-      {route.reviews.map((review) => {
-        const date = parisDay(review.createdAt);
-        const spoken = t('route.reviews.item', {
-          name: review.firstName,
-          date,
-          rating: review.rating,
-        });
-        return (
-          <View
-            key={review.id}
-            accessible
-            accessibilityLabel={review.comment ? `${spoken}, ${review.comment}` : spoken}
-            className="gap-8 border-t border-line pt-16"
-          >
-            <View className="flex-row items-center gap-12">
-              <Avatar url={null} name={review.firstName} size="avatar-l" />
-              <View className="flex-1">
-                <Text variant="item">{review.firstName}</Text>
-                <Text variant="body-s" color="muted">
-                  {date}
-                </Text>
-              </View>
-              <View className="flex-row items-center gap-4">
-                <Icon {...uiIcon('rating')} size="icon-s" />
-                <Text variant="number-m">{review.rating}</Text>
-              </View>
-            </View>
-            {review.comment && <Text variant="body">{review.comment}</Text>}
-          </View>
-        );
-      })}
+      {route.reviews.map((review) => (
+        <ReviewItem key={review.id} review={review} />
+      ))}
+      {onOpenReviews && count > route.reviews.length && (
+        <TextLink
+          label={t('route.reviews.all', { count })}
+          onPress={() => onOpenReviews(route.id)}
+        />
+      )}
     </View>
   );
 }

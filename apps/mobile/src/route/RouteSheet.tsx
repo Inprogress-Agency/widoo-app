@@ -41,6 +41,8 @@ export interface RouteSheetProps {
   onNearby: () => void;
   /** « Voir le profil » of the creator box, to its public profile (E-16). */
   onOpenCreator?: (author: NonNullable<RouteDetail['author']>) => void;
+  /** « Voir les 128 avis », to every review (E-05, D-013). */
+  onOpenReviews?: (routeId: string) => void;
   onScrollDepth: (depth: ScrollDepth) => void;
   /** Opened at a step from « Voir plus » of the map, from 0: unfolded, scrolled to. */
   initialStep?: number;
@@ -65,6 +67,7 @@ export function RouteSheet({
   onSeeOnMap,
   onNearby,
   onOpenCreator,
+  onOpenReviews,
   onScrollDepth,
   initialStep,
   now = new Date(),
@@ -303,7 +306,7 @@ export function RouteSheet({
                       layout.current.reviews = event.nativeEvent.layout.y;
                     }}
                   >
-                    <RouteReviews route={route} />
+                    <RouteReviews route={route} onOpenReviews={onOpenReviews} />
                   </View>
                 </>
               )}

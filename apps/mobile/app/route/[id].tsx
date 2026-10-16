@@ -70,6 +70,7 @@ export default function RouteScreen() {
         }
         onNearby={goHome}
         onOpenCreator={(author) => openCreatorProfile(author, 'route')}
+        onOpenReviews={(id) => router.push({ pathname: '/reviews/[id]', params: { id } })}
         onScrollDepth={(depth) => analytics.track('route_scrolled', { route_id: id, depth })}
         // Planning asks for an account (D-038): signed out, the sheet E-10 first, then E-06. A
         // planned route opens « Modifier la sortie » until « Votre sortie » exists (E-08).
