@@ -1,6 +1,7 @@
 import {
   allowedUserActions,
   type AdminUserDetail,
+  type CertificationBody,
   type GiftBody,
   type UserAction,
   type UserRole,
@@ -9,6 +10,7 @@ import { and, eq, isNull } from 'drizzle-orm';
 import type { Db, Tx } from '../db/client';
 import { routeUnlocks, routes, users } from '../db/schema';
 import { httpError } from '../errors';
+import { softDeleteUser } from '../users/repository';
 import { recordAdminAction } from './actions';
 import { readUserDetail } from './users-read';
 
@@ -220,4 +222,69 @@ export async function giftUser(
     });
   });
   return detailOf(db, targetId);
+}
+
+/** Awards or removes the Créateur certifié badge; the choice wins over the nightly computation. */
+export async function setCertification(
+  db: Db,
+  actor: Actor,
+  targetId: string,
+  body: CertificationBody,
+  now = new Date(),
+): Promise<AdminUserDetail> {
+  await db.transaction(async (tx) => {
+    const target = await lockTarget(tx, actor, targetId, 'certification');
+    if (target.certifiedOverride === body.override) {
+      return;
+    }
+    await tx
+      .update(users)
+      .set({
+        certifiedOverride: body.override,
+        certifiedAt: body.override === 'granted' ? (target.certifiedAt ?? now) : target.certifiedAt,
+      })
+      .where(eq(users.id, targetId));
+    await recordAdminAction(tx, {
+      actorId: actor.id,
+      action: 'user.certification',
+      targetType: 'user',
+      targetId,
+      before: { override: target.certifiedOverride },
+      after: { override: body.override },
+    });
+  });
+  return detailOf(db, targetId);
+}
+
+/**
+ * Deletes an account with the rule of the app (`softDeleteUser`, D-025, D-027): data erased now,
+ * routes online kept as « Membre Widoo », the others deleted. An account of the team is demoted to
+ * `user` first.
+ */
+export async function deleteUser(db: Db, actor: Actor, targetId: string): Promise<void> {
+  await db.transaction(async (tx) => {
+    const target = await lockTarget(tx, actor, targetId, 'delete');
+    await softDeleteUser(tx, targetId);
+    await recordAdminAction(tx, {
+      actorId: actor.id,
+      action: 'user.delete',
+      targetType: 'user',
+      targetId,
+      before: { role: target.role, plan: target.plan },
+    });
+  });
+}
+
+/** Refuses an export to whoever may not make it, before any data is read. */
+export async function assertCanExport(db: Db, actor: Actor, targetId: string): Promise<void> {
+  const [target] = await db
+    .select({ id: users.id, role: users.role })
+    .from(users)
+    .where(and(eq(users.id, targetId), isNull(users.deletedAt)));
+  if (!target) {
+    throw httpError(404, 'User not found');
+  }
+  if (!allowedUserActions(actor, target).includes('export')) {
+    throw httpError(403, 'Insufficient role');
+  }
 }
