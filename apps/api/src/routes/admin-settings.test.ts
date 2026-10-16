@@ -1,4 +1,4 @@
-import { AdminSettings, ApiError, type UserRole } from '@widoo/shared';
+import { AdminSetting, AdminSettings, ApiError, type UserRole } from '@widoo/shared';
 import { eq, inArray } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
@@ -51,6 +51,9 @@ async function signIn(role: UserRole) {
   return { id: user.id, headers: { authorization: `Bearer ${token}` } };
 }
 
+const patch = (headers: Record<string, string>, settingKey: string, payload: object) =>
+  app.inject({ method: 'PATCH', url: `/v1/admin/settings/${settingKey}`, headers, payload });
+
 describe('GET /v1/admin/settings', () => {
   it('is for admins only', async () => {
     for (const role of ['editor', 'moderator'] as const) {
@@ -76,5 +79,66 @@ describe('GET /v1/admin/settings', () => {
       'recommendation.weights',
     ]);
     expect(items.find((item) => item.key === 'recommendation.weights')?.kind).toBe('weights');
+  });
+});
+
+describe('PATCH /v1/admin/settings/:key', () => {
+  it('changes a setting, tells the value in force and journals it with its reason', async () => {
+    const admin = await signIn('admin');
+    const before = AdminSetting.parse(
+      (await app.inject({ url: '/v1/admin/settings', headers: admin.headers }))
+        .json()
+        .items.find((item: { key: string }) => item.key === key),
+    );
+    const response = await patch(admin.headers, key, { value: 7, reason: 'Parcours plus riches' });
+    expect(response.statusCode).toBe(200);
+    expect(AdminSetting.parse(response.json())).toMatchObject({ key, value: 7, isCustom: true });
+
+    const [entry] = await app.db
+      .select()
+      .from(adminActions)
+      .where(eq(adminActions.actorId, admin.id));
+    expect(entry).toMatchObject({
+      action: 'setting.update',
+      targetType: 'setting',
+      targetId: key,
+      reason: 'Parcours plus riches',
+      before: { value: before.value, isCustom: before.isCustom },
+      after: { value: 7 },
+    });
+    const [row] = await app.db.select().from(settings).where(eq(settings.key, key));
+    expect(row?.value).toBe(7);
+  });
+
+  it('is for admins only', async () => {
+    const moderator = await signIn('moderator');
+    const response = await patch(moderator.headers, key, { value: 6, reason: 'Essai' });
+    expect(response.statusCode).toBe(403);
+  });
+
+  it('refuses a value out of bounds, a fraction for a count and weights that all are zero', async () => {
+    const admin = await signIn('admin');
+    for (const value of [0, 21, 4.5]) {
+      expect((await patch(admin.headers, key, { value, reason: 'Essai' })).statusCode).toBe(400);
+    }
+    const zero = await patch(admin.headers, 'recommendation.weights', {
+      value: { proximity: 0 },
+      reason: 'Essai',
+    });
+    expect(zero.statusCode).toBe(400);
+    const unknown = await patch(admin.headers, 'recommendation.weights', {
+      value: { luck: 1 },
+      reason: 'Essai',
+    });
+    expect(unknown.statusCode).toBe(400);
+  });
+
+  it('asks for a reason and a number, and knows its keys', async () => {
+    const admin = await signIn('admin');
+    expect((await patch(admin.headers, key, { value: 6 })).statusCode).toBe(422);
+    expect((await patch(admin.headers, key, { value: '6', reason: 'Essai' })).statusCode).toBe(422);
+    expect(
+      (await patch(admin.headers, 'free.max_routes', { value: 2, reason: 'Essai' })).statusCode,
+    ).toBe(404);
   });
 });
