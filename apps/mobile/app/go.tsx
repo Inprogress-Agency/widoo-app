@@ -3,6 +3,8 @@ import { useEffect } from 'react';
 import { View } from 'react-native';
 import { useIsOnline } from '../src/discovery/useRouteSearch';
 import { GoPage } from '../src/go/GoPage';
+import { GoSections } from '../src/go/GoSections';
+import { GO_SHEET_PEEK, GoSheet } from '../src/go/GoSheet';
 import { useGo, useGoActions } from '../src/go/useGo';
 import type { GoProgress } from '../src/go/progress';
 import type { PlannedRoute } from '@widoo/shared';
@@ -19,19 +21,30 @@ function Go({ planned, progress }: { planned: PlannedRoute; progress: GoProgress
   const isOnline = useIsOnline();
   const { state } = useRouteSheet(planned.route.id);
   const actions = useGoActions(planned, progress, collapse);
+  const route = state.status === 'ready' ? state.route : null;
   return (
-    <GoPage
-      planned={planned}
-      progress={progress}
-      route={state.status === 'ready' ? state.route : null}
-      isOnline={isOnline}
-      sheetPeek={0}
-      onCollapse={collapse}
-      onDirections={() => void actions.directions()}
-      onArrived={actions.arrive}
-      onNext={() => void actions.next()}
-      onFinish={() => void actions.finish()}
-    />
+    <>
+      <GoPage
+        planned={planned}
+        progress={progress}
+        route={route}
+        isOnline={isOnline}
+        sheetPeek={GO_SHEET_PEEK}
+        onCollapse={collapse}
+        onDirections={() => void actions.directions()}
+        onArrived={actions.arrive}
+        onNext={() => void actions.next()}
+        onFinish={() => void actions.finish()}
+      >
+        <GoSections progress={progress} route={route} now={new Date()} />
+      </GoPage>
+      <GoSheet
+        planned={planned}
+        progress={progress}
+        onFinish={() => void actions.finish()}
+        onStop={actions.stop}
+      />
+    </>
   );
 }
 

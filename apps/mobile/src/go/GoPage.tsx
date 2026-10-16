@@ -172,7 +172,7 @@ export function GoPage({
       >
         <View
           className="justify-end px-20 pb-16"
-          style={{ minHeight: height - sheetPeek, paddingTop: insets.top + 72 }}
+          style={{ minHeight: height - sheetPeek - insets.bottom, paddingTop: insets.top + 72 }}
         >
           <View className="gap-16">
             <TextVeil bleed={BLOCK_PADDING} />
