@@ -1,6 +1,8 @@
 import {
   AdminRatings,
   RatingActionResult,
+  AdminUserDetail,
+  AdminUsers,
   AdminRouteReports,
   AdminSignaledPlaces,
   PlaceActionResult,
@@ -48,6 +50,11 @@ import {
   type AdminRatingsQuery,
   type AdminReportsQuery,
   type AdminSignalsQuery,
+  type AdminUsersQuery,
+  type CertificationBody,
+  type ChangeUserRoleBody,
+  type GiftBody,
+  type UserReasonBody,
   type CatalogPlaceInput,
   type ClosePlaceBody,
   type HideRatingBody,
@@ -86,6 +93,7 @@ import { myRoutesQueryString, type MyRoutesParams } from './my-routes';
 import { createTransport, type ApiClientOptions } from './transport';
 import { moderationQueryString, type ModerationQueueParams } from './moderation';
 import { catalogPlacesQueryString, catalogQueryString } from './catalog';
+import { usersQueryString } from './users';
 import { ratingsQueryString, reportsQueryString, signalsQueryString } from './reports';
 
 /**
@@ -616,6 +624,90 @@ export function createApiClient(options: ApiClientOptions) {
         schema: RatingActionResult,
         auth: true,
       }),
+
+    /** `GET /v1/admin/users`: the accounts, newest first, searched by e-mail, first name or id (A-06). */
+    getAdminUsers: (params: Partial<AdminUsersQuery>, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/admin/users?${usersQueryString(params)}`,
+        schema: AdminUsers,
+        auth: true,
+        signal,
+      }),
+
+    /** `GET /v1/admin/users/:id`: the card of an account. */
+    getAdminUser: (userId: string, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/admin/users/${userId}`,
+        schema: AdminUserDetail,
+        auth: true,
+        signal,
+      }),
+
+    /** `PATCH /v1/admin/users/:id/role`: changes a role (admin only, never one's own). */
+    changeUserRole: (userId: string, body: ChangeUserRoleBody) =>
+      request({
+        method: 'PATCH',
+        path: `/v1/admin/users/${userId}/role`,
+        body,
+        schema: AdminUserDetail,
+        auth: true,
+      }),
+
+    /** `POST /v1/admin/users/:id/suspend`: suspends an account, with a reason. */
+    suspendUser: (userId: string, body: UserReasonBody) =>
+      request({
+        method: 'POST',
+        path: `/v1/admin/users/${userId}/suspend`,
+        body,
+        schema: AdminUserDetail,
+        auth: true,
+      }),
+
+    /** `POST /v1/admin/users/:id/reactivate`: lifts a suspension, with a reason. */
+    reactivateUser: (userId: string, body: UserReasonBody) =>
+      request({
+        method: 'POST',
+        path: `/v1/admin/users/${userId}/reactivate`,
+        body,
+        schema: AdminUserDetail,
+        auth: true,
+      }),
+
+    /** `POST /v1/admin/users/:id/gift`: offers Premium until a date, or one Premium route. */
+    giftUser: (userId: string, body: GiftBody) =>
+      request({
+        method: 'POST',
+        path: `/v1/admin/users/${userId}/gift`,
+        body,
+        schema: AdminUserDetail,
+        auth: true,
+      }),
+
+    /** `POST /v1/admin/users/:id/certification`: awards or removes the Créateur certifié badge. */
+    setUserCertification: (userId: string, body: CertificationBody) =>
+      request({
+        method: 'POST',
+        path: `/v1/admin/users/${userId}/certification`,
+        body,
+        schema: AdminUserDetail,
+        auth: true,
+      }),
+
+    /** `GET /v1/admin/users/:id/export`: the data of an account, the same file as the app's. */
+    exportUserData: (userId: string, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/admin/users/${userId}/export`,
+        schema: MyDataExport,
+        auth: true,
+        signal,
+      }),
+
+    /** `DELETE /v1/admin/users/:id`: deletes an account with the rule of the app. */
+    deleteUser: (userId: string) =>
+      requestEmpty({ method: 'DELETE', path: `/v1/admin/users/${userId}`, auth: true }),
 
     /** `GET /v1/admin/ratings`: the ratings with a comment, filtered by note and route (A-03). */
     getAdminRatings: (params: Partial<AdminRatingsQuery>, signal?: AbortSignal) =>
