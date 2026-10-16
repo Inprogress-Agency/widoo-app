@@ -4,12 +4,14 @@ import {
   LegalDocument,
   Me,
   MyDataExport,
+  MyRouteRating,
   PlannedMapsUrl,
   PlannedRoute,
   PlannedRouteList,
   PublicProfile,
   RouteCount,
   RouteDetail,
+  RouteRatingList,
   RouteSearchResult,
   RouteTimeline,
   SupportMessageReceipt,
@@ -17,6 +19,7 @@ import {
   type CreatePlannedRoute,
   type LegalDoc,
   type PublicProfileQuery,
+  type RateRoute,
   type RegisterDevice,
   type SupportMessageInput,
   type UpdateMe,
@@ -26,6 +29,7 @@ import {
   plannedMapsUrlPath,
   plannedPath,
   plannedQueryString,
+  plannedRatingPath,
   plannedStepDonePath,
   type PlannedListParams,
 } from './planned';
@@ -36,7 +40,14 @@ import {
   type RouteSearchParams,
 } from './search';
 import { isProfileUnavailable, publicProfilePath, type PublicProfileAnswer } from './profile';
-import { removedOf, routePath, type GetRouteOptions, type RouteSheetAnswer } from './route';
+import {
+  removedOf,
+  routePath,
+  routeRatingsPath,
+  type GetRouteOptions,
+  type RouteRatingsParams,
+  type RouteSheetAnswer,
+} from './route';
 import { createTransport, type ApiClientOptions } from './transport';
 
 /**
@@ -223,6 +234,32 @@ export function createApiClient(options: ApiClientOptions) {
         path: plannedMapsUrlPath(id),
         schema: PlannedMapsUrl,
         auth: true,
+        signal,
+      }),
+
+    /**
+     * `POST /v1/me/planned/:id/rating`: rates the route of a completed outing (E-15), or changes
+     * the rating given before; 409 while the outing does not open the rating (D-033).
+     */
+    rateOuting: (id: string, body: RateRoute) =>
+      request({
+        method: 'POST',
+        path: plannedRatingPath(id),
+        body,
+        schema: MyRouteRating,
+        auth: true,
+      }),
+
+    /**
+     * `GET /v1/routes/:id/ratings`: the visible reviews of a route, newest first (E-05 › « Voir
+     * les avis »), with the token when signed in, so that one's own review shows at once.
+     */
+    listRouteRatings: (id: string, params: RouteRatingsParams = {}, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: routeRatingsPath(id, params),
+        schema: RouteRatingList,
+        auth: 'optional',
         signal,
       }),
 

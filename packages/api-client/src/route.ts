@@ -33,3 +33,22 @@ export function removedOf(error: unknown): RouteSheetAnswer | null {
   const details = RouteRemovedDetails.safeParse(error.body?.details);
   return details.success ? { kind: 'removed', removedAt: details.data.removedAt } : null;
 }
+
+/** Query of `GET /v1/routes/:id/ratings`, by pages. */
+export interface RouteRatingsParams {
+  cursor?: string;
+  limit?: number;
+}
+
+/** Path of the reviews of a route, with its page. */
+export function routeRatingsPath(id: string, { cursor, limit }: RouteRatingsParams = {}) {
+  const query = new URLSearchParams();
+  if (cursor) {
+    query.set('cursor', cursor);
+  }
+  if (limit !== undefined) {
+    query.set('limit', String(limit));
+  }
+  const text = query.toString();
+  return `/v1/routes/${encodeURIComponent(id)}/ratings${text ? `?${text}` : ''}` as const;
+}
