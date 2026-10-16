@@ -2,9 +2,6 @@ import type { Translation } from '../translation';
 
 /** English strings of my profile, its editing and the settings (E-09). */
 export const profile = {
-  routes: {
-    title: 'My routes',
-  },
   profile: {
     title: 'Profile',
     settings: 'Settings',
@@ -263,7 +260,6 @@ export const profile = {
   },
 } satisfies Pick<
   Translation,
-  | 'routes'
   | 'profile'
   | 'field'
   | 'editProfile'
