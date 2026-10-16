@@ -3,7 +3,7 @@ import { ApiRequestError } from '@widoo/api-client';
 import type { Me } from '@widoo/shared';
 import { readSession, requireSecondFactor, sessionOfAccount, type Session } from './session';
 
-const account = { firstName: 'Sarah', email: 'sarah@example.com' };
+const account = { id: '0', firstName: 'Sarah', email: 'sarah@example.com' };
 
 describe('sessionOfAccount', () => {
   it.each(['editor', 'moderator', 'admin'] as const)('lets a %s in', (role) => {
@@ -23,7 +23,7 @@ describe('sessionOfAccount', () => {
 
 describe('readSession', () => {
   const me = (role: Me['role']) =>
-    ({ ...account, role, id: '0', avatarUrl: null, plan: 'free' }) as unknown as Me;
+    ({ ...account, role, avatarUrl: null, plan: 'free' }) as unknown as Me;
 
   it('lets in the member of the team the API describes', async () => {
     await expect(readSession({ getMe: async () => me('moderator') })).resolves.toMatchObject({
