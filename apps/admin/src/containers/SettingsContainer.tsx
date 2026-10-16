@@ -4,6 +4,7 @@ import { SettingPanelContent } from '@/components/settings/SettingPanelContent';
 import { SettingsTable } from '@/components/settings/SettingsTable';
 import { PageMessage } from '@/components/states/PageMessage';
 import { sectionPaths } from '@/config/navigation';
+import { SettingEditContainer } from '@/containers/SettingEditContainer';
 import { useRemoteData } from '@/hooks/useRemoteData';
 import { getSessionClients } from '@/lib/auth/clients';
 import { messages } from '@/messages/fr';
@@ -42,6 +43,10 @@ export function SettingsContainer() {
         : sectionPaths.settings,
       { scroll: false },
     );
+  const reloadAll = () => {
+    if (settings.status !== 'loading') settings.reload();
+    if (history.status !== 'loading') history.reload();
+  };
 
   if (settings.status === 'error') {
     return (
@@ -69,6 +74,7 @@ export function SettingsContainer() {
           title={texts.items[openSetting.key]?.label ?? openSetting.key}
           closeLabel={messages.confirm.close}
           onClose={() => showSetting(null)}
+          actions={<SettingEditContainer setting={openSetting} onSaved={reloadAll} />}
         >
           <SettingPanelContent
             setting={openSetting}
