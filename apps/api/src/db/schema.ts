@@ -7,6 +7,7 @@ import { directionsProfiles } from '@widoo/orchestration';
 import {
   anecdoteAnswerMaxLength,
   appLocales,
+  linkOrigins,
   bioMaxLength,
   bookingNoteMaxLength,
   certifiedOverrides,
@@ -87,6 +88,8 @@ export const directionsProfile = pgEnum('directions_profile', directionsProfiles
 export const certifiedOverride = pgEnum('certified_override', certifiedOverrides);
 /** Origin of a right to Premium: the store, or a gift of the team (A-06). */
 export const planSource = pgEnum('plan_source', planSources);
+/** Where the booking link of a step comes from (D-048); the admin names each origin. */
+export const linkOrigin = pgEnum('link_origin', linkOrigins);
 /** Status of a planned route (D-029, D-033, D-038); its labels belong to the app. */
 export const plannedRouteStatus = pgEnum('planned_route_status', plannedRouteStatuses);
 /** Who closed a Go (D-033). */
@@ -238,6 +241,28 @@ export const devices = pgTable(
   ],
 );
 
+/**
+ * A program of affiliation Widoo is registered with (A-09, #212): the network, the commission and
+ * the cookie it keeps. An inactive program no longer lends its links to the places that name it.
+ */
+export const affiliatePrograms = pgTable(
+  'affiliate_programs',
+  {
+    id: id(),
+    name: text('name').notNull().unique(),
+    /** The network that runs it: « Awin », « Impact »... */
+    network: text('network').notNull(),
+    /** Free note on the commission: « 5 % du panier ». */
+    commissionNote: text('commission_note'),
+    /** Days the program keeps its cookie. */
+    cookieDays: smallint('cookie_days').notNull(),
+    isActive: boolean('is_active').notNull().default(true),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [check('affiliate_programs_cookie_days_check', sql`${t.cookieDays} between 0 and 365`)],
+);
+
 export const places = pgTable(
   'places',
   {
@@ -255,6 +280,14 @@ export const places = pgTable(
     priceRange: priceRange('price_range'),
     websiteUrl: text('website_url'),
     phone: text('phone'),
+    /**
+     * Booking link of a partner program of Widoo (D-048): shown only when the creator of the step
+     * has no link of their own. https only.
+     */
+    partnerBookingUrl: text('partner_booking_url'),
+    partnerProgramId: uuid('partner_program_id').references(() => affiliatePrograms.id, {
+      onDelete: 'set null',
+    }),
     /** Google Places, OpenStreetMap... identifiers, for later. */
     externalRefs: jsonb('external_refs').notNull().default({}),
     /**
@@ -279,6 +312,11 @@ export const places = pgTable(
     index('places_location_idx').using('gist', t.location),
     index('places_city_category_idx').on(t.cityId, t.category),
     index('places_name_trgm_idx').using('gin', t.name.op('gin_trgm_ops')),
+    check(
+      'places_partner_link_check',
+      sql`(${t.partnerBookingUrl} is null or ${t.partnerBookingUrl} like 'https://%')
+        and (${t.partnerProgramId} is null or ${t.partnerBookingUrl} is not null)`,
+    ),
   ],
 );
 
@@ -891,4 +929,23 @@ export const supportMessages = pgTable(
     ),
     check('support_messages_locale_check', isOneOf(t.locale, appLocales)),
   ],
+);
+
+/**
+ * A click on « Réserver », counted by `GET /go/:stepId` before it redirects (A-09). `step_id` is
+ * not a foreign key, like `planned_steps.step_id`: editing a route rewrites its steps, ids kept,
+ * and a cascade would erase the clicks. `user_id` stays null while the redirect is opened in the
+ * browser, which carries no session; the link is cut when an account is purged.
+ */
+export const bookingClicks = pgTable(
+  'booking_clicks',
+  {
+    id: id(),
+    stepId: uuid('step_id').notNull(),
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+    /** Where the link that was served comes from. */
+    linkOrigin: linkOrigin('link_origin').notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index('booking_clicks_step_idx').on(t.stepId, t.createdAt)],
 );

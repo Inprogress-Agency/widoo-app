@@ -1,4 +1,5 @@
 export * from './admin-sections';
+export * from './booking-link';
 export * from './analytics';
 export * from './app-version';
 export { arrondissementLabel } from './arrondissement';
@@ -21,6 +22,7 @@ export { hasRole } from './roles';
 export { zoneMinSpanM, zoneSearchBox } from './zone';
 export * from './schemas/admin';
 export * from './schemas/admin-actions';
+export * from './schemas/admin-affiliation';
 export * from './schemas/admin-settings';
 export * from './schemas/admin-reports';
 export * from './schemas/admin-signals';

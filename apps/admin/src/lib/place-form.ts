@@ -13,6 +13,9 @@ export type PlaceFormValues = {
   priceRange: string;
   websiteUrl: string;
   phone: string;
+  /** The partner link of Widoo (A-09), and the program it belongs to; empty for none. */
+  partnerBookingUrl: string;
+  partnerProgramId: string;
   /** One line per day, Monday first. */
   dayHours: string[];
 };
@@ -30,6 +33,8 @@ export const emptyPlaceForm: PlaceFormValues = {
   priceRange: '',
   websiteUrl: '',
   phone: '',
+  partnerBookingUrl: '',
+  partnerProgramId: '',
   dayHours: ['', '', '', '', '', '', ''],
 };
 
@@ -45,6 +50,8 @@ export function placeFormOf(place: CatalogPlaceDetail): PlaceFormValues {
     priceRange: place.priceRange ?? '',
     websiteUrl: place.websiteUrl ?? '',
     phone: place.phone ?? '',
+    partnerBookingUrl: place.partnerBookingUrl ?? '',
+    partnerProgramId: place.partnerProgramId ?? '',
     dayHours: hoursToDayTexts(place.hours),
   };
 }
@@ -83,6 +90,8 @@ export function placeInputOf(
   if (!hours) {
     return { error: 'hours' };
   }
+  // A program needs a link: without one, none is sent. The two always go together.
+  const partnerBookingUrl = values.partnerBookingUrl.trim() || null;
   return {
     input: {
       name: values.name.trim(),
@@ -93,6 +102,8 @@ export function placeInputOf(
       priceRange: (values.priceRange || null) as CatalogPlaceInput['priceRange'],
       websiteUrl: values.websiteUrl.trim() || null,
       phone: values.phone.trim() || null,
+      partnerBookingUrl,
+      partnerProgramId: partnerBookingUrl ? values.partnerProgramId || null : null,
       hours,
     },
   };
