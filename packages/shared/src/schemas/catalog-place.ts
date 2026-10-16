@@ -47,21 +47,40 @@ export type CatalogPlaces = z.infer<typeof CatalogPlaces>;
  * sent, and its opening hours replace the previous ones. The city is never sent: it follows
  * from the position. The verification status has its own actions (A-03).
  */
-export const CatalogPlaceInput = z.strictObject({
-  name: plainText(120),
-  category: z.enum(taxonomies.placeCategories),
-  address: plainText(240),
-  location: LatLng,
-  isIndoor: z.boolean(),
-  priceRange: z.enum(taxonomies.priceRanges).nullable(),
-  websiteUrl: HttpsUrl.nullable(),
-  phone: z
-    .string()
-    .trim()
-    .regex(/^\+?[0-9 .()-]{6,24}$/, 'Expected a phone number')
-    .nullable(),
-  hours: z.array(PlaceHours).max(60),
-});
+export const CatalogPlaceInput = z
+  .strictObject({
+    name: plainText(120),
+    category: z.enum(taxonomies.placeCategories),
+    address: plainText(240),
+    location: LatLng,
+    isIndoor: z.boolean(),
+    priceRange: z.enum(taxonomies.priceRanges).nullable(),
+    websiteUrl: HttpsUrl.nullable(),
+    phone: z
+      .string()
+      .trim()
+      .regex(/^\+?[0-9 .()-]{6,24}$/, 'Expected a phone number')
+      .nullable(),
+    hours: z.array(PlaceHours).max(60),
+    /**
+     * The booking link of a partner program of Widoo (A-09, D-048) and the program it belongs to.
+     * Both are sent together, or none: left out, the place keeps the link it has. Without a link
+     * there is no program.
+     */
+    partnerBookingUrl: HttpsUrl.nullable().optional(),
+    partnerProgramId: z.uuid().nullable().optional(),
+  })
+  .refine(
+    (place) => (place.partnerBookingUrl === undefined) === (place.partnerProgramId === undefined),
+    {
+      message: 'Send the partner link and its program together',
+      path: ['partnerProgramId'],
+    },
+  )
+  .refine((place) => place.partnerBookingUrl !== null || !place.partnerProgramId, {
+    message: 'A program needs a partner link',
+    path: ['partnerProgramId'],
+  });
 export type CatalogPlaceInput = z.infer<typeof CatalogPlaceInput>;
 
 /** Body of `GET /admin/places/:id`: the sheet of a place, and the routes that use it. */
@@ -72,6 +91,9 @@ export const CatalogPlaceDetail = CatalogPlace.extend({
   priceRange: z.enum(taxonomies.priceRanges).nullable(),
   websiteUrl: z.string().nullable(),
   phone: z.string().nullable(),
+  /** The partner link of Widoo and its program (A-09). */
+  partnerBookingUrl: z.string().nullable(),
+  partnerProgramId: z.uuid().nullable(),
   hours: z.array(PlaceHours),
   routes: z.array(
     z.object({ id: z.uuid(), title: z.string(), status: z.enum(taxonomies.routeStatuses) }),

@@ -65,6 +65,8 @@ describe('placeFormOf', () => {
       priceRange: 'low' as const,
       websiteUrl: 'https://lomi.example',
       phone: '+33 1 00 00 00 00',
+      partnerBookingUrl: null,
+      partnerProgramId: null,
       hours: [{ weekday: 2, opens: '09:00', closes: '17:00', validFrom: null, validTo: null }],
       routes: [],
     };
