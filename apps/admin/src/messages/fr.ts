@@ -289,6 +289,12 @@ export const messages = {
         website: 'Site web',
         websiteHint: 'Une adresse en https.',
         phone: 'Téléphone',
+        partnerLink: 'Lien partenaire de Widoo',
+        partnerLinkHint:
+          "Une adresse en https. Elle ne s'affiche que si le créateur n'a pas mis son propre lien.",
+        partnerProgram: 'Programme du lien',
+        noProgram: 'Aucun programme',
+        inactiveProgram: (name: string) => `${name} (inactif)`,
         hours: 'Horaires',
         hoursHint:
           'Par jour : « 9:00-12:30, 14:00-18:00 ». Laissez vide un jour de fermeture. Tout vide : horaires inconnus.',
@@ -298,7 +304,8 @@ export const messages = {
           position: 'Saisissez une latitude et une longitude valides.',
           hours: 'Un horaire ne peut pas être lu. Écrivez par exemple « 9:00-18:00 ».',
           outside: "Cette position n'est dans aucune ville ouverte.",
-          refused: 'Un champ est refusé. Vérifiez le nom, le site web (https) et le téléphone.',
+          refused:
+            'Un champ est refusé. Vérifiez le nom, le téléphone et les liens, qui doivent commencer par https.',
           failed: "Le lieu n'a pas pu être enregistré.",
         },
         created: 'Lieu créé',

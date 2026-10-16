@@ -1,21 +1,8 @@
 import { getSessionClients } from '@/lib/auth/clients';
-import { placeInputOf, type PlaceFormError, type PlaceFormValues } from '@/lib/place-form';
-import { ApiRequestError } from '@widoo/api-client';
+import { placeInputOf, type PlaceFormValues } from '@/lib/place-form';
+import { failureOf, type PlaceSaveFailure } from '@/lib/place-save-failure';
 import type { CatalogPlaceDetail, PlaceHours } from '@widoo/shared';
 import { useState } from 'react';
-
-/** Why a place was not saved, as the form tells it. */
-export type PlaceSaveFailure = PlaceFormError | 'outside' | 'refused' | 'failed';
-
-// Message of the 400 the API sends for a position outside every city (place-writes.ts).
-const outsideEveryCity = 'Position outside every city';
-
-function failureOf(error: unknown): PlaceSaveFailure {
-  if (!(error instanceof ApiRequestError) || error.status !== 400) {
-    return 'failed';
-  }
-  return error.body?.message === outsideEveryCity ? 'outside' : 'refused';
-}
 
 /**
  * The form of a place (A-04): its values, and saving them as a new place or over `placeId`.
