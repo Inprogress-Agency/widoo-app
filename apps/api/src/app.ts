@@ -22,6 +22,7 @@ import { adminRoutes } from './routes/admin';
 import { adminCatalogRoutes } from './routes/admin-catalog';
 import { adminModerationRoutes } from './routes/admin-moderation';
 import { adminReportsRoutes } from './routes/admin-reports';
+import { adminSettingsRoutes } from './routes/admin-settings';
 import { adminUsersRoutes } from './routes/admin-users';
 import { configRoutes } from './routes/config';
 import { editorRoutes } from './routes/editor';
@@ -154,6 +155,7 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   await app.register(adminCatalogRoutes, { prefix: '/v1' });
   await app.register(adminReportsRoutes, { prefix: '/v1' });
   await app.register(adminUsersRoutes, { prefix: '/v1' });
+  await app.register(adminSettingsRoutes, { prefix: '/v1' });
   await app.register(searchRoutesPlugin, { prefix: '/v1' });
   await app.register(routeRatingsPlugin, { prefix: '/v1' });
   await app.register(routeSheetRoutes, {
