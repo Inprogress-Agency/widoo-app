@@ -1,0 +1,83 @@
+import type { Translation } from '../translation';
+
+/** English strings of the route under way (Ecrans › E-07). */
+export const go = {
+  go: {
+    dialog: 'Route under way, {{title}}',
+    collapse: 'Minimize, the route goes on',
+    status: {
+      enRoute: 'On the way to stop {{position}}',
+      onSite: 'Stop {{position}} of {{total}}, you are here',
+      allDone: 'Every stop is done',
+      enRouteSpoken: 'On the way to stop {{position}} of {{total}}.',
+      onSiteSpoken: 'Stop {{position}} of {{total}}, you are here.',
+    },
+    line: {
+      enRoute: '{{category}}, {{duration}}',
+      enRouteDistance: '{{category}}, {{duration}}, {{distance}} from you',
+      onSite: '{{category}}, {{duration}} planned, until about {{time}}',
+    },
+    progress: {
+      start: 'Start {{time}}',
+      end: 'Ends around {{time}}',
+      spoken_one: '{{count}} stop done of {{total}}, start {{start}}, ends around {{end}}',
+      spoken_other: '{{count}} stops done of {{total}}, start {{start}}, ends around {{end}}',
+    },
+    directions: 'Directions',
+    directionsLabel: 'Directions to {{place}}, opens Google Maps',
+    arrived: "I'm here",
+    arrivedLabel: "I'm here, {{place}}",
+    suggested: 'You seem to be there',
+    next: 'Next stop: {{place}}',
+    finish: 'End the outing',
+    discover: 'Discover the stop',
+    offline: 'Offline, the outing goes on',
+    kept: 'Answer kept, sent when the network is back',
+    sections: {
+      practical: 'Practical',
+      word: "{{name}}'s word",
+      next: 'Next',
+      path: "{{name}}'s way",
+      nextStep: '{{category}}, {{duration}}, around {{time}}',
+      perPerson: '{{price}} per person',
+    },
+    sheet: {
+      title: 'The route',
+      times: 'Start {{start}}, ends around {{end}}',
+      doneAt: 'Done at {{time}}',
+      here: 'You are here',
+      nextStep: 'Next stop',
+      skipped: 'Skipped',
+      end: 'Planned end around {{time}}',
+      expand: 'Expand',
+      reduce: 'Collapse',
+      stop: 'Stop the route',
+    },
+    stop: {
+      title: 'Stop the route?',
+      body: 'You will find it in your past routes, with the stops already done.',
+      continue: 'Continue',
+      confirm: 'Stop',
+    },
+    another: {
+      title: 'A route is already under way',
+      body: 'Stop “{{title}}” and start this one? You will find it in your past routes.',
+      cancel: 'Cancel',
+      confirm: 'Stop and start',
+    },
+    mini: {
+      enRoute: 'Route under way, on the way to stop {{position}} of {{total}}, {{place}}. Reopen',
+      onSite: 'Route under way, stop {{position}} of {{total}}, {{place}}, you are here. Reopen',
+      allDone: 'Route under way, every stop is done. Reopen',
+    },
+    toast: {
+      startFailed: 'The route did not start',
+      failedBody: 'Check the connection and try again.',
+      premium: 'This route needs Premium.',
+      actionFailed: 'That did not work',
+      completed: 'Outing ended',
+      completedBody: 'You will find it in your past routes.',
+      needsNetwork: 'Reconnect to end or stop the outing.',
+    },
+  },
+} satisfies Pick<Translation, 'go'>;
