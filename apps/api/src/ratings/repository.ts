@@ -48,7 +48,7 @@ export async function rateOuting(
       .onConflictDoUpdate({ target: [routeRatings.routeId, routeRatings.userId], set: values })
       .returning();
     if (!row) throw new Error('Rating not written');
-    await recomputeRouteRating(tx, outing.routeId);
+    await recomputeRouteRating(tx, outing.routeId, now);
     return toMyRating(row);
   });
 }
