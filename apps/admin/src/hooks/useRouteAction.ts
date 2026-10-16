@@ -1,7 +1,7 @@
 import { notifyCountersStale } from '@/hooks/useAdminCounters';
 import { messages } from '@/messages/fr';
+import { conflictStatusLabel } from '@/lib/conflict-status';
 import { ApiRequestError } from '@widoo/api-client';
-import { AlreadyDecidedDetails, labels } from '@widoo/shared';
 import { showToast } from '@widoo/ui';
 import { useState } from 'react';
 
@@ -11,10 +11,10 @@ const texts = messages.moderation.decisions.toasts;
 export type RouteActionOutcome = 'published' | 'other';
 
 /**
- * Sends an action of the team on a route and tells its result in a toast. `onSettled` is called
- * once the route is settled, by this action or by the one another member of the team took first
- * (409 `already_decided`, told with the status the route was given): the screen then moves on.
- * The counters of the navigation are read again at once.
+ * Sends an action of the team on a route, a report or a place and tells its result in a toast.
+ * `onSettled` is called once it is settled, by this action or by the one another member of the
+ * team took first (409 `already_decided`, told with the status it was given): the screen then
+ * moves on. The counters of the navigation are read again at once.
  */
 export function useRouteAction(onSettled: (outcome: RouteActionOutcome) => void) {
   const [isBusy, setIsBusy] = useState(false);
@@ -31,14 +31,12 @@ export function useRouteAction(onSettled: (outcome: RouteActionOutcome) => void)
       notifyCountersStale();
       onSettled(outcome);
     } catch (error) {
-      const details =
+      const conflict =
         error instanceof ApiRequestError && error.code === 'already_decided'
-          ? AlreadyDecidedDetails.safeParse(error.body?.details)
-          : undefined;
-      if (details?.success) {
-        showToast('info', {
-          title: texts.alreadyDecided(labels.fr.routeStatuses[details.data.status]),
-        });
+          ? conflictStatusLabel(error.body?.details)
+          : null;
+      if (conflict) {
+        showToast('info', { title: texts.alreadyDecided(conflict) });
         notifyCountersStale();
         onSettled('other');
       } else {
