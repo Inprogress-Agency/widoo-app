@@ -82,7 +82,8 @@ module.exports = {
       // Sizes of the admin drawn on the reference boards (wiki Ecrans › Admin web, « Formes et
       // tailles », « Navigation », « En-tête », A-01) and missing from tokens.json: to move there
       // (DESIGN), then remove from here.
-      height: { header: '64px', screen: '100dvh', fit: 'fit-content' },
+      // `map`: the map of a position in a form (A-04, no board: to size with DESIGN).
+      height: { header: '64px', screen: '100dvh', fit: 'fit-content', map: '280px' },
       minHeight: { 0: '0px', field: '40px', screen: '100dvh', textarea: '72px' },
       // Zero, for what is pinned to an edge (`inset-0`): tokens.json starts at 4 px.
       spacing: { 0: '0px' },
@@ -95,10 +96,13 @@ module.exports = {
       },
       maxWidth: { 'sign-in': '440px', dialog: '520px' },
       // A change of a revision on the moderation sheet: its subject, then what changed.
-      gridTemplateColumns: { change: '150px 1fr' },
+      // And a day of the week next to its opening hours, in the form of a place.
+      gridTemplateColumns: { change: '150px 1fr', hours: '110px 1fr' },
       // Text of a button of 36 px and of a navigation entry: `body-s` in 700.
       fontSize: {
         control: ['14px', { lineHeight: '20px', fontWeight: '700' }],
+        // Figure of the dashboard: 30/36 in 800.
+        figure: ['30px', { lineHeight: '36px', fontWeight: '800', letterSpacing: '-0.6px' }],
         // Header of a table column and text of a badge: 12/16 in 600.
         'column-head': ['12px', { lineHeight: '16px', fontWeight: '600' }],
       },

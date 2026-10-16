@@ -1,4 +1,4 @@
-import type { AdminSection, CountedAdminSection, TeamRole } from '@widoo/shared';
+import type { AdminSection, CountedAdminSection, RouteStatus, TeamRole } from '@widoo/shared';
 import type { NavigationGroupId } from '@/config/navigation';
 
 const sections: Record<AdminSection, string> = {
@@ -73,12 +73,25 @@ const counted: Record<CountedAdminSection, (count: number) => string> = {
   translations: (count) => (count > 1 ? `${count} traductions en échec` : '1 traduction en échec'),
 };
 
+/** Status of a route as the team reads it, shorter than the labels of the app. */
+const routeStatuses: Record<RouteStatus, string> = {
+  draft: 'Brouillon',
+  private: 'Privé',
+  pending: 'En relecture',
+  changes_requested: 'À corriger',
+  published: 'Publié',
+  needs_fix: 'À corriger',
+  rejected: 'Refusé',
+  unpublished: 'Retiré',
+};
+
 /** Texts of the admin. French only (wiki Admin-Web › Principes). */
 export const messages = {
   app: { name: 'Widoo', product: 'Admin', title: 'Admin Widoo' },
   sections,
   pageTitles,
   roles,
+  routeStatuses,
   shell: {
     navigation: 'Navigation principale',
     groups: navigationGroups,
@@ -174,6 +187,247 @@ export const messages = {
     error: "La liste n'a pas pu être chargée.",
     retry: 'Réessayer',
   },
+  dashboard: {
+    error: "Le tableau de bord n'a pas pu être chargé.",
+    updated: (when: string) => `Mis à jour ${when}`,
+    refresh: 'Actualiser',
+    toHandle: {
+      title: 'À traiter',
+      nothing: 'Rien à traiter pour le moment.',
+      oldest: (time: string) => `Le plus ancien attend depuis ${time}`,
+      tiles: {
+        moderation: { label: 'Parcours à relire', none: 'Aucun parcours en attente' },
+        reports: { label: 'Signalements ouverts', none: 'Aucun signalement ouvert' },
+        support: { label: 'Messages de support', none: 'Aucun message à traiter' },
+        aiDrafts: { label: 'Brouillons IA à relire', none: 'Aucun brouillon à relire' },
+        translations: { label: 'Traductions en échec', none: 'Aucune traduction en échec' },
+      },
+    },
+    catalog: {
+      title: 'Catalogue',
+      link: 'Analyses dans PostHog',
+      publishedRoutes: 'Parcours publiés',
+      publishedDetail: (premium: number, official: number) =>
+        `dont ${premium} Premium et ${official} de Widoo`,
+      places: 'Lieux',
+      placesDetail: 'utilisés par les parcours',
+      cities: 'Villes',
+      citiesDetail: 'où des parcours existent',
+      creators: 'Créateurs actifs',
+      last30Days: 'sur les 30 derniers jours',
+    },
+    users: {
+      title: 'Utilisateurs',
+      link: 'Abonnements dans RevenueCat',
+      registered: 'Inscrits',
+      registeredDetail: 'depuis le lancement',
+      newUsers: 'Nouveaux',
+      newUsersDetail: 'sur les 7 derniers jours',
+      premium: 'Premium actifs',
+      premiumDetail: 'abonnements et pass',
+      unlocks: 'Déblocages',
+    },
+  },
+  catalog: {
+    tabs: { label: 'Catalogue', places: 'Lieux', routes: 'Parcours' },
+    places: {
+      search: 'Rechercher un nom ou une adresse',
+      total: (count: number) => (count > 1 ? `${count} lieux` : `${count} lieu`),
+      create: 'Créer un lieu',
+      filters: { label: 'Filtres des lieux', category: 'Catégorie', status: 'Statut' },
+      columns: {
+        place: 'Lieu',
+        category: 'Catégorie',
+        city: 'Ville',
+        status: 'Statut',
+        verified: 'Dernière vérification',
+        routes: 'Parcours',
+      },
+      neverVerified: 'Jamais',
+      empty: { title: 'Aucun lieu', text: 'Aucun lieu ne correspond à cette recherche.' },
+      panel: {
+        error: "La fiche du lieu n'a pas pu être chargée.",
+        edit: 'Modifier',
+        address: 'Adresse',
+        position: 'Position',
+        indoor: 'En intérieur',
+        yes: 'Oui',
+        no: 'Non',
+        price: 'Niveau de prix',
+        website: 'Site web',
+        phone: 'Téléphone',
+        none: 'Non renseigné',
+        hours: 'Horaires',
+        hoursUnknown: 'Horaires inconnus',
+        closed: 'Fermé',
+        routes: (count: number) =>
+          count > 1
+            ? `${count} parcours passent par ce lieu`
+            : `${count} parcours passe par ce lieu`,
+        noRoute: 'Aucun parcours ne passe par ce lieu.',
+      },
+      weekdays: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'],
+      form: {
+        back: 'Lieux du catalogue',
+        createTitle: 'Créer un lieu',
+        name: 'Nom',
+        category: 'Catégorie',
+        address: 'Adresse',
+        addressHint: 'Adresse complète, avec le code postal et la ville.',
+        latitude: 'Latitude',
+        longitude: 'Longitude',
+        positionHint:
+          'En degrés décimaux, par exemple 48,8785 et 2,3397. La ville du lieu est déduite de sa position.',
+        map: 'Carte de la position du lieu',
+        mapHint:
+          "Cliquez sur la carte ou déplacez l'épingle : la latitude et la longitude suivent.",
+        mapFailed: "La carte n'a pas pu être chargée. Saisissez la latitude et la longitude.",
+        indoor: 'Lieu en intérieur',
+        indoorHint: "Un lieu à l'abri compte pour les parcours « par temps de pluie ».",
+        price: 'Niveau de prix',
+        noPrice: 'Non renseigné',
+        website: 'Site web',
+        websiteHint: 'Une adresse en https.',
+        phone: 'Téléphone',
+        hours: 'Horaires',
+        hoursHint:
+          'Par jour : « 9:00-12:30, 14:00-18:00 ». Laissez vide un jour de fermeture. Tout vide : horaires inconnus.',
+        save: 'Enregistrer',
+        cancel: 'Annuler',
+        errors: {
+          position: 'Saisissez une latitude et une longitude valides.',
+          hours: 'Un horaire ne peut pas être lu. Écrivez par exemple « 9:00-18:00 ».',
+          outside: "Cette position n'est dans aucune ville ouverte.",
+          refused: 'Un champ est refusé. Vérifiez le nom, le site web (https) et le téléphone.',
+          failed: "Le lieu n'a pas pu être enregistré.",
+        },
+        created: 'Lieu créé',
+        saved: 'Lieu enregistré',
+      },
+      import: {
+        open: 'Importer un CSV',
+        title: 'Importer des lieux',
+        rules: [
+          'Un lieu par ligne, sous une première ligne qui nomme les colonnes.',
+          'Colonnes obligatoires : nom, categorie, adresse, latitude, longitude.',
+          'Colonnes facultatives : interieur (oui ou non), prix, site_web, telephone, et les horaires de lundi à dimanche.',
+          "Rien n'est créé avant votre validation : chaque ligne est d'abord vérifiée et affichée.",
+          '500 lignes au plus par fichier.',
+        ],
+        choose: 'Choisir un fichier CSV',
+        reading: 'Lecture du fichier…',
+        template: 'Télécharger le modèle',
+        templateFileName: 'modele-lieux.csv',
+        another: 'Choisir un autre fichier',
+        backToList: 'Voir les lieux',
+        creating: 'Création…',
+        confirm: (count: number) => (count > 1 ? `Créer ${count} lieux` : `Créer ${count} lieu`),
+        setAside: (count: number) =>
+          count > 1 ? `${count} lignes écartées` : `${count} ligne écartée`,
+        summary: {
+          preview: (count: number) =>
+            count > 1 ? `${count} lieux prêts à être créés` : `${count} lieu prêt à être créé`,
+          done: (count: number) => (count > 1 ? `${count} lieux créés` : `${count} lieu créé`),
+        },
+        columns: { line: 'Ligne', place: 'Lieu', outcome: 'Résultat', explanation: 'Détail' },
+        noName: 'Sans nom',
+        outcomes: {
+          ready: 'Prêt',
+          created: 'Créé',
+          invalid: 'Invalide',
+          duplicate: 'Doublon',
+          outside: 'Hors zone',
+        },
+        fields: {
+          name: 'Nom',
+          category: 'Catégorie',
+          address: 'Adresse',
+          location: 'Latitude et longitude',
+          isIndoor: 'Intérieur (oui ou non)',
+          priceRange: 'Prix',
+          websiteUrl: 'Site web (https)',
+          phone: 'Téléphone',
+          hours: 'Horaires',
+        },
+        otherField: 'Ligne illisible',
+        explanations: {
+          ready: 'Sera créé, avec le statut « À vérifier ».',
+          created: 'Créé, avec le statut « À vérifier ».',
+          invalid: (fields: string) => `À corriger : ${fields}.`,
+          duplicateInCatalog: (name: string) =>
+            `« ${name} » existe déjà dans le catalogue, à moins de 50 m.`,
+          duplicateInFile: (line: number) => `Même lieu que la ligne ${line}, à moins de 50 m.`,
+          outside: "Cette position n'est dans aucune ville ouverte.",
+        },
+        errors: {
+          empty: 'Ce fichier ne contient aucune ligne de lieu.',
+          tooMany: 'Ce fichier dépasse 500 lignes. Découpez-le en plusieurs fichiers.',
+          columns: (missing: string) => `Colonnes manquantes dans le fichier : ${missing}.`,
+          failed: "L'import n'a pas abouti. Réessayez.",
+        },
+      },
+    },
+    routes: {
+      search: 'Rechercher un titre ou un auteur',
+      total: (count: number) => `${count} parcours`,
+      filters: {
+        label: 'Filtres des parcours',
+        status: 'Statut',
+        access: 'Accès',
+      },
+      columns: {
+        route: 'Parcours',
+        author: 'Auteur',
+        city: 'Ville',
+        status: 'Statut',
+        access: 'Accès',
+        rating: 'Note',
+        updated: 'Modifié',
+      },
+      team: 'Équipe Widoo',
+      access: { free: 'Gratuit', premium: 'Premium' },
+      rating: (average: number, count: number) =>
+        `${average.toLocaleString('fr-FR', { maximumFractionDigits: 1 })} (${count} avis)`,
+      noRating: 'Pas encore noté',
+      empty: { title: 'Aucun parcours', text: 'Aucun parcours ne correspond à cette recherche.' },
+      sheet: {
+        back: 'Parcours du catalogue',
+        actions: 'Actions',
+        openInApp: "Ouvrir dans l'app",
+        openInAppHint: "Depuis un téléphone où l'app Widoo est installée.",
+        unpublish: 'Dépublier',
+        republish: 'Republier',
+        reassign: "Réassigner à l'équipe Widoo",
+        alreadyTeam: "Ce parcours est déjà un parcours de l'équipe Widoo.",
+        noAction: "Aucune action n'est possible sur ce parcours dans son statut actuel.",
+      },
+      unpublishDialog: {
+        title: 'Dépublier ce parcours ?',
+        description:
+          "Le parcours n'est plus visible dans l'app. L'auteur garde son parcours et reçoit le motif et votre message.",
+        message: "Message à l'auteur",
+        confirm: 'Dépublier le parcours',
+      },
+      republishDialog: {
+        title: 'Republier ce parcours ?',
+        description: "Le parcours redevient visible par tous dans l'app.",
+        message: 'Pourquoi le remettre en ligne',
+        messageHint: "Gardé dans l'historique du parcours et dans le journal.",
+        confirm: 'Republier le parcours',
+      },
+      reassignDialog: {
+        title: "Réassigner ce parcours à l'équipe Widoo ?",
+        description:
+          "Le parcours devient « Par Widoo » et n'a plus d'auteur : l'équipe le maintient depuis l'éditeur de l'app. Cette action ne se défait pas depuis l'admin.",
+        confirm: "Réassigner à l'équipe",
+      },
+      toasts: {
+        unpublished: 'Parcours dépublié',
+        republished: 'Parcours republié',
+        reassigned: "Parcours réassigné à l'équipe Widoo",
+      },
+    },
+  },
   moderation: {
     search: 'Rechercher un titre ou un auteur',
     total: (count: number) => `${count} parcours`,
@@ -213,16 +467,6 @@ export const messages = {
       next: 'Parcours suivant',
       notFound: "Ce parcours n'existe pas.",
       error: "La fiche n'a pas pu être chargée.",
-      statuses: {
-        pending: 'En relecture',
-        changes_requested: 'À corriger',
-        published: 'Publié',
-        rejected: 'Refusé',
-        unpublished: 'Retiré',
-        needs_fix: 'À corriger',
-        draft: 'Brouillon',
-        private: 'Privé',
-      },
       premium: 'Premium',
       premiumComputed: (minSteps: number) => `Premium calculé : ${minSteps} étapes ou plus`,
       waitingSince: 'En file depuis',
@@ -360,6 +604,10 @@ export const messages = {
       filteredTitle: 'Aucun parcours ne correspond',
       filteredText: 'Modifiez la recherche ou les filtres.',
     },
+  },
+  accessDenied: {
+    title: "Vous n'avez pas accès à cette page",
+    text: 'Votre rôle ne permet pas cette action. Adressez-vous à un admin si vous en avez besoin.',
   },
   notFound: {
     title: 'Page introuvable',

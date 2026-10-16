@@ -46,7 +46,7 @@ type StepRow = {
 
 type HistoryRow = {
   action: ModerationHistoryEntry['action'];
-  actor_first_name: string | null;
+  actor_name: string | null;
   reason_code: ModerationHistoryEntry['reasonCode'];
   message: string | null;
   created_at: Date;
@@ -136,7 +136,7 @@ export async function readModerationRoute(
     order by s.position`);
 
   const history = await db.execute<HistoryRow>(sql`
-    select a.action, u.first_name as actor_first_name, a.reason_code, a.message, a.created_at
+    select a.action, coalesce(u.first_name, split_part(u.email, '@', 1)) as actor_name, a.reason_code, a.message, a.created_at
     from moderation_actions a left join users u on u.id = a.actor_id
     where a.route_id = ${routeId}
     order by a.created_at desc`);
@@ -193,7 +193,7 @@ export async function readModerationRoute(
     publishedVersionAt: null,
     history: history.map((entry) => ({
       action: entry.action,
-      actorFirstName: entry.actor_first_name,
+      actorName: entry.actor_name,
       reasonCode: entry.reason_code,
       message: entry.message,
       createdAt: new Date(entry.created_at).toISOString(),

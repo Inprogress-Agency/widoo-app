@@ -27,6 +27,7 @@ const nextConfig: NextConfig = {
           apiOrigin: env.NEXT_PUBLIC_API_URL,
           authDomain: env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
           authEmulatorOrigin: env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL,
+          hasMap: Boolean(env.NEXT_PUBLIC_MAPBOX_TOKEN),
         }),
       },
     ];

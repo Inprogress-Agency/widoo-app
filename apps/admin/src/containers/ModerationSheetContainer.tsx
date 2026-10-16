@@ -5,29 +5,51 @@ import { CoherenceWarnings } from '@/components/moderation/sheet/CoherenceWarnin
 import { DecisionPanel } from '@/components/moderation/sheet/DecisionPanel';
 import { HistoryCard } from '@/components/moderation/sheet/HistoryCard';
 import { PublishedPanel } from '@/components/moderation/sheet/PublishedPanel';
-import { RejectDialog } from '@/components/moderation/sheet/RejectDialog';
 import { RequestChangesDialog } from '@/components/moderation/sheet/RequestChangesDialog';
 import { RevisionChanges } from '@/components/moderation/sheet/RevisionChanges';
 import { RoutePreview } from '@/components/moderation/sheet/RoutePreview';
 import { SheetHeader } from '@/components/moderation/sheet/SheetHeader';
 import { SheetNavigation, sheetPathOf } from '@/components/moderation/sheet/SheetNavigation';
 import { StepList } from '@/components/moderation/sheet/StepList';
+import { RouteReasonDialog } from '@/components/routes/RouteReasonDialog';
 import { PageMessage } from '@/components/states/PageMessage';
 import { sectionPaths } from '@/config/navigation';
 import { useModerationDecision } from '@/hooks/useModerationDecision';
 import { useRemoteData } from '@/hooks/useRemoteData';
 import { getSessionClients } from '@/lib/auth/clients';
 import { formatDayMonth, isWaitingLate } from '@/lib/dates';
+import { isRejectionReason } from '@/lib/rejection-reason';
 import { messages } from '@/messages/fr';
-import { taxonomies, type RejectionReason } from '@widoo/shared';
+import type { ModerationRouteDetail } from '@widoo/shared';
 import { Button } from '@widoo/ui';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-const isRejectionReason = (code: string): code is RejectionReason =>
-  taxonomies.rejectionReasons.some((reason) => reason === code);
-
 type OpenDialog = 'requestChanges' | 'reject' | null;
+
+const rejectTexts = messages.moderation.decisions.rejectDialog;
+
+/** What the refusal window says: for a revision, that the version online stays online. */
+function rejectTextsOf(route: ModerationRouteDetail) {
+  const authorName = route.author?.firstName;
+  const message = authorName ? rejectTexts.messageTo(authorName) : rejectTexts.message;
+  if (route.isRevision && route.publishedVersionAt) {
+    return {
+      title: rejectTexts.revisionTitle,
+      description: rejectTexts.revisionDescription(
+        formatDayMonth(new Date(route.publishedVersionAt)),
+      ),
+      message,
+      confirm: rejectTexts.revisionConfirm,
+    };
+  }
+  return {
+    title: rejectTexts.title,
+    description: rejectTexts.description,
+    message,
+    confirm: rejectTexts.confirm,
+  };
+}
 
 /**
  * A-02, the moderation sheet of a route: reads it, shows it as it will be published, and sends
@@ -106,7 +128,7 @@ export function ModerationSheetContainer({ routeId }: { routeId: string }) {
         <aside className="flex w-full shrink-0 flex-col gap-16 lg:w-decision">
           {publishedTo ? (
             <PublishedPanel
-              publishedBy={route.history[0]?.actorFirstName ?? null}
+              publishedBy={route.history[0]?.actorName ?? null}
               onNext={() => router.push(publishedTo.nextPath)}
               onBackToCatalog={() => router.push(sectionPaths.catalog)}
             />
@@ -132,14 +154,10 @@ export function ModerationSheetContainer({ routeId }: { routeId: string }) {
         onConfirm={() => void decision.requestChanges(message)}
         isBusy={decision.isBusy}
       />
-      <RejectDialog
+      <RouteReasonDialog
+        id="reject"
+        texts={rejectTextsOf(route)}
         isOpen={openDialog === 'reject'}
-        authorFirstName={route.author?.firstName ?? null}
-        publishedVersionOn={
-          route.isRevision && route.publishedVersionAt
-            ? formatDayMonth(new Date(route.publishedVersionAt))
-            : null
-        }
         reasonCode={reasonCode}
         onReasonCodeChange={setReasonCode}
         message={message}

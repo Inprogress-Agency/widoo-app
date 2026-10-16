@@ -4,21 +4,21 @@ import { labels, taxonomies } from '@widoo/shared';
 import { ConfirmDialog } from '@widoo/ui';
 import { useState } from 'react';
 
-const texts = messages.moderation.decisions.rejectDialog;
+const messageTexts = messages.moderation.decisions.rejectDialog;
 
-/** The seven codified reasons of a refusal, in the order of the wiki, each explained. */
+/** The seven codified reasons of a refusal or an unpublication, each explained, in wiki order. */
 const reasons = taxonomies.rejectionReasons.map((code) => ({
   code,
   label: labels.fr.rejectionReasons[code],
-  description: texts.reasonExplanations[code],
+  description: messageTexts.reasonExplanations[code],
 }));
 
-type RejectDialogProps = {
+type RouteReasonDialogProps = {
+  /** Prefix of the `id` of its fields, unique on the page. */
+  id: string;
+  /** What the window says: its question, the effect of the action, and its buttons. */
+  texts: { title: string; description: string; message: string; confirm: string };
   isOpen: boolean;
-  /** First name of the author, for « Message à Camille »; null when the account is purged. */
-  authorFirstName: string | null;
-  /** When the version still online was published, for a revision; null for a first submission. */
-  publishedVersionOn: string | null;
   reasonCode: string;
   onReasonCodeChange: (code: string) => void;
   message: string;
@@ -28,11 +28,14 @@ type RejectDialogProps = {
   isBusy: boolean;
 };
 
-/** « Refuser »: a codified reason and a message to the author, both required. */
-export function RejectDialog({
+/**
+ * Confirmation of an action that takes a route away from its author's readers, refusing it or
+ * unpublishing it: one of the codified reasons and a message to the author, both required.
+ */
+export function RouteReasonDialog({
+  id,
+  texts,
   isOpen,
-  authorFirstName,
-  publishedVersionOn,
   reasonCode,
   onReasonCodeChange,
   message,
@@ -40,9 +43,8 @@ export function RejectDialog({
   onCancel,
   onConfirm,
   isBusy,
-}: RejectDialogProps) {
+}: RouteReasonDialogProps) {
   const [isMessageMissing, setIsMessageMissing] = useState(false);
-  const isRevision = publishedVersionOn !== null;
 
   const handleConfirm = () => {
     if (message.trim() === '') {
@@ -61,25 +63,25 @@ export function RejectDialog({
       isOpen={isOpen}
       onCancel={onCancel}
       onConfirm={handleConfirm}
-      title={isRevision ? texts.revisionTitle : texts.title}
-      description={isRevision ? texts.revisionDescription(publishedVersionOn) : texts.description}
+      title={texts.title}
+      description={texts.description}
       cancelLabel={messages.confirm.cancel}
       closeLabel={messages.confirm.close}
-      confirmLabel={isRevision ? texts.revisionConfirm : texts.confirm}
+      confirmLabel={texts.confirm}
       isBusy={isBusy}
     >
       <ReasonFields
-        id="reject"
+        id={id}
         options={reasons}
         reasonLayout="radios"
         reasonCode={reasonCode}
         onReasonCodeChange={onReasonCodeChange}
         detail={message}
         onDetailChange={handleMessageChange}
-        detailLabel={authorFirstName ? texts.messageTo(authorFirstName) : texts.message}
-        detailHint={texts.messageHint}
-        detailPlaceholder={texts.messagePlaceholder}
-        detailError={isMessageMissing ? texts.messageRequired : undefined}
+        detailLabel={texts.message}
+        detailHint={messageTexts.messageHint}
+        detailPlaceholder={messageTexts.messagePlaceholder}
+        detailError={isMessageMissing ? messageTexts.messageRequired : undefined}
       />
     </ConfirmDialog>
   );

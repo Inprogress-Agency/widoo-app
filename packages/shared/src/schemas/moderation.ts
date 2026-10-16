@@ -164,8 +164,11 @@ export type ModerationStep = z.infer<typeof ModerationStep>;
 /** A line of the history of a route in moderation. */
 export const ModerationHistoryEntry = z.object({
   action: z.enum(moderationActions),
-  /** First name of the member of the team; null once the account is purged. */
-  actorFirstName: z.string().nullable(),
+  /**
+   * Who decided: the first name of the member of the team, or the start of their address when
+   * the account has none. Null once the account is purged.
+   */
+  actorName: z.string().nullable(),
   reasonCode: z.enum(taxonomies.rejectionReasons).nullable(),
   message: z.string().nullable(),
   createdAt: z.iso.datetime(),
