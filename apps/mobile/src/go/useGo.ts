@@ -158,7 +158,12 @@ export function GoSync() {
  * « Terminer la sortie » and « Arrêter le parcours », with their events. Once the Go is over, it
  * leaves the cache: the mini-player closes, and E-07 too, or gives way to E-15 once completed.
  */
-export function useGoActions(planned: PlannedRoute, progress: GoProgress) {
+export function useGoActions(
+  planned: PlannedRoute,
+  progress: GoProgress,
+  /** The outing completed, given before the Go leaves the cache: E-15 takes over at once. */
+  onCompleted?: (outing: PlannedRoute) => void,
+) {
   const { t } = useTranslation();
   const client = useQueryClient();
   const routeId = planned.route.id;
@@ -185,8 +190,7 @@ export function useGoActions(planned: PlannedRoute, progress: GoProgress) {
     return true;
   };
 
-  /** Closes the Go; the outing as closed, for E-15, or null when the API refused it. */
-  const close = async (status: 'completed' | 'stopped'): Promise<PlannedRoute | null> => {
+  const close = async (status: 'completed' | 'stopped') => {
     if (current && progress.phase === 'on_site' && status === 'completed') {
       await markDone(current.step.id);
     }
@@ -200,7 +204,7 @@ export function useGoActions(planned: PlannedRoute, progress: GoProgress) {
       } else {
         failed();
       }
-      return null;
+      return;
     }
     const after = goProgress(planned, goLocal.localOf(planned.id));
     const ratio = Math.max(doneRatio(after), doneRatio(progress));
@@ -214,12 +218,14 @@ export function useGoActions(planned: PlannedRoute, progress: GoProgress) {
     } else {
       analytics.track('go_stopped', { route_id: routeId, steps_done_ratio: ratio });
     }
+    if (status === 'completed') {
+      onCompleted?.(closed);
+    }
     goLocal.clear();
     setGo(client, null);
     void client.invalidateQueries({
       queryKey: plannedQueryKey(session.store.getState().user?.uid ?? ''),
     });
-    return closed;
   };
 
   return {
@@ -261,7 +267,7 @@ export function useGoActions(planned: PlannedRoute, progress: GoProgress) {
       analytics.track('maps_opened', { route_id: routeId, mode: 'next_step' });
       await Linking.openURL(url).catch(failed);
     },
-    /** « Terminer la sortie »: the outing completed, which E-15 then closes (D-029). */
+    /** « Terminer la sortie »: the outing completed goes to `onCompleted`, E-15 (D-029). */
     finish: () => close('completed'),
     /** « Arrêter le parcours », after the system alert; no note (D-029). */
     stop() {
