@@ -30,6 +30,8 @@ describe('placeInputOf', () => {
         priceRange: null,
         websiteUrl: null,
         phone: null,
+        partnerBookingUrl: null,
+        partnerProgramId: null,
         hours: [{ weekday: 0, opens: '08:00', closes: '18:00', validFrom: null, validTo: null }],
       },
     });
@@ -79,6 +81,8 @@ describe('placeFormOf', () => {
         priceRange: 'low',
         websiteUrl: place.websiteUrl,
         phone: place.phone,
+        partnerBookingUrl: null,
+        partnerProgramId: null,
         hours: place.hours,
       },
     });
@@ -102,6 +106,49 @@ describe('coordinateText', () => {
     expect(positionOfForm({ latitude: coordinateText(-33.8688197), longitude: '151,2' })).toEqual({
       lat: -33.86882,
       lng: 151.2,
+    });
+  });
+});
+
+describe('the partner link of Widoo', () => {
+  const place = {
+    id: 'p1',
+    name: 'Café Lomi',
+    category: 'cafe' as const,
+    cityName: 'Paris',
+    verificationStatus: 'verified' as const,
+    verifiedAt: null,
+    routeCount: 0,
+    address: '3 ter rue Marcadet, 75018 Paris',
+    location: { lat: 48.8905, lng: 2.3558 },
+    isIndoor: true,
+    priceRange: null,
+    websiteUrl: null,
+    phone: null,
+    partnerBookingUrl: 'https://partner.example/lomi',
+    partnerProgramId: '0199d1ec-0000-7000-8000-000000000000',
+    hours: [],
+    routes: [],
+  };
+
+  it('is filled from the place and sent with its program', () => {
+    const values = placeFormOf(place);
+    expect(values).toMatchObject({
+      partnerBookingUrl: 'https://partner.example/lomi',
+      partnerProgramId: place.partnerProgramId,
+    });
+    expect(placeInputOf(values, [])).toMatchObject({
+      input: {
+        partnerBookingUrl: 'https://partner.example/lomi',
+        partnerProgramId: place.partnerProgramId,
+      },
+    });
+  });
+
+  it('is sent as none, with no program, when the link is emptied', () => {
+    const values = { ...placeFormOf(place), partnerBookingUrl: ' ' };
+    expect(placeInputOf(values, [])).toMatchObject({
+      input: { partnerBookingUrl: null, partnerProgramId: null },
     });
   });
 });
