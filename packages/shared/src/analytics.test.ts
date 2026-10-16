@@ -336,4 +336,14 @@ describe('events of the planning (D-038)', () => {
       checkAnalyticsEvent('plan_changed', { route_id: 'route-1', days_moved: 0.5 }).success,
     ).toBe(false);
   });
+
+  it('counts the days to the date of an outing cancelled or restored, never negative', () => {
+    for (const name of ['plan_cancelled', 'plan_restored'] as const) {
+      expect(checkAnalyticsEvent(name, { route_id: 'route-1', days_ahead: 3 }).success).toBe(true);
+      expect(checkAnalyticsEvent(name, { route_id: 'route-1', days_ahead: -1 }).success).toBe(
+        false,
+      );
+      expect(checkAnalyticsEvent(name, { route_id: 'route-1' }).success).toBe(false);
+    }
+  });
 });
