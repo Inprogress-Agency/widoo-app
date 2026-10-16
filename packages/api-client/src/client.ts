@@ -1,4 +1,7 @@
 import {
+  AffiliateProgram,
+  AffiliatePrograms,
+  BookableSteps,
   AdminActionFilters,
   AdminActions,
   AdminRatings,
@@ -48,6 +51,9 @@ import {
   type AdminRatingsQuery,
   type AdminReportsQuery,
   type AdminActionsQuery,
+  type AffiliateProgramInput,
+  type AffiliateProgramPatch,
+  type BookableStepsQuery,
   type AdminSignalsQuery,
   type UpdateSettingBody,
   type AdminUsersQuery,
@@ -74,6 +80,7 @@ import { createTransport, type ApiClientOptions } from './transport';
 import { moderationQueryString, type ModerationQueueParams } from './moderation';
 import { catalogPlacesQueryString, catalogQueryString } from './catalog';
 import { actionsQueryString } from './actions';
+import { bookableStepsQueryString } from './affiliation';
 import { usersQueryString } from './users';
 import { ratingsQueryString, reportsQueryString, signalsQueryString } from './reports';
 
@@ -601,6 +608,46 @@ export function createApiClient(options: ApiClientOptions) {
         method: 'GET',
         path: '/v1/admin/actions/filters',
         schema: AdminActionFilters,
+        auth: true,
+        signal,
+      }),
+
+    /** `GET /v1/admin/affiliate-programs`: the programs of affiliation (A-09). */
+    getAffiliatePrograms: (signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: '/v1/admin/affiliate-programs',
+        schema: AffiliatePrograms,
+        auth: true,
+        signal,
+      }),
+
+    /** `POST /v1/admin/affiliate-programs`: registers a program. */
+    createAffiliateProgram: (program: AffiliateProgramInput) =>
+      request({
+        method: 'POST',
+        path: '/v1/admin/affiliate-programs',
+        body: program,
+        schema: AffiliateProgram,
+        auth: true,
+      }),
+
+    /** `PATCH /v1/admin/affiliate-programs/:id`: changes the fields given of a program. */
+    updateAffiliateProgram: (programId: string, patch: AffiliateProgramPatch) =>
+      request({
+        method: 'PATCH',
+        path: `/v1/admin/affiliate-programs/${programId}`,
+        body: patch,
+        schema: AffiliateProgram,
+        auth: true,
+      }),
+
+    /** `GET /v1/admin/bookable-steps`: the steps that can be booked, with the link shown (A-09). */
+    getBookableSteps: (params: Partial<BookableStepsQuery>, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/admin/bookable-steps?${bookableStepsQueryString(params)}`,
+        schema: BookableSteps,
         auth: true,
         signal,
       }),
