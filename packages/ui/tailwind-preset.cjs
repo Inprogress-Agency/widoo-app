@@ -95,6 +95,9 @@ module.exports = {
         decision: '320px',
       },
       maxWidth: { 'sign-in': '440px', dialog: '520px' },
+      // The detail panel stays in view while the list scrolls: the window less the header (64 px) and
+      // the padding of the page (2 × 24 px).
+      maxHeight: { 'detail-panel': 'calc(100dvh - 112px)' },
       // A change of a revision on the moderation sheet: its subject, then what changed.
       // And a day of the week next to its opening hours, in the form of a place.
       gridTemplateColumns: { change: '150px 1fr', hours: '110px 1fr' },
