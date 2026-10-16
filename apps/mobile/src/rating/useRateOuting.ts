@@ -1,6 +1,6 @@
 import { onlineManager, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { ApiRequestError } from '@widoo/api-client';
-import type { PlannedRoute, RateRoute } from '@widoo/shared';
+import type { PlannedRoute, RouteCard } from '@widoo/shared';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createMMKV } from 'react-native-mmkv';
@@ -8,11 +8,12 @@ import { useStore } from 'zustand';
 import { analytics } from '../analytics';
 import { api } from '../api/client';
 import { session } from '../auth';
-import { useIsOnline } from '../discovery/useRouteSearch';
+import { discoveryStore, useIsOnline } from '../discovery/useRouteSearch';
 import { plannedQueryKey } from '../plan/planned';
 import { showToast } from '../ui/toastStore';
+import { withRouteRating } from './cardRating';
 import { bodyOf, isRatingChanged, type GivenRating } from './given';
-import { createPendingRatingStore } from './pendingRatings';
+import { createPendingRatingStore, type PendingRating } from './pendingRatings';
 
 const storage = createMMKV({ id: 'ratings' });
 const PENDING_KEY = 'pending';
@@ -41,10 +42,23 @@ function refresh(client: QueryClient) {
   });
 }
 
+/** The new rating of `routeId` in every card and sheet in memory, the map's included. */
+function applyRouteRating(client: QueryClient, routeId: string, rating: RouteCard['rating']) {
+  client.setQueriesData({ queryKey: ['routes'] }, (data: unknown) =>
+    withRouteRating(data, routeId, rating),
+  );
+  const { results, answer } = discoveryStore.getState();
+  discoveryStore.setState({
+    results: withRouteRating(results, routeId, rating),
+    answer: withRouteRating(answer, routeId, rating),
+  });
+}
+
 /** Sends one rating: taken, kept for later (no network), or refused for good. */
-async function send(client: QueryClient, plannedId: string, body: RateRoute) {
+async function send(client: QueryClient, { plannedId, routeId, body }: PendingRating) {
   try {
-    await api.rateOuting(plannedId, body);
+    const { routeRating } = await api.rateOuting(plannedId, body);
+    applyRouteRating(client, routeId, routeRating);
     refresh(client);
     return 'sent' as const;
   } catch (error) {
@@ -70,11 +84,10 @@ export function useRateOuting() {
       has_comment: body.comment !== null,
       source,
     });
-    const result = onlineManager.isOnline()
-      ? await send(client, outing.id, body)
-      : ('kept' as const);
+    const entry = { plannedId: outing.id, routeId: outing.route.id, body };
+    const result = onlineManager.isOnline() ? await send(client, entry) : ('kept' as const);
     if (result === 'kept') {
-      pendingRatings.queue({ plannedId: outing.id, body });
+      pendingRatings.queue(entry);
       showToast('info', t('go.end.kept'), { isAboveTabBar: true });
     } else if (result === 'refused') {
       showToast('error', t('go.end.failed'), {
@@ -95,11 +108,11 @@ export function RatingSync() {
       return;
     }
     void (async () => {
-      for (const { plannedId, body } of pendingRatings.pending()) {
-        if ((await send(client, plannedId, body)) === 'kept') {
+      for (const entry of pendingRatings.pending()) {
+        if ((await send(client, entry)) === 'kept') {
           return;
         }
-        pendingRatings.sent(plannedId);
+        pendingRatings.sent(entry.plannedId);
       }
     })();
   }, [client, isOnline, pendingCount]);
