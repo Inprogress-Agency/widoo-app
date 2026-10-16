@@ -75,8 +75,6 @@ export const go = {
       failedBody: 'Check the connection and try again.',
       premium: 'This route needs Premium.',
       actionFailed: 'That did not work',
-      completed: 'Outing ended',
-      completedBody: 'You will find it in your past routes.',
       needsNetwork: 'Reconnect to end or stop the outing.',
     },
     end: {
