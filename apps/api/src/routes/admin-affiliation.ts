@@ -3,10 +3,13 @@ import {
   AffiliateProgramInput,
   AffiliateProgramPatch,
   AffiliatePrograms,
+  BookableSteps,
+  BookableStepsQuery,
 } from '@widoo/shared';
 import type { FastifyRequest } from 'fastify';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
+import { readBookableSteps } from '../affiliation/bookable-steps';
 import { createProgram, readPrograms, updateProgram } from '../affiliation/programs';
 import { httpError } from '../errors';
 
@@ -73,5 +76,19 @@ export const adminAffiliationRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (request) => updateProgram(app.db, actorIdOf(request), request.params.id, request.body),
+  );
+
+  app.get(
+    '/admin/bookable-steps',
+    {
+      schema: {
+        tags,
+        summary: 'The steps that can be booked, with the link shown and the clicks of 30 days',
+        security,
+        querystring: BookableStepsQuery,
+        response: { 200: BookableSteps },
+      },
+    },
+    async (request) => readBookableSteps(app.db, request.query),
   );
 };
