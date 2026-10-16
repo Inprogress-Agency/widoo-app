@@ -70,6 +70,8 @@ const route = {
         hours: [],
       },
       verification: { confirmations: 0, lastConfirmedAt: null, reports: null },
+      highlights: [],
+      photos: [],
     },
   ],
 };

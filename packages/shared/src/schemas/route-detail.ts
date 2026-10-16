@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { taxonomies } from '../taxonomies';
 import { HttpsUrl } from './common';
-import { routeCardFields, Step, StepTransition } from './route';
+import { routeCardFields, Step, StepHighlightList, StepPhotos, StepTransition } from './route';
 
 /**
  * Answer of `GET /v1/routes/:id` and `GET /v1/routes/:id/timeline` (wiki API › Découverte),
@@ -68,6 +68,8 @@ export const RouteDetailStep = Step.extend({
   /** Last day of an ephemeral step (D-050). */
   endsOn: z.iso.date().nullable(),
   verification: PlaceVerification,
+  highlights: StepHighlightList,
+  photos: StepPhotos,
 });
 export type RouteDetailStep = z.infer<typeof RouteDetailStep>;
 
