@@ -6,6 +6,7 @@
 import {
   PlannedRouteSnapshot,
   RouteTimeline,
+  type MyRouteRating,
   type PlannedRoute,
   type PlannedRouteStatus,
 } from '@widoo/shared';
@@ -14,6 +15,7 @@ import { z } from 'zod';
 import type { Db, Tx } from '../db/client';
 import { plannedRoutes, plannedSteps } from '../db/schema';
 import { httpError } from '../errors';
+import { myRatingsOf } from '../ratings/mine';
 import { timelineOf } from './snapshot';
 
 export type PlannedRow = typeof plannedRoutes.$inferSelect;
@@ -21,8 +23,15 @@ type PlannedStepRow = typeof plannedSteps.$inferSelect;
 
 const iso = (date: Date | null) => date?.toISOString() ?? null;
 
-/** The answer of a planning: its snapshot, timeline, bookings and progress, in step order. */
-export function toPlannedRoute(row: PlannedRow, stepRows: readonly PlannedStepRow[]): PlannedRoute {
+/**
+ * The answer of a planning: its snapshot, timeline, bookings and progress, in step order, and the
+ * caller's rating of its route.
+ */
+export function toPlannedRoute(
+  row: PlannedRow,
+  stepRows: readonly PlannedStepRow[],
+  myRating: MyRouteRating | null = null,
+): PlannedRoute {
   const route = PlannedRouteSnapshot.parse(row.routeRevisionSnapshot);
   const checked = new Set(row.checklist);
   const progress = new Map(stepRows.map((step) => [step.stepId, step]));
@@ -47,6 +56,7 @@ export function toPlannedRoute(row: PlannedRow, stepRows: readonly PlannedStepRo
         skippedAt: iso(done?.skippedAt ?? null),
       };
     }),
+    myRating,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
@@ -59,9 +69,13 @@ const stepsOf = (db: Db | Tx, plannedRouteId: string) =>
     .where(eq(plannedSteps.plannedRouteId, plannedRouteId))
     .orderBy(asc(plannedSteps.position));
 
-/** A planning with its progress rows. */
+const ratingOfRoute = (ratings: Map<string, MyRouteRating>, routeId: string | null) =>
+  (routeId === null ? undefined : ratings.get(routeId)) ?? null;
+
+/** A planning with its progress rows and the rating of its route. */
 export async function readPlanned(db: Db | Tx, row: PlannedRow): Promise<PlannedRoute> {
-  return toPlannedRoute(row, await stepsOf(db, row.id));
+  const ratings = await myRatingsOf(db, row.userId, [row.routeId]);
+  return toPlannedRoute(row, await stepsOf(db, row.id), ratingOfRoute(ratings, row.routeId));
 }
 
 const ownedBy = (userId: string, id: string) =>
@@ -167,12 +181,18 @@ export async function listPlanned(
               page.map((row) => row.id),
             ),
           );
+  const ratings = await myRatingsOf(
+    db,
+    userId,
+    page.map((row) => row.routeId),
+  );
   const last = page.at(-1);
   return {
     items: page.map((row) =>
       toPlannedRoute(
         row,
         stepRows.filter((step) => step.plannedRouteId === row.id),
+        ratingOfRoute(ratings, row.routeId),
       ),
     ),
     nextCursor: rows.length > query.limit && last ? encodeCursor(last) : null,

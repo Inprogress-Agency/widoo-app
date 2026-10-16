@@ -51,6 +51,7 @@ const planned = {
   },
   checklist: [{ stepId, isChecked: false }],
   steps: [{ stepId, arrivedAt: null, doneAt: null, skippedAt: null }],
+  myRating: null,
   createdAt: at,
   updatedAt: at,
 };
