@@ -30,9 +30,25 @@ const roles: Record<TeamRole, string> = {
   admin: 'Admin',
 };
 
+/** Title of a page when it differs from the entry of its section in the navigation. */
+const pageTitles: Partial<Record<AdminSection, string>> = {
+  moderation: 'File de modération',
+};
+
 /**
  * Where « Reconnectez-vous pour revenir… » sends back, after « revenir » (A-01, session expirée).
  */
+/** What each refusal reason means, under its label (A-02, « Refuser »). */
+const rejectionExplanations = {
+  not_a_route: 'Une liste de lieux sans enchaînement',
+  place_invalid: 'Fermé, privé, introuvable ou adresse fausse',
+  description_insufficient: 'Trop courte ou copiée',
+  photos_invalid: 'Droits, crédit, visages ou mineurs',
+  promotional: 'Publicité ou coordonnées personnelles',
+  policy_violation: 'Illicite, dangereux ou discriminatoire',
+  duplicate: 'Même parcours déjà publié',
+} as const;
+
 const returnTargets: Record<AdminSection, string> = {
   dashboard: 'au tableau de bord',
   moderation: 'à la file de modération',
@@ -61,6 +77,7 @@ const counted: Record<CountedAdminSection, (count: number) => string> = {
 export const messages = {
   app: { name: 'Widoo', product: 'Admin', title: 'Admin Widoo' },
   sections,
+  pageTitles,
   roles,
   shell: {
     navigation: 'Navigation principale',
@@ -149,12 +166,200 @@ export const messages = {
     close: 'Fermer',
   },
   list: {
+    range: (first: number, last: number, total: number) => `${first} à ${last} sur ${total}`,
     loading: 'Chargement de la liste',
     pages: 'Pages de la liste',
     previous: 'Précédent',
     next: 'Suivant',
     error: "La liste n'a pas pu être chargée.",
     retry: 'Réessayer',
+  },
+  moderation: {
+    search: 'Rechercher un titre ou un auteur',
+    total: (count: number) => `${count} parcours`,
+    filters: {
+      label: 'Filtres de la file',
+      pending: 'En relecture',
+      changesRequested: 'Modifications demandées',
+      late: 'Plus de 72 h',
+      revisions: 'Révisions',
+      city: 'Ville',
+    },
+    columns: {
+      route: 'Parcours',
+      author: 'Auteur',
+      city: 'Ville',
+      content: 'Contenu',
+      warnings: 'Alertes',
+      unverified: 'Non vérifiés',
+      waiting: 'En file',
+    },
+    firstSubmission: 'Première soumission',
+    revision: 'Révision',
+    toFix: 'À corriger',
+    certified: 'créateur certifié',
+    noAuthor: 'Compte supprimé',
+    content: (steps: number, duration: string | null) =>
+      `${steps} ${steps > 1 ? 'étapes' : 'étape'}${duration ? `, ${duration}` : ''}`,
+    warnings: (count: number) => (count > 1 ? `${count} alertes` : '1 alerte'),
+    noWarning: 'Aucune',
+    unverified: (count: number) => (count > 1 ? `${count} lieux` : '1 lieu'),
+    noUnverified: 'Aucun',
+    late: 'en retard',
+    sheet: {
+      back: 'File de modération',
+      position: (position: number, total: number) => `Parcours ${position} sur ${total}`,
+      previous: 'Parcours précédent',
+      next: 'Parcours suivant',
+      notFound: "Ce parcours n'existe pas.",
+      error: "La fiche n'a pas pu être chargée.",
+      statuses: {
+        pending: 'En relecture',
+        changes_requested: 'À corriger',
+        published: 'Publié',
+        rejected: 'Refusé',
+        unpublished: 'Retiré',
+        needs_fix: 'À corriger',
+        draft: 'Brouillon',
+        private: 'Privé',
+      },
+      premium: 'Premium',
+      premiumComputed: (minSteps: number) => `Premium calculé : ${minSteps} étapes ou plus`,
+      waitingSince: 'En file depuis',
+      warningsTitle: (count: number) =>
+        count > 1 ? `${count} avertissements de cohérence` : '1 avertissement de cohérence',
+      changes: {
+        title: 'Changements depuis la version publiée',
+        version: (date: string) => `Version du ${date}`,
+        subjects: {
+          step: (number: number) => `Étape ${number}`,
+          title: 'Titre',
+          description: 'Description',
+        },
+        kinds: { replaced: 'Remplacée', modified: 'Modifiée', duration_changed: 'Durée changée' },
+        becomes: 'devient',
+        before: 'Avant',
+        after: 'Après',
+        duration: 'Durée conseillée :',
+      },
+      previewTitle: "Le parcours tel qu'il sera publié",
+      noDescription: 'Aucune description.',
+      tiles: { duration: 'Durée', budget: 'Budget', steps: 'Étapes', distance: 'Distance' },
+      budget: (euros: number) => (euros === 0 ? 'Gratuit' : `≈ ${Math.round(euros)} €`),
+      distance: (meters: number) =>
+        `${(meters / 1000).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} km`,
+      mapTitle: 'Carte et étapes',
+      mapLabel: (count: number) => `Plan des ${count} étapes, dans l'ordre du parcours`,
+      onSite: (duration: string) => `${duration} sur place`,
+      free: 'Gratuit',
+      perPerson: (euros: number) => `≈ ${Math.round(euros)} € par pers.`,
+      book: 'Réserver',
+      neverVerified: 'Lieu jamais vérifié',
+      transition: (duration: string, meters: number) =>
+        `${duration} (${(meters / 1000).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} km)`,
+      transports: { walk: 'à pied', bike: 'à vélo', metro: 'en métro', car: 'en voiture' },
+      author: {
+        title: 'Auteur',
+        certified: 'Créateur certifié',
+        published: 'Parcours publiés',
+        rejected: 'Parcours refusés',
+        reports: 'Signalements reçus',
+        registered: 'Inscription',
+        seeAccount: 'Voir son compte',
+      },
+      history: {
+        title: 'Historique',
+        empty: 'Aucune décision pour le moment.',
+        actions: {
+          publish: 'Publié',
+          request_changes: 'Modifications demandées',
+          reject: 'Refusé',
+          unpublish: 'Dépublié',
+          edit: 'Modifié',
+        },
+        by: (action: string, name: string | null) => (name ? `${action} par ${name}` : action),
+      },
+    },
+    charter: {
+      title: 'Charte de publication',
+      progress: (checked: number, total: number) => `${checked} sur ${total}`,
+      hint: (total: number) => `Cochez les ${total} règles pour publier.`,
+      rules: [
+        {
+          label: 'Un vrai parcours, pas une liste',
+          description: "Les étapes s'enchaînent et forment un moment cohérent.",
+        },
+        {
+          label: 'Des lieux réels et ouverts au public',
+          description: 'Adresse exacte, aucun lieu privé.',
+        },
+        {
+          label: 'Une description originale',
+          description: "Le pourquoi et l'ambiance, rien de copié.",
+        },
+        {
+          label: 'Des photos conformes',
+          description: 'Personnelles ou libres avec crédit, sans visage ni mineur.',
+        },
+        {
+          label: 'Aucune promotion déguisée',
+          description: 'Pas de coordonnées ; liens affiliés déclarés.',
+        },
+        { label: 'Aucun contenu illicite ou dangereux', description: null },
+      ],
+    },
+    decisions: {
+      publish: 'Publier',
+      requestChanges: 'Demander des modifications',
+      reject: 'Refuser',
+      requestChangesDialog: {
+        title: 'Demander des modifications ?',
+        description:
+          "Le parcours passe en « À corriger ». Votre message est gardé dans son historique ; l'auteur n'est pas encore averti automatiquement.",
+        message: "Message à l'auteur",
+        messageHint: "Texte brut, sans < ni >. Gardé dans l'historique du parcours.",
+        confirm: 'Demander les modifications',
+      },
+      rejectDialog: {
+        reasonExplanations: rejectionExplanations,
+        revisionTitle: 'Refuser cette révision ?',
+        revisionDescription: (publishedOn: string) =>
+          `Cette révision ne sera pas publiée : la version du ${publishedOn} reste en ligne. Le motif et votre message sont gardés dans l'historique ; l'auteur n'est pas encore averti automatiquement.`,
+        revisionConfirm: 'Refuser la révision',
+        messageTo: (firstName: string) => `Message à ${firstName}`,
+        messagePlaceholder: 'Expliquez ce qui a conduit au refus.',
+        messageRequired: "Écrivez un message à l'auteur.",
+        title: 'Refuser ce parcours ?',
+        description:
+          "Le parcours est refusé. Le motif et votre message sont gardés dans son historique ; l'auteur n'est pas encore averti automatiquement.",
+        message: "Message à l'auteur",
+        messageHint: "Texte brut, sans < ni >. Gardé dans l'historique du parcours.",
+        confirm: 'Refuser le parcours',
+      },
+      published: {
+        title: "Publié à l'instant",
+        by: (firstName: string) => `par ${firstName}, les 6 règles vérifiées`,
+        text: 'Le parcours est en ligne.',
+        next: 'Parcours suivant',
+        toCatalog: 'Voir dans Lieux et parcours',
+      },
+      toasts: {
+        published: 'Parcours publié',
+        changesRequested: 'Modifications demandées',
+        rejected: 'Parcours refusé',
+        failed: "La décision n'a pas pu être enregistrée.",
+        invalidMessage:
+          'Le message est refusé : texte brut uniquement, sans < ni >, ni tabulation, 1 000 caractères au plus.',
+        alreadyDecided: (status: string) =>
+          `Un autre membre de l'équipe a déjà tranché : ${status.toLowerCase()}.`,
+      },
+    },
+    empty: {
+      title: 'La file est vide',
+      text: 'Aucun parcours à relire pour le moment.',
+      filteredTitle: 'Aucun parcours ne correspond',
+      filteredText: 'Modifiez la recherche ou les filtres.',
+    },
   },
   notFound: {
     title: 'Page introuvable',

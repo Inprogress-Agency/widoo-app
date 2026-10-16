@@ -37,7 +37,9 @@ export function contentSecurityPolicy(options: HeaderOptions): string {
       ...(dev ? ["'unsafe-eval'"] : []),
     ],
     'style-src': ["'self'", "'unsafe-inline'"],
-    'img-src': ["'self'", 'data:', 'blob:'],
+    // Photos of the routes and places are served from their own address until they move to the
+    // storage bucket of Widoo: any https image, nothing else.
+    'img-src': ["'self'", 'data:', 'blob:', 'https:'],
     'font-src': ["'self'"],
     'connect-src': ["'self'", apiOrigin, ...authOrigins, ...(dev ? ['ws:'] : [])],
     'frame-src': [`https://${authDomain}`, ...(authEmulatorOrigin ? [authEmulatorOrigin] : [])],

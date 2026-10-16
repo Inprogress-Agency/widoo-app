@@ -1,4 +1,7 @@
 import {
+  ModerationRouteDetail,
+  ModerationQueue,
+  ModerationDecision,
   AdminCounters,
   AppConfig,
   GeocodeResult,
@@ -21,6 +24,8 @@ import {
   type SupportMessageInput,
   type UpdateMe,
   type UpdatePlannedRoute,
+  type RejectionBody,
+  type RequestChangesBody,
 } from '@widoo/shared';
 import { plannedPath, plannedQueryString, type PlannedListParams } from './planned';
 import {
@@ -32,6 +37,7 @@ import {
 import { isProfileUnavailable, publicProfilePath, type PublicProfileAnswer } from './profile';
 import { removedOf, routePath, type GetRouteOptions, type RouteSheetAnswer } from './route';
 import { createTransport, type ApiClientOptions } from './transport';
+import { moderationQueryString, type ModerationQueueParams } from './moderation';
 
 /**
  * Typed client of the API, one method per route, answers validated by the `shared` schemas.
@@ -233,6 +239,62 @@ export function createApiClient(options: ApiClientOptions) {
         method: 'GET',
         path: '/v1/admin/counters',
         schema: AdminCounters,
+        auth: true,
+        signal,
+      }),
+
+    /** `GET /v1/admin/moderation`: a page of the moderation queue (A-02). Moderators and admins. */
+    getModerationQueue: (params: ModerationQueueParams, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/admin/moderation?${moderationQueryString(params)}`,
+        schema: ModerationQueue,
+        auth: true,
+        signal,
+      }),
+
+    /**
+     * Decisions of a moderator on a route. A route another member of the team already decided
+     * answers 409 `already_decided`, with the status it was given in `details`.
+     */
+    publishRoute: (routeId: string) =>
+      request({
+        method: 'POST',
+        path: `/v1/admin/routes/${routeId}/publish`,
+        schema: ModerationDecision,
+        auth: true,
+      }),
+    requestRouteChanges: (routeId: string, body: RequestChangesBody) =>
+      request({
+        method: 'POST',
+        path: `/v1/admin/routes/${routeId}/request-changes`,
+        body,
+        schema: ModerationDecision,
+        auth: true,
+      }),
+    rejectRoute: (routeId: string, body: RejectionBody) =>
+      request({
+        method: 'POST',
+        path: `/v1/admin/routes/${routeId}/reject`,
+        body,
+        schema: ModerationDecision,
+        auth: true,
+      }),
+    unpublishRoute: (routeId: string, body: RejectionBody) =>
+      request({
+        method: 'POST',
+        path: `/v1/admin/routes/${routeId}/unpublish`,
+        body,
+        schema: ModerationDecision,
+        auth: true,
+      }),
+
+    /** `GET /v1/admin/routes/:id`: the moderation sheet of a route (A-02). 404 when unknown. */
+    getModerationRoute: (routeId: string, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/admin/routes/${routeId}`,
+        schema: ModerationRouteDetail,
         auth: true,
         signal,
       }),
