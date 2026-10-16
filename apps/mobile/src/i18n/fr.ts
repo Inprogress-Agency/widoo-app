@@ -506,8 +506,6 @@ export const fr = {
       failedBody: 'Vérifiez la connexion et réessayez.',
       premium: 'Ce parcours demande Premium.',
       actionFailed: "Ça n'a pas marché",
-      completed: 'Sortie terminée',
-      completedBody: 'Vous la retrouverez dans vos parcours passés.',
       needsNetwork: 'Reconnectez-vous pour terminer ou arrêter la sortie.',
     },
     // E-15, the end of the outing in the same modal (D-029, D-033, D-034).

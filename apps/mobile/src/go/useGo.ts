@@ -156,7 +156,7 @@ export function GoSync() {
 /**
  * The commands of E-07 on the Go `planned`: « J'y suis », « Étape suivante », « Itinéraire »,
  * « Terminer la sortie » and « Arrêter le parcours », with their events. Once the Go is over, it
- * leaves the cache: E-07 and the mini-player close by themselves.
+ * leaves the cache: the mini-player closes, and E-07 too, or gives way to E-15 once completed.
  */
 export function useGoActions(planned: PlannedRoute, progress: GoProgress) {
   const { t } = useTranslation();
@@ -185,20 +185,22 @@ export function useGoActions(planned: PlannedRoute, progress: GoProgress) {
     return true;
   };
 
-  const close = async (status: 'completed' | 'stopped') => {
+  /** Closes the Go; the outing as closed, for E-15, or null when the API refused it. */
+  const close = async (status: 'completed' | 'stopped'): Promise<PlannedRoute | null> => {
     if (current && progress.phase === 'on_site' && status === 'completed') {
       await markDone(current.step.id);
     }
+    let closed: PlannedRoute;
     try {
       await sendPending(client, planned.id);
-      await api.updatePlanned(planned.id, { status });
+      closed = await api.updatePlanned(planned.id, { status });
     } catch (error) {
       if (isUnreachable(error)) {
         showToast('error', t('go.toast.actionFailed'), { subtitle: t('go.toast.needsNetwork') });
       } else {
         failed();
       }
-      return;
+      return null;
     }
     const after = goProgress(planned, goLocal.localOf(planned.id));
     const ratio = Math.max(doneRatio(after), doneRatio(progress));
@@ -217,12 +219,7 @@ export function useGoActions(planned: PlannedRoute, progress: GoProgress) {
     void client.invalidateQueries({
       queryKey: plannedQueryKey(session.store.getState().user?.uid ?? ''),
     });
-    if (status === 'completed') {
-      showToast('success', t('go.toast.completed'), {
-        subtitle: t('go.toast.completedBody'),
-        isAboveTabBar: true,
-      });
-    }
+    return closed;
   };
 
   return {
@@ -264,6 +261,7 @@ export function useGoActions(planned: PlannedRoute, progress: GoProgress) {
       analytics.track('maps_opened', { route_id: routeId, mode: 'next_step' });
       await Linking.openURL(url).catch(failed);
     },
+    /** « Terminer la sortie »: the outing completed, which E-15 then closes (D-029). */
     finish: () => close('completed'),
     /** « Arrêter le parcours », after the system alert; no note (D-029). */
     stop() {

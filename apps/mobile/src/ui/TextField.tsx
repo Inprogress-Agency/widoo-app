@@ -25,6 +25,10 @@ interface TextFieldProps extends InputProps {
   isMultiline?: boolean;
   /** Under the field, in `error-ink` with its icon: the field the API would refuse. */
   error?: string;
+  /** What a screen reader calls the field when it differs from the label (« …, facultatif »). */
+  spokenLabel?: string;
+  /** The counter as the screen writes it, « 100 / 280 »; « 103/150 » by default. */
+  formatCounter?: (length: number, max: number) => string;
 }
 
 /**
@@ -37,11 +41,13 @@ export function TextField({
   maxLength,
   isMultiline = false,
   error,
+  spokenLabel,
+  formatCounter = (length, max) => `${length}/${max}`,
   ...input
 }: TextFieldProps) {
   const { t } = useTranslation();
   const length = input.value?.length ?? 0;
-  const counter = maxLength === undefined ? null : `${length}/${maxLength}`;
+  const counter = maxLength === undefined ? null : formatCounter(length, maxLength);
   const spokenCounter =
     maxLength === undefined ? null : t('field.counter', { count: length, max: maxLength });
   const hint = [error, help, spokenCounter].filter(Boolean).join('. ');
@@ -55,7 +61,7 @@ export function TextField({
       >
         <TextInput
           {...input}
-          accessibilityLabel={label}
+          accessibilityLabel={spokenLabel ?? label}
           accessibilityHint={hint || undefined}
           maxLength={maxLength}
           multiline={isMultiline}
