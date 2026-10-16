@@ -28,7 +28,7 @@ import { readAnecdotes, readCertificationValues } from './profile';
 import type { User } from './repository';
 
 /**
- * The account of a public profile: active, public and with a first name, as the author of a card
+ * The account of a public profile: active, not suspended, public and with a first name, as the author of a card
  * (D-025). A masked profile, a deleted account and an unknown id are all `undefined`, so that the
  * answer never tells them apart.
  */
@@ -40,6 +40,8 @@ async function findPublicUser(db: Db, id: string): Promise<User | undefined> {
       and(
         eq(users.id, id),
         isNull(users.deletedAt),
+        // A suspended account is masked; its published routes stay (A-06).
+        isNull(users.suspendedAt),
         eq(users.isPublic, true),
         isNotNull(users.firstName),
       ),
