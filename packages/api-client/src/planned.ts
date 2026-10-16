@@ -30,3 +30,6 @@ export const plannedStepDonePath = (id: string, stepId: string) =>
 
 /** « Itinéraire » of a Go (E-07, D-032): Google Maps on foot to the next step, never the route. */
 export const plannedMapsUrlPath = (id: string) => `${plannedPath(id)}/maps-url` as const;
+
+/** The rating of the route of an outing (E-15): created or changed. */
+export const plannedRatingPath = (id: string) => `${plannedPath(id)}/rating` as const;
