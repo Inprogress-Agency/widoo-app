@@ -3,6 +3,8 @@ import { isTeamRole, type Me, type TeamRole } from '@widoo/shared';
 
 /** The member of the team who is signed in, as the shell shows it. */
 export type TeamMember = {
+  /** To tell the account of the member apart in a list: nobody acts on their own. */
+  id: string;
   firstName: string | null;
   email: string | null;
   role: TeamRole;
@@ -32,13 +34,20 @@ export type Session =
  * other account is refused. The API checks the role again on every call: this only decides what
  * the admin shows.
  */
-export function sessionOfAccount(account: Pick<Me, 'firstName' | 'email' | 'role'>): Session {
+export function sessionOfAccount(
+  account: Pick<Me, 'id' | 'firstName' | 'email' | 'role'>,
+): Session {
   if (!isTeamRole(account.role)) {
     return { status: 'signedOut', refusal: { reason: 'noAccess', email: account.email } };
   }
   return {
     status: 'signedIn',
-    member: { firstName: account.firstName, email: account.email, role: account.role },
+    member: {
+      id: account.id,
+      firstName: account.firstName,
+      email: account.email,
+      role: account.role,
+    },
   };
 }
 
