@@ -155,10 +155,10 @@ export function GoSync() {
 
 /**
  * The commands of E-07 on the Go `planned`: « J'y suis », « Étape suivante », « Itinéraire »,
- * « Terminer la sortie » and « Arrêter le parcours », with their events. `onClosed` once the Go
- * is over: E-07 and the mini-player close.
+ * « Terminer la sortie » and « Arrêter le parcours », with their events. Once the Go is over, it
+ * leaves the cache: E-07 and the mini-player close by themselves.
  */
-export function useGoActions(planned: PlannedRoute, progress: GoProgress, onClosed: () => void) {
+export function useGoActions(planned: PlannedRoute, progress: GoProgress) {
   const { t } = useTranslation();
   const client = useQueryClient();
   const routeId = planned.route.id;
@@ -217,7 +217,6 @@ export function useGoActions(planned: PlannedRoute, progress: GoProgress, onClos
     void client.invalidateQueries({
       queryKey: plannedQueryKey(session.store.getState().user?.uid ?? ''),
     });
-    onClosed();
     if (status === 'completed') {
       showToast('success', t('go.toast.completed'), {
         subtitle: t('go.toast.completedBody'),
