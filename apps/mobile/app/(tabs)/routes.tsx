@@ -1,8 +1,4 @@
-import { useTranslation } from 'react-i18next';
-import { Screen } from '../../src/components/Screen';
+import { MyRoutesScreen } from '../../src/my-routes/MyRoutesScreen';
 
-/** E-08, to be built. */
-export default function RoutesScreen() {
-  const { t } = useTranslation();
-  return <Screen title={t('routes.title')} />;
-}
+/** E-08, the tab « Parcours ». */
+export default MyRoutesScreen;
