@@ -1,5 +1,5 @@
 import { AdminUserDetail, AdminUsers, ApiError, type UserRole } from '@widoo/shared';
-import { inArray } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
@@ -49,6 +49,16 @@ async function signIn(role: UserRole, name = 'Membre') {
 
 type Headers = Record<string, string>;
 const get = (headers: Headers, url: string) => app.inject({ url: `/v1/admin${url}`, headers });
+const send = (
+  method: 'POST' | 'PATCH' | 'DELETE',
+  headers: Headers,
+  url: string,
+  payload?: object,
+) => app.inject({ method, url: `/v1/admin${url}`, headers, payload });
+const journalOf = async (targetId: string) =>
+  (await app.db.select().from(adminActions).where(eq(adminActions.targetId, targetId))).map(
+    (row) => row.action,
+  );
 
 describe('GET /v1/admin/users', () => {
   it('is for moderators and admins, not for an editor', async () => {
@@ -94,5 +104,85 @@ describe('GET /v1/admin/users', () => {
     });
     const missing = await get(moderator.headers, `/users/${uuidv7()}`);
     expect(missing.statusCode).toBe(404);
+  });
+});
+
+describe('role, suspension and the other actions by role', () => {
+  it('lets only an admin change a role, never their own', async () => {
+    const admin = await signIn('admin');
+    const moderator = await signIn('moderator');
+    const target = await signIn('user');
+    const refused = await send('PATCH', moderator.headers, `/users/${target.id}/role`, {
+      role: 'editor',
+    });
+    expect(refused.statusCode).toBe(403);
+    const own = await send('PATCH', admin.headers, `/users/${admin.id}/role`, { role: 'user' });
+    expect(own.statusCode).toBe(403);
+    const changed = await send('PATCH', admin.headers, `/users/${target.id}/role`, {
+      role: 'editor',
+    });
+    expect(changed.statusCode).toBe(200);
+    expect(AdminUserDetail.parse(changed.json()).role).toBe('editor');
+    expect(await journalOf(target.id)).toEqual(['user.change_role']);
+  });
+
+  it('lets a moderator suspend a user, not an editor, a moderator, an admin or themselves', async () => {
+    const moderator = await signIn('moderator');
+    const user = await signIn('user');
+    const editor = await signIn('editor');
+    const otherModerator = await signIn('moderator');
+    const admin = await signIn('admin');
+    for (const refused of [editor, otherModerator, admin, moderator]) {
+      const response = await send('POST', moderator.headers, `/users/${refused.id}/suspend`, {
+        reason: 'Test',
+      });
+      expect(response.statusCode).toBe(403);
+    }
+    const response = await send('POST', moderator.headers, `/users/${user.id}/suspend`, {
+      reason: 'Propos injurieux',
+    });
+    expect(response.statusCode).toBe(200);
+  });
+
+  it('refuses an admin to suspend themselves, and asks for a reason', async () => {
+    const admin = await signIn('admin');
+    const own = await send('POST', admin.headers, `/users/${admin.id}/suspend`, { reason: 'Moi' });
+    expect(own.statusCode).toBe(403);
+    const target = await signIn('user');
+    const blank = await send('POST', admin.headers, `/users/${target.id}/suspend`, {});
+    expect(blank.statusCode).toBe(422);
+  });
+
+  it('refuses a suspended account everywhere, hides its profile, and lets a reactivation undo it', async () => {
+    const admin = await signIn('admin');
+    const target = await signIn('user', 'Visible');
+    expect((await app.inject({ url: '/v1/me', headers: target.headers })).statusCode).toBe(200);
+    expect((await app.inject({ url: `/v1/users/${target.id}/profile` })).statusCode).toBe(200);
+
+    const suspended = await send('POST', admin.headers, `/users/${target.id}/suspend`, {
+      reason: 'Spam',
+    });
+    expect(suspended.statusCode).toBe(200);
+    expect(AdminUserDetail.parse(suspended.json())).toMatchObject({ suspensionReason: 'Spam' });
+    const refused = await app.inject({ url: '/v1/me', headers: target.headers });
+    expect(refused.statusCode).toBe(403);
+    expect(ApiError.parse(refused.json()).code).toBe('account_suspended');
+    expect((await app.inject({ url: `/v1/users/${target.id}/profile` })).statusCode).toBe(404);
+    const again = await send('POST', admin.headers, `/users/${target.id}/suspend`, { reason: 'X' });
+    expect(again.statusCode).toBe(409);
+
+    const back = await send('POST', admin.headers, `/users/${target.id}/reactivate`, {
+      reason: 'Erreur',
+    });
+    expect(AdminUserDetail.parse(back.json())).toMatchObject({
+      suspendedAt: null,
+      suspensionReason: null,
+    });
+    expect((await app.inject({ url: '/v1/me', headers: target.headers })).statusCode).toBe(200);
+    expect(await journalOf(target.id)).toEqual(['user.suspend', 'user.reactivate']);
+    const notSuspended = await send('POST', admin.headers, `/users/${target.id}/reactivate`, {
+      reason: 'Encore',
+    });
+    expect(notSuspended.statusCode).toBe(409);
   });
 });

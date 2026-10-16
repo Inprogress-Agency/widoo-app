@@ -1,12 +1,28 @@
-import { AdminUserDetail, AdminUsers, AdminUsersQuery } from '@widoo/shared';
+import {
+  AdminUserDetail,
+  AdminUsers,
+  AdminUsersQuery,
+  ChangeUserRoleBody,
+  UserReasonBody,
+} from '@widoo/shared';
+import type { FastifyRequest } from 'fastify';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
+import { changeUserRole, reactivateUser, suspendUser, type Actor } from '../admin/users-actions';
 import { readUserDetail, readUsers } from '../admin/users-read';
 import { httpError } from '../errors';
 
 const security = [{ firebaseIdToken: [] }];
 const tags = ['admin'];
 const UserParams = z.object({ id: z.uuid() });
+
+/** Set by the guard of the section, which every route of this plugin runs first. */
+function actorOf(request: FastifyRequest): Actor {
+  if (!request.user) {
+    throw httpError(401, 'Missing bearer token');
+  }
+  return { id: request.user.id, role: request.user.role };
+}
 
 /**
  * Users and roles of the admin (A-06, wiki API › Admin). Moderators and admins open the section;
@@ -51,5 +67,53 @@ export const adminUsersRoutes: FastifyPluginAsyncZod = async (app) => {
       }
       return detail;
     },
+  );
+
+  app.patch(
+    '/admin/users/:id/role',
+    {
+      schema: {
+        tags,
+        summary: 'Change the role of an account (admin only, never one’s own)',
+        security,
+        params: UserParams,
+        body: ChangeUserRoleBody,
+        response: { 200: AdminUserDetail },
+      },
+    },
+    async (request) =>
+      changeUserRole(app.db, actorOf(request), request.params.id, request.body.role),
+  );
+
+  app.post(
+    '/admin/users/:id/suspend',
+    {
+      schema: {
+        tags,
+        summary: 'Suspend an account',
+        security,
+        params: UserParams,
+        body: UserReasonBody,
+        response: { 200: AdminUserDetail },
+      },
+    },
+    async (request) =>
+      suspendUser(app.db, actorOf(request), request.params.id, request.body.reason),
+  );
+
+  app.post(
+    '/admin/users/:id/reactivate',
+    {
+      schema: {
+        tags,
+        summary: 'Lift the suspension of an account',
+        security,
+        params: UserParams,
+        body: UserReasonBody,
+        response: { 200: AdminUserDetail },
+      },
+    },
+    async (request) =>
+      reactivateUser(app.db, actorOf(request), request.params.id, request.body.reason),
   );
 };
