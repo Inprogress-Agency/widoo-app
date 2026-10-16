@@ -4,6 +4,7 @@ import type { Tx } from '../db/client';
 import {
   devices,
   notifications,
+  routeRatings,
   routeReports,
   routes,
   routeUnlocks,
@@ -13,12 +14,17 @@ import { iso, isoOrNull } from './export-dates';
 
 type Activity = Pick<
   MyDataExport,
-  'unlockedRoutes' | 'routeReports' | 'supportMessages' | 'devices' | 'notifications'
+  | 'unlockedRoutes'
+  | 'routeRatings'
+  | 'routeReports'
+  | 'supportMessages'
+  | 'devices'
+  | 'notifications'
 >;
 
 /**
- * What the account did or received beyond its profile, outings and routes: purchases, reports,
- * messages to the support, phones and notifications, oldest first.
+ * What the account did or received beyond its profile, outings and routes: purchases, ratings,
+ * reports, messages to the support, phones and notifications, oldest first.
  */
 export async function activityOf(tx: Tx, userId: string): Promise<Activity> {
   const unlocks = await tx
@@ -27,6 +33,12 @@ export async function activityOf(tx: Tx, userId: string): Promise<Activity> {
     .innerJoin(routes, eq(routes.id, routeUnlocks.routeId))
     .where(eq(routeUnlocks.userId, userId))
     .orderBy(asc(routeUnlocks.createdAt));
+  const ratings = await tx
+    .select({ rating: routeRatings, title: routes.title })
+    .from(routeRatings)
+    .innerJoin(routes, eq(routes.id, routeRatings.routeId))
+    .where(eq(routeRatings.userId, userId))
+    .orderBy(asc(routeRatings.createdAt));
   const reports = await tx
     .select()
     .from(routeReports)
@@ -49,6 +61,15 @@ export async function activityOf(tx: Tx, userId: string): Promise<Activity> {
     .orderBy(asc(notifications.createdAt));
   return {
     unlockedRoutes: unlocks.map(({ at, ...unlock }) => ({ ...unlock, unlockedAt: iso(at) })),
+    routeRatings: ratings.map(({ rating, title }) => ({
+      routeId: rating.routeId,
+      title,
+      rating: rating.rating,
+      comment: rating.comment,
+      status: rating.status,
+      createdAt: iso(rating.createdAt),
+      updatedAt: iso(rating.updatedAt),
+    })),
     routeReports: reports.map((report) => ({
       routeId: report.routeId,
       reason: report.reason,

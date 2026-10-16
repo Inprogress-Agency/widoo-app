@@ -1,9 +1,11 @@
 import {
   CreatePlannedRoute,
+  MyRouteRating,
   PlannedRoute,
   PlannedMapsUrl,
   PlannedRouteList,
   PlannedRouteQuery,
+  RateRoute,
   UpdatePlannedRoute,
 } from '@widoo/shared';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
@@ -15,6 +17,7 @@ import { markStepDone, nextStepMapsUrl } from '../planned/go';
 import { createPlanned, listPlanned, ownedPlanned, readPlanned } from '../planned/repository';
 import { snapshotOf } from '../planned/snapshot';
 import { updatePlanned } from '../planned/update';
+import { rateOuting } from '../ratings/repository';
 import { currentUser } from './me';
 
 const security = [{ firebaseIdToken: [] }];
@@ -143,5 +146,22 @@ export const plannedRoutesPlugin: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (request) => nextStepMapsUrl(app.db, currentUser(request).id, request.params.id),
+  );
+
+  app.post(
+    '/me/planned/:id/rating',
+    {
+      schema: {
+        tags,
+        summary:
+          'Rate the route of my completed outing (half of its steps done), or change my rating',
+        security,
+        params: PlannedParams,
+        body: RateRoute,
+        response: { 200: MyRouteRating },
+      },
+    },
+    async (request) =>
+      rateOuting(app.db, currentUser(request).id, request.params.id, request.body, new Date()),
   );
 };

@@ -17,6 +17,7 @@ import {
   userFeaturedRoutes,
   users,
 } from '../db/schema';
+import { eraseRatingsOf } from '../ratings/repository';
 import { storedNotificationPrefs } from './notification-prefs';
 import { profileIssues, replaceProfileLists, type ProfileIssue } from './profile';
 
@@ -170,6 +171,8 @@ async function eraseAccountRows(tx: Tx, userId: string): Promise<void> {
   await tx.delete(supportMessages).where(eq(supportMessages.userId, userId));
   // Its reports of routes, open or decided (D-056); a `low_rating` report has no reporter.
   await tx.delete(routeReports).where(eq(routeReports.userId, userId));
+  // Its ratings and reviews leave the routes they counted in, recomputed (D-029).
+  await eraseRatingsOf(tx, userId);
   await tx.delete(notifications).where(eq(notifications.userId, userId));
 }
 
