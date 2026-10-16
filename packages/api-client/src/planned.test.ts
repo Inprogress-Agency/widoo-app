@@ -106,6 +106,16 @@ describe('createPlanned', () => {
   });
 });
 
+describe('getPlanned', () => {
+  it('reads one planning of the caller, signed in', async () => {
+    const { client, call, headers } = setup(json(200, planned));
+    await expect(client.getPlanned(id)).resolves.toMatchObject({ id, status: 'planned' });
+    expect(call()?.[0]).toBe(`http://10.0.2.2:8080/v1/me/planned/${id}`);
+    expect(call()?.[1]?.method).toBe('GET');
+    expect(headers().authorization).toBe('Bearer token-1');
+  });
+});
+
 describe('updatePlanned', () => {
   it('patches the start and the ticked bookings of a planning', async () => {
     const { client, call } = setup(json(200, planned));
