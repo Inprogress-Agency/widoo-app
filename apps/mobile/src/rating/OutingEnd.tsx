@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   AccessibilityInfo,
+  BackHandler,
   findNodeHandle,
   KeyboardAvoidingView,
   Platform,
@@ -76,10 +77,21 @@ export function OutingEnd({ outing, onFinish }: OutingEndProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const title = useRef<NativeText>(null);
+  const scroll = useRef<ScrollView>(null);
   const [rating, setRating] = useState<number | null>(outing.myRating?.rating ?? null);
   const [comment, setComment] = useState(outing.myRating?.comment ?? '');
   const offer = ratingOffer(outing);
   const [now] = useState(() => new Date());
+  const finish = () => onFinish(rating === null ? null : { rating, comment });
+
+  useEffect(() => {
+    // Without a cross, E-15 is left by « Terminer » only: the back of Android does the same.
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      onFinish(rating === null ? null : { rating, comment });
+      return true;
+    });
+    return () => subscription.remove();
+  }, [onFinish, rating, comment]);
 
   useEffect(() => {
     // The title takes the focus once E-15 has replaced E-07, so that it is read first.
@@ -99,6 +111,7 @@ export function OutingEnd({ outing, onFinish }: OutingEndProps) {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView
+          ref={scroll}
           keyboardShouldPersistTaps="handled"
           contentContainerClassName="gap-32 px-16"
           // Safe area measured at runtime.
@@ -154,6 +167,10 @@ export function OutingEnd({ outing, onFinish }: OutingEndProps) {
                     maxLength={ratingCommentMaxLength}
                     formatCounter={(count, max) => t('go.end.comment.counter', { count, max })}
                     isMultiline
+                    // The field goes up with the keyboard, which would otherwise cover it.
+                    onFocus={() =>
+                      setTimeout(() => scroll.current?.scrollToEnd(), motion.durations.base)
+                    }
                   />
                 </Animated.View>
               )}
@@ -161,12 +178,7 @@ export function OutingEnd({ outing, onFinish }: OutingEndProps) {
           )}
         </ScrollView>
         <StickyBar>
-          <Button
-            label={t('go.end.finish')}
-            onPress={() => onFinish(rating === null ? null : { rating, comment })}
-            isDense
-            isFullWidth
-          />
+          <Button label={t('go.end.finish')} onPress={finish} isDense isFullWidth />
         </StickyBar>
       </KeyboardAvoidingView>
     </Animated.View>
