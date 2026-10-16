@@ -10,6 +10,8 @@ export interface PendingRatingStorage {
 /** A rating given offline on E-15, sent at the return of the network (Ecrans › E-15). */
 export interface PendingRating {
   plannedId: string;
+  /** The route of the outing, whose cards take the new average once sent. */
+  routeId: string;
   body: RateRoute;
 }
 
@@ -19,8 +21,11 @@ function entryOf(value: unknown): PendingRating[] {
     return [];
   }
   const { plannedId } = value;
+  const routeId = 'routeId' in value ? value.routeId : undefined;
   const body = RateRoute.safeParse('body' in value ? value.body : undefined);
-  return typeof plannedId === 'string' && body.success ? [{ plannedId, body: body.data }] : [];
+  return typeof plannedId === 'string' && typeof routeId === 'string' && body.success
+    ? [{ plannedId, routeId, body: body.data }]
+    : [];
 }
 
 function read(storage: PendingRatingStorage): PendingRating[] {
