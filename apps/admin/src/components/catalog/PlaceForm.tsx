@@ -12,6 +12,8 @@ type PlaceFormProps = {
   /** The map that shows and moves the position, under its two fields; nothing without one. */
   positionMap: ReactNode;
   values: PlaceFormValues;
+  /** The affiliate programs the partner link may belong to (A-09). */
+  programs: readonly { id: string; name: string; isActive: boolean }[];
   /** Changes one field of the form. */
   onChange: <Key extends keyof PlaceFormValues>(key: Key, value: PlaceFormValues[Key]) => void;
   onSubmit: () => void;
@@ -27,6 +29,7 @@ export function PlaceForm({
   notice,
   positionMap,
   values,
+  programs,
   onChange,
   onSubmit,
   onCancel,
@@ -142,6 +145,33 @@ export function PlaceForm({
           onChange={(event) => onChange('phone', event.target.value)}
         />
       </Field>
+      <Field label={texts.partnerLink} htmlFor="place-partner-link" hint={texts.partnerLinkHint}>
+        <Input
+          id="place-partner-link"
+          type="url"
+          pattern="https://.+"
+          title={texts.partnerLinkHint}
+          aria-describedby="place-partner-link-hint"
+          value={values.partnerBookingUrl}
+          onChange={(event) => onChange('partnerBookingUrl', event.target.value)}
+        />
+      </Field>
+      {values.partnerBookingUrl.trim() ? (
+        <Field label={texts.partnerProgram} htmlFor="place-partner-program">
+          <Select
+            id="place-partner-program"
+            value={values.partnerProgramId}
+            onChange={(event) => onChange('partnerProgramId', event.target.value)}
+          >
+            <option value="">{texts.noProgram}</option>
+            {programs.map((program) => (
+              <option key={program.id} value={program.id}>
+                {program.isActive ? program.name : texts.inactiveProgram(program.name)}
+              </option>
+            ))}
+          </Select>
+        </Field>
+      ) : null}
       <fieldset className="flex flex-col gap-8">
         <legend className="text-label-strong">{texts.hours}</legend>
         <p id="place-hours-hint" className="pt-4 text-label text-muted-foreground">
