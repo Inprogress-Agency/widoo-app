@@ -4,6 +4,7 @@ import {
   LegalDocument,
   Me,
   MyDataExport,
+  MyRouteList,
   PlannedMapsUrl,
   PlannedRoute,
   PlannedRouteList,
@@ -48,6 +49,7 @@ import {
   type RouteRatingsParams,
   type RouteSheetAnswer,
 } from './route';
+import { myRoutesQueryString, type MyRoutesParams } from './my-routes';
 import { createTransport, type ApiClientOptions } from './transport';
 
 /**
@@ -188,6 +190,16 @@ export function createApiClient(options: ApiClientOptions) {
         method: 'GET',
         path: `/v1/me/planned${plannedQueryString(params)}`,
         schema: PlannedRouteList,
+        auth: true,
+        signal,
+      }),
+
+    /** `GET /v1/me/routes`: the caller's own routes, every status, the newest first (E-08). */
+    listMyRoutes: (params: MyRoutesParams = {}, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/me/routes${myRoutesQueryString(params)}`,
+        schema: MyRouteList,
         auth: true,
         signal,
       }),
