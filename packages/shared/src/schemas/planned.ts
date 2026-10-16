@@ -3,7 +3,7 @@ import { taxonomies } from '../taxonomies';
 import { HttpsUrl, LatLng } from './common';
 import { PlaceHours } from './place';
 import { MyRouteRating } from './rating';
-import { Step } from './route';
+import { Step, StepHighlightList, StepPhotos } from './route';
 import { RouteTimeline } from './route-detail';
 
 /**
@@ -55,7 +55,15 @@ export const PlannedRoutePlace = z.object({
 });
 export type PlannedRoutePlace = z.infer<typeof PlannedRoutePlace>;
 
-export const PlannedRouteStep = Step.omit({ place: true }).extend({ place: PlannedRoutePlace });
+/**
+ * A step as it was planned. Its points and photos are frozen with it, the photos by their URL
+ * (E-07 keeps the whole route on the phone); a planning saved before them reads them as empty.
+ */
+export const PlannedRouteStep = Step.omit({ place: true }).extend({
+  place: PlannedRoutePlace,
+  highlights: StepHighlightList.default([]),
+  photos: StepPhotos.default([]),
+});
 export type PlannedRouteStep = z.infer<typeof PlannedRouteStep>;
 
 /**

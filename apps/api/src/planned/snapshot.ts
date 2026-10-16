@@ -14,6 +14,7 @@ import {
 import { asc, eq, inArray } from 'drizzle-orm';
 import type { Db } from '../db/client';
 import { cities, placeHours, places, routes, steps } from '../db/schema';
+import { photosByOwner } from '../media/photos';
 
 /** Statuses of a route that can be planned: published, even when marked « à corriger ». */
 const plannableStatuses: readonly RouteStatus[] = ['published', 'needs_fix'];
@@ -81,6 +82,12 @@ export async function snapshotOf(
     return undefined;
   }
   const hours = await hoursByPlace(db, [...new Set(rows.map(({ place }) => place.id))]);
+  // Frozen by their URL with the rest: E-07 keeps the whole route on the phone.
+  const photos = await photosByOwner(
+    db,
+    'step',
+    rows.map(({ step }) => step.id),
+  );
   // The mode chosen by the creator, kept from the stored trip; its measures are estimated again.
   const transitions = await computeTransitions(
     rows.map(({ step, place }) => ({
@@ -123,6 +130,8 @@ export async function snapshotOf(
           isIndoor: place.isIndoor,
           hours: hours.get(place.id) ?? [],
         },
+        highlights: step.highlights ?? [],
+        photos: photos.get(step.id) ?? [],
       };
     }),
   };
