@@ -3,7 +3,7 @@
  * parcours): only an outing of the caller, completed with half of its steps done, gives the right
  * to rate, and only its own route; another user's outing is « not found », like the planning.
  */
-import { canRateOuting, type MyRouteRating, type RateRoute } from '@widoo/shared';
+import { canRateOuting, type RateRoute, type RateRouteResult } from '@widoo/shared';
 import { eq } from 'drizzle-orm';
 import type { Db, Tx } from '../db/client';
 import { plannedSteps, routeRatings } from '../db/schema';
@@ -15,7 +15,8 @@ import { recomputeRouteRating } from './stats';
 /**
  * Rates the route of the caller's outing `plannedId`: creates the rating, or updates the one of
  * an earlier outing (one per user and per route), then recomputes the route. 409 while the outing
- * is not completed with half of its steps done, or once its route is deleted.
+ * is not completed with half of its steps done, or once its route is deleted. The answer carries
+ * the rating of the route recomputed with it.
  */
 export async function rateOuting(
   db: Db,
@@ -23,7 +24,7 @@ export async function rateOuting(
   plannedId: string,
   body: RateRoute,
   now: Date = new Date(),
-): Promise<MyRouteRating> {
+): Promise<RateRouteResult> {
   return db.transaction(async (tx) => {
     const outing = await ownedPlanned(tx, userId, plannedId, true);
     const steps = await tx
@@ -48,8 +49,8 @@ export async function rateOuting(
       .onConflictDoUpdate({ target: [routeRatings.routeId, routeRatings.userId], set: values })
       .returning();
     if (!row) throw new Error('Rating not written');
-    await recomputeRouteRating(tx, outing.routeId, now);
-    return toMyRating(row);
+    const routeRating = await recomputeRouteRating(tx, outing.routeId, now);
+    return { ...toMyRating(row), routeRating };
   });
 }
 

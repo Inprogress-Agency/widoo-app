@@ -4,11 +4,11 @@ import {
   LegalDocument,
   Me,
   MyDataExport,
-  MyRouteRating,
   PlannedMapsUrl,
   PlannedRoute,
   PlannedRouteList,
   PublicProfile,
+  RateRouteResult,
   RouteCount,
   RouteDetail,
   RouteRatingList,
@@ -239,14 +239,15 @@ export function createApiClient(options: ApiClientOptions) {
 
     /**
      * `POST /v1/me/planned/:id/rating`: rates the route of a completed outing (E-15), or changes
-     * the rating given before; 409 while the outing does not open the rating (D-033).
+     * the rating given before, with the rating of the route recomputed; 409 while the outing
+     * does not open the rating (D-033).
      */
     rateOuting: (id: string, body: RateRoute) =>
       request({
         method: 'POST',
         path: plannedRatingPath(id),
         body,
-        schema: MyRouteRating,
+        schema: RateRouteResult,
         auth: true,
       }),
 

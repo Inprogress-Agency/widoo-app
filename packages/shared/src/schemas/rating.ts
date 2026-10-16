@@ -26,6 +26,18 @@ export const MyRouteRating = z.object({
 });
 export type MyRouteRating = z.infer<typeof MyRouteRating>;
 
+/**
+ * Answer of `POST /me/planned/:id/rating`: the caller's rating, and the rating of the route as
+ * recomputed with it, which the app writes into the cards it shows (« dans la seconde »).
+ */
+export const RateRouteResult = MyRouteRating.extend({
+  routeRating: z.object({
+    average: z.number().min(1).max(5).nullable(),
+    count: z.number().int().nonnegative(),
+  }),
+});
+export type RateRouteResult = z.infer<typeof RateRouteResult>;
+
 /** Query of `GET /routes/:id/ratings`. */
 export const RouteRatingsQuery = z.strictObject({
   cursor: z.string().min(1).max(512).optional(),

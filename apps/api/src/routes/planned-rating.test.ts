@@ -1,4 +1,4 @@
-import { MyRouteRating, PlannedRoute, PlannedRouteList } from '@widoo/shared';
+import { PlannedRoute, PlannedRouteList, RateRouteResult } from '@widoo/shared';
 import { and, eq, inArray } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
@@ -108,7 +108,8 @@ describe('POST /v1/me/planned/:id/rating', () => {
     const headers = await fixtures.signIn({ firstName: 'Camille' });
     const first = await outing(headers, routeId);
     const created = await rate(headers, first.id, { rating: 2, comment: 'Trop de monde.' });
-    expect(MyRouteRating.parse(created.json())).toMatchObject({
+    expect(RateRouteResult.parse(created.json())).toMatchObject({
+      routeRating: { average: 2, count: 1 },
       rating: 2,
       comment: 'Trop de monde.',
     });
@@ -116,7 +117,11 @@ describe('POST /v1/me/planned/:id/rating', () => {
 
     const second = await outing(headers, routeId);
     const updated = await rate(headers, second.id, { rating: 5 });
-    expect(MyRouteRating.parse(updated.json())).toMatchObject({ rating: 5, comment: null });
+    expect(RateRouteResult.parse(updated.json())).toMatchObject({
+      rating: 5,
+      comment: null,
+      routeRating: { average: 5, count: 1 },
+    });
     expect(await statsOf(routeId)).toEqual({ average: 5, count: 1 });
 
     // Each outing of the route carries the rating, read and changed from any of them.
