@@ -23,6 +23,7 @@ export { zoneMinSpanM, zoneSearchBox } from './zone';
 export * from './schemas/admin';
 export * from './schemas/admin-reports';
 export * from './schemas/admin-signals';
+export * from './schemas/admin-users';
 export * from './schemas/catalog';
 export * from './schemas/catalog-place';
 export * from './schemas/common';
