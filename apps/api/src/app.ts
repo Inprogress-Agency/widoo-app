@@ -26,6 +26,7 @@ import { adminActionsRoutes } from './routes/admin-actions';
 import { adminAffiliationRoutes } from './routes/admin-affiliation';
 import { adminSettingsRoutes } from './routes/admin-settings';
 import { adminUsersRoutes } from './routes/admin-users';
+import { goRoutes } from './routes/go';
 import { configRoutes } from './routes/config';
 import { editorRoutes } from './routes/editor';
 import { geocodeRoutes } from './routes/geocode';
@@ -160,6 +161,7 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   await app.register(adminSettingsRoutes, { prefix: '/v1' });
   await app.register(adminActionsRoutes, { prefix: '/v1' });
   await app.register(adminAffiliationRoutes, { prefix: '/v1' });
+  await app.register(goRoutes, { prefix: '/v1' });
   await app.register(searchRoutesPlugin, { prefix: '/v1' });
   await app.register(routeRatingsPlugin, { prefix: '/v1' });
   await app.register(routeSheetRoutes, {
