@@ -1,5 +1,6 @@
+import type { RouteDetail } from '@widoo/shared';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useRef } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { Linking, Share } from 'react-native';
 import { analytics } from '../../src/analytics';
 import { openCreatorProfile } from '../../src/creator/navigation';
@@ -16,13 +17,22 @@ import { routeShareUrl } from '../../src/route/share';
 import { useRouteSheet } from '../../src/route/useRouteSheet';
 import { useTranslation } from 'react-i18next';
 
+/** « Votre sortie » of a planning (E-08), pushed over the sheet (M-03). */
+const openOuting = (id: string) => router.push({ pathname: '/outing/[id]', params: { id } });
+
 /**
  * E-05, the route sheet: opened from a card, a marker or « Voir plus » of the map, at a step when
- * the tooltip points at one (`step`, from 1); `token` for a private route opened by its link.
+ * the tooltip points at one (`step`, from 1); `token` for a private route opened by its link;
+ * `reschedule`, an outing not done of Parcours › Passés, which opens E-06 at once (D-038).
  */
 export default function RouteScreen() {
   const { t } = useTranslation();
-  const { id, step, token } = useLocalSearchParams<{ id: string; step?: string; token?: string }>();
+  const { id, step, token, reschedule } = useLocalSearchParams<{
+    id: string;
+    step?: string;
+    token?: string;
+    reschedule?: string;
+  }>();
   const { state, retry } = useRouteSheet(id, token);
   const isOnline = useIsOnline();
   const planned = usePlannedRoute(id);
@@ -37,6 +47,29 @@ export default function RouteScreen() {
   const goHome = () => {
     router.dismissTo('/');
   };
+  // Planning asks for an account (D-038): signed out, the sheet E-10 first, then E-06. A planned
+  // route opens « Votre sortie » (E-08).
+  const plan = (route: RouteDetail) =>
+    void signInFlow.requireAccount('plan', () => {
+      void lookupPlanned(route.id).then((current) =>
+        current ? openOuting(current.id) : planSheet.current?.open(route, null),
+      );
+    });
+  // « Reprogrammer » brings the outing not done back until it is planned again (Ecrans › E-08).
+  const [rescheduledId, setRescheduledId] = useState(reschedule ?? null);
+  const readyRoute = state.status === 'ready' ? state.route : null;
+  const hasOpenedReschedule = useRef(false);
+  const openReschedule = useEffectEvent((route: RouteDetail) => {
+    if (rescheduledId && !hasOpenedReschedule.current) {
+      hasOpenedReschedule.current = true;
+      plan(route);
+    }
+  });
+  useEffect(() => {
+    if (readyRoute) {
+      openReschedule(readyRoute);
+    }
+  }, [readyRoute]);
 
   return (
     <>
@@ -72,34 +105,29 @@ export default function RouteScreen() {
         onOpenCreator={(author) => openCreatorProfile(author, 'route')}
         onOpenReviews={(id) => router.push({ pathname: '/reviews/[id]', params: { id } })}
         onScrollDepth={(depth) => analytics.track('route_scrolled', { route_id: id, depth })}
-        // Planning asks for an account (D-038): signed out, the sheet E-10 first, then E-06. A
-        // planned route opens « Modifier la sortie » until « Votre sortie » exists (E-08).
-        onPlan={(route) =>
-          void signInFlow.requireAccount('plan', () => {
-            void lookupPlanned(route.id).then((current) => planSheet.current?.open(route, current));
-          })
-        }
+        onPlan={plan}
         plannedDate={planned ? plannedDateText(t, planned.startsAt, new Date()) : null}
       />
       <PlanSheet
         ref={planSheet}
         isOnline={isOnline}
-        onSubmit={(choice) =>
-          submitPlan(choice, {
+        onSubmit={async (choice) => {
+          const isDone = await submitPlan(choice, {
             t,
             create: planActions.create,
             update: planActions.update,
             trackPlanned: (properties) => analytics.track('route_planned', properties),
             trackChanged: (properties) => analytics.track('plan_changed', properties),
             toast: showToast,
-            // Out of the route sheet first, to the Parcours tab under it.
-            onSee: () => {
-              router.dismissAll();
-              router.navigate('/routes');
-            },
+            onSee: (planned) => openOuting(planned.id),
+            rescheduledId,
             now: new Date(),
-          })
-        }
+          });
+          if (isDone) {
+            setRescheduledId(null);
+          }
+          return isDone;
+        }}
         onToggleBooking={(route, step, isChecked) => {
           if (isChecked) {
             analytics.track('plan_checklist_item_done', {

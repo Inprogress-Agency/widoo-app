@@ -23,13 +23,18 @@ export interface SubmitPlanDeps {
   trackPlanned: (properties: AnalyticsEventArgs<'route_planned'>[0]) => void;
   trackChanged: (properties: AnalyticsEventArgs<'plan_changed'>[0]) => void;
   toast: (kind: ToastKind, title: string, options?: ToastOptions) => void;
-  /** « Voir » of the toast: Parcours › À venir, until « Votre sortie » (E-08). */
-  onSee: () => void;
+  /** « Voir » of the toast: « Votre sortie » of the planning (E-08). */
+  onSee: (planned: PlannedRoute) => void;
+  /**
+   * The outing not done that « Reprogrammer » of Parcours › Passés reopens (D-038): « Programmer »
+   * brings it back to `planned` at the new date, as `source: past`.
+   */
+  rescheduledId?: string | null;
   now: Date;
 }
 
 /**
- * « Programmer » or « Déplacer » (Ecrans › E-06): the planning sent, its event, then the toast
+ * « Programmer », « Déplacer » or « Reprogrammer » (Ecrans › E-06, E-08): the planning sent, its event, then the toast
  * « Sortie programmée » or « Sortie déplacée » with « Voir »; a failure leaves the sheet open with
  * an error toast. True when done.
  */
@@ -42,9 +47,10 @@ export async function submitPlan(choice: PlanChoice, deps: SubmitPlanDeps): Prom
   );
   const checklist = bookings.map((step) => ({ stepId: step.id, isChecked: checked.has(step.id) }));
   const today = planDayOf(now);
+  let saved: PlannedRoute;
   try {
     if (planned) {
-      await deps.update(planned.id, {
+      saved = await deps.update(planned.id, {
         startsAt,
         ...(checklist.length > 0 && { checklist }),
       });
@@ -53,10 +59,17 @@ export async function submitPlan(choice: PlanChoice, deps: SubmitPlanDeps): Prom
         days_moved: daysBetween(planDayOf(planned.startsAt), day),
       });
     } else {
-      await deps.create(
-        { routeId: route.id, startsAt },
-        checklist.filter((item) => item.isChecked),
-      );
+      const rescheduledId = deps.rescheduledId ?? null;
+      saved = rescheduledId
+        ? await deps.update(rescheduledId, {
+            status: 'planned',
+            startsAt,
+            ...(checklist.length > 0 && { checklist }),
+          })
+        : await deps.create(
+            { routeId: route.id, startsAt },
+            checklist.filter((item) => item.isChecked),
+          );
       // Offline the sheet does not plan: the notice is there unless the programme failed.
       const steps = route.steps.filter((step): step is RouteDetailStep => !step.isLocked);
       deps.trackPlanned({
@@ -64,7 +77,7 @@ export async function submitPlan(choice: PlanChoice, deps: SubmitPlanDeps): Prom
         days_ahead: Math.max(0, daysBetween(today, day)),
         has_conflicts: notice ? hasConflicts(notice, localTimeline(steps, day, minute)) : false,
         bookings_count: bookings.length,
-        source: 'route',
+        source: rescheduledId ? 'past' : 'route',
       });
     }
   } catch (error) {
@@ -77,7 +90,7 @@ export async function submitPlan(choice: PlanChoice, deps: SubmitPlanDeps): Prom
   }
   deps.toast('success', planned ? t('plan.toast.moved') : t('plan.toast.planned'), {
     subtitle: plannedSubtitle(t, day, minute, today),
-    action: { label: t('plan.toast.see'), onPress: deps.onSee },
+    action: { label: t('plan.toast.see'), onPress: () => deps.onSee(saved) },
     isAboveStickyBar: true,
   });
   return true;
