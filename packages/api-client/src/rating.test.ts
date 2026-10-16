@@ -23,7 +23,13 @@ function setup(response: Response, token: string | null = 'token-1') {
 
 describe('rateOuting', () => {
   it('posts the rating and comment of an outing, signed in', async () => {
-    const mine = { rating: 5, comment: 'Parfait', createdAt: at, updatedAt: at };
+    const mine = {
+      rating: 5,
+      comment: 'Parfait',
+      createdAt: at,
+      updatedAt: at,
+      routeRating: { average: 4.5, count: 2 },
+    };
     const { client, call, headers } = setup(json(200, mine));
     await expect(client.rateOuting(id, { rating: 5, comment: 'Parfait' })).resolves.toEqual(mine);
     expect(call()?.[0]).toBe(`http://10.0.2.2:8080/v1/me/planned/${id}/rating`);

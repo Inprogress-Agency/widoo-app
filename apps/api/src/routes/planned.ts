@@ -1,11 +1,11 @@
 import {
   CreatePlannedRoute,
-  MyRouteRating,
   PlannedRoute,
   PlannedMapsUrl,
   PlannedRouteList,
   PlannedRouteQuery,
   RateRoute,
+  RateRouteResult,
   UpdatePlannedRoute,
 } from '@widoo/shared';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
@@ -158,7 +158,7 @@ export const plannedRoutesPlugin: FastifyPluginAsyncZod = async (app) => {
         security,
         params: PlannedParams,
         body: RateRoute,
-        response: { 200: MyRouteRating },
+        response: { 200: RateRouteResult },
       },
     },
     async (request) =>
