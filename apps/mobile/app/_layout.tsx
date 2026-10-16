@@ -9,6 +9,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useReducedMotion } from 'react-native-reanimated';
 import '../global.css';
 import { useAppOpenedEvent } from '../src/analytics';
+import { GoSync } from '../src/go/useGo';
 import { signInFlow } from '../src/auth/signIn';
 import { SignInSheet } from '../src/auth/SignInSheet';
 import { persistOptions } from '../src/api/persister';
@@ -72,6 +73,8 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
         <ThemeProvider value={navigationTheme}>
+          {/* The steps of a Go done offline leave at the return of the network (E-07). */}
+          <GoSync />
           <StatusBar style="dark" />
           {/* Modal sheets, such as « Trier par », rise over the tab bar. */}
           <BottomSheetModalProvider>
@@ -87,6 +90,17 @@ export default function RootLayout() {
                   options={{
                     presentation: 'fullScreenModal',
                     // `mappings.motion.modal.animation`, which the generated theme does not carry.
+                    animation: isReducedMotion ? 'fade' : 'slide_from_bottom',
+                    animationDuration: isReducedMotion
+                      ? motion.durations.fade
+                      : motion.durations.page,
+                  }}
+                />
+                {/* E-07, the route under way: the same rise over the tabs (M-02). */}
+                <Stack.Screen
+                  name="go"
+                  options={{
+                    presentation: 'fullScreenModal',
                     animation: isReducedMotion ? 'fade' : 'slide_from_bottom',
                     animationDuration: isReducedMotion
                       ? motion.durations.fade

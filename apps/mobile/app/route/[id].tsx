@@ -4,13 +4,13 @@ import { Linking, Share } from 'react-native';
 import { analytics } from '../../src/analytics';
 import { openCreatorProfile } from '../../src/creator/navigation';
 import { signInFlow } from '../../src/auth/signIn';
+import { useStartGo } from '../../src/go/useGo';
 import { discoveryStore, useDiscovery, useIsOnline } from '../../src/discovery/useRouteSearch';
 import { usePlannedLookup, usePlannedRoute, usePlanActions } from '../../src/plan/planned';
 import { PlanSheet, type PlanSheetMethods } from '../../src/plan/PlanSheet';
 import { plannedDateText } from '../../src/plan/planText';
 import { submitPlan } from '../../src/plan/submitPlan';
 import { showToast } from '../../src/ui/toastStore';
-import { googleMapsUrl } from '../../src/route/maps';
 import { RouteSheet } from '../../src/route/RouteSheet';
 import { routeShareUrl } from '../../src/route/share';
 import { useRouteSheet } from '../../src/route/useRouteSheet';
@@ -29,6 +29,7 @@ export default function RouteScreen() {
   const planActions = usePlanActions();
   const lookupPlanned = usePlannedLookup();
   const planSheet = useRef<PlanSheetMethods>(null);
+  const startGo = useStartGo();
   const isOnMap = useDiscovery(
     (discovery) => discovery.results?.items.some((route) => route.id === id) ?? false,
   );
@@ -56,24 +57,8 @@ export default function RouteScreen() {
           });
         }}
         // Launching a route asks for an account (D-029): signed out, the sheet E-10 opens and
-        // the launch resumes after the sign-in. Google Maps until the route under way (E-07).
-        onGo={(route) =>
-          void signInFlow.requireAccount('go', () => {
-            const url = googleMapsUrl(
-              route.steps.flatMap((routeStep) =>
-                'place' in routeStep
-                  ? [routeStep.place.location]
-                  : 'location' in routeStep
-                    ? [routeStep.location]
-                    : [],
-              ),
-              route.transport,
-            );
-            if (url) {
-              void Linking.openURL(url);
-            }
-          })
-        }
+        // the launch resumes after the sign-in; then E-07 rises (Ecrans › E-07, ouverture).
+        onGo={(route) => void signInFlow.requireAccount('go', () => void startGo(route.id))}
         // Back to the home with the route selected, framed with its steps (E-04).
         onSeeOnMap={
           isOnMap
