@@ -10,6 +10,7 @@ import {
   notifications,
   plannedRoutes,
   plannedSteps,
+  routeRatings,
   routeReports,
   routeUnlocks,
   supportMessages,
@@ -76,6 +77,13 @@ async function fillAccount(headers: Record<string, string>, marker: string) {
   await db
     .insert(routeUnlocks)
     .values({ userId, routeId: route.id, storeTransactionId: `fictitious-${marker}` });
+  await db.insert(routeRatings).values({
+    userId,
+    routeId: route.id,
+    plannedRouteId: planned?.id ?? null,
+    rating: 4,
+    comment: `Avis ${marker}`,
+  });
   await db
     .insert(routeReports)
     .values({ userId, routeId: route.id, reason: 'other', comment: `Signalement ${marker}` });
@@ -126,6 +134,9 @@ describe('exportUserData', () => {
     ]);
     expect(exported.createdRoutes[0]?.steps).toHaveLength(route.steps.length);
     expect(exported.unlockedRoutes).toMatchObject([{ routeId: route.id }]);
+    expect(exported.routeRatings).toMatchObject([
+      { routeId: route.id, rating: 4, comment: `Avis ${marker}`, status: 'visible' },
+    ]);
     expect(exported.routeReports).toMatchObject([{ comment: `Signalement ${marker}` }]);
     expect(exported.supportMessages).toMatchObject([{ message: `Message ${marker}` }]);
     expect(exported.devices).toMatchObject([{ locale: 'en' }]);
@@ -160,6 +171,7 @@ describe('exportUserData', () => {
       'devices.user_id',
       'notifications.user_id',
       'planned_routes.user_id',
+      'route_ratings.user_id',
       'route_reports.user_id',
       'route_unlocks.user_id',
       'routes.author_id',

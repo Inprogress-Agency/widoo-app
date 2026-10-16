@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { routeRatingStatuses } from '../ratings';
 import { notificationKinds, reportStatuses, routeReportReasons } from '../reports';
 import { taxonomies } from '../taxonomies';
 import { AppLocale, NotificationPrefs } from './me';
@@ -8,7 +9,7 @@ import { SupportTopic } from './support';
 /**
  * Body of `GET /me/export` (E-19 › Confidentialité, D-063, wiki Securite-et-RGPD › portabilité):
  * every personal data the API holds on the caller, prepared on demand and kept nowhere. Photos
- * are given by their links. Favorites and ratings join it with their tables.
+ * are given by their links. Favorites join it with their table.
  */
 const DateTime = z.iso.datetime();
 
@@ -102,6 +103,18 @@ export const MyDataExport = z.object({
   createdRoutes: z.array(ExportedCreatedRoute),
   /** Premium routes bought alone (D-073). */
   unlockedRoutes: z.array(z.object({ routeId: z.uuid(), title: z.string(), unlockedAt: DateTime })),
+  /** Ratings and reviews of routes (E-15), published with the first name. */
+  routeRatings: z.array(
+    z.object({
+      routeId: z.uuid(),
+      title: z.string(),
+      rating: z.int().min(1).max(5),
+      comment: z.string().nullable(),
+      status: z.enum(routeRatingStatuses),
+      createdAt: DateTime,
+      updatedAt: DateTime,
+    }),
+  ),
   routeReports: z.array(
     z.object({
       routeId: z.uuid(),
