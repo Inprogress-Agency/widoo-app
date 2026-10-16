@@ -55,9 +55,25 @@ describe('submitPlan', () => {
     });
     expect(given.toast).toHaveBeenCalledWith('success', 'Sortie programmée', {
       subtitle: 'Samedi 26 septembre à 10:00',
-      action: { label: 'Voir', onPress: given.onSee },
+      action: { label: 'Voir', onPress: expect.any(Function) },
       isAboveStickyBar: true,
     });
+  });
+
+  it('brings an outing not done back at the new date, as planned from the past', async () => {
+    const saved = { id: 'missed-1' } as PlannedRoute;
+    const given = deps({ rescheduledId: 'missed-1', update: vi.fn(async () => saved) });
+    await expect(submitPlan(choice, given)).resolves.toBe(true);
+    expect(given.create).not.toHaveBeenCalled();
+    expect(given.update).toHaveBeenCalledWith('missed-1', {
+      status: 'planned',
+      startsAt: '2026-09-26T10:00:00+02:00',
+      checklist: [{ stepId: bookingId, isChecked: true }],
+    });
+    expect(given.trackPlanned).toHaveBeenCalledWith(expect.objectContaining({ source: 'past' }));
+    const options = vi.mocked(given.toast).mock.calls[0]?.[2];
+    options?.action?.onPress();
+    expect(given.onSee).toHaveBeenCalledWith(saved);
   });
 
   it('moves a planning and counts the days it moved', async () => {
