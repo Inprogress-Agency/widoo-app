@@ -56,9 +56,7 @@ describe('E-07 texts, in French', () => {
     const planned = plannedFixture({ 0: { doneAt: at }, 1: { doneAt: at }, 2: { skippedAt: at } });
     const progress = goProgress(planned, emptyGoLocal);
     expect(statusText(t, progress).short).toBe('2 étapes faites sur 3');
-    expect(miniPlayerLabel(t, progress)).toBe(
-      'Parcours en cours, 2 étapes faites sur 3. Rouvrir',
-    );
+    expect(miniPlayerLabel(t, progress)).toBe('Parcours en cours, 2 étapes faites sur 3. Rouvrir');
     const several = plannedFixture({
       0: { doneAt: at },
       1: { skippedAt: at },
