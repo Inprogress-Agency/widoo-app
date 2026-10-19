@@ -31,7 +31,9 @@ import {
   plannedPath,
   plannedQueryString,
   plannedRatingPath,
+  plannedStepArrivedPath,
   plannedStepDonePath,
+  plannedStepSkipPath,
   type PlannedListParams,
 } from './planned';
 import {
@@ -236,6 +238,42 @@ export function createApiClient(options: ApiClientOptions) {
       request({
         method: 'POST',
         path: plannedStepDonePath(id, stepId),
+        schema: PlannedRoute,
+        auth: true,
+      }),
+
+    /**
+     * `POST /v1/me/planned/:id/steps/:stepId/arrived`: « J'y suis » of the Go (E-07); a step
+     * already arrived keeps its first time; 409 outside a Go.
+     */
+    markPlannedStepArrived: (id: string, stepId: string) =>
+      request({
+        method: 'POST',
+        path: plannedStepArrivedPath(id, stepId),
+        schema: PlannedRoute,
+        auth: true,
+      }),
+
+    /**
+     * `POST /v1/me/planned/:id/steps/:stepId/skip`: « Passer cette étape » of the Go (E-07,
+     * D-033); 409 once the step is done, or outside a Go.
+     */
+    skipPlannedStep: (id: string, stepId: string) =>
+      request({
+        method: 'POST',
+        path: plannedStepSkipPath(id, stepId),
+        schema: PlannedRoute,
+        auth: true,
+      }),
+
+    /**
+     * `DELETE /v1/me/planned/:id/steps/:stepId/skip`: « Annuler » of the toast, the step goes
+     * back to before, without losing its arrival (E-07, D-033).
+     */
+    unskipPlannedStep: (id: string, stepId: string) =>
+      request({
+        method: 'DELETE',
+        path: plannedStepSkipPath(id, stepId),
         schema: PlannedRoute,
         auth: true,
       }),

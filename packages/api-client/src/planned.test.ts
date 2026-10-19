@@ -138,6 +138,37 @@ describe('markPlannedStepDone', () => {
   });
 });
 
+describe('markPlannedStepArrived', () => {
+  it('posts « J\'y suis » of a step, without a body', async () => {
+    const { client, call, headers } = setup(json(200, planned));
+    await expect(client.markPlannedStepArrived(id, stepId)).resolves.toMatchObject({ id });
+    expect(call()?.[0]).toBe(`http://10.0.2.2:8080/v1/me/planned/${id}/steps/${stepId}/arrived`);
+    expect(call()?.[1]?.method).toBe('POST');
+    expect(call()?.[1]?.body).toBeUndefined();
+    expect(headers().authorization).toBe('Bearer token-1');
+  });
+});
+
+describe('skipPlannedStep', () => {
+  it('posts « Passer cette étape » of a step, without a body', async () => {
+    const { client, call, headers } = setup(json(200, planned));
+    await client.skipPlannedStep(id, stepId);
+    expect(call()?.[0]).toBe(`http://10.0.2.2:8080/v1/me/planned/${id}/steps/${stepId}/skip`);
+    expect(call()?.[1]?.method).toBe('POST');
+    expect(call()?.[1]?.body).toBeUndefined();
+    expect(headers().authorization).toBe('Bearer token-1');
+  });
+});
+
+describe('unskipPlannedStep', () => {
+  it('deletes the skip of a step (D-033, « Annuler »)', async () => {
+    const { client, call } = setup(json(200, planned));
+    await client.unskipPlannedStep(id, stepId);
+    expect(call()?.[0]).toBe(`http://10.0.2.2:8080/v1/me/planned/${id}/steps/${stepId}/skip`);
+    expect(call()?.[1]?.method).toBe('DELETE');
+  });
+});
+
 describe('getPlannedMapsUrl', () => {
   it('reads Google Maps to the next step', async () => {
     const url =
