@@ -9,7 +9,13 @@ const viewer = (
   plan: RouteViewer['plan'],
   planExpiresAt: Date | null,
   unlockedRouteIds: string[] = [],
-): RouteViewer => ({ plan, planExpiresAt, unlockedRouteIds: new Set(unlockedRouteIds) });
+  authoredRouteIds: string[] = [],
+): RouteViewer => ({
+  plan,
+  planExpiresAt,
+  unlockedRouteIds: new Set(unlockedRouteIds),
+  authoredRouteIds: new Set(authoredRouteIds),
+});
 
 describe('canAccessRoute', () => {
   it('opens a free route to anyone', () => {
@@ -47,5 +53,11 @@ describe('canAccessRoute', () => {
 
   it('opens only the route bought alone, not another Premium route', () => {
     expect(canAccessRoute(otherPremium, viewer('free', null, [premium.id]), now)).toBe(false);
+  });
+
+  it('opens a Premium route to its author, whatever the plan, and only their own (D-093)', () => {
+    expect(canAccessRoute(premium, viewer('free', null, [], [premium.id]), now)).toBe(true);
+    expect(canAccessRoute(premium, viewer('premium', now, [], [premium.id]), now)).toBe(true);
+    expect(canAccessRoute(otherPremium, viewer('free', null, [], [premium.id]), now)).toBe(false);
   });
 });

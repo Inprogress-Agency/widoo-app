@@ -26,10 +26,13 @@ const accounts = {
   pass: { plan: 'premium', planExpiresAt: new Date(Date.now() + 7 * day) },
   passEnded: { plan: 'premium', planExpiresAt: new Date(Date.now() - minute) },
   unlocked: { plan: 'free', planExpiresAt: null },
+  // The author of the Premium copy has the whole of it, without a plan (D-093).
+  author: { plan: 'free', planExpiresAt: null },
 } as const;
 const tokens = new Map<keyof typeof accounts, string>();
 const uids: string[] = [];
 let unlockedUserId = '';
+let authorUserId = '';
 
 let app: Awaited<ReturnType<typeof buildApp>>;
 beforeAll(async () => {
@@ -44,12 +47,14 @@ beforeAll(async () => {
       .values({ firebaseUid: uid, ...accounts[key] })
       .returning({ id: users.id });
     if (user && key === 'unlocked') unlockedUserId = user.id;
+    if (user && key === 'author') authorUserId = user.id;
   }
   const [demoRoute] = await app.db.select().from(routes).where(eq(routes.id, demoId));
   if (!demoRoute) throw new Error('Demo route missing from the seed');
   await app.db.insert(routes).values({
     ...demoRoute,
     id: premiumId,
+    authorId: authorUserId,
     access: 'premium',
     startLocation: { lat: 21, lng: 21 },
     bounds: { west: 21, south: 21, east: 21.001, north: 21.001 },
@@ -124,6 +129,7 @@ describe('GET /v1/routes/search with an optional token (D-075)', () => {
     ['a Premium plan', 'premium'],
     ['a 7-day pass in progress', 'pass'],
     ['a free account that bought this route alone', 'unlocked'],
+    ['its author, on a free account', 'author'],
   ] as const)(
     'carries every step of a Premium card for %s, as the free route',
     async (_, account) => {
