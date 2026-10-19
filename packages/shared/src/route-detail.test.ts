@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { ApiError, RouteDetail, RouteRemovedDetails, RouteTimeline, SheetStep } from '.';
+import {
+  ApiError,
+  RouteDetail,
+  RouteDetailQuery,
+  RouteRemovedDetails,
+  RouteTimeline,
+  RouteTimelineQuery,
+  SheetStep,
+} from '.';
 
 // Fictitious data only.
 const ids: [string, string, string] = [
@@ -19,8 +27,15 @@ const place = {
   verificationStatus: 'verified',
   verifiedAt: null,
   hours: [],
+  photo: null,
 };
-const transition = { distanceM: 600, durationMin: 8, mode: 'walk', estimated: true };
+const transition = {
+  distanceM: 600,
+  durationMin: 8,
+  mode: 'walk',
+  estimated: false,
+  geometry: 'a~l~Fjk~uOwHJ',
+};
 const creatorPhoto = { url: 'https://example.com/photos/etape.jpg', credit: null };
 const freePhoto = {
   url: 'https://example.com/photos/libre.jpg',
@@ -57,7 +72,7 @@ const lockedStep = (id: string, position: number) => ({
   isLocked: true,
   category: 'cafe',
   durationMin: 30,
-  transition,
+  transition: { ...transition, estimated: true, geometry: null },
 });
 const timeline = {
   startsAt: '2026-10-13T08:00:00.000Z',
@@ -94,6 +109,9 @@ const detail = {
   status: 'published',
   description: 'Description fictive',
   photoUrls: [],
+  photos: [],
+  timezone: 'Europe/Paris',
+  tips: ['Prévoir des chaussures fictives'],
   walkingDistanceM: 2400,
   effort: 'easy',
   startAccess: null,
@@ -102,6 +120,7 @@ const detail = {
   reviews: [],
   timeline,
   steps: ids.map(fullStep),
+  myReport: null,
 };
 const locked = {
   ...detail,
@@ -175,6 +194,29 @@ describe('RouteDetail', () => {
       },
     ],
     ['an unknown effort', { ...detail, effort: 'hard' }],
+    [
+      'a trip without its geometry',
+      {
+        ...detail,
+        steps: [
+          fullStep(ids[0], 0),
+          ...detail.steps
+            .slice(1)
+            .map((step) => ({ ...step, transition: { ...transition, geometry: undefined } })),
+        ],
+      },
+    ],
+    [
+      'a place without its photo',
+      {
+        ...detail,
+        steps: detail.steps.map((step) => ({ ...step, place: { ...place, photo: undefined } })),
+      },
+    ],
+    [
+      'a report of an unknown status',
+      { ...detail, myReport: { reportedAt: review.createdAt, status: 'pending' } },
+    ],
   ])('refuses %s', (_, value) => {
     expect(RouteDetail.safeParse(value).success).toBe(false);
   });
@@ -211,12 +253,42 @@ describe('RouteTimeline', () => {
 });
 
 describe('a withdrawn route', () => {
-  it('answers route_removed with the date of the withdrawal', () => {
+  it('answers route_removed with the date of the withdrawal and the zone of its start', () => {
     const body = ApiError.parse({
       code: 'route_removed',
       message: 'Route removed',
-      details: { removedAt: '2026-09-20T10:00:00.000Z' },
+      details: { removedAt: '2026-09-20T10:00:00.000Z', near: { lat: 48.86, lng: 2.35 } },
     });
-    expect(RouteRemovedDetails.parse(body.details).removedAt).toBe('2026-09-20T10:00:00.000Z');
+    expect(RouteRemovedDetails.parse(body.details)).toEqual({
+      removedAt: '2026-09-20T10:00:00.000Z',
+      near: { lat: 48.86, lng: 2.35 },
+    });
+    expect(RouteRemovedDetails.safeParse({ removedAt: '2026-09-20T10:00:00.000Z' }).success).toBe(
+      false,
+    );
+  });
+});
+
+describe('the queries of the sheet and of its timeline (D-093)', () => {
+  const token = 'Fictitious_share-token_0123456789ab';
+
+  it('reads a token and the estimated trips, and nothing else', () => {
+    expect(RouteDetailQuery.parse({ token, trips: 'estimated' })).toEqual({
+      token,
+      trips: 'estimated',
+    });
+    expect(RouteDetailQuery.parse({})).toEqual({});
+    for (const query of [{ trips: 'exact' }, { lang: 'fr' }, { token: 'court' }]) {
+      expect(RouteDetailQuery.safeParse(query).success).toBe(false);
+    }
+  });
+
+  it('needs a start with its offset for the timeline', () => {
+    expect(RouteTimelineQuery.parse({ startsAt: '2026-10-24T10:00:00+02:00' }).startsAt).toBe(
+      '2026-10-24T10:00:00+02:00',
+    );
+    for (const query of [{}, { startsAt: '2026-10-24' }, { startsAt: 'demain', token }]) {
+      expect(RouteTimelineQuery.safeParse(query).success).toBe(false);
+    }
   });
 });

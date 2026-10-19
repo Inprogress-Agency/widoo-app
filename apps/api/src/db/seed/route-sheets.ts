@@ -9,7 +9,14 @@
  */
 import { fileURLToPath } from 'node:url';
 import { computeTransitions } from '@widoo/orchestration';
-import type { LatLng, RouteDetail, RouteDetailStep, RouteReview, SheetStep } from '@widoo/shared';
+import type {
+  LatLng,
+  RouteDetail,
+  RouteDetailStep,
+  RouteRemovedDetails,
+  RouteReview,
+  SheetStep,
+} from '@widoo/shared';
 import { seedId } from '../seed';
 import { bucketsOf, demoDataset, type DemoPlace, type DemoRoute } from './demo-routes';
 
@@ -21,7 +28,7 @@ export const routeSheetFixturesPath = fileURLToPath(
 /** What the app reads: the sheets, and the withdrawn routes with their date. */
 export interface RouteSheetFixtures {
   routes: RouteDetail[];
-  removed: { id: string; removedAt: string }[];
+  removed: ({ id: string } & RouteRemovedDetails)[];
 }
 
 const { datasetDate, places, routes, authors } = demoDataset;
@@ -91,6 +98,8 @@ async function sheetOf(route: DemoRoute): Promise<RouteDetail> {
         durationMin: transition.durationMin,
         mode: transition.mode,
         estimated: transition.estimated,
+        // Estimated without a provider: no line (D-088).
+        geometry: null,
       },
       place: {
         id: seedId(`place:${place.key}`),
@@ -103,6 +112,7 @@ async function sheetOf(route: DemoRoute): Promise<RouteDetail> {
         verificationStatus: 'verified',
         verifiedAt: datasetDate,
         hours: hoursOf(place),
+        photo: null,
       },
       // Fictitious visitors, so that the verification line reads as on a live route (D-056).
       verification: {
@@ -157,6 +167,9 @@ async function sheetOf(route: DemoRoute): Promise<RouteDetail> {
     status: 'published',
     description: route.description,
     photoUrls: route.photos.map((photo) => photo.url),
+    photos: route.photos.map((photo) => ({ url: photo.url, credit: null })),
+    timezone: 'Europe/Paris',
+    tips: route.tips,
     walkingDistanceM: route.computed.walking_m,
     effort: route.computed.effort,
     startAccess: null,
@@ -172,6 +185,7 @@ async function sheetOf(route: DemoRoute): Promise<RouteDetail> {
       steps: timelineSteps,
     },
     steps,
+    myReport: null,
   };
 }
 
@@ -276,6 +290,8 @@ export async function routeSheetFixtures(): Promise<RouteSheetFixtures> {
       { ...shared, status: 'private', isVerified: false, sharedBy: { firstName: 'Camille' } },
       flagged,
     ],
-    removed: [{ id: seedId('fixture:removed'), removedAt: daysBefore(5) }],
+    removed: [
+      { id: seedId('fixture:removed'), removedAt: daysBefore(5), near: { lat: 48.86, lng: 2.35 } },
+    ],
   };
 }
