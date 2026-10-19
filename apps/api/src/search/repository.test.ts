@@ -42,13 +42,20 @@ const premiumPlan = {
   plan: 'premium',
   planExpiresAt: new Date('2026-10-29T12:00:00Z'),
   unlockedRouteIds: none,
+  authoredRouteIds: none,
 } as const;
 const expiredPlan = {
   plan: 'premium',
   planExpiresAt: new Date('2026-09-28T12:00:00Z'),
   unlockedRouteIds: none,
+  authoredRouteIds: none,
 } as const;
-const freePlan = { plan: 'free', planExpiresAt: null, unlockedRouteIds: none } as const;
+const freePlan = {
+  plan: 'free',
+  planExpiresAt: null,
+  unlockedRouteIds: none,
+  authoredRouteIds: none,
+} as const;
 
 const everyStep = [
   {
