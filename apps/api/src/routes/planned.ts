@@ -13,7 +13,7 @@ import { z } from 'zod';
 import { canAccessRoute } from '../access/route-access';
 import { routeViewerOf } from '../access/route-viewer';
 import { httpError, premiumRequired } from '../errors';
-import { markStepDone, nextStepMapsUrl } from '../planned/go';
+import { markStepArrived, markStepDone, nextStepMapsUrl, skipStep, unskipStep } from '../planned/go';
 import { createPlanned, listPlanned, ownedPlanned, readPlanned } from '../planned/repository';
 import { snapshotOf } from '../planned/snapshot';
 import { updatePlanned } from '../planned/update';
@@ -132,6 +132,67 @@ export const plannedRoutesPlugin: FastifyPluginAsyncZod = async (app) => {
         request.params.stepId,
         new Date(),
       ),
+  );
+
+  app.post(
+    '/me/planned/:id/steps/:stepId/arrived',
+    {
+      schema: {
+        tags,
+        summary: 'Mark a step of my Go arrived (« J\'y suis »)',
+        security,
+        params: PlannedStepParams,
+        // Like `done`: no body until `place_signals` (#49).
+        body: z.strictObject({}).nullish(),
+        response: { 200: PlannedRoute },
+      },
+    },
+    async (request) =>
+      markStepArrived(
+        app.db,
+        currentUser(request).id,
+        request.params.id,
+        request.params.stepId,
+        new Date(),
+      ),
+  );
+
+  app.post(
+    '/me/planned/:id/steps/:stepId/skip',
+    {
+      schema: {
+        tags,
+        summary: 'Mark a step of my Go skipped (« Passer cette étape »); 409 once it is done',
+        security,
+        params: PlannedStepParams,
+        // Like `done`: no body until `place_signals` (#49).
+        body: z.strictObject({}).nullish(),
+        response: { 200: PlannedRoute },
+      },
+    },
+    async (request) =>
+      skipStep(
+        app.db,
+        currentUser(request).id,
+        request.params.id,
+        request.params.stepId,
+        new Date(),
+      ),
+  );
+
+  app.delete(
+    '/me/planned/:id/steps/:stepId/skip',
+    {
+      schema: {
+        tags,
+        summary: 'Skip a step of my Go no more: it goes back to before (« Annuler »)',
+        security,
+        params: PlannedStepParams,
+        response: { 200: PlannedRoute },
+      },
+    },
+    async (request) =>
+      unskipStep(app.db, currentUser(request).id, request.params.id, request.params.stepId),
   );
 
   app.get(

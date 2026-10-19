@@ -47,6 +47,26 @@ const done = (headers: Headers, id: string, stepId: string | undefined, payload?
     headers,
     ...(payload && { payload }),
   });
+const arrived = (headers: Headers, id: string, stepId: string | undefined, payload?: object) =>
+  app.inject({
+    method: 'POST',
+    url: `/v1/me/planned/${id}/steps/${stepId}/arrived`,
+    headers,
+    ...(payload && { payload }),
+  });
+const skip = (headers: Headers, id: string, stepId: string | undefined, payload?: object) =>
+  app.inject({
+    method: 'POST',
+    url: `/v1/me/planned/${id}/steps/${stepId}/skip`,
+    headers,
+    ...(payload && { payload }),
+  });
+const unskip = (headers: Headers, id: string, stepId: string | undefined) =>
+  app.inject({
+    method: 'DELETE',
+    url: `/v1/me/planned/${id}/steps/${stepId}/skip`,
+    headers,
+  });
 const mapsUrl = (headers: Headers, id: string) =>
   app.inject({ url: `/v1/me/planned/${id}/maps-url`, headers });
 
@@ -132,6 +152,82 @@ describe('POST /v1/me/planned/:id/steps/:stepId/done', () => {
     const response = await done(await fixtures.signIn(), id, route.steps[0]?.id);
     expect(response.statusCode).toBe(404);
     expect(ApiError.parse(response.json()).code).toBe('not_found');
+  });
+});
+
+describe('POST and DELETE /v1/me/planned/:id/steps/:stepId/(arrived|skip)', () => {
+  it('marks arrived and skipped once, and unskips back to before', async () => {
+    const headers = await fixtures.signIn();
+    const { id, route } = await go(headers);
+    const [first] = route.steps;
+
+    const marked = PlannedRoute.parse((await arrived(headers, id, first?.id)).json());
+    const arrivedAt = marked.steps[0]?.arrivedAt;
+    expect(arrivedAt).not.toBeNull();
+    expect(marked.steps[0]?.doneAt).toBeNull();
+    const again = PlannedRoute.parse((await arrived(headers, id, first?.id)).json());
+    expect(again.steps[0]?.arrivedAt).toBe(arrivedAt);
+
+    const skipped = PlannedRoute.parse((await skip(headers, id, first?.id)).json());
+    const skippedAt = skipped.steps[0]?.skippedAt;
+    expect(skippedAt).not.toBeNull();
+    expect(skipped.steps[0]?.doneAt).toBeNull();
+    // Plannings are personal: never cached.
+    expect((await arrived(headers, id, first?.id)).headers['cache-control']).toBe('no-store');
+
+    const unskipped = PlannedRoute.parse((await unskip(headers, id, first?.id)).json());
+    expect(unskipped.steps[0]).toEqual({
+      stepId: first?.id,
+      arrivedAt,
+      doneAt: null,
+      skippedAt: null,
+    });
+    // Idempotent: unskipping a step that was never skipped anyway.
+    expect(PlannedRoute.parse((await unskip(headers, id, first?.id)).json()).steps[0]?.skippedAt).toBe(
+      null,
+    );
+  });
+
+  it('refuses to skip a done step with 409', async () => {
+    const headers = await fixtures.signIn();
+    const { id, route } = await go(headers);
+    await done(headers, id, route.steps[0]?.id);
+    const response = await skip(headers, id, route.steps[0]?.id);
+    expect(response.statusCode).toBe(409);
+    expect(ApiError.parse(response.json()).code).toBe('conflict');
+  });
+
+  it('answers 409 outside a Go, 404 for an unknown step, 422 for a body', async () => {
+    const headers = await fixtures.signIn();
+    const planned = await go(headers, false);
+    const stepId = planned.route.steps[0]?.id;
+    expect((await arrived(headers, planned.id, stepId)).statusCode).toBe(409);
+    expect((await skip(headers, planned.id, stepId)).statusCode).toBe(409);
+    expect((await unskip(headers, planned.id, stepId)).statusCode).toBe(409);
+    const started = await go(headers);
+    expect((await arrived(headers, started.id, uuidv7())).statusCode).toBe(404);
+    expect((await skip(headers, started.id, uuidv7())).statusCode).toBe(404);
+    expect((await unskip(headers, started.id, uuidv7())).statusCode).toBe(404);
+    // Like `done`, a body waits for `place_signals` (#49).
+    expect(
+      (await arrived(headers, started.id, started.route.steps[0]?.id, { signal: {} })).statusCode,
+    ).toBe(422);
+    expect(
+      (await skip(headers, started.id, started.route.steps[0]?.id, { signal: {} })).statusCode,
+    ).toBe(422);
+  });
+
+  it("answers 404 for another user's planning", async () => {
+    const { id, route } = await go(await fixtures.signIn());
+    const other = await fixtures.signIn();
+    for (const response of [
+      await arrived(other, id, route.steps[0]?.id),
+      await skip(other, id, route.steps[0]?.id),
+      await unskip(other, id, route.steps[0]?.id),
+    ]) {
+      expect(response.statusCode).toBe(404);
+      expect(ApiError.parse(response.json()).code).toBe('not_found');
+    }
   });
 });
 
