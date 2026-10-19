@@ -28,6 +28,14 @@ export const plannedPath = (id: string) => `/v1/me/planned/${encodeURIComponent(
 export const plannedStepDonePath = (id: string, stepId: string) =>
   `${plannedPath(id)}/steps/${encodeURIComponent(stepId)}/done` as const;
 
+/** « J'y suis » of a Go (E-07): the step marked arrived, once. */
+export const plannedStepArrivedPath = (id: string, stepId: string) =>
+  `${plannedPath(id)}/steps/${encodeURIComponent(stepId)}/arrived` as const;
+
+/** « Passer cette étape » of a Go (E-07, D-033): posted once, removed by DELETE (« Annuler »). */
+export const plannedStepSkipPath = (id: string, stepId: string) =>
+  `${plannedPath(id)}/steps/${encodeURIComponent(stepId)}/skip` as const;
+
 /** « Itinéraire » of a Go (E-07, D-032): Google Maps on foot to the next step, never the route. */
 export const plannedMapsUrlPath = (id: string) => `${plannedPath(id)}/maps-url` as const;
 
