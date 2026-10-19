@@ -51,6 +51,8 @@ export const PlannedRoutePlace = z.object({
   location: LatLng,
   address: z.string().min(1),
   isIndoor: z.boolean(),
+  /** « Accessible à toute heure » (`places.always_open`): no conflict in the timeline (D-049). */
+  alwaysOpen: z.boolean().default(false),
   hours: z.array(PlaceHours),
 });
 export type PlannedRoutePlace = z.infer<typeof PlannedRoutePlace>;
