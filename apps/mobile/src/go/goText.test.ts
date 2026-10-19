@@ -52,12 +52,12 @@ describe('E-07 texts, in French', () => {
     expect(lineText(t, progress, null)).toBeNull();
   });
 
-  it('says the skipped steps left once none is current, never « all done »', () => {
+  it('tells the steps done out of the total once none is current, never « all done »', () => {
     const planned = plannedFixture({ 0: { doneAt: at }, 1: { doneAt: at }, 2: { skippedAt: at } });
     const progress = goProgress(planned, emptyGoLocal);
-    expect(statusText(t, progress).short).toBe('Il reste 1 étape passée');
+    expect(statusText(t, progress).short).toBe('2 étapes faites sur 3');
     expect(miniPlayerLabel(t, progress)).toBe(
-      'Parcours en cours, il reste 1 étape passée. Rouvrir',
+      'Parcours en cours, 2 étapes faites sur 3. Rouvrir',
     );
     const several = plannedFixture({
       0: { doneAt: at },
@@ -65,9 +65,23 @@ describe('E-07 texts, in French', () => {
       2: { skippedAt: at },
     });
     const left = goProgress(several, emptyGoLocal);
-    expect(statusText(t, left).short).toBe('Il reste 2 étapes passées');
-    expect(miniPlayerLabel(t, left)).toBe(
-      'Parcours en cours, il reste 2 étapes passées. Rouvrir',
-    );
+    expect(statusText(t, left).short).toBe('1 étape faite sur 3');
+    expect(miniPlayerLabel(t, left)).toBe('Parcours en cours, 1 étape faite sur 3. Rouvrir');
+    expect(left.steps.map((entry) => timelineState(t, entry, left.phase).text)).toEqual([
+      expect.stringMatching(/^Fait à /),
+      'Passée',
+      'Passée',
+    ]);
+  });
+});
+
+describe('E-07 texts, in English', () => {
+  const en = i18next.getFixedT('en');
+
+  it('tells the steps done out of the total once only skipped ones are left', () => {
+    const planned = plannedFixture({ 0: { doneAt: at }, 1: { doneAt: at }, 2: { skippedAt: at } });
+    const progress = goProgress(planned, emptyGoLocal);
+    expect(statusText(en, progress).short).toBe('2 stops done of 3');
+    expect(miniPlayerLabel(en, progress)).toBe('Route under way, 2 stops done of 3. Reopen');
   });
 });

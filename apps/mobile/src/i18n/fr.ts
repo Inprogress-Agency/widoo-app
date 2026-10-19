@@ -444,8 +444,8 @@ export const fr = {
       enRoute: "En route vers l'étape {{position}}",
       onSite: 'Étape {{position}} sur {{total}}, vous y êtes',
       allDone: 'Toutes les étapes sont faites',
-      skippedLeft_one: 'Il reste {{count}} étape passée',
-      skippedLeft_other: 'Il reste {{count}} étapes passées',
+      doneOf_one: '{{count}} étape faite sur {{total}}',
+      doneOf_other: '{{count}} étapes faites sur {{total}}',
       enRouteSpoken: "En route vers l'étape {{position}} sur {{total}}.",
       onSiteSpoken: 'Étape {{position}} sur {{total}}, vous y êtes.',
     },
@@ -508,8 +508,8 @@ export const fr = {
       onSite:
         'Parcours en cours, étape {{position}} sur {{total}}, {{place}}, vous y êtes. Rouvrir',
       allDone: 'Parcours en cours, toutes les étapes sont faites. Rouvrir',
-      skippedLeft_one: 'Parcours en cours, il reste {{count}} étape passée. Rouvrir',
-      skippedLeft_other: 'Parcours en cours, il reste {{count}} étapes passées. Rouvrir',
+      doneOf_one: 'Parcours en cours, {{count}} étape faite sur {{total}}. Rouvrir',
+      doneOf_other: 'Parcours en cours, {{count}} étapes faites sur {{total}}. Rouvrir',
     },
     toast: {
       startFailed: "Le parcours n'a pas démarré",
