@@ -85,6 +85,9 @@ module.exports = {
       // `map`: the map of a position in a form (A-04, no board: to size with DESIGN).
       height: { header: '64px', screen: '100dvh', fit: 'fit-content', map: '280px' },
       minHeight: { 0: '0px', field: '40px', screen: '100dvh', textarea: '72px' },
+      // A menu of many choices (the route filter of A-03) scrolls past this height; to size with
+      // DESIGN (à reporter dans tokens.json).
+      maxHeight: { menu: '320px' },
       // Zero, for what is pinned to an edge (`inset-0`): tokens.json starts at 4 px.
       spacing: { 0: '0px' },
       minWidth: { 0: '0px' },

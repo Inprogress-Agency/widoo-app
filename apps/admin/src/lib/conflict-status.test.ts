@@ -6,6 +6,7 @@ describe('conflictStatusLabel', () => {
     expect(conflictStatusLabel({ status: 'published' })).toBe('Publié');
     expect(conflictStatusLabel({ status: 'accepted' })).toBe('Accepté');
     expect(conflictStatusLabel({ status: 'closed' })).toBe('Fermé');
+    expect(conflictStatusLabel({ status: 'hidden' })).toBe('Masqué');
   });
 
   it('gives nothing for other details', () => {
