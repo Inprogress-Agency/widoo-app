@@ -241,8 +241,9 @@ export function createApiClient(options: ApiClientOptions) {
       }),
 
     /**
-     * `GET /v1/me/planned/:id/maps-url`: « Itinéraire » of the Go, Google Maps on foot to the
-     * first step neither done nor skipped (D-032); 409 when none is left.
+     * `GET /v1/me/planned/:id/maps-url`: « Itinéraire » of the Go, Google Maps to the first step
+     * neither done nor skipped, in the mode of the trip that leads to it (D-032, #510); 409 when
+     * none is left.
      */
     getPlannedMapsUrl: (id: string, signal?: AbortSignal) =>
       request({

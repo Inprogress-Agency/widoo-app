@@ -15,6 +15,11 @@ const times = [
   ['09:00', '10:45'],
   ['11:00', '11:45'],
 ] as const;
+/** The trip of each step to the next one, in a mode of its own (#510); null for the last one. */
+const trips = [
+  { distanceM: 900, durationMin: 12, mode: 'bike', estimated: true },
+  { distanceM: 900, durationMin: 12, mode: 'metro', estimated: true },
+] as const;
 
 /**
  * A fictitious Go in progress of three steps near République, started at 10:00 in Paris; the
@@ -48,10 +53,7 @@ export function plannedFixture(
         bookingUrl: null,
         bookingProvider: null,
         transitionNote: null,
-        transition:
-          index < stepIds.length - 1
-            ? { distanceM: 900, durationMin: 12, mode: 'walk', estimated: true }
-            : null,
+        transition: trips[index] ?? null,
         place: {
           id,
           name: names[index] ?? 'Lieu fictif',
