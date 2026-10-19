@@ -1,4 +1,10 @@
-import type { ApiError, ApiErrorCode, CoherenceIssue, ValidationIssue } from '@widoo/shared';
+import type {
+  ApiError,
+  ApiErrorCode,
+  CoherenceIssue,
+  RouteRemovedDetails,
+  ValidationIssue,
+} from '@widoo/shared';
 import { DrizzleQueryError } from 'drizzle-orm';
 import type { FastifyError, FastifyInstance } from 'fastify';
 import { hasZodFastifySchemaValidationErrors } from 'fastify-type-provider-zod';
@@ -56,6 +62,18 @@ export function coherenceBlocked(errors: CoherenceIssue[]) {
     statusCode: 422,
     apiCode: 'coherence_blocked' as const,
     details: { errors },
+  });
+}
+
+/**
+ * 410 `route_removed` of a withdrawn route (D-093): when, and its start rounded to 0.01°, nothing
+ * else of the route. 410 has no code by default.
+ */
+export function routeRemoved(details: RouteRemovedDetails) {
+  return Object.assign(new Error('Route removed'), {
+    statusCode: 410,
+    apiCode: 'route_removed' as const,
+    details,
   });
 }
 
