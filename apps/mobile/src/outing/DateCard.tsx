@@ -40,7 +40,8 @@ export function DateCard({ day, hours, spoken, onChange }: DateCardProps) {
             {hours}
           </Text>
         </View>
-        {isLargeText && change && <View className="items-end">{change}</View>}
+        {/* A row pushed to the end: the link sets its own cross alignment (`self-start`). */}
+        {isLargeText && change && <View className="flex-row justify-end">{change}</View>}
       </View>
       {!isLargeText && change}
     </View>
