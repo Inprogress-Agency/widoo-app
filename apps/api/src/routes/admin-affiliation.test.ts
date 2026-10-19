@@ -28,10 +28,8 @@ let fixtures: ReturnType<typeof createStepFixtures>;
 beforeAll(async () => {
   app = await buildApp(testConfig(), { tokenVerifier: verifier });
   await seed(app.db);
-  const [place] = await app.db.select({ id: places.id }).from(places).limit(1);
-  if (!place) throw new Error('No place in the seed');
-  placeId = place.id;
   fixtures = createStepFixtures(app.db);
+  placeId = await fixtures.addPlace();
 });
 afterAll(async () => {
   await fixtures.cleanUp();
