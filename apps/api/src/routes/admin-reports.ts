@@ -138,6 +138,6 @@ export const adminReportsRoutes: FastifyPluginAsyncZod = async (app) => {
         response: { 200: AdminRatings },
       },
     },
-    async (request) => readRatings(request.query),
+    async (request) => readRatings(app.db, request.query),
   );
 };
