@@ -1,0 +1,1 @@
+ALTER TABLE "routes" ADD COLUMN "unpublished_at" timestamp with time zone;

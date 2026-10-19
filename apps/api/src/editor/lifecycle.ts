@@ -23,7 +23,7 @@ export const newShareToken = () => randomBytes(24).toString('base64url');
 /**
  * Moves a route, locked by the caller, from its status to `to`, or answers 409 `conflict` for a
  * move the life cycle refuses to `actor`. In the same transaction: the private link is created on
- * the first move to `private`; the first publication is dated; a route that leaves the public
+ * the first move to `private`; the first publication is dated, and each withdrawal; a route that leaves the public
  * statuses leaves the profiles that featured it (D-023), there being no trigger in the database.
  */
 export async function moveRoute(
@@ -42,6 +42,8 @@ export async function moveRoute(
       status: to,
       ...(to === 'private' && !route.shareToken && { shareToken: newShareToken() }),
       ...(to === 'published' && !route.publishedAt && { publishedAt: now }),
+      // Dated at each withdrawal, cleared by any move out of it: a republication.
+      unpublishedAt: to === 'unpublished' ? now : null,
     })
     .where(eq(routes.id, route.id))
     .returning();

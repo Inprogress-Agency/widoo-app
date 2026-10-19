@@ -338,6 +338,11 @@ export const routes = pgTable(
     durationBucket: durationBucket('duration_bucket'),
     budgetBucket: budgetBucket('budget_bucket'),
     publishedAt: timestamp('published_at', { withTimezone: true }),
+    /**
+     * Last move to `unpublished`, by `moveRoute` only; null in any other status. The date of the
+     * 410 `route_removed` of the sheet (`details.removedAt`, D-093).
+     */
+    unpublishedAt: timestamp('unpublished_at', { withTimezone: true }),
     /** Denormalized counters and rating, recomputed. */
     stats: jsonb('stats').notNull().default({}),
     /** Score components except proximity and context, recomputed nightly. */
