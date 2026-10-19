@@ -3,7 +3,7 @@ import { ApiRequestError } from '@widoo/api-client';
 import type { PlannedRoute } from '@widoo/shared';
 import { router } from 'expo-router';
 import type { TFunction } from 'i18next';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Linking } from 'react-native';
 import { createMMKV } from 'react-native-mmkv';
@@ -71,6 +71,25 @@ export function useGo(): { planned: PlannedRoute | null; progress: GoProgress | 
   );
   const progress = useMemo(() => (planned ? goProgress(planned, local) : null), [planned, local]);
   return { planned, progress };
+}
+
+/**
+ * Back on a tab, the Go is read again: one stopped or closed elsewhere (another phone, the night
+ * job) closes the mini-player, which `AppState` alone only learns at the return of the app.
+ * Offline nothing is asked: the Go kept on the phone goes on.
+ */
+export function useReadGoOnTabChange(tabIndex: number) {
+  const client = useQueryClient();
+  const shownIndex = useRef(tabIndex);
+  useEffect(() => {
+    if (shownIndex.current === tabIndex) {
+      return;
+    }
+    shownIndex.current = tabIndex;
+    if (onlineManager.isOnline()) {
+      void client.invalidateQueries({ queryKey: goQueryPrefix });
+    }
+  }, [client, tabIndex]);
 }
 
 const confirmReplace = (t: TFunction) => (title: string) =>
