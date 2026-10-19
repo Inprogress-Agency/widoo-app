@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { canAccessRoute } from '../access/route-access';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
-import { adminActions, routeUnlocks, routes, users } from '../db/schema';
+import { adminActions, routeRatings, routeUnlocks, routes, users } from '../db/schema';
 import { seed, seedId } from '../db/seed';
 import { uuidv7 } from '../db/uuid';
 import { testConfig } from '../test-config';
@@ -125,9 +125,39 @@ describe('GET /v1/admin/users', () => {
       suspendedAt: null,
       certification: { isCertified: false, override: 'none' },
       ratingsGiven: [],
+      ratingsReceived: [],
     });
     const missing = await get(moderator.headers, `/users/${uuidv7()}`);
     expect(missing.statusCode).toBe(404);
+  });
+
+  it('shows on the card the ratings an account gave and the ones its routes received', async () => {
+    const moderator = await signIn('moderator');
+    const author = await signIn('user', 'Autrice');
+    const rater = await signIn('user', 'Notateur');
+    const authored = await addRoute('free');
+    const rated = await addRoute('free');
+    await app.db.update(routes).set({ authorId: author.id }).where(eq(routes.id, authored));
+    await app.db.insert(routeRatings).values([
+      { routeId: authored, userId: rater.id, rating: 2, comment: 'Décevant', status: 'hidden' },
+      { routeId: rated, userId: author.id, rating: 5, comment: null },
+    ]);
+
+    const received = AdminUserDetail.parse(
+      (await get(moderator.headers, `/users/${author.id}`)).json(),
+    );
+    const given = AdminUserDetail.parse(
+      (await get(moderator.headers, `/users/${rater.id}`)).json(),
+    );
+
+    expect(received.ratingsReceived).toMatchObject([
+      { route: { id: authored }, score: 2, comment: 'Décevant', isHidden: true },
+    ]);
+    expect(received.ratingsGiven).toMatchObject([
+      { route: { id: rated }, score: 5, comment: null, isHidden: false },
+    ]);
+    expect(given.ratingsGiven).toMatchObject([{ route: { id: authored }, score: 2 }]);
+    expect(given.ratingsReceived).toEqual([]);
   });
 });
 

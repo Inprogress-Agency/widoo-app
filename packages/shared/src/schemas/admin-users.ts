@@ -64,12 +64,14 @@ export const AdminUserReport = z.object({
 });
 export type AdminUserReport = z.infer<typeof AdminUserReport>;
 
-/** A rating seen from an account (`route_ratings`, #64: none is stored yet). */
+/** A rating seen from an account: given by it, or received on one of its routes. */
 export const AdminUserRating = z.object({
   id: z.uuid(),
   route: RouteRef,
   score: z.number().int().min(1).max(5),
   comment: z.string().nullable(),
+  /** Masked by the team (A-03): it no longer counts in the average of its route. */
+  isHidden: z.boolean(),
   createdAt: z.iso.datetime(),
 });
 export type AdminUserRating = z.infer<typeof AdminUserRating>;
@@ -89,7 +91,6 @@ export const AdminUserDetail = AdminUserListItem.extend({
   createdRoutes: z.array(RouteRef.extend({ status: z.enum(taxonomies.routeStatuses) })),
   reportsMade: z.array(AdminUserReport),
   reportsReceived: z.array(AdminUserReport),
-  /** Empty until ratings are stored (#64). */
   ratingsGiven: z.array(AdminUserRating),
   ratingsReceived: z.array(AdminUserRating),
   supportMessages: z.array(

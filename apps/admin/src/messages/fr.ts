@@ -836,12 +836,12 @@ export const messages = {
       reportsReceived: 'Signalements reçus',
       ratingsGiven: 'Avis donnés',
       ratingsReceived: 'Avis reçus',
+      ratingScore: (score: number) => (score > 1 ? `${score} étoiles` : `${score} étoile`),
       support: 'Messages de support',
       none: 'Aucun',
       gift: 'offert',
       handled: 'traité',
       unhandled: 'à traiter',
-      ratingsNotice: "Les avis ne sont pas encore enregistrés ; ils s'afficheront ici ensuite.",
     },
     topics: {
       question: 'Question',
