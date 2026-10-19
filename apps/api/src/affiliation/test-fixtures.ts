@@ -29,7 +29,37 @@ export function createStepFixtures(db: Db) {
   const programIds: string[] = [];
   const stepIds: string[] = [];
 
+  async function addPlace(
+    setup: { partnerUrl?: string; partnerProgramId?: string | null } = {},
+  ): Promise<string> {
+    const [stepTemplate] = await db
+      .select()
+      .from(steps)
+      .where(eq(steps.routeId, templateRouteId))
+      .limit(1);
+    if (!stepTemplate) throw new Error('Demo route missing from the seed');
+    const [placeTemplate] = await db
+      .select()
+      .from(places)
+      .where(eq(places.id, stepTemplate.placeId));
+    if (!placeTemplate) throw new Error('Demo place missing from the seed');
+    const placeId = uuidv7();
+    placeIds.push(placeId);
+    await db.insert(places).values({
+      ...placeTemplate,
+      id: placeId,
+      name: `Lieu ${placeId}`,
+      location: farAway,
+      partnerBookingUrl: setup.partnerUrl ?? null,
+      partnerProgramId: setup.partnerProgramId ?? null,
+    });
+    return placeId;
+  }
+
   return {
+    /** A place of its own, far from the seed, for the tests that change a place. */
+    addPlace,
+
     async addStep(setup: StepSetup = {}): Promise<string> {
       const [routeTemplate] = await db.select().from(routes).where(eq(routes.id, templateRouteId));
       const [stepTemplate] = await db
@@ -38,12 +68,6 @@ export function createStepFixtures(db: Db) {
         .where(eq(steps.routeId, templateRouteId))
         .limit(1);
       if (!routeTemplate || !stepTemplate) throw new Error('Demo route missing from the seed');
-      const [placeTemplate] = await db
-        .select()
-        .from(places)
-        .where(eq(places.id, stepTemplate.placeId));
-      if (!placeTemplate) throw new Error('Demo place missing from the seed');
-
       let programId: string | null = null;
       if (setup.partnerUrl && setup.programIsActive !== undefined) {
         programId = uuidv7();
@@ -56,16 +80,7 @@ export function createStepFixtures(db: Db) {
           isActive: setup.programIsActive,
         });
       }
-      const placeId = uuidv7();
-      placeIds.push(placeId);
-      await db.insert(places).values({
-        ...placeTemplate,
-        id: placeId,
-        name: `Lieu ${placeId}`,
-        location: farAway,
-        partnerBookingUrl: setup.partnerUrl ?? null,
-        partnerProgramId: programId,
-      });
+      const placeId = await addPlace({ partnerUrl: setup.partnerUrl, partnerProgramId: programId });
       const routeId = uuidv7();
       routeIds.push(routeId);
       await db.insert(routes).values({
