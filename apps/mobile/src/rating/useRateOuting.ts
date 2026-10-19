@@ -42,7 +42,11 @@ function refresh(client: QueryClient) {
   });
 }
 
-/** The new rating of `routeId` in every card and sheet in memory, the map's included. */
+/**
+ * The new rating of `routeId` in every card and sheet in memory, the map's included. The search
+ * asked again by `refresh` replaces the cards too, but only once it answers: written here, the
+ * average changes at once, and stays right when that answer is slow or never comes.
+ */
 function applyRouteRating(client: QueryClient, routeId: string, rating: RouteCard['rating']) {
   client.setQueriesData({ queryKey: ['routes'] }, (data: unknown) =>
     withRouteRating(data, routeId, rating),
