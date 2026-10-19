@@ -17,7 +17,7 @@ describe('DateCard', () => {
     expect(onChange).toHaveBeenCalled();
   });
 
-  it('keeps « Changer » at large text, and leaves it out while the route is not read', async () => {
+  it('keeps « Changer » at large text, and leaves it out once the route is gone', async () => {
     mockIsLargeText = true;
     await render(<DateCard {...card} spoken={spoken} onChange={jest.fn()} />);
     expect(screen.getByRole('button', { name: 'Changer la date' })).toBeTruthy();
