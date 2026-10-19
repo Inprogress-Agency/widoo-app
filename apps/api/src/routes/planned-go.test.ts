@@ -6,6 +6,7 @@ import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
 import { plannedSteps, steps } from '../db/schema';
 import { uuidv7 } from '../db/uuid';
+import { markStepArrived, markStepDone, skipStep, unskipStep } from '../planned/go';
 import { plannedFixtures, saturdayTen } from '../planned/test-fixtures';
 import { testConfig } from '../test-config';
 
@@ -49,6 +50,49 @@ const done = (headers: Headers, id: string, stepId: string | undefined, payload?
 const mapsUrl = (headers: Headers, id: string) =>
   app.inject({ url: `/v1/me/planned/${id}/maps-url`, headers });
 
+describe('markStepArrived and skipStep', () => {
+  const userIdOf = async (headers: Headers) =>
+    (await app.inject({ url: '/v1/me', headers })).json<{ id: string }>().id;
+
+  it('marks arrived once, skips a second time, and unskips back to before', async () => {
+    const headers = await fixtures.signIn();
+    const { id, route } = await go(headers);
+    const userId = await userIdOf(headers);
+    const stepId = route.steps[0]?.id ?? '';
+
+    const arrived = await markStepArrived(app.db, userId, id, stepId, new Date());
+    const arrivedAt = arrived.steps[0]?.arrivedAt;
+    expect(arrivedAt).not.toBeNull();
+    // A second « J'y suis » keeps the first time.
+    const again = await markStepArrived(app.db, userId, id, stepId, new Date());
+    expect(again.steps[0]?.arrivedAt).toBe(arrivedAt);
+
+    const skipped = await skipStep(app.db, userId, id, stepId, new Date());
+    const skippedAt = skipped.steps[0]?.skippedAt;
+    expect(skippedAt).not.toBeNull();
+    expect(skipped.steps[0]?.doneAt).toBeNull();
+    // A second « Passer cette étape » keeps the first time too.
+    const skippedAgain = await skipStep(app.db, userId, id, stepId, new Date());
+    expect(skippedAgain.steps[0]?.skippedAt).toBe(skippedAt);
+
+    // « Annuler » puts the step back as it was, arrival kept, never done.
+    const unskipped = await unskipStep(app.db, userId, id, stepId);
+    expect(unskipped.steps[0]).toEqual({ stepId, arrivedAt, doneAt: null, skippedAt: null });
+    const unskippedAgain = await unskipStep(app.db, userId, id, stepId);
+    expect(unskippedAgain.steps[0]?.skippedAt).toBeNull();
+  });
+
+  it('refuses to skip a done step with 409', async () => {
+    const headers = await fixtures.signIn();
+    const { id, route } = await go(headers);
+    const userId = await userIdOf(headers);
+    const stepId = route.steps[0]?.id ?? '';
+    await markStepDone(app.db, userId, id, stepId, new Date());
+    await expect(skipStep(app.db, userId, id, stepId, new Date())).rejects.toMatchObject({
+      statusCode: 409,
+    });
+  });
+});
 describe('POST /v1/me/planned/:id/steps/:stepId/done', () => {
   it('marks a step done once, and a skipped step done', async () => {
     const headers = await fixtures.signIn();
