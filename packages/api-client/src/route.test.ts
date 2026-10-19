@@ -29,6 +29,9 @@ const route = {
   status: 'published',
   description: 'Description fictive',
   photoUrls: [],
+  photos: [],
+  timezone: 'Europe/Paris',
+  tips: [],
   walkingDistanceM: 0,
   effort: 'easy',
   startAccess: null,
@@ -68,12 +71,14 @@ const route = {
         verificationStatus: 'verified',
         verifiedAt: null,
         hours: [],
+        photo: null,
       },
       verification: { confirmations: 0, lastConfirmedAt: null, reports: null },
       highlights: [],
       photos: [],
     },
   ],
+  myReport: null,
 };
 
 const json = (status: number, body: unknown) =>
@@ -105,7 +110,11 @@ describe('getRoute', () => {
   });
 
   it('answers the date of a withdrawn route (410 route_removed)', async () => {
-    const body = { code: 'route_removed', message: 'Removed', details: { removedAt: at } };
+    const body = {
+      code: 'route_removed',
+      message: 'Removed',
+      details: { removedAt: at, near: { lat: 48.86, lng: 2.35 } },
+    };
     await expect(setup(json(410, body)).client.getRoute(id)).resolves.toEqual({
       kind: 'removed',
       removedAt: at,
