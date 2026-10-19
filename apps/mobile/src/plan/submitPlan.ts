@@ -23,8 +23,11 @@ export interface SubmitPlanDeps {
   trackPlanned: (properties: AnalyticsEventArgs<'route_planned'>[0]) => void;
   trackChanged: (properties: AnalyticsEventArgs<'plan_changed'>[0]) => void;
   toast: (kind: ToastKind, title: string, options?: ToastOptions) => void;
-  /** « Voir » of the toast: « Votre sortie » of the planning (E-08). */
-  onSee: (planned: PlannedRoute) => void;
+  /**
+   * « Voir » of the toast: « Votre sortie » of the planning (E-08); null when the toast shows
+   * over that page already, where « Voir » would lead nowhere.
+   */
+  onSee: ((planned: PlannedRoute) => void) | null;
   /**
    * The outing not done that « Reprogrammer » of Parcours › Passés reopens (D-038): « Programmer »
    * brings it back to `planned` at the new date, as `source: past`.
@@ -34,9 +37,9 @@ export interface SubmitPlanDeps {
 }
 
 /**
- * « Programmer », « Déplacer » or « Reprogrammer » (Ecrans › E-06, E-08): the planning sent, its event, then the toast
- * « Sortie programmée » or « Sortie déplacée » with « Voir »; a failure leaves the sheet open with
- * an error toast. True when done.
+ * « Programmer », « Déplacer » or « Reprogrammer » (Ecrans › E-06, E-08): the planning sent, its
+ * event, then the toast « Sortie programmée » or « Sortie déplacée » with « Voir »; a failure
+ * leaves the sheet open with an error toast. True when done.
  */
 export async function submitPlan(choice: PlanChoice, deps: SubmitPlanDeps): Promise<boolean> {
   const { t, now } = deps;
@@ -88,9 +91,10 @@ export async function submitPlan(choice: PlanChoice, deps: SubmitPlanDeps): Prom
     });
     return false;
   }
+  const { onSee } = deps;
   deps.toast('success', planned ? t('plan.toast.moved') : t('plan.toast.planned'), {
     subtitle: plannedSubtitle(t, day, minute, today),
-    action: { label: t('plan.toast.see'), onPress: () => deps.onSee(saved) },
+    ...(onSee && { action: { label: t('plan.toast.see'), onPress: () => onSee(saved) } }),
     isAboveStickyBar: true,
   });
   return true;

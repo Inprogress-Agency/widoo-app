@@ -88,6 +88,16 @@ describe('submitPlan', () => {
     expect(given.toast).toHaveBeenCalledWith('success', 'Sortie déplacée', expect.anything());
   });
 
+  it('leaves « Voir » out of the toast shown over « Votre sortie » itself', async () => {
+    const given = deps({ onSee: null });
+    const planned = { id: 'planned-1', startsAt: '2026-09-27T08:00:00Z' } as PlannedRoute;
+    await submitPlan({ ...choice, planned }, given);
+    expect(given.toast).toHaveBeenCalledWith('success', 'Sortie déplacée', {
+      subtitle: 'Samedi 26 septembre à 10:00',
+      isAboveStickyBar: true,
+    });
+  });
+
   it('keeps the sheet open on a failure, and names a Premium route', async () => {
     const premium = new ApiRequestError('http', 402, {
       code: 'premium_required',
