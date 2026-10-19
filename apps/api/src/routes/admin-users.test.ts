@@ -41,8 +41,8 @@ afterAll(async () => {
 });
 
 /** An account of this file, signed in with a second factor; `firstName` carries the marker. */
-async function signIn(role: UserRole, name = 'Membre') {
-  const { token, uid } = verifier.issue({ secondFactor: 'totp' });
+async function signIn(role: UserRole, name = 'Membre', authTime: Date | undefined = undefined) {
+  const { token, uid } = verifier.issue({ secondFactor: 'totp', ...(authTime && { authTime }) });
   createdUids.push(uid);
   const [user] = await app.db
     .insert(users)
@@ -411,5 +411,49 @@ describe('certification, export and deletion', () => {
     expect((await get(admin.headers, `/users/${target.id}`)).statusCode).toBe(404);
     expect((await send('DELETE', admin.headers, `/users/${target.id}`)).statusCode).toBe(404);
     expect(await journalOf(target.id)).toEqual(['user.delete']);
+  });
+});
+
+describe('sensitive actions after a while without a sign-in', () => {
+  // The last sign-in with the second factor, 11 minutes ago: the delay is 10.
+  const elevenMinutesAgo = () => new Date(Date.now() - 11 * 60_000);
+
+  it('refuses the role, the suspension and the deletion, and writes nothing', async () => {
+    const admin = await signIn('admin', 'Admin', elevenMinutesAgo());
+    const target = await signIn('user');
+    const calls = [
+      send('PATCH', admin.headers, `/users/${target.id}/role`, { role: 'editor' }),
+      send('POST', admin.headers, `/users/${target.id}/suspend`, { reason: 'Test' }),
+      send('DELETE', admin.headers, `/users/${target.id}`),
+    ];
+    for (const response of await Promise.all(calls)) {
+      expect(response.statusCode).toBe(403);
+      expect(ApiError.parse(response.json()).code).toBe('recent_sign_in_required');
+    }
+    expect(await journalOf(target.id)).toEqual([]);
+    const [unchanged] = await app.db.select().from(users).where(eq(users.id, target.id));
+    expect(unchanged).toMatchObject({ role: 'user', suspendedAt: null, deletedAt: null });
+  });
+
+  it('lets the same action through once the sign-in is recent', async () => {
+    const admin = await signIn('admin', 'Admin');
+    const target = await signIn('user');
+    const response = await send('PATCH', admin.headers, `/users/${target.id}/role`, {
+      role: 'editor',
+    });
+    expect(response.statusCode).toBe(200);
+  });
+
+  it('does not ask for it to read, nor to lift a suspension', async () => {
+    const recent = await signIn('admin', 'Admin');
+    const stale = await signIn('admin', 'Admin', elevenMinutesAgo());
+    const target = await signIn('user');
+    await send('POST', recent.headers, `/users/${target.id}/suspend`, { reason: 'Test' });
+
+    expect((await get(stale.headers, `/users/${target.id}`)).statusCode).toBe(200);
+    const lifted = await send('POST', stale.headers, `/users/${target.id}/reactivate`, {
+      reason: 'Test',
+    });
+    expect(lifted.statusCode).toBe(200);
   });
 });

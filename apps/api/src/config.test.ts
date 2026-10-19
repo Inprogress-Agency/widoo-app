@@ -17,6 +17,7 @@ describe('loadConfig', () => {
       corsOrigins: [],
       trustedProxies: [],
       rateLimitMax: 1000,
+      adminRecentSignInMinutes: 10,
       firebaseProjectId: undefined,
       usesAuthEmulator: false,
       sentryDsn: undefined,
@@ -164,5 +165,13 @@ describe('loadConfig', () => {
         FIREBASE_AUTH_EMULATOR_HOST: '127.0.0.1:9099',
       });
     expect(load).toThrow(/demo- project/);
+  });
+
+  it('reads the delay of the sign-in asked before a sensitive action of the admin', () => {
+    const load = (minutes?: string) =>
+      loadConfig({ DATABASE_URL: databaseUrl, ADMIN_RECENT_SIGN_IN_MINUTES: minutes });
+    expect(load().adminRecentSignInMinutes).toBe(10);
+    expect(load('5').adminRecentSignInMinutes).toBe(5);
+    expect(() => load('0')).toThrow(/ADMIN_RECENT_SIGN_IN_MINUTES/);
   });
 });
