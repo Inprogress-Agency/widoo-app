@@ -36,6 +36,10 @@ describe('sheetAccessOf', () => {
     },
   );
 
+  it('opens a private route by its link whatever its past', () => {
+    expect(sheetAccessOf(route('private', { publishedAt }), withLink)).toEqual(open(true));
+  });
+
   it.each(['pending', 'changes_requested'] as const)(
     'keeps a %s route published once from its link, not from its author (Q3)',
     (status) => {
