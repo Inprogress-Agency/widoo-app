@@ -1,9 +1,9 @@
 import { PlannedRouteSnapshot } from '@widoo/shared';
-import { and, asc, eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
-import { places, steps } from '../db/schema';
+import { steps } from '../db/schema';
 import { uuidv7 } from '../db/uuid';
 import { testConfig } from '../test-config';
 import { snapshotOf, timelineOf } from './snapshot';
@@ -11,16 +11,12 @@ import { plannedFixtures, saturdayTen } from './test-fixtures';
 
 let app: Awaited<ReturnType<typeof buildApp>>;
 const fixtures = plannedFixtures(() => app, new TestTokenVerifier());
-/** « Accessible à toute heure » and without hours: deleted by `afterAll` (D-049). */
-const placeId = uuidv7();
 
 beforeAll(async () => {
   app = await buildApp(testConfig());
 });
 afterAll(async () => {
-  // The routes first: their steps still refer to the fictitious place.
   await fixtures.cleanUp();
-  await app.db.delete(places).where(eq(places.id, placeId));
   await app.close();
 });
 
@@ -77,31 +73,8 @@ describe('timelineOf', () => {
   });
 
   it('raises no conflict for an always-open place without hours, even late (D-049)', async () => {
-    // A fictitious always-open place without any hour, where the first step of the copy goes.
     const routeId = await fixtures.copyDemoRoute();
-    const [first] = await app.db
-      .select({ id: steps.id, placeId: steps.placeId })
-      .from(steps)
-      .where(eq(steps.routeId, routeId))
-      .orderBy(asc(steps.position))
-      .limit(1);
-    if (!first) throw new Error('The copied route has no step');
-    const [demoPlace] = await app.db
-      .select({ cityId: places.cityId })
-      .from(places)
-      .where(eq(places.id, first.placeId));
-    if (!demoPlace) throw new Error('The demo place is missing from the seed');
-    await app.db.insert(places).values({
-      id: placeId,
-      cityId: demoPlace.cityId,
-      name: 'Square toujours ouvert',
-      category: 'park',
-      location: { lat: -40, lng: -40 },
-      address: 'Adresse fictive',
-      verificationStatus: 'unverified',
-      alwaysOpen: true,
-    });
-    await app.db.update(steps).set({ placeId }).where(eq(steps.id, first.id));
+    await fixtures.alwaysOpenFirstStep(routeId);
 
     const snapshot = PlannedRouteSnapshot.parse(await snapshotOf(app.db, routeId));
     expect(snapshot.steps[0]?.place).toMatchObject({ alwaysOpen: true, hours: [] });
