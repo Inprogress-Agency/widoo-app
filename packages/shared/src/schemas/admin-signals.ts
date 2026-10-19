@@ -85,6 +85,8 @@ export type AdminRating = z.infer<typeof AdminRating>;
 /** Body of `GET /admin/ratings`. */
 export const AdminRatings = z.object({
   items: z.array(AdminRating),
+  /** The routes that have a rating with a comment, the latest rated first: the choices of the route filter. */
+  routes: z.array(z.object({ id: z.uuid(), title: z.string() })),
   total: z.number().int().nonnegative(),
   offset: z.number().int().nonnegative(),
   previousCursor: z.string().nullable(),

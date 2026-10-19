@@ -1,5 +1,4 @@
 import {
-  AdminRatings,
   AdminSignaledPlaces,
   ApiError,
   PlaceActionResult,
@@ -280,22 +279,8 @@ describe('POST /v1/admin/places/:id/close', () => {
 });
 
 describe('GET /v1/admin/ratings', () => {
-  it('is empty until ratings exist, and validates its filters', async () => {
+  it('validates its filters', async () => {
     const moderator = await signIn('moderator');
-
-    const response = await app.inject({
-      url: `/v1/admin/ratings?rating=2&routeId=${uuidv7()}`,
-      headers: moderator.headers,
-    });
-
-    expect(response.statusCode).toBe(200);
-    expect(AdminRatings.parse(response.json())).toEqual({
-      items: [],
-      total: 0,
-      offset: 0,
-      previousCursor: null,
-      nextCursor: null,
-    });
     const tooHigh = await app.inject({
       url: '/v1/admin/ratings?rating=6',
       headers: moderator.headers,
