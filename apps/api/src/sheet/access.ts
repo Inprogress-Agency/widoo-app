@@ -28,7 +28,7 @@ export type SheetAccess =
   | { kind: 'removed' };
 
 /** Statuses a private link opens while the route was never published (Q4). */
-const linkStatuses: readonly RouteStatus[] = ['private', 'pending', 'changes_requested'];
+const inReviewStatuses: readonly RouteStatus[] = ['pending', 'changes_requested'];
 
 /** Constant time, so that the comparison tells nothing of the right token. */
 function isTokenOf(route: SheetRoute, token: string | undefined): boolean {
@@ -47,7 +47,9 @@ export function sheetAccessOf(route: SheetRoute, caller: SheetCaller): SheetAcce
   const isAuthor = caller.userId !== null && caller.userId === route.authorId;
   if (isOnline(route.status) || isAuthor) return { kind: 'open', isAuthor, viaLink: false };
   // A route published once and back in review is out of the public until the decision (Q3).
-  const opensByLink = linkStatuses.includes(route.status) && route.publishedAt === null;
+  const opensByLink =
+    route.status === 'private' ||
+    (inReviewStatuses.includes(route.status) && route.publishedAt === null);
   if (opensByLink && isTokenOf(route, caller.token)) {
     return { kind: 'open', isAuthor: false, viaLink: true };
   }
