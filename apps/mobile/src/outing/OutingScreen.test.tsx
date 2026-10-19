@@ -1,8 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { QueryClient, QueryClientProvider, onlineManager } from '@tanstack/react-query';
 import { ApiRequestError, type RouteSheetAnswer } from '@widoo/api-client';
-import { RouteDetail, type PlannedRoute } from '@widoo/shared';
+import { RouteDetail, type PlannedRoute, type RouteDetailStep } from '@widoo/shared';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { Alert, type AlertButton } from 'react-native';
+import { analytics } from '../analytics';
 import { api } from '../api/client';
 import { plannedFixture } from '../go/testPlanned';
 import { plannedQueryKey } from '../plan/planned';
@@ -46,7 +48,15 @@ jest.mock('../plan/PlanSheet', () => {
 });
 
 const user = { uid: 'uid-1', email: 'camille@exemple.fr', displayName: null };
-const route = RouteDetail.parse(fixtures.routes[0]);
+const marais = RouteDetail.parse(fixtures.routes[0]);
+// A fictitious booking at the second step, the Musée Carnavalet.
+const route: RouteDetail = {
+  ...marais,
+  steps: marais.steps.map((step, index) =>
+    index === 1 ? { ...(step as RouteDetailStep), bookingRequired: true } : step,
+  ),
+};
+const bookingId = route.steps[1]?.id ?? '';
 // A fictitious outing of the first demo route, in three days at 10:00 in Paris.
 const startsAt = new Date(Date.now() + 3 * 86_400_000).toISOString();
 const fixture = plannedFixture();
@@ -61,6 +71,8 @@ const outing: PlannedRoute = {
 };
 
 const getPlanned = jest.mocked(api.getPlanned);
+const updatePlanned = jest.mocked(api.updatePlanned);
+const track = jest.mocked(analytics.track);
 const toast = jest.mocked(showToast);
 
 /** The route sheet as the page reads it: answered by the test, or failing. */
@@ -138,5 +150,78 @@ describe('« Votre sortie » (E-08)', () => {
     );
     expect(mockOpenSheet).not.toHaveBeenCalled();
     await waitFor(() => expect(getRoute.mock.calls.length).toBeGreaterThan(calls));
+  });
+  it('titles the page and reads the outing from « À venir » at once', async () => {
+    const { onSeeRoute } = await renderOuting(sourceOf(answered));
+    expect(screen.getByRole('header', { name: 'Votre sortie' })).toBeTruthy();
+    expect(screen.getByRole('header', { name: route.title })).toBeTruthy();
+    expect(screen.getByLabelText(/^[A-Z][a-z]+ \d+ [a-zéû]+, Départ \d\d:\d\d/)).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Annuler la sortie' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: `C'est parti, ${route.title}` })).toBeTruthy();
+    await fireEvent.press(screen.getByRole('link', { name: 'Voir la fiche du parcours' }));
+    expect(onSeeRoute).toHaveBeenCalledWith(route.id);
+  });
+
+  it('asks the outing when « À venir » does not hold it, and again after a failure', async () => {
+    getPlanned.mockRejectedValueOnce(new ApiRequestError('http', 500, null));
+    await renderOuting(sourceOf(answered), { isListed: false });
+    await screen.findByText('Votre sortie ne se charge pas');
+    expect(screen.queryByRole('button', { name: /^C'est parti/ })).toBeNull();
+    await fireEvent.press(screen.getByRole('button', { name: 'Réessayer' }));
+    await screen.findByRole('button', { name: 'Changer la date' });
+    expect(getPlanned).toHaveBeenCalledTimes(2);
+  });
+
+  it('says an outing no longer to come, without « C’est parti »', async () => {
+    getPlanned.mockResolvedValue({ ...outing, status: 'cancelled' });
+    await renderOuting(sourceOf(answered), { isListed: false });
+    await screen.findByText("Cette sortie n'est plus à venir");
+    expect(screen.queryByRole('button', { name: /^C'est parti/ })).toBeNull();
+  });
+
+  it('cancels after the system alert, then « Rétablir » brings the outing back', async () => {
+    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+    updatePlanned.mockResolvedValue(outing);
+    const { onBack } = await renderOuting(sourceOf(answered));
+    await fireEvent.press(screen.getByRole('button', { name: 'Annuler la sortie' }));
+    const buttons = (alert.mock.calls[0]?.[2] ?? []) as AlertButton[];
+    expect(buttons.map((button) => button.text)).toEqual(['Annuler la sortie', 'Garder']);
+    await act(async () => buttons[0]?.onPress?.());
+    expect(updatePlanned).toHaveBeenCalledWith(outing.id, { status: 'cancelled' });
+    expect(onBack).toHaveBeenCalled();
+    const event = { route_id: route.id, days_ahead: expect.any(Number) };
+    expect(track).toHaveBeenCalledWith('plan_cancelled', event);
+    const cancelled = toast.mock.calls.find((call) => call[1] === 'Sortie annulée');
+    expect(cancelled?.[2]?.action?.label).toBe('Rétablir');
+    await act(async () => cancelled?.[2]?.action?.onPress());
+    expect(updatePlanned).toHaveBeenLastCalledWith(outing.id, { status: 'planned' });
+    expect(track).toHaveBeenCalledWith('plan_restored', event);
+    expect(toast).toHaveBeenLastCalledWith('success', 'Sortie rétablie', expect.anything());
+    alert.mockRestore();
+  });
+
+  it('keeps a box ticked from the server, and gives it back its state on a failure', async () => {
+    getPlanned.mockResolvedValue({
+      ...outing,
+      checklist: [{ stepId: bookingId, isChecked: true }],
+    });
+    await renderOuting(sourceOf(answered), { isListed: false });
+    const box = await screen.findByRole('checkbox', { name: /Musée Carnavalet/ });
+    expect(box.props.accessibilityState).toMatchObject({ checked: true });
+    updatePlanned.mockRejectedValueOnce(new ApiRequestError('network', null, null));
+    await fireEvent.press(box);
+    expect(updatePlanned).toHaveBeenCalledWith(outing.id, {
+      checklist: [{ stepId: bookingId, isChecked: false }],
+    });
+    await waitFor(() =>
+      expect(toast).toHaveBeenCalledWith(
+        'error',
+        "La case n'a pas pu être enregistrée",
+        expect.anything(),
+      ),
+    );
+    expect(
+      screen.getByRole('checkbox', { name: /Musée Carnavalet/ }).props.accessibilityState,
+    ).toMatchObject({ checked: true });
   });
 });
