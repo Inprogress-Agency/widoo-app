@@ -1,5 +1,6 @@
 import { onlineManager, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { ApiRequestError } from '@widoo/api-client';
+import { stepMapsUrl } from '@widoo/orchestration';
 import type { PlannedRoute } from '@widoo/shared';
 import { router } from 'expo-router';
 import type { TFunction } from 'i18next';
@@ -23,7 +24,6 @@ import {
   doneRatio,
   emptyGoLocal,
   goProgress,
-  walkingMapsUrl,
   type GoProgress,
 } from './progress';
 import { startGo } from './startGo';
@@ -270,7 +270,8 @@ export function useGoActions(
         analytics.track('go_step_done', { route_id: routeId, step_index: current.index });
       }
     },
-    /** « Itinéraire »: Google Maps on foot to the step, by the API; written here offline. */
+    /** « Itinéraire »: Google Maps to the step, in the mode of the trip to it, by the API or
+     * written here offline with the same shared rule (E-07, #510). */
     async directions() {
       if (!current) {
         return;
@@ -281,8 +282,8 @@ export function useGoActions(
           ? await api
               .getPlannedMapsUrl(planned.id)
               .then((answer) => answer.url)
-              .catch(() => walkingMapsUrl(current.step.place.location))
-          : walkingMapsUrl(current.step.place.location);
+              .catch(() => stepMapsUrl(planned.route.steps, current.index))
+          : stepMapsUrl(planned.route.steps, current.index);
       analytics.track('maps_opened', { route_id: routeId, mode: 'next_step' });
       await Linking.openURL(url).catch(failed);
     },

@@ -1,3 +1,4 @@
+import { stepMapsUrl } from '@widoo/orchestration';
 import { describe, expect, it } from 'vitest';
 import {
   actualMinutes,
@@ -6,7 +7,6 @@ import {
   emptyGoLocal,
   goProgress,
   isArrivalSuggested,
-  walkingMapsUrl,
 } from './progress';
 import { plannedFixture, stepIds } from './testPlanned';
 
@@ -104,10 +104,21 @@ describe('actualMinutes', () => {
   });
 });
 
-describe('walkingMapsUrl', () => {
-  it('writes Google Maps on foot to the step, as the API does', () => {
-    expect(walkingMapsUrl({ lat: 48.8674, lng: 2.3636 })).toBe(
+describe('maps URL', () => {
+  const planned = plannedFixture();
+
+  it('writes offline the URL the API writes, in the mode of the trip to the step', () => {
+    // « Itinéraire » offline builds the URL of `maps-url` with the same shared `stepMapsUrl`
+    // (#510): on foot to the first step, then in the mode of the trip that leads to it.
+    expect(stepMapsUrl(planned.route.steps, 0)).toBe(
       'https://www.google.com/maps/dir/?api=1&destination=48.8674%2C2.3636&travelmode=walking',
     );
+    expect(stepMapsUrl(planned.route.steps, 1)).toBe(
+      'https://www.google.com/maps/dir/?api=1&destination=48.8714%2C2.3676&travelmode=bicycling',
+    );
+    // The trip to the third step: the metro, even when the straight line carries a float error.
+    expect(stepMapsUrl(planned.route.steps, 2)).toContain('travelmode=transit');
+    // One destination, no waypoints: never the whole route.
+    expect(stepMapsUrl(planned.route.steps, 2)).not.toContain('waypoints');
   });
 });

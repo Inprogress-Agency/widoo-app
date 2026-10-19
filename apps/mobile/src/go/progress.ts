@@ -101,13 +101,3 @@ export function distanceToCurrent(progress: GoProgress, position: LatLng | null)
 /** The pill « Vous semblez être sur place »: en route, under 100 m of the step, app open. */
 export const isArrivalSuggested = (progress: GoProgress, distanceM: number | null) =>
   progress.phase === 'en_route' && distanceM !== null && distanceM < ARRIVAL_SUGGESTION_M;
-
-/** Google Maps on foot to `destination`, as the API writes it: « Itinéraire » offline (E-07). */
-export function walkingMapsUrl(destination: LatLng): string {
-  const query = new URLSearchParams({
-    api: '1',
-    destination: `${destination.lat},${destination.lng}`,
-    travelmode: 'walking',
-  });
-  return `https://www.google.com/maps/dir/?${query.toString()}`;
-}
