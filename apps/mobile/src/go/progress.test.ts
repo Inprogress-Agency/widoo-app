@@ -61,6 +61,20 @@ describe('goProgress', () => {
     expect(progress.phase).toBe('en_route');
     expect(doneRatio(progress)).toBe(1);
   });
+
+  it('has no step left once all remaining are skipped, which do not count as done', () => {
+    const planned = plannedFixture({
+      0: { doneAt: at },
+      1: { skippedAt: at },
+      2: { skippedAt: at },
+    });
+    const progress = goProgress(planned, emptyGoLocal);
+    expect(progress.current).toBeNull();
+    expect(progress.steps.map((entry) => entry.status)).toEqual(['done', 'skipped', 'skipped']);
+    expect(progress.doneCount).toBe(1);
+    expect(progress.skippedCount).toBe(2);
+    expect(doneRatio(progress)).toBeCloseTo(1 / 3);
+  });
 });
 
 describe('arrival suggestion', () => {

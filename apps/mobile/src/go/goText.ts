@@ -19,9 +19,14 @@ const categoryOf = (step: PlannedRouteStep) =>
 
 /** « En route vers l'étape 1 », « Étape 2 sur 4, vous y êtes ». */
 export function statusText(t: TFunction, progress: GoProgress): Spoken {
-  const { current, phase, total } = progress;
+  const { current, phase, total, doneCount, skippedCount } = progress;
   if (!current) {
-    const text = t('go.status.allDone');
+    // « Toutes les étapes sont faites » only once nothing is left: a skipped step is not done
+    // (#519).
+    const text =
+      doneCount === total
+        ? t('go.status.allDone')
+        : t('go.status.skippedLeft', { count: skippedCount });
     return { short: text, spoken: `${text}.` };
   }
   const values = { position: current.index + 1, total };
@@ -97,9 +102,11 @@ export function progressText(t: TFunction, planned: PlannedRoute, progress: GoPr
 
 /** The label of the mini-player: the whole name, which its single line may cut (D-034). */
 export function miniPlayerLabel(t: TFunction, progress: GoProgress): string {
-  const { current, phase, total } = progress;
+  const { current, phase, total, doneCount, skippedCount } = progress;
   if (!current) {
-    return t('go.mini.allDone');
+    return doneCount === total
+      ? t('go.mini.allDone')
+      : t('go.mini.skippedLeft', { count: skippedCount });
   }
   const values = { position: current.index + 1, total, place: stepName(current.step) };
   return phase === 'on_site' ? t('go.mini.onSite', values) : t('go.mini.enRoute', values);
