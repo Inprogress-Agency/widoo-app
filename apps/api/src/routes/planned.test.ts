@@ -1,4 +1,4 @@
-import { ApiError, PlannedRoute, PlannedRouteList } from '@widoo/shared';
+import { ApiError, PlannedRoute, PlannedRouteList, RouteTimeline } from '@widoo/shared';
 import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
@@ -154,6 +154,72 @@ describe('GET /v1/me/planned and /v1/me/planned/:id', () => {
     );
     expect(cancelled.items.map((item) => item.id)).toEqual([first.id]);
     expect((await app.inject({ url: '/v1/me/planned?cursor=bad', headers })).statusCode).toBe(400);
+  });
+});
+
+describe('the timeline of a planning and an always-open place (D-049)', () => {
+  /** A copy of the demo route whose first step is « Accessible à toute heure », without hours. */
+  async function alwaysOpenRoute() {
+    const id = await fixtures.copyDemoRoute();
+    await fixtures.alwaysOpenFirstStep(id);
+    return id;
+  }
+
+  it('raises no hours_unknown for an always-open place in GET /v1/me/planned', async () => {
+    const headers = await fixtures.signIn();
+    const id = await alwaysOpenRoute();
+    const created = PlannedRoute.parse(
+      (await plan(headers, { routeId: id, startsAt: saturdayTen })).json(),
+    );
+
+    const list = PlannedRouteList.parse(
+      (await app.inject({ url: '/v1/me/planned', headers })).json(),
+    );
+    const planned = list.items.find((item) => item.id === created.id);
+    expect(planned?.route.steps[0]?.place).toMatchObject({ alwaysOpen: true, hours: [] });
+    expect(planned?.timeline.steps[0]?.conflicts).toEqual([]);
+  });
+
+  it.each([
+    ['the demo route', () => fixtures.copyDemoRoute()],
+    ['a route with an always-open place', alwaysOpenRoute],
+  ])(
+    'gives the same hours and conflicts as GET /v1/routes/:id/timeline, for %s',
+    async (_, routeOf) => {
+      const headers = await fixtures.signIn();
+      const id = await routeOf();
+      const created = PlannedRoute.parse(
+        (await plan(headers, { routeId: id, startsAt: saturdayTen })).json(),
+      );
+      const route = await app.inject({
+        url: `/v1/routes/${id}/timeline?startsAt=${encodeURIComponent(saturdayTen)}`,
+      });
+
+      const read = await app.inject({ url: `/v1/me/planned/${created.id}`, headers });
+      expect(PlannedRoute.parse(read.json()).timeline).toEqual(RouteTimeline.parse(route.json()));
+    },
+  );
+
+  it('reads a snapshot stored before alwaysOpen with alwaysOpen: false', async () => {
+    const headers = await fixtures.signIn();
+    const created = PlannedRoute.parse(
+      (await plan(headers, { routeId, startsAt: saturdayTen })).json(),
+    );
+    const [row] = await app.db
+      .select({ snapshot: plannedRoutes.routeRevisionSnapshot })
+      .from(plannedRoutes)
+      .where(eq(plannedRoutes.id, created.id));
+    const stored = row?.snapshot as { steps: { place: Record<string, unknown> }[] };
+    for (const step of stored.steps) delete step.place.alwaysOpen;
+    await app.db
+      .update(plannedRoutes)
+      .set({ routeRevisionSnapshot: stored })
+      .where(eq(plannedRoutes.id, created.id));
+
+    const response = await app.inject({ url: `/v1/me/planned/${created.id}`, headers });
+    expect(response.statusCode).toBe(200);
+    const places = PlannedRoute.parse(response.json()).route.steps.map((step) => step.place);
+    expect(places.map((place) => place.alwaysOpen)).toEqual([false, false, false, false]);
   });
 });
 

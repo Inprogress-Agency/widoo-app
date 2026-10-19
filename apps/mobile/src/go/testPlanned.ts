@@ -59,6 +59,7 @@ export function plannedFixture(
           location: { lat: 48.8674 + index * 0.004, lng: 2.3636 + index * 0.004 },
           address: '1 rue Fictive, Paris',
           isIndoor: index === 1,
+          alwaysOpen: false,
           hours: [],
         },
         highlights: [],

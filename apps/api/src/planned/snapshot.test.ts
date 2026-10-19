@@ -71,4 +71,15 @@ describe('timelineOf', () => {
     expect(timeline.steps[0]?.conflicts).toEqual(['closed_at_arrival']);
     expect(timeline.steps[1]?.conflicts).toEqual(['closed_that_day']);
   });
+
+  it('raises no conflict for an always-open place without hours, even late (D-049)', async () => {
+    const routeId = await fixtures.copyDemoRoute();
+    await fixtures.alwaysOpenFirstStep(routeId);
+
+    const snapshot = PlannedRouteSnapshot.parse(await snapshotOf(app.db, routeId));
+    expect(snapshot.steps[0]?.place).toMatchObject({ alwaysOpen: true, hours: [] });
+    const timeline = timelineOf(snapshot, new Date('2026-10-24T23:00:00+02:00'));
+
+    expect(timeline.steps[0]?.conflicts).toEqual([]);
+  });
 });
