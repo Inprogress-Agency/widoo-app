@@ -139,7 +139,8 @@ export const plannedRoutesPlugin: FastifyPluginAsyncZod = async (app) => {
     {
       schema: {
         tags,
-        summary: 'Google Maps on foot to the next step of my planning, never the whole route',
+        summary:
+          'Google Maps to the next step of my planning, in the mode of the trip to it, never the whole route',
         security,
         params: PlannedParams,
         response: { 200: PlannedMapsUrl },

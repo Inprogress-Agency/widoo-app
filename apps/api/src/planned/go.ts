@@ -1,22 +1,15 @@
 /**
  * The Go of a planning (Ecrans E-07): « Étape suivante » marks a step done, and « Itinéraire »
- * opens Google Maps on foot to the next step only, never the whole route (D-029, D-032).
+ * opens Google Maps to the next step, in the mode of the trip that leads to it, never the whole
+ * route (D-029, D-032, #510).
  */
-import type { LatLng, PlannedMapsUrl, PlannedRoute } from '@widoo/shared';
+import { stepMapsUrl } from '@widoo/orchestration';
+import type { PlannedMapsUrl, PlannedRoute } from '@widoo/shared';
 import { and, asc, eq, isNull } from 'drizzle-orm';
 import type { Db } from '../db/client';
 import { plannedSteps } from '../db/schema';
 import { httpError } from '../errors';
 import { ownedPlanned, readPlanned, snapshotOfRow } from './repository';
-
-/** Google Maps URLs, on foot from where the phone is to `destination`. */
-export function walkingMapsUrl(destination: LatLng): string {
-  const url = new URL('https://www.google.com/maps/dir/');
-  url.searchParams.set('api', '1');
-  url.searchParams.set('destination', `${destination.lat},${destination.lng}`);
-  url.searchParams.set('travelmode', 'walking');
-  return url.href;
-}
 
 /** Marks a step of the caller's Go done, once: a skipped step becomes done. 409 outside a Go. */
 export async function markStepDone(
@@ -58,9 +51,11 @@ export async function nextStepMapsUrl(db: Db, userId: string, id: string): Promi
     )
     .orderBy(asc(plannedSteps.position))
     .limit(1);
-  const step = snapshotOfRow(row).steps.find((candidate) => candidate.id === next?.stepId);
+  const steps = snapshotOfRow(row).steps;
+  const index = steps.findIndex((candidate) => candidate.id === next?.stepId);
+  const step = index === -1 ? undefined : steps[index];
   if (!step) {
     throw httpError(409, 'No step left to go to');
   }
-  return { stepId: step.id, url: walkingMapsUrl(step.place.location) };
+  return { stepId: step.id, url: stepMapsUrl(steps, index) };
 }
