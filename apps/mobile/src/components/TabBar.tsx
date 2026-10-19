@@ -3,6 +3,7 @@ import { BottomTabBarHeightCallbackContext, type BottomTabBarProps } from 'expo-
 import { use } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { MiniPlayer } from '../go/MiniPlayer';
+import { useReadGoOnTabChange } from '../go/useGo';
 import { Icon, uiIcon } from '../ui/Icon';
 import { setTabBarHeight } from '../ui/toastStore';
 import { Text } from '../ui/Text';
@@ -27,6 +28,7 @@ const icons: Record<string, UiIconKey> = {
  */
 export function TabBar({ state, descriptors, navigation, insets }: BottomTabBarProps) {
   const onHeightChange = use(BottomTabBarHeightCallbackContext);
+  useReadGoOnTabChange(state.index);
   return (
     <View
       pointerEvents="box-none"
