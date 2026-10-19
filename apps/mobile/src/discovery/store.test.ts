@@ -151,9 +151,28 @@ describe('discovery store', () => {
     store.getState().searchZone('button');
     expect(store.getState().receive(older, listed('old'))).toBe(false);
     const newer = searchId();
-    expect(store.getState().receive(newer, listed('new'))).toBe(true);
-    expect(store.getState().receive(newer, listed('again'))).toBe(false);
+    expect(store.getState().receive(newer, listed('new'), 9_000)).toBe(true);
+    // The same search answered again, at the exact time of its results, is a copy to drop.
+    expect(store.getState().receive(newer, listed('again'), 9_000)).toBe(false);
     expect(store.getState().results?.items.map((r) => r.id)).toEqual(['new']);
+  });
+
+  it('accepts a fresher answer of the same search', () => {
+    openedWith('a');
+    store.getState().showView(moved, true);
+    store.getState().searchZone('button');
+    expect(store.getState().receive(searchId(), listed('a'), 5_000)).toBe(true);
+    store.getState().focus('b');
+    expect(store.getState().receive(searchId(), listed('a', 'b'), 9_000)).toBe(true);
+    const state = store.getState();
+    expect(state.results?.items.map((r) => r.id)).toEqual(['a', 'b']);
+    expect(state.resultsAt).toBe(9_000);
+    expect(state.status).toBe('success');
+    // A refresh does not send the carousel back to its start.
+    expect(state.focusedRouteId).toBe('b');
+    expect(store.getState().receive(searchId(), listed('a'), 4_000)).toBe(false);
+    expect(store.getState().results?.items.map((r) => r.id)).toEqual(['a', 'b']);
+    expect(store.getState().resultsAt).toBe(9_000);
   });
 
   it('keeps the previous results when a search fails', () => {
