@@ -87,6 +87,7 @@ export const adminUsersRoutes: FastifyPluginAsyncZod = async (app) => {
   app.patch(
     '/admin/users/:id/role',
     {
+      onRequest: app.requireRecentSignIn,
       schema: {
         tags,
         summary: 'Change the role of an account (admin only, never one’s own)',
@@ -103,6 +104,7 @@ export const adminUsersRoutes: FastifyPluginAsyncZod = async (app) => {
   app.post(
     '/admin/users/:id/suspend',
     {
+      onRequest: app.requireRecentSignIn,
       schema: {
         tags,
         summary: 'Suspend an account',
@@ -206,6 +208,7 @@ export const adminUsersRoutes: FastifyPluginAsyncZod = async (app) => {
   app.delete(
     '/admin/users/:id',
     {
+      onRequest: app.requireRecentSignIn,
       schema: {
         tags,
         summary: 'Delete an account, with the rule of the app',

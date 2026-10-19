@@ -14,6 +14,8 @@ export const apiErrorCodes = [
   'route_removed',
   /** 403 on `/admin/*`: the session was opened without a second factor (D-087). */
   'mfa_required',
+  /** 403 on a sensitive action of the admin: the last sign-in is too old, confirm it again. */
+  'recent_sign_in_required',
   /** 403 everywhere: the account was suspended by the team (wiki Admin-Web › A-06). */
   'account_suspended',
   /** 409 on a moderation decision: another member of the team decided first (D-087). */

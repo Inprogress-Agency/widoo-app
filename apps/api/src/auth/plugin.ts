@@ -20,6 +20,12 @@ declare module 'fastify' {
      */
     requireAdminSection: (section: AdminSection) => AuthHook;
     /**
+     * Added to the route of a sensitive action of the admin, after `requireAdminSection`: refuses
+     * a session whose last sign-in, with its second factor, is older than the delay of
+     * `AuthOptions.recentSignInMaxMs` (403 `recent_sign_in_required`, wiki Admin-Web › Sécurité).
+     */
+    requireRecentSignIn: AuthHook;
+    /**
      * Optional authentication (wiki API › conventions): without an `Authorization` header the
      * caller stays anonymous; with one, the same checks as `requireAuth`, 401 included.
      */
@@ -45,6 +51,8 @@ export type AuthOptions = {
    * session without a second factor in. Always true on staging and production.
    */
   isSecondFactorRequired: boolean;
+  /** How recent the sign-in must be for a sensitive action of the admin, in milliseconds. */
+  recentSignInMaxMs: number;
 };
 
 /**
@@ -126,6 +134,20 @@ export function registerAuth(
     // The authenticator app only (D-087): a text message is not a second factor of the admin.
     if (options.isSecondFactorRequired && identity.secondFactor !== 'totp') {
       throw httpError(403, 'Second factor required', 'mfa_required');
+    }
+  });
+  // `auth_time` is renewed by a new sign-in, with its second factor, and kept by token refreshes.
+  // With the local Auth emulator, which has no second factor, nothing is asked, as above.
+  app.decorate('requireRecentSignIn', async (request: FastifyRequest) => {
+    const identity = request.identity;
+    if (!identity) {
+      throw httpError(401, 'Missing bearer token');
+    }
+    if (
+      options.isSecondFactorRequired &&
+      Date.now() - identity.authTime.getTime() > options.recentSignInMaxMs
+    ) {
+      throw httpError(403, 'Recent sign-in required', 'recent_sign_in_required');
     }
   });
 }

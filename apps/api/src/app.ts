@@ -141,7 +141,10 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   app.addHook('onClose', async () => {
     await sql.end({ timeout: 5 });
   });
-  registerAuth(app, tokenVerifier, { isSecondFactorRequired: !config.usesAuthEmulator });
+  registerAuth(app, tokenVerifier, {
+    isSecondFactorRequired: !config.usesAuthEmulator,
+    recentSignInMaxMs: config.adminRecentSignInMinutes * 60_000,
+  });
 
   if (!config.isProduction) {
     await registerDocs(app);

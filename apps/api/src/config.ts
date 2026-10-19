@@ -33,6 +33,11 @@ const Env = z.object({
     .pipe(z.array(Proxy)),
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(1000),
   /**
+   * Minutes after which a sensitive action of the admin (role, suspension or deletion of an
+   * account) asks to confirm the sign-in again. 10, as the wiki says; shorter only to try it.
+   */
+  ADMIN_RECENT_SIGN_IN_MINUTES: z.coerce.number().int().min(1).max(720).default(10),
+  /**
    * Required by the server (`buildApp`), not by the database scripts. Google Cloud project ID
    * rules: 6 to 30 lowercase letters, digits and hyphens.
    */
@@ -171,6 +176,7 @@ export const Config = ProductionEnv.transform((env) => ({
   corsOrigins: env.CORS_ORIGINS,
   trustedProxies: env.TRUST_PROXY,
   rateLimitMax: env.RATE_LIMIT_MAX,
+  adminRecentSignInMinutes: env.ADMIN_RECENT_SIGN_IN_MINUTES,
   firebaseProjectId: env.FIREBASE_PROJECT_ID,
   /**
    * The local Auth emulator signs the tokens (never in production, refused above). It has no
