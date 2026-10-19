@@ -3,24 +3,30 @@
  * the caller may read, or the same 404, or the 410 of a withdrawn route; then the sheet, on the
  * trips of this answer.
  */
-import { computeTransitions, type DirectionsProvider, type Transition } from '@widoo/orchestration';
+import {
+  computeTransitions,
+  routeTimelineOf,
+  type DirectionsProvider,
+  type Transition,
+} from '@widoo/orchestration';
 import {
   isCertifiedWith,
   onlineRouteStatuses,
   type RouteDetail,
   type RouteStatus,
+  type RouteTimeline,
 } from '@widoo/shared';
 import { and, eq, sql } from 'drizzle-orm';
 import { routeViewerOf } from '../access/route-viewer';
 import type { Db } from '../db/client';
 import { routes, users } from '../db/schema';
-import { httpError, routeRemoved } from '../errors';
+import { httpError, premiumRequired, routeRemoved } from '../errors';
 import { listRouteRatings } from '../ratings/reviews';
 import { runningRouteReport } from '../reports/repository';
 import { toCard } from '../search/repository';
 import type { User } from '../users/repository';
 import { sheetAccessOf } from './access';
-import { buildSheet } from './build';
+import { buildSheet, routeInputOf } from './build';
 import { loadSheet, loadSheetRoute, type LoadedSheet } from './load';
 
 export interface SheetRequest {
@@ -139,4 +145,20 @@ export async function readSheet(
     myReport: report && { reportedAt: report.createdAt.toISOString(), status: report.status },
     now,
   });
+}
+
+/**
+ * The timeline of a route for another start (`GET /routes/:id/timeline`), on our estimates, the
+ * trips `POST /me/planned` freezes, without Mapbox (D-093); 402 for a Premium route locked to
+ * the caller, who cannot plan it (Q7).
+ */
+export async function readTimeline(
+  db: Db,
+  id: string,
+  request: SheetRequest,
+  startsAt: Date,
+): Promise<RouteTimeline> {
+  const { loaded, card } = await readableRoute(db, id, request, new Date());
+  if (card.isLocked) throw premiumRequired('premium_route');
+  return routeTimelineOf(routeInputOf(loaded, await estimatedTrips(loaded)), startsAt);
 }

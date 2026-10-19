@@ -1,10 +1,16 @@
 import type { DirectionsProvider } from '@widoo/orchestration';
-import { ApiError, RouteDetail, RouteDetailQuery } from '@widoo/shared';
+import {
+  ApiError,
+  RouteDetail,
+  RouteDetailQuery,
+  RouteTimeline,
+  RouteTimelineQuery,
+} from '@widoo/shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { cacheHook } from '../http-cache';
-import { readSheet } from '../sheet/read';
+import { readSheet, readTimeline } from '../sheet/read';
 
 /**
  * Requests per minute and per client IP on the sheet (Q8): each opening asks Mapbox a trip per
@@ -51,7 +57,8 @@ async function noStore(_request: FastifyRequest, reply: FastifyReply, payload: u
 /**
  * `GET /routes/:id` (wiki API › Fiche parcours, D-093): the sheet the caller may read, Premium
  * steps locked without the right to them; the same 404 for anything else; 410 for a withdrawn
- * route. Public, with an optional token.
+ * route. `GET /routes/:id/timeline`: its timeline for another start, with the same access, 402
+ * for a locked Premium route. Public, with an optional token.
  */
 export const routeSheetRoutes: FastifyPluginAsyncZod<RouteSheetOptions> = async (
   app,
@@ -89,6 +96,35 @@ export const routeSheetRoutes: FastifyPluginAsyncZod<RouteSheetOptions> = async 
         request.params.id,
         { user: request.user ?? null, token: request.query.token },
         { directions: request.query.trips === 'estimated' ? null : directions },
+      ),
+  );
+
+  app.get(
+    '/routes/:id/timeline',
+    {
+      onRequest: app.optionalAuth,
+      onSend: cacheEstimated,
+      schema: {
+        tags: ['discovery'],
+        summary: 'Timeline of a route for another start, on our estimated trips',
+        params: SheetParams,
+        querystring: RouteTimelineQuery,
+        response: {
+          200: RouteTimeline,
+          400: ApiError,
+          401: ApiError,
+          402: ApiError,
+          404: ApiError,
+          410: ApiError,
+        },
+      },
+    },
+    async (request) =>
+      readTimeline(
+        app.db,
+        request.params.id,
+        { user: request.user ?? null, token: request.query.token },
+        new Date(request.query.startsAt),
       ),
   );
 };
