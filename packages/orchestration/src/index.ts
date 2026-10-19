@@ -9,6 +9,7 @@ export {
   type DirectionsProvider,
 } from './directions';
 export { COORDINATE_DECIMALS, roundedPoint, straightLineM } from './geo';
+export { stepMapsUrl, travelModeOf, type MapsStep, type MapsTravelMode } from './maps';
 export {
   computeTransitions,
   estimateOfMode,
