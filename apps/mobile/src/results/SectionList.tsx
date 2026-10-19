@@ -69,9 +69,9 @@ export function SectionList({
   const results = useDiscovery((state) => state.results);
   const search = useDiscovery((state) => state.search);
   const setSort = useDiscovery((state) => state.setSort);
-  const resultsAt = useDiscovery((state) => state.resultsAt);
-  /** The results shown: the zone, its answer and the sort. */
-  const shownResults = `${search?.id}:${resultsAt}:${sort}`;
+  const answerId = useDiscovery((state) => state.answerId);
+  /** The results shown: the zone, its answer and the sort; a refresh keeps them. */
+  const shownResults = `${search?.id}:${answerId}:${sort}`;
   const reportCardViews = useCardViews(section, shownResults, sort);
 
   const zone = position && results ? zoneName(results.items, position) : null;

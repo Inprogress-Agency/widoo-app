@@ -73,6 +73,11 @@ export interface DiscoveryState {
   answer: RouteSearchResult | null;
   /** When the results on screen were fetched: « résultats du 22 sept. à 14:02 » offline. */
   resultsAt: number | null;
+  /**
+   * Which answer the results on screen are: another search, or a zone answered from the cache,
+   * changes it; a refresh of the same search keeps it, so the list carries on where it was read.
+   */
+  answerId: number;
   filters: SearchFilters;
   /** Filters being chosen in the panel (E-03), applied or dropped as a whole; null when closed. */
   draft: SearchFilters | null;
@@ -160,6 +165,7 @@ export const initialDiscoveryState: DiscoveryState = {
   results: null,
   answer: null,
   resultsAt: null,
+  answerId: 0,
   filters: {},
   draft: null,
   selectedRouteId: null,
@@ -311,7 +317,7 @@ export function createDiscoveryStore() {
         }
       },
       receive: (id, result, fetchedAt = Date.now()) => {
-        const { search, status, selectedRouteId, resultsAt } = get();
+        const { search, status, selectedRouteId, focusedRouteId, resultsAt, answerId } = get();
         // A search offline is answered once the network is back, and one already answered
         // is answered again only when something was fetched strictly after its results.
         if (
@@ -322,17 +328,20 @@ export function createDiscoveryStore() {
         ) {
           return false;
         }
-        const isStillListed = result.items.some((route) => route.id === selectedRouteId);
-        // A refresh of the same search keeps the carousel where the user scrolled it; only the
-        // answer of another search starts it over, with no card to come round to.
+        const isListed = (routeId: string | null) =>
+          result.items.some((route) => route.id === routeId);
+        // A refresh of the same search keeps the carousel on the card the user scrolled to, while
+        // it is still there; the answer of another search starts it over, with no card to come
+        // round to.
         const isRefresh = status === 'success';
         set({
           results: result,
           answer: result,
           resultsAt: fetchedAt,
+          answerId: isRefresh ? answerId : answerId + 1,
           status: 'success',
-          selectedRouteId: isStillListed ? selectedRouteId : null,
-          focusedRouteId: isRefresh ? get().focusedRouteId : null,
+          selectedRouteId: isListed(selectedRouteId) ? selectedRouteId : null,
+          focusedRouteId: isRefresh && isListed(focusedRouteId) ? focusedRouteId : null,
         });
         return true;
       },
@@ -342,12 +351,14 @@ export function createDiscoveryStore() {
         }
       },
       goOffline: (id, cached) => {
-        const { search, status, answer } = get();
+        const { search, status, answer, answerId } = get();
         if (search?.id !== id || status === 'offline' || status === 'idle') {
           return;
         }
         const kept =
-          answer === null && cached ? { answer: cached.result, resultsAt: cached.fetchedAt } : {};
+          answer === null && cached
+            ? { answer: cached.result, resultsAt: cached.fetchedAt, answerId: answerId + 1 }
+            : {};
         const base = kept.answer ?? answer;
         set({
           status: 'offline',

@@ -175,6 +175,25 @@ describe('discovery store', () => {
     expect(store.getState().resultsAt).toBe(9_000);
   });
 
+  it('keeps the list of a refreshed search, and lets go of a card no longer there', () => {
+    openedWith('a');
+    store.getState().showView(moved, true);
+    store.getState().searchZone('button');
+    store.getState().receive(searchId(), listed('a', 'b'), 5_000);
+    const { answerId } = store.getState();
+    store.getState().select('a');
+    store.getState().focus('b');
+    expect(store.getState().receive(searchId(), listed('a'), 9_000)).toBe(true);
+    expect(store.getState()).toMatchObject({
+      answerId,
+      selectedRouteId: 'a',
+      focusedRouteId: null,
+    });
+    store.getState().searchZone('button');
+    store.getState().receive(searchId(), listed('a'), 12_000);
+    expect(store.getState().answerId).toBe(answerId + 1);
+  });
+
   it('keeps the previous results when a search fails', () => {
     openedWith('a');
     store.getState().showView(moved, true);

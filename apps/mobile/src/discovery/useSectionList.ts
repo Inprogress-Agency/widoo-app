@@ -70,6 +70,7 @@ export function useSectionList(position: LatLng | null) {
   const zone = useDiscovery((state) => state.status);
   const results = useDiscovery((state) => state.results);
   const resultsAt = useDiscovery((state) => state.resultsAt);
+  const answerId = useDiscovery((state) => state.answerId);
   const chosenSort = useDiscovery((state) => state.sort);
   const isOnline = useIsOnline();
   const sort = effectiveSort(chosenSort, position !== null);
@@ -78,8 +79,8 @@ export function useSectionList(position: LatLng | null) {
   const hasZoneResults = results !== null && (zone === 'success' || zone === 'offline');
 
   const query = useInfiniteQuery({
-    // A new answer of the zone starts the list over.
-    queryKey: [...listQueryKey, search?.id, resultsAt, apiSort],
+    // A new answer of the zone starts the list over; a refresh of the same one does not.
+    queryKey: [...listQueryKey, search?.id, answerId, apiSort],
     queryFn:
       search && hasZoneResults
         ? ({ pageParam, signal }) =>
