@@ -1,5 +1,6 @@
 import {
   AdminRatings,
+  RatingActionResult,
   AdminRouteReports,
   AdminSignaledPlaces,
   PlaceActionResult,
@@ -49,6 +50,7 @@ import {
   type AdminSignalsQuery,
   type CatalogPlaceInput,
   type ClosePlaceBody,
+  type HideRatingBody,
   type ResolveReportBody,
   type CatalogPlacesQuery,
   type PlaceImportBody,
@@ -593,6 +595,25 @@ export function createApiClient(options: ApiClientOptions) {
         path: `/v1/admin/places/${placeId}/close`,
         body,
         schema: PlaceActionResult,
+        auth: true,
+      }),
+
+    /** `POST /v1/admin/ratings/:id/hide`: masks a rating, out of the app and of the average. */
+    hideRating: (ratingId: string, body: HideRatingBody) =>
+      request({
+        method: 'POST',
+        path: `/v1/admin/ratings/${ratingId}/hide`,
+        body,
+        schema: RatingActionResult,
+        auth: true,
+      }),
+
+    /** `POST /v1/admin/ratings/:id/unhide`: restores a masked rating. */
+    unhideRating: (ratingId: string) =>
+      request({
+        method: 'POST',
+        path: `/v1/admin/ratings/${ratingId}/unhide`,
+        schema: RatingActionResult,
         auth: true,
       }),
 

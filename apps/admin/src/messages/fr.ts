@@ -745,7 +745,11 @@ export const messages = {
       error: 'Les lieux signalés ne se sont pas chargés.',
     },
     ratings: {
-      filters: { label: 'Filtres des avis', rating: 'Note' },
+      filters: {
+        label: 'Filtres des avis',
+        rating: 'Note',
+        route: 'Parcours',
+      },
       ratingOption: (value: number) => (value > 1 ? `${value} étoiles` : `${value} étoile`),
       total: (count: number) => `${count} avis`,
       columns: {
@@ -754,12 +758,30 @@ export const messages = {
         route: 'Parcours',
         author: 'Auteur',
         date: 'Date',
+        actions: 'Actions',
       },
       empty: {
         title: 'Aucun avis avec commentaire',
         text: 'Les avis laissés par les utilisateurs après une sortie apparaissent ici.',
       },
       hidden: 'Masqué',
+      statuses: { visible: 'Visible', hidden: 'Masqué' },
+      actions: { hide: 'Masquer', unhide: 'Rétablir' },
+      hideDialog: {
+        title: 'Masquer cet avis ?',
+        description:
+          'L’avis disparaît de l’app et ne compte plus dans la note du parcours. Il reste ici, et peut être rétabli.',
+        reason: 'Motif',
+        reasonHint: 'Gardé dans le journal.',
+        confirm: 'Masquer l’avis',
+      },
+      toasts: {
+        hidden: 'Avis masqué',
+        unhidden: 'Avis rétabli',
+        failed: "L'action n'a pas pu être enregistrée.",
+        alreadyDecided: (status: string) =>
+          `Un autre membre de l'équipe a déjà tranché : ${status.toLowerCase()}.`,
+      },
       unknownAuthor: 'Compte supprimé',
       error: 'Les avis ne se sont pas chargés.',
     },

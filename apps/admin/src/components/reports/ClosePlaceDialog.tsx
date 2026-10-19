@@ -1,5 +1,5 @@
 import { messages } from '@/messages/fr';
-import { ConfirmDialog, Field, Textarea } from '@widoo/ui';
+import { ReasonDialog } from './ReasonDialog';
 
 const texts = messages.reports.places.closeDialog;
 
@@ -15,37 +15,17 @@ type ClosePlaceDialogProps = {
 };
 
 /** « Fermer le lieu »: the effect on its routes, and a required reason kept in the journal. */
-export function ClosePlaceDialog({
-  isOpen,
-  routeCount,
-  reason,
-  onReasonChange,
-  onCancel,
-  onConfirm,
-  isBusy,
-}: ClosePlaceDialogProps) {
+export function ClosePlaceDialog({ routeCount, ...props }: ClosePlaceDialogProps) {
   return (
-    <ConfirmDialog
-      isOpen={isOpen}
-      onCancel={onCancel}
-      onConfirm={onConfirm}
-      title={texts.title}
-      description={texts.description(routeCount)}
-      cancelLabel={messages.confirm.cancel}
-      closeLabel={messages.confirm.close}
-      confirmLabel={texts.confirm}
-      isBusy={isBusy}
-    >
-      <Field label={texts.reason} htmlFor="close-place-reason" isRequired hint={texts.reasonHint}>
-        <Textarea
-          id="close-place-reason"
-          required
-          maxLength={500}
-          aria-describedby="close-place-reason-hint"
-          value={reason}
-          onChange={(event) => onReasonChange(event.target.value)}
-        />
-      </Field>
-    </ConfirmDialog>
+    <ReasonDialog
+      {...props}
+      dialog={{
+        title: texts.title,
+        description: texts.description(routeCount),
+        confirm: texts.confirm,
+      }}
+      field={texts}
+      fieldId="close-place-reason"
+    />
   );
 }

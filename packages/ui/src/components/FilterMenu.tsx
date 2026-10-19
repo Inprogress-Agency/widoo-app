@@ -42,7 +42,7 @@ export function FilterMenu({ label, options, value, onChange }: FilterMenuProps)
         {chosen?.label ?? label}
         <CaretDownIcon aria-hidden className="size-16" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
+      <DropdownMenuContent align="start" className="max-h-menu overflow-y-auto">
         {options.map((option) => (
           <DropdownMenuItem
             key={option.value}
