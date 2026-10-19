@@ -31,6 +31,18 @@
         "https://images.unsplash.com/photo-1775210676191-f450802fa51e?w=1200&h=800&fit=crop&auto=format&q=80",
         "https://images.unsplash.com/photo-1691472898646-7011d4d0ad55?w=1200&h=800&fit=crop&auto=format&q=80"
       ],
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1775210676191-f450802fa51e?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1691472898646-7011d4d0ad55?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        }
+      ],
+      "timezone": "Europe/Paris",
+      "tips": [],
       "walkingDistanceM": 1320,
       "effort": "easy",
       "startAccess": null,
@@ -90,7 +102,8 @@
             "distanceM": 505,
             "durationMin": 7,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7d9f-94a4-85a235454ec3",
@@ -148,7 +161,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 3,
@@ -193,7 +207,8 @@
             "distanceM": 138,
             "durationMin": 2,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7df8-ac16-8b05bfe9a217",
@@ -251,7 +266,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 5,
@@ -289,7 +305,8 @@
             "distanceM": 677,
             "durationMin": 9,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7932-9719-3cfb8ed46879",
@@ -347,7 +364,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 7,
@@ -429,7 +447,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 9,
@@ -439,7 +458,8 @@
           "highlights": [],
           "photos": []
         }
-      ]
+      ],
+      "myReport": null
     },
     {
       "id": "01a0d794-1000-79f6-a104-4beb72b37775",
@@ -472,6 +492,18 @@
         "https://images.unsplash.com/photo-1561370665-7e266065fce1?w=1200&h=800&fit=crop&auto=format&q=80",
         "https://images.unsplash.com/photo-1623009070764-45002990256e?w=1200&h=800&fit=crop&auto=format&q=80"
       ],
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1561370665-7e266065fce1?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1623009070764-45002990256e?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        }
+      ],
+      "timezone": "Europe/Paris",
+      "tips": [],
       "walkingDistanceM": 1010,
       "effort": "easy",
       "startAccess": null,
@@ -537,7 +569,8 @@
             "distanceM": 477,
             "durationMin": 6,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-783b-aec5-f6752d38b3f7",
@@ -602,7 +635,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 3,
@@ -631,7 +665,8 @@
             "distanceM": 216,
             "durationMin": 3,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7a21-a335-712dbd95f1d8",
@@ -646,7 +681,8 @@
             "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
-            "hours": []
+            "hours": [],
+            "photo": null
           },
           "verification": {
             "confirmations": 5,
@@ -675,7 +711,8 @@
             "distanceM": 220,
             "durationMin": 3,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7450-b8f6-8862ea352e7d",
@@ -690,7 +727,8 @@
             "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
-            "hours": []
+            "hours": [],
+            "photo": null
           },
           "verification": {
             "confirmations": 7,
@@ -719,7 +757,8 @@
             "distanceM": 94,
             "durationMin": 1,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-727e-b878-6a25394373cb",
@@ -784,7 +823,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 9,
@@ -873,7 +913,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 11,
@@ -883,7 +924,8 @@
           "highlights": [],
           "photos": []
         }
-      ]
+      ],
+      "myReport": null
     },
     {
       "id": "01a0d794-1000-7a0e-bab7-eadc3bd50c52",
@@ -920,6 +962,18 @@
         "https://images.unsplash.com/photo-1642766603265-e33f8a27fb31?w=1200&h=800&fit=crop&auto=format&q=80",
         "https://images.unsplash.com/photo-1548123833-0d46ee1d7400?w=1200&h=800&fit=crop&auto=format&q=80"
       ],
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1642766603265-e33f8a27fb31?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1548123833-0d46ee1d7400?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        }
+      ],
+      "timezone": "Europe/Paris",
+      "tips": [],
       "walkingDistanceM": 0,
       "effort": "easy",
       "startAccess": null,
@@ -985,7 +1039,8 @@
             "distanceM": 361,
             "durationMin": 1,
             "mode": "bike",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7a29-8984-4d401bfbba23",
@@ -1036,7 +1091,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 3,
@@ -1065,7 +1121,8 @@
             "distanceM": 257,
             "durationMin": 1,
             "mode": "bike",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-766b-a7a3-ae0f1a2dbbc3",
@@ -1080,7 +1137,8 @@
             "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
-            "hours": []
+            "hours": [],
+            "photo": null
           },
           "verification": {
             "confirmations": 5,
@@ -1109,7 +1167,8 @@
             "distanceM": 2390,
             "durationMin": 10,
             "mode": "bike",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7b6e-b183-e566e8ea1e7f",
@@ -1174,7 +1233,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 7,
@@ -1203,7 +1263,8 @@
             "distanceM": 1422,
             "durationMin": 6,
             "mode": "bike",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-720d-853c-455a2c56f979",
@@ -1268,7 +1329,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 9,
@@ -1307,7 +1369,8 @@
             "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
-            "hours": []
+            "hours": [],
+            "photo": null
           },
           "verification": {
             "confirmations": 11,
@@ -1317,7 +1380,8 @@
           "highlights": [],
           "photos": []
         }
-      ]
+      ],
+      "myReport": null
     },
     {
       "id": "01a0d794-1000-735a-a62f-1efe50ef01ea",
@@ -1354,6 +1418,18 @@
         "https://images.unsplash.com/photo-1594676632059-b0707a8cca55?w=1200&h=800&fit=crop&auto=format&q=80",
         "https://images.unsplash.com/photo-1683020369711-fa6e11acaccd?w=1200&h=800&fit=crop&auto=format&q=80"
       ],
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1594676632059-b0707a8cca55?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1683020369711-fa6e11acaccd?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        }
+      ],
+      "timezone": "Europe/Paris",
+      "tips": ["Un maillot et un bonnet de bain pour la piscine"],
       "walkingDistanceM": 2070,
       "effort": "easy",
       "startAccess": null,
@@ -1419,7 +1495,8 @@
             "distanceM": 747,
             "durationMin": 10,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7475-9b69-eeac7928d1a1",
@@ -1434,7 +1511,8 @@
             "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
-            "hours": []
+            "hours": [],
+            "photo": null
           },
           "verification": {
             "confirmations": 3,
@@ -1463,7 +1541,8 @@
             "distanceM": 964,
             "durationMin": 13,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-710e-ad3e-4fc1fce609b4",
@@ -1478,7 +1557,8 @@
             "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
-            "hours": []
+            "hours": [],
+            "photo": null
           },
           "verification": {
             "confirmations": 5,
@@ -1507,7 +1587,8 @@
             "distanceM": 215,
             "durationMin": 3,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7a59-b369-4b572ebd08b0",
@@ -1579,7 +1660,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 7,
@@ -1608,7 +1690,8 @@
             "distanceM": 149,
             "durationMin": 2,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-748f-a820-7cf33a176444",
@@ -1623,7 +1706,8 @@
             "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
-            "hours": []
+            "hours": [],
+            "photo": null
           },
           "verification": {
             "confirmations": 9,
@@ -1761,7 +1845,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 11,
@@ -1771,7 +1856,8 @@
           "highlights": [],
           "photos": []
         }
-      ]
+      ],
+      "myReport": null
     },
     {
       "id": "01a0d794-1000-7467-b7b8-2ba1382da326",
@@ -1808,6 +1894,18 @@
         "https://images.unsplash.com/photo-1682939033295-031f290adbd2?w=1200&h=800&fit=crop&auto=format&q=80",
         "https://images.unsplash.com/photo-1682939036672-cf58620cf3e8?w=1200&h=800&fit=crop&auto=format&q=80"
       ],
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1682939033295-031f290adbd2?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1682939036672-cf58620cf3e8?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        }
+      ],
+      "timezone": "Europe/Paris",
+      "tips": [],
       "walkingDistanceM": 1360,
       "effort": "easy",
       "startAccess": null,
@@ -1867,7 +1965,8 @@
             "distanceM": 369,
             "durationMin": 5,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-710d-a93f-37d0066236e2",
@@ -1882,7 +1981,8 @@
             "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
-            "hours": []
+            "hours": [],
+            "photo": null
           },
           "verification": {
             "confirmations": 3,
@@ -1911,7 +2011,8 @@
             "distanceM": 404,
             "durationMin": 5,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7143-a136-2f2ed3ccb853",
@@ -1926,7 +2027,8 @@
             "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
-            "hours": []
+            "hours": [],
+            "photo": null
           },
           "verification": {
             "confirmations": 5,
@@ -1955,7 +2057,8 @@
             "distanceM": 586,
             "durationMin": 8,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7b82-bb2f-8fe9f952feed",
@@ -2020,7 +2123,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 7,
@@ -2059,7 +2163,8 @@
             "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
-            "hours": []
+            "hours": [],
+            "photo": null
           },
           "verification": {
             "confirmations": 9,
@@ -2069,7 +2174,8 @@
           "highlights": [],
           "photos": []
         }
-      ]
+      ],
+      "myReport": null
     },
     {
       "id": "01a0d794-1000-7776-be7f-e3481cd8e31b",
@@ -2102,6 +2208,18 @@
         "https://images.unsplash.com/photo-1578838389363-a62d9069d2c6?w=1200&h=800&fit=crop&auto=format&q=80",
         "https://images.unsplash.com/photo-1654103399842-98a63767b6bc?w=1200&h=800&fit=crop&auto=format&q=80"
       ],
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1578838389363-a62d9069d2c6?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1654103399842-98a63767b6bc?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        }
+      ],
+      "timezone": "Europe/Paris",
+      "tips": ["Un pique-nique pour le déjeuner", "Une gourde par enfant"],
       "walkingDistanceM": 1980,
       "effort": "easy",
       "startAccess": null,
@@ -2167,7 +2285,8 @@
             "distanceM": 714,
             "durationMin": 10,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7bcc-b00f-7bc56608cecc",
@@ -2232,7 +2351,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 3,
@@ -2261,7 +2381,8 @@
             "distanceM": 723,
             "durationMin": 10,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-709d-a433-36111e4efd62",
@@ -2326,7 +2447,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 5,
@@ -2355,7 +2477,8 @@
             "distanceM": 109,
             "durationMin": 1,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-704a-972f-88c68b1e1b80",
@@ -2420,7 +2543,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 7,
@@ -2449,7 +2573,8 @@
             "distanceM": 434,
             "durationMin": 6,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7817-8bf2-080a9b796919",
@@ -2507,7 +2632,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 9,
@@ -2596,7 +2722,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 11,
@@ -2606,7 +2733,8 @@
           "highlights": [],
           "photos": []
         }
-      ]
+      ],
+      "myReport": null
     },
     {
       "id": "01a0d794-1000-77e7-95df-464d67289b68",
@@ -2639,6 +2767,18 @@
         "https://images.unsplash.com/photo-1571860424830-0271e6c9d9b2?w=1200&h=800&fit=crop&auto=format&q=80",
         "https://images.unsplash.com/photo-1546444809-d64eccd9fb88?w=1200&h=800&fit=crop&auto=format&q=80"
       ],
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1571860424830-0271e6c9d9b2?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1546444809-d64eccd9fb88?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        }
+      ],
+      "timezone": "Europe/Paris",
+      "tips": [],
       "walkingDistanceM": 1630,
       "effort": "easy",
       "startAccess": null,
@@ -2704,7 +2844,8 @@
             "distanceM": 455,
             "durationMin": 6,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7e78-a0e2-354acddf253a",
@@ -2769,7 +2910,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 3,
@@ -2798,7 +2940,8 @@
             "distanceM": 437,
             "durationMin": 6,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7d00-9ccc-34ccc7d7e0aa",
@@ -2863,7 +3006,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 5,
@@ -2892,7 +3036,8 @@
             "distanceM": 2300,
             "durationMin": 15,
             "mode": "metro",
-            "estimated": false
+            "estimated": false,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7c9e-8255-6fe664751a34",
@@ -2950,7 +3095,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 7,
@@ -2979,7 +3125,8 @@
             "distanceM": 343,
             "durationMin": 5,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7fa7-a607-bf6866f58a9b",
@@ -3044,7 +3191,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 9,
@@ -3133,7 +3281,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 11,
@@ -3143,7 +3292,8 @@
           "highlights": [],
           "photos": []
         }
-      ]
+      ],
+      "myReport": null
     },
     {
       "id": "01a0d794-1000-7804-bb63-0b1b16a70b24",
@@ -3176,6 +3326,18 @@
         "https://images.unsplash.com/photo-1731666593725-197dc759038d?w=1200&h=800&fit=crop&auto=format&q=80",
         "https://images.unsplash.com/photo-1731666595277-2082e64c8936?w=1200&h=800&fit=crop&auto=format&q=80"
       ],
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1731666593725-197dc759038d?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1731666595277-2082e64c8936?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        }
+      ],
+      "timezone": "Europe/Paris",
+      "tips": [],
       "walkingDistanceM": 890,
       "effort": "easy",
       "startAccess": null,
@@ -3235,7 +3397,8 @@
             "distanceM": 350,
             "durationMin": 5,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-700d-a600-4e36c7ac23e2",
@@ -3272,7 +3435,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 3,
@@ -3301,7 +3465,8 @@
             "distanceM": 200,
             "durationMin": 3,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-739b-a061-3fbe3b354e2d",
@@ -3366,7 +3531,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 5,
@@ -3395,7 +3561,8 @@
             "distanceM": 341,
             "durationMin": 5,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7e41-9c62-175dbeaf8f60",
@@ -3460,7 +3627,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 7,
@@ -3535,7 +3703,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 9,
@@ -3545,7 +3714,8 @@
           "highlights": [],
           "photos": []
         }
-      ]
+      ],
+      "myReport": null
     },
     {
       "id": "01a0d794-1000-705c-b24a-30d8b8f3b527",
@@ -3578,6 +3748,18 @@
         "https://images.unsplash.com/photo-1788101841904-669e8b5924b4?w=1200&h=800&fit=crop&auto=format&q=80",
         "https://images.unsplash.com/photo-1563896171319-a5534fcf465f?w=1200&h=800&fit=crop&auto=format&q=80"
       ],
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1788101841904-669e8b5924b4?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1563896171319-a5534fcf465f?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        }
+      ],
+      "timezone": "Europe/Paris",
+      "tips": ["Des espèces pour les petites boutiques"],
       "walkingDistanceM": 2010,
       "effort": "easy",
       "startAccess": null,
@@ -3637,7 +3819,8 @@
             "distanceM": 891,
             "durationMin": 12,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-767b-87d0-2a9912057f10",
@@ -3702,7 +3885,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 3,
@@ -3748,7 +3932,8 @@
             "distanceM": 702,
             "durationMin": 9,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7912-87df-5eebd16c342a",
@@ -3806,7 +3991,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 5,
@@ -3844,7 +4030,8 @@
             "distanceM": 421,
             "durationMin": 6,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7464-af87-4002b816640a",
@@ -3895,7 +4082,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 7,
@@ -3970,7 +4158,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 9,
@@ -3980,7 +4169,8 @@
           "highlights": ["Le sorbet au cacao amer", "Notre-Dame depuis le pont Saint-Louis"],
           "photos": []
         }
-      ]
+      ],
+      "myReport": null
     },
     {
       "id": "01a0d794-1000-764a-9d0c-b935faae6650",
@@ -4013,6 +4203,18 @@
         "https://images.unsplash.com/photo-1663511870425-5dd7edf1c071?w=1200&h=800&fit=crop&auto=format&q=80",
         "https://images.unsplash.com/photo-1663511433047-c0f9317e046a?w=1200&h=800&fit=crop&auto=format&q=80"
       ],
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1663511870425-5dd7edf1c071?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1663511433047-c0f9317e046a?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        }
+      ],
+      "timezone": "Europe/Paris",
+      "tips": [],
       "walkingDistanceM": 7250,
       "effort": "intense",
       "startAccess": null,
@@ -4072,7 +4274,8 @@
             "distanceM": 1104,
             "durationMin": 15,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7700-b8e9-3bcd586afff4",
@@ -4087,7 +4290,8 @@
             "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
-            "hours": []
+            "hours": [],
+            "photo": null
           },
           "verification": {
             "confirmations": 3,
@@ -4116,7 +4320,8 @@
             "distanceM": 3366,
             "durationMin": 18,
             "mode": "metro",
-            "estimated": false
+            "estimated": false,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-79bd-89b4-1a5c5056307e",
@@ -4181,7 +4386,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 5,
@@ -4210,7 +4416,8 @@
             "distanceM": 3254,
             "durationMin": 18,
             "mode": "metro",
-            "estimated": false
+            "estimated": false,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7bd8-8590-7358b7874c83",
@@ -4225,7 +4432,8 @@
             "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
-            "hours": []
+            "hours": [],
+            "photo": null
           },
           "verification": {
             "confirmations": 7,
@@ -4314,7 +4522,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 9,
@@ -4324,7 +4533,8 @@
           "highlights": [],
           "photos": []
         }
-      ]
+      ],
+      "myReport": null
     },
     {
       "id": "01a0d794-1000-74ca-8b68-280d29c13fca",
@@ -4357,6 +4567,18 @@
         "https://images.unsplash.com/photo-1561370665-7e266065fce1?w=1200&h=800&fit=crop&auto=format&q=80",
         "https://images.unsplash.com/photo-1623009070764-45002990256e?w=1200&h=800&fit=crop&auto=format&q=80"
       ],
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1561370665-7e266065fce1?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1623009070764-45002990256e?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        }
+      ],
+      "timezone": "Europe/Paris",
+      "tips": [],
       "walkingDistanceM": 1010,
       "effort": "easy",
       "startAccess": null,
@@ -4422,7 +4644,8 @@
             "distanceM": 477,
             "durationMin": 6,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-783b-aec5-f6752d38b3f7",
@@ -4487,7 +4710,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 3,
@@ -4507,7 +4731,8 @@
             "distanceM": 216,
             "durationMin": 3,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           }
         },
         {
@@ -4520,7 +4745,8 @@
             "distanceM": 220,
             "durationMin": 3,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           }
         },
         {
@@ -4533,7 +4759,8 @@
             "distanceM": 94,
             "durationMin": 1,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           }
         },
         {
@@ -4544,7 +4771,8 @@
           "durationMin": 90,
           "transition": null
         }
-      ]
+      ],
+      "myReport": null
     },
     {
       "id": "01a0d794-1000-7608-9f30-19be4d17ab18",
@@ -4581,6 +4809,18 @@
         "https://images.unsplash.com/photo-1642766603265-e33f8a27fb31?w=1200&h=800&fit=crop&auto=format&q=80",
         "https://images.unsplash.com/photo-1548123833-0d46ee1d7400?w=1200&h=800&fit=crop&auto=format&q=80"
       ],
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1642766603265-e33f8a27fb31?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1548123833-0d46ee1d7400?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        }
+      ],
+      "timezone": "Europe/Paris",
+      "tips": [],
       "walkingDistanceM": 0,
       "effort": "easy",
       "startAccess": null,
@@ -4648,7 +4888,8 @@
             "distanceM": 361,
             "durationMin": 1,
             "mode": "bike",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7a29-8984-4d401bfbba23",
@@ -4699,7 +4940,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 3,
@@ -4728,7 +4970,8 @@
             "distanceM": 257,
             "durationMin": 1,
             "mode": "bike",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-766b-a7a3-ae0f1a2dbbc3",
@@ -4743,7 +4986,8 @@
             "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
-            "hours": []
+            "hours": [],
+            "photo": null
           },
           "verification": {
             "confirmations": 5,
@@ -4772,7 +5016,8 @@
             "distanceM": 2390,
             "durationMin": 10,
             "mode": "bike",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7b6e-b183-e566e8ea1e7f",
@@ -4837,7 +5082,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 7,
@@ -4866,7 +5112,8 @@
             "distanceM": 1422,
             "durationMin": 6,
             "mode": "bike",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-720d-853c-455a2c56f979",
@@ -4931,7 +5178,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 9,
@@ -4970,7 +5218,8 @@
             "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
-            "hours": []
+            "hours": [],
+            "photo": null
           },
           "verification": {
             "confirmations": 11,
@@ -4980,7 +5229,8 @@
           "highlights": [],
           "photos": []
         }
-      ]
+      ],
+      "myReport": null
     },
     {
       "id": "01a0d794-1000-76a5-a7f7-68e74903b975",
@@ -5013,6 +5263,18 @@
         "https://images.unsplash.com/photo-1788101841904-669e8b5924b4?w=1200&h=800&fit=crop&auto=format&q=80",
         "https://images.unsplash.com/photo-1563896171319-a5534fcf465f?w=1200&h=800&fit=crop&auto=format&q=80"
       ],
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1788101841904-669e8b5924b4?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1563896171319-a5534fcf465f?w=1200&h=800&fit=crop&auto=format&q=80",
+          "credit": null
+        }
+      ],
+      "timezone": "Europe/Paris",
+      "tips": ["Des espèces pour les petites boutiques"],
       "walkingDistanceM": 2010,
       "effort": "easy",
       "startAccess": null,
@@ -5094,7 +5356,8 @@
             "distanceM": 891,
             "durationMin": 12,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-767b-87d0-2a9912057f10",
@@ -5159,7 +5422,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 3,
@@ -5205,7 +5469,8 @@
             "distanceM": 702,
             "durationMin": 9,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7912-87df-5eebd16c342a",
@@ -5263,7 +5528,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 0,
@@ -5304,7 +5570,8 @@
             "distanceM": 421,
             "durationMin": 6,
             "mode": "walk",
-            "estimated": true
+            "estimated": true,
+            "geometry": null
           },
           "place": {
             "id": "01a0d794-1000-7464-af87-4002b816640a",
@@ -5355,7 +5622,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 0,
@@ -5430,7 +5698,8 @@
                 "validFrom": null,
                 "validTo": null
               }
-            ]
+            ],
+            "photo": null
           },
           "verification": {
             "confirmations": 9,
@@ -5440,13 +5709,18 @@
           "highlights": ["Le sorbet au cacao amer", "Notre-Dame depuis le pont Saint-Louis"],
           "photos": []
         }
-      ]
+      ],
+      "myReport": null
     }
   ],
   "removed": [
     {
       "id": "01a0d794-1000-7c65-8700-0ce047497f0a",
-      "removedAt": "2026-09-20T08:00:00.000Z"
+      "removedAt": "2026-09-20T08:00:00.000Z",
+      "near": {
+        "lat": 48.86,
+        "lng": 2.35
+      }
     }
   ]
 }
