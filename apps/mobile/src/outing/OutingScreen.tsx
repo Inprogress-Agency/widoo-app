@@ -48,7 +48,6 @@ export function OutingScreen({ outingId, onBack, onSeeRoute }: OutingScreenProps
   const route = outing?.routeId && state.status === 'ready' ? state.route : null;
   const planActions = usePlanActions();
   const startGo = useStartGo();
-  const scroll = useRef<ScrollView>(null);
   const planSheet = useRef<PlanSheetMethods>(null);
   const checklist = useOutingChecklist(outing, () =>
     showToast('error', t('routes.outing.toast.checkFailed'), {
@@ -139,7 +138,6 @@ export function OutingScreen({ outingId, onBack, onSeeRoute }: OutingScreenProps
         back={{ label: t('routes.outing.back'), onPress: onBack }}
       />
       <ScrollView
-        ref={scroll}
         contentContainerClassName="p-16"
         contentContainerStyle={{ paddingBottom: spacing['space-32'] }}
       >
@@ -167,8 +165,8 @@ export function OutingScreen({ outingId, onBack, onSeeRoute }: OutingScreenProps
             trackPlanned: (properties) => analytics.track('route_planned', properties),
             trackChanged: (properties) => analytics.track('plan_changed', properties),
             toast: showToast,
-            // Already on the outing: « Voir » brings its new date to the top.
-            onSee: () => scroll.current?.scrollTo({ y: 0 }),
+            // Already on the outing, which shows its new date: no « Voir » in « Sortie déplacée ».
+            onSee: null,
             now: new Date(),
           })
         }
