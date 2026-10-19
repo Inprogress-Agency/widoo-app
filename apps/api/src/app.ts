@@ -7,8 +7,10 @@ import {
 import { createFirebaseVerifier } from './auth/firebase-verifier';
 import { registerAuth } from './auth/plugin';
 import type { TokenVerifier } from './auth/verifier';
+import type { DirectionsProvider } from '@widoo/orchestration';
 import type { Config } from './config';
 import { createDb, createSql } from './db/client';
+import { createMapboxDirections } from './directions/mapbox';
 import { registerDocs } from './docs';
 import { registerErrorHandling } from './errors';
 import type { Geocoder } from './geocode/geocoder';
@@ -26,6 +28,7 @@ import { meRoutes } from './routes/me';
 import { meExportRoutes } from './routes/me-export';
 import { plannedRoutesPlugin } from './routes/planned';
 import { routeRatingsPlugin } from './routes/ratings';
+import { routeSheetRoutes } from './routes/route-sheet';
 import { searchRoutesPlugin } from './routes/search';
 import { supportRoutes } from './routes/support';
 import { usersRoutes } from './routes/users';
@@ -39,6 +42,8 @@ export type BuildAppOptions = {
   internalJobs?: InternalJobs;
   /** Tests only: replaces the geocoder of the search. Refused in production. */
   geocoder?: Geocoder;
+  /** Tests only: replaces Mapbox Directions on the route sheet. Refused in production. */
+  directions?: DirectionsProvider | null;
 };
 
 /** Firebase unless a verifier is injected; fails at startup rather than on the first request. */
@@ -76,6 +81,22 @@ function geocoderOf(config: Config, log: FastifyBaseLogger): Geocoder | null {
   return localGeocoder;
 }
 
+/**
+ * Mapbox Directions with the server token, for the exact trips of the route sheet only, never
+ * stored (D-088); without it, the sheet serves our estimates.
+ */
+function directionsOf(config: Config, log: FastifyBaseLogger): DirectionsProvider | null {
+  if (!config.mapboxDirectionsToken) {
+    log.warn('MAPBOX_DIRECTIONS_TOKEN is not set: GET /v1/routes/:id serves estimated trips');
+    return null;
+  }
+  return createMapboxDirections({
+    token: config.mapboxDirectionsToken,
+    // The profile and the status only: the URL holds the token.
+    onFailure: (failure) => log.warn({ directions: failure }, 'directions failed'),
+  });
+}
+
 /** Builds the API without listening, so that tests drive it with `app.inject()`. */
 export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   const tokenVerifier = tokenVerifierOf(config, options.tokenVerifier);
@@ -84,6 +105,9 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   }
   if (options.geocoder && config.isProduction) {
     throw new Error('An injected geocoder is refused in production');
+  }
+  if (options.directions !== undefined && config.isProduction) {
+    throw new Error('Injected directions are refused in production');
   }
   const app = Fastify({
     logger: loggerOptions(config.logLevel, options.logStream),
@@ -122,6 +146,11 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   await app.register(plannedRoutesPlugin, { prefix: '/v1' });
   await app.register(searchRoutesPlugin, { prefix: '/v1' });
   await app.register(routeRatingsPlugin, { prefix: '/v1' });
+  await app.register(routeSheetRoutes, {
+    prefix: '/v1',
+    directions:
+      options.directions !== undefined ? options.directions : directionsOf(config, app.log),
+  });
   await app.register(usersRoutes, { prefix: '/v1' });
   await app.register(editorRoutes, { prefix: '/v1' });
   await app.register(geocodeRoutes, {
