@@ -87,6 +87,18 @@ describe('moveRoute', () => {
     expect(pending.shareToken).toBe(shareToken);
   });
 
+  it('dates each withdrawal in unpublished_at, the date of the 410 of the sheet (D-093)', async () => {
+    const id = await routeIn('published');
+    expect((await move(id, 'unpublished', 'author')).unpublishedAt).toEqual(now);
+  });
+
+  it('clears unpublished_at on any move out of the withdrawal, a republication', async () => {
+    // No edge leaves unpublished yet: a pending route carrying a leftover date stands for it.
+    const id = await routeIn('pending');
+    await app.db.update(routes).set({ unpublishedAt: now }).where(eq(routes.id, id));
+    expect((await move(id, 'published', 'moderator')).unpublishedAt).toBeNull();
+  });
+
   it('dates the first publication only', async () => {
     const id = await routeIn('pending');
     expect((await move(id, 'published', 'moderator')).publishedAt).toEqual(now);
