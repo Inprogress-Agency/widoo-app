@@ -8,7 +8,14 @@ import {
 } from '@widoo/shared';
 import { and, desc, eq, isNull, sql } from 'drizzle-orm';
 import type { Db } from '../db/client';
-import { routeReports, routeUnlocks, routes, supportMessages, users } from '../db/schema';
+import {
+  routeRatings,
+  routeReports,
+  routeUnlocks,
+  routes,
+  supportMessages,
+  users,
+} from '../db/schema';
 import { neighbourCursors, offsetOfCursor } from './page-cursor';
 
 type UserRow = {
@@ -113,10 +120,37 @@ async function readReports(
   }));
 }
 
-/**
- * The card of an account (A-06), or null when it does not exist or was deleted. The ratings are
- * empty until `route_ratings` exists (#64): the single place to fill when it does.
- */
+/** The ratings given by an account, or received on its routes, the latest first. */
+async function readRatings(
+  db: Db,
+  by: { raterId: string } | { authorId: string },
+): Promise<AdminUserDetail['ratingsGiven']> {
+  const rows = await db
+    .select({
+      id: routeRatings.id,
+      rating: routeRatings.rating,
+      comment: routeRatings.comment,
+      status: routeRatings.status,
+      createdAt: routeRatings.createdAt,
+      routeId: routes.id,
+      routeTitle: routes.title,
+    })
+    .from(routeRatings)
+    .innerJoin(routes, eq(routes.id, routeRatings.routeId))
+    .where('raterId' in by ? eq(routeRatings.userId, by.raterId) : eq(routes.authorId, by.authorId))
+    .orderBy(desc(routeRatings.createdAt), desc(routeRatings.id))
+    .limit(cardListLimit);
+  return rows.map((row) => ({
+    id: row.id,
+    route: { id: row.routeId, title: row.routeTitle },
+    score: row.rating,
+    comment: row.comment,
+    isHidden: row.status === 'hidden',
+    createdAt: row.createdAt.toISOString(),
+  }));
+}
+
+/** The card of an account (A-06), or null when it does not exist or was deleted. */
 export async function readUserDetail(db: Db, userId: string): Promise<AdminUserDetail | null> {
   const [user] = await db
     .select()
@@ -125,7 +159,15 @@ export async function readUserDetail(db: Db, userId: string): Promise<AdminUserD
   if (!user) {
     return null;
   }
-  const [unlocks, createdRoutes, reportsMade, reportsReceived, messages] = await Promise.all([
+  const [
+    unlocks,
+    createdRoutes,
+    reportsMade,
+    reportsReceived,
+    ratingsGiven,
+    ratingsReceived,
+    messages,
+  ] = await Promise.all([
     db
       .select({
         id: routes.id,
@@ -146,6 +188,8 @@ export async function readUserDetail(db: Db, userId: string): Promise<AdminUserD
       .limit(cardListLimit),
     readReports(db, { reporterId: userId }),
     readReports(db, { authorId: userId }),
+    readRatings(db, { raterId: userId }),
+    readRatings(db, { authorId: userId }),
     db
       .select({
         id: supportMessages.id,
@@ -193,8 +237,8 @@ export async function readUserDetail(db: Db, userId: string): Promise<AdminUserD
     createdRoutes,
     reportsMade,
     reportsReceived,
-    ratingsGiven: [],
-    ratingsReceived: [],
+    ratingsGiven,
+    ratingsReceived,
     supportMessages: messages.map((row) => ({
       id: row.id,
       topic: row.topic,

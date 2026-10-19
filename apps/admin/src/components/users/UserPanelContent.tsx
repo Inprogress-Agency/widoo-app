@@ -56,6 +56,16 @@ export function UserPanelContent({ user, routePathOf }: UserPanelContentProps) {
       </span>
     </li>
   );
+  const ratingItem = (rating: AdminUserDetail['ratingsGiven'][number]) => (
+    <li key={rating.id} className="flex flex-col text-body-s">
+      <span>{routeLink(rating.route)}</span>
+      <span className="text-label text-muted-foreground">
+        {texts.ratingScore(rating.score)} · {formatRelativeDate(new Date(rating.createdAt))}
+        {rating.isHidden ? ` · ${messages.reports.ratings.hidden}` : ''}
+      </span>
+      {rating.comment ? <span className="break-words">{rating.comment}</span> : null}
+    </li>
+  );
   return (
     <div className="flex flex-col gap-16">
       <dl className="flex flex-col gap-8">
@@ -106,9 +116,8 @@ export function UserPanelContent({ user, routePathOf }: UserPanelContentProps) {
       </Section>
       <Section title={texts.reportsMade}>{user.reportsMade.map(reportItem)}</Section>
       <Section title={texts.reportsReceived}>{user.reportsReceived.map(reportItem)}</Section>
-      <Section title={texts.ratingsGiven}>{[]}</Section>
-      <Section title={texts.ratingsReceived}>{[]}</Section>
-      <p className="text-label text-muted-foreground">{texts.ratingsNotice}</p>
+      <Section title={texts.ratingsGiven}>{user.ratingsGiven.map(ratingItem)}</Section>
+      <Section title={texts.ratingsReceived}>{user.ratingsReceived.map(ratingItem)}</Section>
       <Section title={texts.support}>
         {user.supportMessages.map((message) => (
           <li key={message.id} className="text-body-s">
