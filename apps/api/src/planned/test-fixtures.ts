@@ -1,7 +1,7 @@
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, asc, eq, inArray } from 'drizzle-orm';
 import type { buildApp } from '../app';
 import type { TestTokenVerifier } from '../auth/test-verifier';
-import { media, routeUnlocks, routes, steps, users } from '../db/schema';
+import { media, places, routeUnlocks, routes, steps, users } from '../db/schema';
 import { seed, seedId } from '../db/seed';
 import { uuidv7 } from '../db/uuid';
 
@@ -18,6 +18,7 @@ export function plannedFixtures(app: () => App, verifier: TestTokenVerifier) {
   const routeIds: string[] = [];
   const uids: string[] = [];
   const stepIds: string[] = [];
+  const placeIds: string[] = [];
 
   /**
    * A copy of the demo route, its first step to book (fictitious link); with `stepPhotos`, the
@@ -73,6 +74,42 @@ export function plannedFixtures(app: () => App, verifier: TestTokenVerifier) {
     return id;
   }
 
+  /**
+   * Moves the first step of the route `routeId` to a fictitious place « Accessible à toute
+   * heure » without any hours (D-049), far from the demo so that no search finds it; deleted by
+   * `cleanUp`. Returns the id of that step.
+   */
+  async function alwaysOpenFirstStep(routeId: string) {
+    const [first] = await app()
+      .db.select({ id: steps.id, placeId: steps.placeId })
+      .from(steps)
+      .where(eq(steps.routeId, routeId))
+      .orderBy(asc(steps.position))
+      .limit(1);
+    if (!first) throw new Error('The copied route has no step');
+    const [demoPlace] = await app()
+      .db.select({ cityId: places.cityId })
+      .from(places)
+      .where(eq(places.id, first.placeId));
+    if (!demoPlace) throw new Error('The demo place is missing from the seed');
+    const placeId = uuidv7();
+    placeIds.push(placeId);
+    await app()
+      .db.insert(places)
+      .values({
+        id: placeId,
+        cityId: demoPlace.cityId,
+        name: 'Square toujours ouvert',
+        category: 'park',
+        location: { lat: -40, lng: -40 },
+        address: 'Adresse fictive',
+        verificationStatus: 'unverified',
+        alwaysOpen: true,
+      });
+    await app().db.update(steps).set({ placeId }).where(eq(steps.id, first.id));
+    return first.id;
+  }
+
   /** A signed-in account of the given plan, created on its first request. */
   async function signIn(values: Partial<typeof users.$inferInsert> = {}) {
     const { token, uid } = verifier.issue();
@@ -103,7 +140,9 @@ export function plannedFixtures(app: () => App, verifier: TestTokenVerifier) {
         .db.delete(media)
         .where(and(eq(media.ownerType, 'step'), inArray(media.ownerId, stepIds)));
     }
+    // After the routes: their steps refer to these places.
+    if (placeIds.length > 0) await app().db.delete(places).where(inArray(places.id, placeIds));
   }
 
-  return { copyDemoRoute, signIn, unlock, cleanUp };
+  return { copyDemoRoute, alwaysOpenFirstStep, signIn, unlock, cleanUp };
 }
