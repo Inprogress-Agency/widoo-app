@@ -1,5 +1,5 @@
 import { ApiError, PlannedMapsUrl, PlannedRoute } from '@widoo/shared';
-import { travelModeOf } from '@widoo/orchestration';
+import { stepMapsUrl } from '@widoo/orchestration';
 import { and, eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
@@ -94,8 +94,12 @@ describe('POST /v1/me/planned/:id/steps/:stepId/done', () => {
 describe('GET /v1/me/planned/:id/maps-url', () => {
   /** The destination of a Google Maps URL, decoded as the test compares it. */
   const destinationOf = (url: string) => new URL(url).searchParams.get('destination');
-  /** The mode of the trip to a step of the next one, as a creator keeps it. */
-  const trips = ['bike', 'metro', 'car'] as const;
+  /** The trip of each of the first three steps to the next one, and its Google Maps mode. */
+  const trips = [
+    ['bike', 'bicycling'],
+    ['metro', 'transit'],
+    ['car', 'driving'],
+  ] as const;
 
   it('opens Google Maps on foot to the next step only', async () => {
     const headers = await fixtures.signIn();
@@ -119,10 +123,10 @@ describe('GET /v1/me/planned/:id/maps-url', () => {
     expect(toSecond.url).toContain('travelmode=walking');
   });
 
-  it('opens Google Maps in the mode of the trip to the next steps', async () => {
+  it('opens Google Maps in the mode of the trip to the next steps, as the app does offline', async () => {
     const headers = await fixtures.signIn();
     const modeRoute = await fixtures.copyDemoRoute();
-    for (const [position, mode] of trips.entries()) {
+    for (const [position, [mode]] of trips.entries()) {
       await app.db
         .update(steps)
         .set({ transition: { distanceM: 900, durationMin: 10, mode, estimated: true } })
@@ -130,17 +134,22 @@ describe('GET /v1/me/planned/:id/maps-url', () => {
     }
     const { id, route } = await go(headers, true, modeRoute);
     // No trip of the route leads to the first step: on foot, even with a bike trip after it.
-    expect(
-      PlannedMapsUrl.parse((await mapsUrl(headers, id)).json()).url,
-    ).toContain('travelmode=walking');
-    for (const [stepIndex, mode] of trips.entries()) {
-      await done(headers, id, route.steps[stepIndex]?.id);
+    const toFirst = PlannedMapsUrl.parse((await mapsUrl(headers, id)).json());
+    expect(toFirst.url).toContain('travelmode=walking');
+    // The app, offline, writes the URL of the same step from the same planning (#510).
+    expect(toFirst.url).toBe(stepMapsUrl(route.steps, 0));
+    for (const [index, [, travelmode]] of trips.entries()) {
+      await done(headers, id, route.steps[index]?.id);
+      const next = route.steps[index + 1];
       const answer = PlannedMapsUrl.parse((await mapsUrl(headers, id)).json());
-      expect(answer.stepId).toBe(route.steps[stepIndex + 1]?.id);
-      expect(answer.url).toContain(`travelmode=${travelModeOf(mode)}`);
-      // One destination, no waypoints: never the whole route.
-      expect(destinationOf(answer.url)).not.toBeNull();
-      expect(answer.url).not.toContain('waypoints');
+      expect(answer.stepId).toBe(next?.id);
+      expect(new URL(answer.url).searchParams.get('travelmode')).toBe(travelmode);
+      expect(answer.url).toBe(stepMapsUrl(route.steps, index + 1));
+      // One destination, the step's, and no waypoints: never the whole route (D-032).
+      expect(destinationOf(answer.url)).toBe(
+        `${next?.place.location.lat},${next?.place.location.lng}`,
+      );
+      expect(new URL(answer.url).searchParams.has('waypoints')).toBe(false);
     }
   });
 

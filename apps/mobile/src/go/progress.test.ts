@@ -116,7 +116,7 @@ describe('maps URL', () => {
     expect(stepMapsUrl(planned.route.steps, 1)).toBe(
       'https://www.google.com/maps/dir/?api=1&destination=48.8714%2C2.3676&travelmode=bicycling',
     );
-    // The trip to the third step: the metro, even when the straight line carries a float error.
+    // The trip to the third step is by metro (its latitude, computed, is not a round literal).
     expect(stepMapsUrl(planned.route.steps, 2)).toContain('travelmode=transit');
     // One destination, no waypoints: never the whole route.
     expect(stepMapsUrl(planned.route.steps, 2)).not.toContain('waypoints');

@@ -19,13 +19,7 @@ import { plannedQueryKey, usePlannedLookup } from '../plan/planned';
 import { haptic } from '../ui/haptics';
 import { showToast } from '../ui/toastStore';
 import { createGoLocalStore } from './localStore';
-import {
-  actualMinutes,
-  doneRatio,
-  emptyGoLocal,
-  goProgress,
-  type GoProgress,
-} from './progress';
+import { actualMinutes, doneRatio, emptyGoLocal, goProgress, type GoProgress } from './progress';
 import { startGo } from './startGo';
 
 const storage = createMMKV({ id: 'go' });
@@ -270,8 +264,10 @@ export function useGoActions(
         analytics.track('go_step_done', { route_id: routeId, step_index: current.index });
       }
     },
-    /** « Itinéraire »: Google Maps to the step, in the mode of the trip to it, by the API or
-     * written here offline with the same shared rule (E-07, #510). */
+    /**
+     * « Itinéraire »: Google Maps to the step, in the mode of the trip to it, by the API; written
+     * here offline with the same shared `stepMapsUrl` (E-07, #510).
+     */
     async directions() {
       if (!current) {
         return;
