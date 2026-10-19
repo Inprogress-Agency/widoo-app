@@ -51,4 +51,23 @@ describe('E-07 texts, in French', () => {
     expect(statusText(t, progress).short).toBe('Toutes les étapes sont faites');
     expect(lineText(t, progress, null)).toBeNull();
   });
+
+  it('says the skipped steps left once none is current, never « all done »', () => {
+    const planned = plannedFixture({ 0: { doneAt: at }, 1: { doneAt: at }, 2: { skippedAt: at } });
+    const progress = goProgress(planned, emptyGoLocal);
+    expect(statusText(t, progress).short).toBe('Il reste 1 étape passée');
+    expect(miniPlayerLabel(t, progress)).toBe(
+      'Parcours en cours, il reste 1 étape passée. Rouvrir',
+    );
+    const several = plannedFixture({
+      0: { doneAt: at },
+      1: { skippedAt: at },
+      2: { skippedAt: at },
+    });
+    const left = goProgress(several, emptyGoLocal);
+    expect(statusText(t, left).short).toBe('Il reste 2 étapes passées');
+    expect(miniPlayerLabel(t, left)).toBe(
+      'Parcours en cours, il reste 2 étapes passées. Rouvrir',
+    );
+  });
 });

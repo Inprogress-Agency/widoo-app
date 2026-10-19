@@ -9,6 +9,8 @@ export const go = {
       enRoute: 'On the way to stop {{position}}',
       onSite: 'Stop {{position}} of {{total}}, you are here',
       allDone: 'Every stop is done',
+      skippedLeft_one: '{{count}} skipped stop left',
+      skippedLeft_other: '{{count}} skipped stops left',
       enRouteSpoken: 'On the way to stop {{position}} of {{total}}.',
       onSiteSpoken: 'Stop {{position}} of {{total}}, you are here.',
     },
@@ -69,6 +71,8 @@ export const go = {
       enRoute: 'Route under way, on the way to stop {{position}} of {{total}}, {{place}}. Reopen',
       onSite: 'Route under way, stop {{position}} of {{total}}, {{place}}, you are here. Reopen',
       allDone: 'Route under way, every stop is done. Reopen',
+      skippedLeft_one: 'Route under way, {{count}} skipped stop left. Reopen',
+      skippedLeft_other: 'Route under way, {{count}} skipped stops left. Reopen',
     },
     toast: {
       startFailed: 'The route did not start',
