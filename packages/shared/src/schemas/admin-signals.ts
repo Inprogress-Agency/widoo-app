@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { routeRatingStatuses } from '../ratings';
 import { taxonomies } from '../taxonomies';
 import { plainText } from './common';
 
@@ -93,3 +94,22 @@ export const AdminRatings = z.object({
   nextCursor: z.string().nullable(),
 });
 export type AdminRatings = z.infer<typeof AdminRatings>;
+
+/** Body of `POST /admin/ratings/:id/hide`: why the rating is masked, kept in the journal. */
+export const HideRatingBody = z.strictObject({ reason: plainText(500) });
+export type HideRatingBody = z.infer<typeof HideRatingBody>;
+
+/**
+ * Answer of `hide` and `unhide`: the rating as it stands, and the rating of its route recomputed
+ * without the masked ones.
+ */
+export const RatingActionResult = z.object({
+  id: z.uuid(),
+  isHidden: z.boolean(),
+  routeRating: z.object({ average: z.number().nullable(), count: z.number().int().nonnegative() }),
+});
+export type RatingActionResult = z.infer<typeof RatingActionResult>;
+
+/** `details` of a 409 `already_decided` on a rating: the status it already has. */
+export const RatingAlreadyDecidedDetails = z.object({ status: z.enum(routeRatingStatuses) });
+export type RatingAlreadyDecidedDetails = z.infer<typeof RatingAlreadyDecidedDetails>;
