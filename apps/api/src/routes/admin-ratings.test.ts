@@ -1,9 +1,16 @@
-import { AdminRatings, type UserRole } from '@widoo/shared';
-import { inArray } from 'drizzle-orm';
+import {
+  AdminRatings,
+  ApiError,
+  RatingActionResult,
+  RatingAlreadyDecidedDetails,
+  type UserRole,
+} from '@widoo/shared';
+import { eq, inArray } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
-import { routeRatings, users } from '../db/schema';
+import { adminActions, routeRatings, routes, users } from '../db/schema';
+import { uuidv7 } from '../db/uuid';
 import { plannedFixtures } from '../planned/test-fixtures';
 import { testConfig } from '../test-config';
 
@@ -11,6 +18,7 @@ import { testConfig } from '../test-config';
 // the lists are read for the routes of this file only.
 const verifier = new TestTokenVerifier();
 const teamUids: string[] = [];
+const ratingIds: string[] = [];
 
 let app: Awaited<ReturnType<typeof buildApp>>;
 const fixtures = plannedFixtures(() => app, verifier);
@@ -19,6 +27,7 @@ beforeAll(async () => {
 });
 afterAll(async () => {
   await fixtures.cleanUp();
+  await app.db.delete(adminActions).where(inArray(adminActions.targetId, ratingIds));
   await app.db.delete(users).where(inArray(users.firebaseUid, teamUids));
   await app.close();
 });
@@ -50,6 +59,7 @@ async function addRating(
     .values({ routeId, userId: author.id, rating, comment, createdAt })
     .returning();
   if (!row) throw new Error('Rating not created');
+  ratingIds.push(row.id);
   return row;
 }
 
@@ -105,5 +115,79 @@ describe('GET /v1/admin/ratings', () => {
     const editor = await signInTeam('editor');
     const response = await app.inject({ url: '/v1/admin/ratings', headers: editor.headers });
     expect(response.statusCode).toBe(403);
+  });
+});
+
+const act = (
+  headers: Record<string, string>,
+  ratingId: string,
+  action: 'hide' | 'unhide',
+  payload?: object,
+) =>
+  app.inject({ method: 'POST', url: `/v1/admin/ratings/${ratingId}/${action}`, headers, payload });
+const statsOf = async (routeId: string) =>
+  (await app.db.select({ stats: routes.stats }).from(routes).where(eq(routes.id, routeId)))[0]
+    ?.stats;
+
+describe('POST /v1/admin/ratings/:id/hide and unhide', () => {
+  it('masks a rating out of the average of its route, journals it, and restores it', async () => {
+    const moderator = await signInTeam('moderator');
+    const routeId = await fixtures.copyDemoRoute();
+    await addRating(routeId, 'Fay', 5, 'Top', day(1));
+    const masked = await addRating(routeId, 'Gus', 1, 'Pas bien', day(2));
+
+    const hidden = await act(moderator.headers, masked.id, 'hide', { reason: 'Insulte.' });
+
+    expect(hidden.statusCode).toBe(200);
+    expect(RatingActionResult.parse(hidden.json())).toEqual({
+      id: masked.id,
+      isHidden: true,
+      routeRating: { average: 5, count: 1 },
+    });
+    expect(await statsOf(routeId)).toMatchObject({ rating_avg: 5, rating_count: 1 });
+    const [entry] = await app.db
+      .select()
+      .from(adminActions)
+      .where(eq(adminActions.targetId, masked.id));
+    expect(entry).toMatchObject({
+      action: 'rating.hide',
+      actorId: moderator.id,
+      reason: 'Insulte.',
+    });
+
+    const restored = await act(moderator.headers, masked.id, 'unhide');
+
+    expect(RatingActionResult.parse(restored.json())).toEqual({
+      id: masked.id,
+      isHidden: false,
+      routeRating: { average: 3, count: 2 },
+    });
+    expect(await statsOf(routeId)).toMatchObject({ rating_avg: 3, rating_count: 2 });
+  });
+
+  it('answers 409 already_decided to a second decision, with the status it has', async () => {
+    const moderator = await signInTeam('moderator');
+    const routeId = await fixtures.copyDemoRoute();
+    const rating = await addRating(routeId, 'Hal', 2, 'Bof', day(1));
+
+    const again = await act(moderator.headers, rating.id, 'unhide');
+
+    expect(again.statusCode).toBe(409);
+    const error = ApiError.parse(again.json());
+    expect(error.code).toBe('already_decided');
+    expect(RatingAlreadyDecidedDetails.parse(error.details)).toEqual({ status: 'visible' });
+  });
+
+  it('asks for a reason, answers 404 to an unknown rating, and refuses an editor', async () => {
+    const moderator = await signInTeam('moderator');
+    const editor = await signInTeam('editor');
+    const routeId = await fixtures.copyDemoRoute();
+    const rating = await addRating(routeId, 'Ida', 2, 'Bof', day(1));
+
+    expect((await act(moderator.headers, rating.id, 'hide', {})).statusCode).toBe(422);
+    expect((await act(moderator.headers, uuidv7(), 'hide', { reason: 'Non.' })).statusCode).toBe(
+      404,
+    );
+    expect((await act(editor.headers, rating.id, 'hide', { reason: 'Non.' })).statusCode).toBe(403);
   });
 });

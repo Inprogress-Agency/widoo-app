@@ -6,7 +6,9 @@ import {
   AdminSignaledPlaces,
   AdminSignalsQuery,
   ClosePlaceBody,
+  HideRatingBody,
   PlaceActionResult,
+  RatingActionResult,
   ResolvedReport,
   ResolveReportBody,
 } from '@widoo/shared';
@@ -16,12 +18,13 @@ import { z } from 'zod';
 import { httpError } from '../errors';
 import { readOpenRouteReports, resolveRouteReport } from '../reports/admin-reports';
 import { closePlace, readSignaledPlaces, verifyPlace } from '../reports/place-signals';
-import { readRatings } from '../reports/ratings';
+import { hideRating, readRatings, unhideRating } from '../reports/ratings';
 
 const security = [{ firebaseIdToken: [] }];
 const tags = ['admin'];
 const ReportParams = z.object({ id: z.uuid() });
 const PlaceParams = z.object({ id: z.uuid() });
+const RatingParams = z.object({ id: z.uuid() });
 
 /** Set by the guard of the section, which every route of this plugin runs first. */
 function actorIdOf(request: FastifyRequest): string {
@@ -139,5 +142,40 @@ export const adminReportsRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (request) => readRatings(app.db, request.query),
+  );
+
+  app.post(
+    '/admin/ratings/:id/hide',
+    {
+      schema: {
+        tags,
+        summary: 'Mask a rating: it leaves the app and the average of its route',
+        security,
+        params: RatingParams,
+        body: HideRatingBody,
+        response: { 200: RatingActionResult },
+      },
+    },
+    async (request) =>
+      hideRating(app.db, {
+        ratingId: request.params.id,
+        actorId: actorIdOf(request),
+        reason: request.body.reason,
+      }),
+  );
+
+  app.post(
+    '/admin/ratings/:id/unhide',
+    {
+      schema: {
+        tags,
+        summary: 'Restore a masked rating',
+        security,
+        params: RatingParams,
+        response: { 200: RatingActionResult },
+      },
+    },
+    async (request) =>
+      unhideRating(app.db, { ratingId: request.params.id, actorId: actorIdOf(request) }),
   );
 };
