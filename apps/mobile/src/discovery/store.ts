@@ -116,7 +116,11 @@ export interface DiscoveryActions {
   closeFilters: () => void;
   /** « Voir N parcours »: the draft becomes the filters, and the zone on screen is searched again. */
   applyFilters: () => void;
-  /** The answer of search `id`; false when a newer search replaced it, or it already came. */
+  /**
+   * The answer of search `id`; false when a newer search replaced it, or when the search was
+   * answered already and nothing was fetched strictly after the results on screen. A fresher
+   * answer is taken, leaving the carousel where the user scrolled it.
+   */
   receive: (id: number, result: RouteSearchResult, fetchedAt?: number) => boolean;
   fail: (id: number) => void;
   /**
@@ -307,20 +311,28 @@ export function createDiscoveryStore() {
         }
       },
       receive: (id, result, fetchedAt = Date.now()) => {
-        const { search, status, selectedRouteId } = get();
-        // A search offline is answered once the network is back.
-        if (search?.id !== id || (status !== 'loading' && status !== 'offline')) {
+        const { search, status, selectedRouteId, resultsAt } = get();
+        // A search offline is answered once the network is back, and one already answered
+        // is answered again only when something was fetched strictly after its results.
+        if (
+          search?.id !== id ||
+          (status !== 'loading' &&
+            status !== 'offline' &&
+            !(status === 'success' && resultsAt !== null && resultsAt < fetchedAt))
+        ) {
           return false;
         }
         const isStillListed = result.items.some((route) => route.id === selectedRouteId);
+        // A refresh of the same search keeps the carousel where the user scrolled it; only the
+        // answer of another search starts it over, with no card to come round to.
+        const isRefresh = status === 'success';
         set({
           results: result,
           answer: result,
           resultsAt: fetchedAt,
           status: 'success',
           selectedRouteId: isStillListed ? selectedRouteId : null,
-          // New results start the carousel over, with no card to come round to.
-          focusedRouteId: null,
+          focusedRouteId: isRefresh ? get().focusedRouteId : null,
         });
         return true;
       },
