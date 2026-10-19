@@ -25,7 +25,8 @@ const httpsOrNull = (url: string | null) => (url?.startsWith('https://') ? url :
 /** `HH:MM` of a Postgres `time`. */
 const hourMinute = (time: string) => time.slice(0, 5);
 
-async function hoursByPlace(db: Db, placeIds: string[]): Promise<Map<string, PlaceHours[]>> {
+/** Opening slots of each place, by weekday then opening; a place without any is absent. */
+export async function hoursByPlace(db: Db, placeIds: string[]): Promise<Map<string, PlaceHours[]>> {
   const rows =
     placeIds.length === 0
       ? []
