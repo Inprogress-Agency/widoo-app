@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import type { PlannedRoute, RouteDetail, RouteDetailStep } from '@widoo/shared';
 import { spacing } from '@widoo/tokens';
-import { useRef } from 'react';
+import { useEffect, useEffectEvent, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Linking, ScrollView, View } from 'react-native';
 import { analytics } from '../analytics';
@@ -44,11 +44,24 @@ export function OutingScreen({ outingId, onBack, onSeeRoute }: OutingScreenProps
   const uid = useSession((state) => state.user?.uid ?? '');
   const isOnline = useIsOnline();
   const { outing, isError, retry } = useOuting(outingId);
-  const { state } = useRouteSheet(outing?.routeId ?? '');
+  const { state, retry: retryRoute } = useRouteSheet(outing?.routeId ?? '');
   const route = outing?.routeId && state.status === 'ready' ? state.route : null;
   const planActions = usePlanActions();
   const startGo = useStartGo();
   const planSheet = useRef<PlanSheetMethods>(null);
+  // « Changer » pressed before the route sheet answered: E-06 opens as soon as it does.
+  const isChangeAsked = useRef(false);
+  const openChange = useEffectEvent((readRoute: RouteDetail) => {
+    if (outing) {
+      planSheet.current?.open(readRoute, outing);
+    }
+  });
+  useEffect(() => {
+    if (route && isChangeAsked.current) {
+      isChangeAsked.current = false;
+      openChange(route);
+    }
+  }, [route]);
   const checklist = useOutingChecklist(outing, () =>
     showToast('error', t('routes.outing.toast.checkFailed'), {
       subtitle: t('routes.outing.toast.failedBody'),
@@ -74,6 +87,21 @@ export function OutingScreen({ outingId, onBack, onSeeRoute }: OutingScreenProps
         context: 'plan',
       });
       void Linking.openURL(step.bookingUrl);
+    }
+  };
+  // « Changer » stays on the card as soon as the outing is read (Ecrans › E-08); E-06 needs the
+  // route, read again when it failed.
+  const change = () => {
+    if (route && outing) {
+      planSheet.current?.open(route, outing);
+    } else if (state.status === 'error') {
+      retryRoute();
+      showToast('error', t('routes.outing.toast.changeFailed'), {
+        subtitle: t('routes.outing.toast.failedBody'),
+        isAboveStickyBar: true,
+      });
+    } else {
+      isChangeAsked.current = true;
     }
   };
   const confirmCancel = (current: PlannedRoute) =>
@@ -115,7 +143,7 @@ export function OutingScreen({ outingId, onBack, onSeeRoute }: OutingScreenProps
         isOnline={isOnline}
         checked={checklist.checked}
         now={new Date()}
-        onChange={route ? () => planSheet.current?.open(route, outing) : null}
+        onChange={outing.routeId && state.status !== 'removed' ? change : null}
         onToggle={(step) =>
           void checklist.toggle(step.id).then((isChecked) => {
             if (isChecked && route) {

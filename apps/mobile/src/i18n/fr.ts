@@ -617,6 +617,7 @@ export const fr = {
         restoreFailed: "La sortie n'a pas pu être rétablie",
         failedBody: 'Vérifiez la connexion, puis réessayez.',
         checkFailed: "La case n'a pas pu être enregistrée",
+        changeFailed: 'La date ne peut pas être changée pour l’instant',
       },
       error: {
         title: 'Votre sortie ne se charge pas',

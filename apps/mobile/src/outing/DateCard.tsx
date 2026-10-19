@@ -9,7 +9,7 @@ interface DateCardProps {
   day: string;
   hours: string;
   spoken: string;
-  /** « Changer », which reopens E-06; null while the route is not read. */
+  /** « Changer », which reopens E-06; null for an outing whose route is gone. */
   onChange: (() => void) | null;
 }
 

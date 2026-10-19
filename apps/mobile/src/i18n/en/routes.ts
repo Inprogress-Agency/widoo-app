@@ -65,6 +65,7 @@ export const routes = {
         restoreFailed: 'The outing could not be restored',
         failedBody: 'Check the connection, then try again.',
         checkFailed: 'The box could not be saved',
+        changeFailed: 'The date cannot be changed for now',
       },
       error: {
         title: 'Your outing is not loading',
