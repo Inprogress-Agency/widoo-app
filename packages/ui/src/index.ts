@@ -3,6 +3,7 @@ export { Checkbox } from './components/Checkbox';
 export { ConfirmDialog } from './components/ConfirmDialog';
 export { CountBadge } from './components/CountBadge';
 export { DetailPanel } from './components/DetailPanel';
+export { DetailPanelSkeleton } from './components/DetailPanelSkeleton';
 export {
   DropdownMenu,
   DropdownMenuContent,
