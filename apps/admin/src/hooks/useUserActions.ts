@@ -1,5 +1,6 @@
 import { getSessionClients } from '@/lib/auth/clients';
 import { downloadTextFile } from '@/lib/download';
+import { isRecentSignInRequired } from '@/lib/recent-sign-in';
 import { messages } from '@/messages/fr';
 import { ApiRequestError } from '@widoo/api-client';
 import {
@@ -33,10 +34,18 @@ function failureTitleOf(error: unknown): string {
  * The actions of the team on one account (A-06), each told in a toast. `onSettled` is called when
  * the action is done, and also after a conflict (another member got there first, or the account
  * no longer allows it): the screen then reads the account again. `onDeleted` replaces it for the
- * deletion, which leaves no card to read.
+ * deletion, which leaves no card to read. A sign-in too old for a sensitive action is no failure to
+ * tell in a toast: `isSignInRequired` says the person must sign in again, and `onSignInRequired`
+ * closes the window of the action.
  */
-export function useUserActions(userId: string, onSettled: () => void, onDeleted: () => void) {
+export function useUserActions(
+  userId: string,
+  onSettled: () => void,
+  onDeleted: () => void,
+  onSignInRequired: () => void,
+) {
   const [isBusy, setIsBusy] = useState(false);
+  const [isSignInRequired, setIsSignInRequired] = useState(false);
   const { api } = getSessionClients();
 
   const send = async (action: () => Promise<unknown>, successTitle: string, done = onSettled) => {
@@ -46,6 +55,11 @@ export function useUserActions(userId: string, onSettled: () => void, onDeleted:
       showToast('success', { title: successTitle });
       done();
     } catch (error) {
+      if (isRecentSignInRequired(error)) {
+        onSignInRequired();
+        setIsSignInRequired(true);
+        return;
+      }
       showToast('error', { title: failureTitleOf(error) });
       if (error instanceof ApiRequestError && error.status === 409) {
         onSettled();
@@ -57,6 +71,8 @@ export function useUserActions(userId: string, onSettled: () => void, onDeleted:
 
   return {
     isBusy,
+    isSignInRequired,
+    dismissSignInRequired: () => setIsSignInRequired(false),
     changeRole: (role: UserRole) =>
       send(() => api.changeUserRole(userId, { role }), texts.roleChanged),
     suspend: (reason: string) => send(() => api.suspendUser(userId, { reason }), texts.suspended),

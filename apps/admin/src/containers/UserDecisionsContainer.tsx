@@ -50,7 +50,7 @@ export function UserDecisionsContainer({
   onSettled,
   onDeleted,
 }: UserDecisionsContainerProps) {
-  const { session } = useSession();
+  const { session, signOut } = useSession();
   const [openAction, setOpenAction] = useState<UserActionName | null>(null);
   const [reason, setReason] = useState('');
   const [role, setRole] = useState<string>(user.role);
@@ -69,6 +69,7 @@ export function UserDecisionsContainer({
       close();
       onDeleted();
     },
+    close,
   );
   const member = session.status === 'signedIn' ? session.member : null;
   const allowed = member ? allowedUserActions(member, user) : [];
@@ -160,6 +161,17 @@ export function UserDecisionsContainer({
         closeLabel={messages.confirm.close}
         confirmLabel={texts.delete.confirm}
         isBusy={actions.isBusy}
+      />
+      <ConfirmDialog
+        isOpen={actions.isSignInRequired}
+        onCancel={actions.dismissSignInRequired}
+        onConfirm={() => void signOut()}
+        title={texts.signInAgain.title}
+        description={texts.signInAgain.description}
+        cancelLabel={messages.confirm.cancel}
+        closeLabel={messages.confirm.close}
+        confirmLabel={texts.signInAgain.confirm}
+        confirmVariant="primary"
       />
     </>
   );
