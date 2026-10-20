@@ -24,6 +24,7 @@ export { zoneMinSpanM, zoneSearchBox } from './zone';
 export * from './schemas/admin';
 export * from './schemas/admin-actions';
 export * from './schemas/admin-affiliation';
+export * from './schemas/admin-b2b';
 export * from './schemas/admin-settings';
 export * from './schemas/admin-reports';
 export * from './schemas/admin-signals';
