@@ -6,7 +6,7 @@ import { Button } from '../ui/Button';
 import { Icon, uiIcon } from '../ui/Icon';
 import { Text } from '../ui/Text';
 import { TextLink } from '../ui/TextLink';
-import { parisTime } from './sheetText';
+import { localTime } from './sheetText';
 import { arrivalOf, EndItem, StepItem } from './StepItem';
 
 interface RouteStepsProps {
@@ -41,7 +41,7 @@ export function RouteSteps({
   onEndLayout,
 }: RouteStepsProps) {
   const { t } = useTranslation();
-  const start = parisTime(t, route.timeline.startsAt);
+  const start = localTime(t, route.timeline.startsAt, route.timezone);
   const lockedCount = route.steps.filter((step) => step.isLocked).length;
   // The widest time column of the rows, which they all take.
   const [timeWidth, setTimeWidth] = useState(0);
@@ -77,18 +77,19 @@ export function RouteSteps({
             key={step.id}
             step={step}
             total={route.stepCount}
-            time={arrivalOf(t, route.timeline.steps[index]?.arrivesAt)}
+            time={arrivalOf(t, route.timeline.steps[index]?.arrivesAt, route.timezone)}
             isExpanded={expanded === index}
             onToggle={() => onToggle(index)}
             creatorName={creatorName}
             now={now}
+            timeZone={route.timezone}
             timeWidth={timeWidth}
             onTimeWidth={handleTimeWidth}
             onLayout={(event: LayoutChangeEvent) => onStepLayout(index, event.nativeEvent.layout.y)}
           />
         ))}
         <EndItem
-          time={parisTime(t, route.timeline.endsAt)}
+          time={localTime(t, route.timeline.endsAt, route.timezone)}
           timeWidth={timeWidth}
           onTimeWidth={handleTimeWidth}
           onLayout={(event) => onEndLayout(event.nativeEvent.layout.y)}

@@ -7,7 +7,7 @@ import { Avatar } from '../ui/Avatar';
 import { Icon, uiIcon } from '../ui/Icon';
 import { Text } from '../ui/Text';
 import { TextLink } from '../ui/TextLink';
-import { parisDay } from './sheetText';
+import { localDay } from './sheetText';
 
 /**
  * The creator box: logo or avatar, name and the blue seal of a certified creator (D-023), its
@@ -68,9 +68,9 @@ export function CreatorBox({
  * A review: initial, first name, date and its rating as a figure after a star (« ★ 5 »), then its
  * comment, read as one element « Camille, 17 sept., note 5 sur 5 ». No reply nor thread.
  */
-export function ReviewItem({ review }: { review: RouteReview }) {
+export function ReviewItem({ review, timeZone }: { review: RouteReview; timeZone?: string }) {
   const { t } = useTranslation();
-  const date = parisDay(review.createdAt);
+  const date = localDay(review.createdAt, timeZone);
   const spoken = t('route.reviews.item', { name: review.firstName, date, rating: review.rating });
   return (
     <View
@@ -133,7 +133,7 @@ export function RouteReviews({
         </Text>
       </View>
       {route.reviews.map((review) => (
-        <ReviewItem key={review.id} review={review} />
+        <ReviewItem key={review.id} review={review} timeZone={route.timezone} />
       ))}
       {onOpenReviews && count > route.reviews.length && (
         <TextLink

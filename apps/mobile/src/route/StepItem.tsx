@@ -12,7 +12,7 @@ import { PhotoCredit } from '../ui/PhotoCredit';
 import { StepDot } from '../ui/StepDot';
 import { Text } from '../ui/Text';
 import { TextLink } from '../ui/TextLink';
-import { hoursLine, parisTime, transitionText, verificationText, type Spoken } from './sheetText';
+import { hoursLine, localTime, transitionText, verificationText, type Spoken } from './sheetText';
 import { taxonomyLabels } from '../i18n/labels';
 
 /** M-08: a step unfolds in `base`, its detail fading in; with « Réduire les animations », in place. */
@@ -31,6 +31,8 @@ interface StepItemProps {
   /** First name of the creator, Widoo for the team: « Le conseil de Widoo ». */
   creatorName: string;
   now: Date;
+  /** IANA zone of the city of the route: « Ouvert aujourd'hui » is read at its time. */
+  timeZone: string;
   onLayout?: (event: LayoutChangeEvent) => void;
   /** The widest time of the timeline, which every row takes so that the dots line up. */
   timeWidth: number;
@@ -97,13 +99,15 @@ function StepDetail({
   step,
   creatorName,
   now,
+  timeZone,
 }: {
   step: RouteDetailStep;
   creatorName: string;
   now: Date;
+  timeZone: string;
 }) {
   const { t } = useTranslation();
-  const hours = hoursLine(t, step, now);
+  const hours = hoursLine(t, step, now, timeZone);
   const verification = verificationText(t, step, now);
   const cost = step.costPerPersonEur;
   return (
@@ -255,6 +259,7 @@ export function StepItem({
   onToggle,
   creatorName,
   now,
+  timeZone,
   onLayout,
   timeWidth,
   onTimeWidth,
@@ -334,7 +339,7 @@ export function StepItem({
           </Pressable>
         )}
         {!step.isLocked && isExpanded && (
-          <StepDetail step={step} creatorName={creatorName} now={now} />
+          <StepDetail step={step} creatorName={creatorName} now={now} timeZone={timeZone} />
         )}
         {step.transition && <TransitionLine transition={step.transition} />}
       </View>
@@ -375,9 +380,9 @@ export function EndItem({
   );
 }
 
-/** The arrival time of the step at `index` in the timeline of the sheet. */
-export function arrivalOf(t: TFunction, arrivesAt: string | undefined): Spoken {
-  return arrivesAt ? parisTime(t, arrivesAt) : { short: '', spoken: '' };
+/** The arrival time of the step at `index` in the timeline of the sheet, in its city. */
+export function arrivalOf(t: TFunction, arrivesAt: string | undefined, timeZone: string): Spoken {
+  return arrivesAt ? localTime(t, arrivesAt, timeZone) : { short: '', spoken: '' };
 }
 
 const styles = StyleSheet.create({

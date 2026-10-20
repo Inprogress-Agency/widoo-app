@@ -7,7 +7,7 @@ import { View, useWindowDimensions } from 'react-native';
 import { ReduceMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatDuration } from '../format/duration';
-import { parisTime, transitionText } from '../route/sheetText';
+import { localTime, transitionText } from '../route/sheetText';
 import { Button } from '../ui/Button';
 import { haptic } from '../ui/haptics';
 import { Icon, uiIcon } from '../ui/Icon';
@@ -34,7 +34,7 @@ const toneColor = { done: 'green-ink', current: 'blue-ink', muted: 'muted' } as 
 
 function TimelineRow({ entry, progress }: { entry: GoStep; progress: GoProgress }) {
   const { t } = useTranslation();
-  const time = entry.times ? parisTime(t, entry.times.arrivesAt) : null;
+  const time = entry.times ? localTime(t, entry.times.arrivesAt) : null;
   const state = timelineState(t, entry, progress.phase);
   const duration = formatDuration(t, entry.step.durationMin, 'short');
   const transition = entry.step.transition ? transitionText(t, entry.step.transition) : null;
@@ -116,8 +116,8 @@ export function GoSheet({ planned, progress, onFinish, onStop }: GoSheetProps) {
   const { height } = useWindowDimensions();
   const sheet = useRef<BottomSheet>(null);
   const [index, setIndex] = useState(0);
-  const start = parisTime(t, planned.timeline.startsAt);
-  const end = parisTime(t, planned.timeline.endsAt);
+  const start = localTime(t, planned.timeline.startsAt);
+  const end = localTime(t, planned.timeline.endsAt);
   const snapPoints = [GO_SHEET_PEEK + insets.bottom, height - STRETCHED_TOP];
   return (
     <BottomSheet

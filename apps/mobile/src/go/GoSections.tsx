@@ -6,7 +6,7 @@ import { Linking, Pressable, View } from 'react-native';
 import { analytics } from '../analytics';
 import { formatDuration } from '../format/duration';
 import { taxonomyLabels } from '../i18n/labels';
-import { hoursLine, parisTime, transitionText } from '../route/sheetText';
+import { hoursLine, localTime, transitionText } from '../route/sheetText';
 import { Icon, uiIcon } from '../ui/Icon';
 import { Text } from '../ui/Text';
 import { stepName } from './goText';
@@ -130,7 +130,7 @@ export function GoSections({ progress, route, now }: GoSectionsProps) {
               {t('go.sections.nextStep', {
                 category: taxonomyLabels().placeCategories[next.step.place.category],
                 duration: formatDuration(t, next.step.durationMin, 'short'),
-                time: next.times ? parisTime(t, next.times.arrivesAt).short : '',
+                time: next.times ? localTime(t, next.times.arrivesAt).short : '',
               })}
             </Text>
           </View>

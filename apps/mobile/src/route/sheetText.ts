@@ -14,12 +14,27 @@ import { dateFormat } from '../i18n/formats';
 
 /**
  * Texts of the route sheet (Ecrans › E-05), pure functions of the route and of the time, so that
- * the screen and its tests write a route the same way. Times are those of Paris, the only city.
+ * the screen and its tests write a route the same way. Times and hours are those of the city of
+ * the route (`RouteDetail.timezone`), never those of the phone: « Ouvert aujourd'hui » is read at
+ * the time of Paris.
  */
 
-const timeZone = 'Europe/Paris';
-const isoDay = new Intl.DateTimeFormat('en-CA', { timeZone });
-const weekdayOf = new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone });
+/** Paris, the only city: the zone of what does not carry its own (a withdrawal, a review list). */
+export const DEFAULT_TIME_ZONE = 'Europe/Paris';
+
+/** The day (« 2026-10-13 ») and the weekday (« Tue ») of a date in a zone, one pair per zone. */
+const dayFormats = new Map<string, { isoDay: Intl.DateTimeFormat; weekday: Intl.DateTimeFormat }>();
+function dayFormatsOf(timeZone: string) {
+  let formats = dayFormats.get(timeZone);
+  if (!formats) {
+    formats = {
+      isoDay: new Intl.DateTimeFormat('en-CA', { timeZone }),
+      weekday: new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone }),
+    };
+    dayFormats.set(timeZone, formats);
+  }
+  return formats;
+}
 const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const DAY_MS = 86_400_000;
 const MONTH_DAYS = 30;
@@ -29,8 +44,11 @@ export interface Spoken {
   spoken: string;
 }
 
-/** « 10:35 », said « 10 heures 35 »; « 10 heures » on the hour; in English, said as written. */
-export function parisTime(t: TFunction, iso: string): Spoken {
+/**
+ * « 10:35 » in the zone of the city, said « 10 heures 35 »; « 10 heures » on the hour; in English,
+ * said as written.
+ */
+export function localTime(t: TFunction, iso: string, timeZone = DEFAULT_TIME_ZONE): Spoken {
   const short = dateFormat({ hour: '2-digit', minute: '2-digit', timeZone }).format(new Date(iso));
   const [hours = 0, minutes = 0] = short.split(':').map(Number);
   const spoken =
@@ -40,17 +58,22 @@ export function parisTime(t: TFunction, iso: string): Spoken {
   return { short, spoken };
 }
 
-/** « 20 sept. », « 20 Sept ». */
-export const parisDay = (iso: string) =>
+/** « 20 sept. », « 20 Sept », in the zone of the city. */
+export const localDay = (iso: string, timeZone = DEFAULT_TIME_ZONE) =>
   dateFormat({ day: 'numeric', month: 'short', timeZone }).format(new Date(iso));
 
 /** « 22 sept » before the full stop of a sentence, never « sept.. ». */
 export const withoutFinalDot = (text: string) => text.replace(/\.$/, '');
 
-/** The slots of a place on the day of `now` in Paris, seasonal hours included when valid. */
-export function todaySlots(hours: readonly PlaceHours[], now: Date): PlaceHours[] {
-  const weekday = weekdays.indexOf(weekdayOf.format(now));
-  const today = isoDay.format(now);
+/** The slots of a place on the day of `now` in its city, seasonal hours included when valid. */
+export function todaySlots(
+  hours: readonly PlaceHours[],
+  now: Date,
+  timeZone = DEFAULT_TIME_ZONE,
+): PlaceHours[] {
+  const formats = dayFormatsOf(timeZone);
+  const weekday = weekdays.indexOf(formats.weekday.format(now));
+  const today = formats.isoDay.format(now);
   return hours.filter(
     (slot) =>
       slot.weekday === weekday &&
@@ -77,13 +100,18 @@ export type HoursLine =
 
 /**
  * « Ouvert » in green then « aujourd'hui, 10:00 – 19:00 »; a reported place gives its usual
- * hours instead, without « Ouvert » (D-013).
+ * hours instead, without « Ouvert » (D-013). Today is the day of `now` in the city of the route.
  */
-export function hoursLine(t: TFunction, step: RouteDetailStep, now: Date): HoursLine | null {
+export function hoursLine(
+  t: TFunction,
+  step: RouteDetailStep,
+  now: Date,
+  timeZone = DEFAULT_TIME_ZONE,
+): HoursLine | null {
   if (step.place.hours.length === 0) {
     return null;
   }
-  const slots = todaySlots(step.place.hours, now);
+  const slots = todaySlots(step.place.hours, now, timeZone);
   if (step.verification.reports) {
     const usual = slots.length > 0 ? slots : step.place.hours.slice(0, 1);
     return {
@@ -123,9 +151,9 @@ export function verificationText(t: TFunction, step: RouteDetailStep, now: Date)
       kind: 'reported',
       banner: t('route.step.reportedBanner', {
         count: reports.count,
-        date: withoutFinalDot(parisDay(reports.lastAt)),
+        date: withoutFinalDot(localDay(reports.lastAt)),
       }),
-      lastVisit: lastConfirmedAt && t('route.step.lastVisit', { date: parisDay(lastConfirmedAt) }),
+      lastVisit: lastConfirmedAt && t('route.step.lastVisit', { date: localDay(lastConfirmedAt) }),
     };
   }
   if (lastConfirmedAt === null) {
@@ -137,7 +165,7 @@ export function verificationText(t: TFunction, step: RouteDetailStep, now: Date)
       text: t('route.step.lastCheck', { ago: agoText(t, lastConfirmedAt, now) }),
     };
   }
-  const date = parisDay(lastConfirmedAt);
+  const date = localDay(lastConfirmedAt);
   return {
     kind: 'verified',
     text:
