@@ -493,6 +493,11 @@ export const fr = {
     sections: {
       practical: 'Pratique',
       word: 'Le mot de {{name}}',
+      mustSee: 'À ne pas manquer',
+      images: 'En images',
+      photoCount_one: '{{count}} photo',
+      photoCount_other: '{{count}} photos',
+      photo: 'Photo {{position}} sur {{count}}',
       next: 'Ensuite',
       path: 'Le chemin de {{name}}',
       nextStep: '{{category}}, {{duration}}, vers {{time}}',
