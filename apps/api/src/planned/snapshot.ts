@@ -12,7 +12,7 @@ import {
   type RouteTimeline,
 } from '@widoo/shared';
 import { asc, eq, inArray } from 'drizzle-orm';
-import type { Db } from '../db/client';
+import type { Db, Tx } from '../db/client';
 import { cities, placeHours, places, routes, steps } from '../db/schema';
 import { photosByOwner } from '../media/photos';
 
@@ -26,7 +26,10 @@ const httpsOrNull = (url: string | null) => (url?.startsWith('https://') ? url :
 const hourMinute = (time: string) => time.slice(0, 5);
 
 /** Opening slots of each place, by weekday then opening; a place without any is absent. */
-export async function hoursByPlace(db: Db, placeIds: string[]): Promise<Map<string, PlaceHours[]>> {
+export async function hoursByPlace(
+  db: Db | Tx,
+  placeIds: string[],
+): Promise<Map<string, PlaceHours[]>> {
   const rows =
     placeIds.length === 0
       ? []

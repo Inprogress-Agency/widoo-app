@@ -9,23 +9,21 @@ import {
   defaultBucketThresholds,
   durationBucketOf,
   type BucketThresholds,
-  type BudgetBucket,
   type CoherenceIssue,
-  type DurationBucket,
   type LatLng,
   type PlaceHours,
+  type RouteComputed,
+  type RouteEvaluation,
   type RouteTimeline,
-  type Transport,
   type VerificationStatus,
 } from '@widoo/shared';
-import { derivedConditionsOf, mainTransportOf, type DerivedCondition } from './derived';
+import { derivedConditionsOf, mainTransportOf } from './derived';
 import {
   defaultCoherenceThresholds,
   evaluateRoute,
   type CoherenceThresholds,
   type EvaluatedRoute,
   type EvaluatedStep,
-  type RouteAggregates,
 } from './evaluate';
 import { reorderOf } from './order';
 import { compatibleStart, defaultStartOf, instantAt } from './start';
@@ -66,30 +64,15 @@ export interface ComputeOptions {
   buckets?: BucketThresholds;
 }
 
-/** What `computed` holds: the aggregates and what is derived from the steps. */
-export interface ComputedAggregates extends RouteAggregates {
-  durationBucket: DurationBucket;
-  /** Of the exact sum, never of the displayed rounding (D-032). */
-  budgetBucket: BudgetBucket;
-  conditions: DerivedCondition[];
-  transport: Transport;
-  /** `HH:MM` of the start: the creator's, else computed (D-050). */
-  startTime: string;
-  startComputed: boolean;
-}
+/** What `computed` holds: the aggregates and what is derived from the steps (`RouteComputed`). */
+export type ComputedAggregates = RouteComputed;
 
-export interface ComputedRoute {
-  /** Null without any step. */
-  computed: ComputedAggregates | null;
-  warnings: CoherenceIssue[];
-  errors: CoherenceIssue[];
-  /** With `closed_at_arrival`: the closest start where every place is open, if one fits (D-049). */
-  proposedStart: string | null;
-  /** With `back_and_forth`: positions of the steps in the order « Réordonner » applies (D-049). */
-  proposedOrder: number[] | null;
-  /** Timeline of the start, today in the city; null without any step. */
-  timeline: RouteTimeline | null;
-}
+/**
+ * The editor's `RouteEvaluation` (with `proposedStart` after `closed_at_arrival`, `proposedOrder`
+ * after `back_and_forth`, D-049), and the timeline of the start today in the city, null without
+ * any step.
+ */
+export type ComputedRoute = RouteEvaluation & { timeline: RouteTimeline | null };
 
 /** A place never verified, or flagged or closed by the visitors (`unverified_place`). */
 export function isUnverifiedPlace(place: Pick<RoutePlace, 'verificationStatus' | 'verifiedAt'>) {

@@ -3,12 +3,7 @@
  * route, the published version staying online until the revision is validated.
  */
 import { mainTransportOf } from '@widoo/orchestration';
-import {
-  budgetBucketOf,
-  durationBucketOf,
-  isRevisionEditable,
-  routeEditModeOf,
-} from '@widoo/shared';
+import { isRevisionEditable, routeEditModeOf } from '@widoo/shared';
 import { eq } from 'drizzle-orm';
 import type { Tx } from '../db/client';
 import { envelopeOf } from '../db/geography';
@@ -17,7 +12,7 @@ import { conflict } from '../errors';
 import { replaceSteps, type RouteContent } from './content';
 import { accessColumnOf } from '../transit/access';
 import type { RouteRow } from './lifecycle';
-import { evaluate } from './recompute';
+import { recomputeRoute } from './recompute';
 import type { Workspace } from './workspace';
 
 /**
@@ -31,13 +26,13 @@ export async function writeInPlace(
   content: RouteContent,
   now: Date,
 ): Promise<RouteRow> {
-  const { placeById, transitions, evaluation } = await evaluate(tx, route.id, content, now);
+  const { placeById, transitions, result } = await recomputeRoute(tx, route, content, now);
   await replaceSteps(tx, route.id, content, transitions);
   const located = content.steps.flatMap((step) => {
     const place = placeById.get(step.placeId);
     return place ? [place] : [];
   });
-  const { computed, warnings } = evaluation;
+  const { computed, warnings } = result;
   const [written] = await tx
     .update(routes)
     .set({
@@ -64,8 +59,9 @@ export async function writeInPlace(
         access: accessColumnOf(located[0]?.location),
         computed_at: computed.computedAt,
       },
-      durationBucket: computed && durationBucketOf(computed.durationMin),
-      budgetBucket: computed && budgetBucketOf(computed.budgetPerPersonEur),
+      // Of the bounds read from `settings`, by the engine.
+      durationBucket: computed?.durationBucket ?? null,
+      budgetBucket: computed?.budgetBucket ?? null,
     })
     .where(eq(routes.id, route.id))
     .returning();

@@ -3,7 +3,7 @@
  * cohérence) that need neither the hours nor the places: the rules on hours, verification and
  * order are added to them by `computeRoute`.
  */
-import type { CoherenceIssue, CoherenceRuleCode, RouteEffort, Transport } from '@widoo/shared';
+import type { CoherenceIssue, CoherenceRuleCode, RouteComputed, Transport } from '@widoo/shared';
 
 /** A step as the rules see it, its trip to the next one estimated (D-088). */
 export interface EvaluatedStep {
@@ -54,16 +54,11 @@ export const defaultCoherenceThresholds: CoherenceThresholds = {
   backAndForthMax: 0.5,
 };
 
-/** Aggregates of the steps on their estimated trips (D-088). */
-export interface RouteAggregates {
-  durationMin: number;
-  /** Exact sum of the costs per person: rounded for display only (D-032). */
-  budgetPerPersonEur: number;
-  distanceM: number;
-  walkingM: number;
-  effort: RouteEffort;
-  computedAt: string;
-}
+/** Aggregates of the steps on their estimated trips (D-088), the first fields of `RouteComputed`. */
+export type RouteAggregates = Pick<
+  RouteComputed,
+  'durationMin' | 'budgetPerPersonEur' | 'distanceM' | 'walkingM' | 'effort' | 'computedAt'
+>;
 
 /** The aggregates, null without any step, and the rules broken: blocking ones in `errors`. */
 export interface BaseEvaluation {

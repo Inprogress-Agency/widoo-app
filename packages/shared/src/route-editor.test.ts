@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { ChangeRouteStatus, CreateRoute, PutRouteSteps, StepInput, UpdateRoute } from '.';
+import {
+  ChangeRouteStatus,
+  CreateRoute,
+  PutRouteSteps,
+  RouteEvaluation,
+  StepInput,
+  UpdateRoute,
+} from '.';
 
 const placeId = '01997a4e-8c00-7000-8000-000000000001';
 const stepId = '01997a4e-8c00-7000-8000-000000000002';
@@ -101,5 +108,46 @@ describe('ChangeRouteStatus', () => {
   it('lets the author set private, draft or unpublished only', () => {
     expect(ChangeRouteStatus.safeParse({ status: 'private' }).success).toBe(true);
     expect(ChangeRouteStatus.safeParse({ status: 'published' }).success).toBe(false);
+  });
+});
+
+describe('RouteEvaluation', () => {
+  const evaluation = {
+    computed: {
+      durationMin: 165,
+      budgetPerPersonEur: 12.5,
+      distanceM: 1200,
+      walkingM: 1200,
+      effort: 'easy',
+      durationBucket: '1_2h',
+      budgetBucket: 'low',
+      conditions: ['no_booking', 'indoor'],
+      transport: 'walk',
+      startTime: '14:00',
+      startComputed: true,
+      computedAt: '2026-10-20T08:00:00.000Z',
+    },
+    warnings: [{ code: 'closed_at_arrival', stepPosition: 1 }],
+    errors: [],
+    proposedStart: '14:30',
+    proposedOrder: null,
+  };
+
+  it('carries the start, the buckets and what the engine proposes (D-049, D-050)', () => {
+    expect(RouteEvaluation.parse(evaluation)).toEqual(evaluation);
+    const reorder = { ...evaluation, proposedStart: null, proposedOrder: [0, 2, 1] };
+    expect(RouteEvaluation.parse(reorder).proposedOrder).toEqual([0, 2, 1]);
+  });
+
+  it.each([
+    ['a start with seconds', { ...evaluation, proposedStart: '14:30:00' }],
+    ['a negative position', { ...evaluation, proposedOrder: [0, -1] }],
+    ['no proposal at all', { ...evaluation, proposedStart: undefined }],
+    [
+      'a computed start out of the day',
+      { ...evaluation, computed: { ...evaluation.computed, startTime: '25:00' } },
+    ],
+  ])('refuses %s', (_, body) => {
+    expect(RouteEvaluation.safeParse(body).success).toBe(false);
   });
 });

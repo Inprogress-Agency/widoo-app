@@ -158,7 +158,10 @@ export const CoherenceIssue = z.object({
 });
 export type CoherenceIssue = z.infer<typeof CoherenceIssue>;
 
-/** Aggregates of the orchestration, on the estimated trips (D-088); null without any step. */
+/**
+ * What the orchestration computes of a route, on the estimated trips (D-088), and stores in
+ * `routes.computed`; null without any step.
+ */
 export const RouteComputed = z.object({
   durationMin: z.int().nonnegative(),
   /** Exact sum of the step costs per person: the app rounds it for display (D-032). */
@@ -166,6 +169,17 @@ export const RouteComputed = z.object({
   distanceM: z.number().nonnegative(),
   walkingM: z.number().nonnegative(),
   effort: z.enum(routeEfforts),
+  /** Buckets of the bounds read from `settings`; the budget one of the exact sum (D-032). */
+  durationBucket: z.enum(taxonomies.durations),
+  budgetBucket: z.enum(taxonomies.budgets),
+  /** Conditions derived from the steps (`no_booking`, `indoor`, `outdoor`). */
+  conditions: z.array(z.enum(taxonomies.conditions)),
+  /** The mode of the trips that covers the most distance (D-048). */
+  transport: z.enum(taxonomies.transports),
+  /** Start of the route: the creator's « Départ conseillé », else computed (D-050). */
+  startTime: LocalTime,
+  /** True when no start was chosen and `startTime` is the computed one. */
+  startComputed: z.boolean(),
   computedAt: z.iso.datetime(),
 });
 export type RouteComputed = z.infer<typeof RouteComputed>;
@@ -178,6 +192,10 @@ export const RouteEvaluation = z.object({
   computed: RouteComputed.nullable(),
   warnings: z.array(CoherenceIssue),
   errors: z.array(CoherenceIssue),
+  /** With `closed_at_arrival`: the closest start where every place is open, if one fits (D-049). */
+  proposedStart: LocalTime.nullable(),
+  /** With `back_and_forth`: positions of the steps in the order « Réordonner » applies (D-049). */
+  proposedOrder: z.array(z.int().nonnegative()).nullable(),
 });
 export type RouteEvaluation = z.infer<typeof RouteEvaluation>;
 
