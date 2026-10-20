@@ -39,7 +39,13 @@ export {
   opensEverywhere,
   START_SEARCH,
 } from './start';
-export { coherenceSettingKeys, coherenceThresholdsOf } from './settings';
+export {
+  coherenceSettingKeys,
+  coherenceThresholdsOf,
+  orchestrationSettingKeys,
+  orchestrationSettingsOf,
+  type OrchestrationSettings,
+} from './settings';
 export {
   derivedConditionKeys,
   derivedConditionsOf,
