@@ -139,7 +139,7 @@ describe('markPlannedStepDone', () => {
 });
 
 describe('markPlannedStepArrived', () => {
-  it('posts « J\'y suis » of a step, without a body', async () => {
+  it("posts « J'y suis » of a step, without a body", async () => {
     const { client, call, headers } = setup(json(200, planned));
     await expect(client.markPlannedStepArrived(id, stepId)).resolves.toMatchObject({ id });
     expect(call()?.[0]).toBe(`http://10.0.2.2:8080/v1/me/planned/${id}/steps/${stepId}/arrived`);
