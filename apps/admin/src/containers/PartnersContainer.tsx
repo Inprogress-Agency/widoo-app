@@ -1,10 +1,12 @@
 'use client';
 
+import { PartnerActions } from '@/components/b2b/PartnerActions';
 import { PartnerPanelContent } from '@/components/b2b/PartnerPanelContent';
 import { PartnersTable } from '@/components/b2b/PartnersTable';
 import { PageMessage } from '@/components/states/PageMessage';
 import { sectionPaths } from '@/config/navigation';
 import { catalogRoutePathOf } from '@/containers/CatalogRoutesContainer';
+import { PartnerFormContainer } from '@/containers/PartnerFormContainer';
 import { useCardOnScreen } from '@/hooks/useCardOnScreen';
 import { useRemoteData } from '@/hooks/useRemoteData';
 import { getSessionClients } from '@/lib/auth/clients';
@@ -12,6 +14,7 @@ import { messages } from '@/messages/fr';
 import type { B2bClient } from '@widoo/shared';
 import { Button, DetailPanel, DetailPanelSkeleton } from '@widoo/ui';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 
 const texts = messages.b2b;
 /** Parameter of the address that holds the partner whose card is open next to the list. */
@@ -29,6 +32,7 @@ export function PartnersContainer() {
   );
   const { fresh: openPartner, isLoading: isCardLoading, stale } = useCardOnScreen(openId, card);
   const items = partners.status === 'ready' ? partners.data.items : undefined;
+  const [dialog, setDialog] = useState<'create' | 'edit' | null>(null);
 
   const showPartner = (partnerId: string | null) =>
     router.replace(
@@ -38,12 +42,22 @@ export function PartnersContainer() {
       { scroll: false },
     );
 
+  const handleSaved = (saved: B2bClient) => {
+    if (partners.status !== 'loading') partners.reload();
+    if (saved.id === openId) {
+      if (card.status !== 'loading') card.reload();
+    } else {
+      showPartner(saved.id);
+    }
+  };
+
   const renderCard = (partner: B2bClient) => (
     <DetailPanel
       key={partner.id}
       title={partner.name}
       closeLabel={messages.confirm.close}
       onClose={() => showPartner(null)}
+      actions={<PartnerActions onEdit={() => setDialog('edit')} />}
     >
       <PartnerPanelContent partner={partner} routePathOf={catalogRoutePathOf} />
     </DetailPanel>
@@ -79,9 +93,12 @@ export function PartnersContainer() {
   return (
     <div className="flex items-stretch gap-24">
       <div className="flex min-w-0 flex-1 flex-col gap-16">
-        {items ? (
-          <p className="text-body-s text-muted-foreground">{texts.total(items.length)}</p>
-        ) : null}
+        <div className="flex flex-wrap items-center gap-16">
+          <Button onClick={() => setDialog('create')}>{texts.add}</Button>
+          {items ? (
+            <p className="text-body-s text-muted-foreground">{texts.total(items.length)}</p>
+          ) : null}
+        </div>
         {items?.length === 0 ? (
           <PageMessage title={texts.empty.title} text={texts.empty.text} />
         ) : (
@@ -94,6 +111,13 @@ export function PartnersContainer() {
         )}
       </div>
       {renderPanel()}
+      {dialog ? (
+        <PartnerFormContainer
+          partner={dialog === 'edit' ? openPartner : null}
+          onClose={() => setDialog(null)}
+          onSaved={handleSaved}
+        />
+      ) : null}
     </div>
   );
 }
