@@ -1,4 +1,4 @@
-import { ApiError, PlannedMapsUrl, PlannedRoute } from '@widoo/shared';
+import { ApiError, PlannedMapsUrl, PlannedRoute, PlannedRouteList } from '@widoo/shared';
 import { stepMapsUrl } from '@widoo/orchestration';
 import { and, eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -70,49 +70,80 @@ const unskip = (headers: Headers, id: string, stepId: string | undefined) =>
 const mapsUrl = (headers: Headers, id: string) =>
   app.inject({ url: `/v1/me/planned/${id}/maps-url`, headers });
 
-describe('markStepArrived and skipStep', () => {
+describe('markStepArrived, skipStep and unskipStep', () => {
   const userIdOf = async (headers: Headers) =>
     (await app.inject({ url: '/v1/me', headers })).json<{ id: string }>().id;
+  // Distinct times, so that a second call that wrote its own time would show.
+  const first = new Date('2026-10-24T10:05:00.000Z');
+  const later = new Date('2026-10-24T10:20:00.000Z');
 
-  it('marks arrived once, skips a second time, and unskips back to before', async () => {
+  it('marks a step arrived once, keeping the first time', async () => {
     const headers = await fixtures.signIn();
     const { id, route } = await go(headers);
     const userId = await userIdOf(headers);
     const stepId = route.steps[0]?.id ?? '';
 
-    const arrived = await markStepArrived(app.db, userId, id, stepId, new Date());
-    const arrivedAt = arrived.steps[0]?.arrivedAt;
-    expect(arrivedAt).not.toBeNull();
-    // A second « J'y suis » keeps the first time.
-    const again = await markStepArrived(app.db, userId, id, stepId, new Date());
-    expect(again.steps[0]?.arrivedAt).toBe(arrivedAt);
-
-    const skipped = await skipStep(app.db, userId, id, stepId, new Date());
-    const skippedAt = skipped.steps[0]?.skippedAt;
-    expect(skippedAt).not.toBeNull();
-    expect(skipped.steps[0]?.doneAt).toBeNull();
-    // A second « Passer cette étape » keeps the first time too.
-    const skippedAgain = await skipStep(app.db, userId, id, stepId, new Date());
-    expect(skippedAgain.steps[0]?.skippedAt).toBe(skippedAt);
-
-    // « Annuler » puts the step back as it was, arrival kept, never done.
-    const unskipped = await unskipStep(app.db, userId, id, stepId);
-    expect(unskipped.steps[0]).toEqual({ stepId, arrivedAt, doneAt: null, skippedAt: null });
-    const unskippedAgain = await unskipStep(app.db, userId, id, stepId);
-    expect(unskippedAgain.steps[0]?.skippedAt).toBeNull();
+    const arrived = await markStepArrived(app.db, userId, id, stepId, first);
+    expect(arrived.steps[0]).toEqual({
+      stepId,
+      arrivedAt: first.toISOString(),
+      doneAt: null,
+      skippedAt: null,
+    });
+    const again = await markStepArrived(app.db, userId, id, stepId, later);
+    expect(again.steps[0]?.arrivedAt).toBe(first.toISOString());
   });
 
-  it('refuses to skip a done step with 409', async () => {
+  it('skips a step once, never done, and « Annuler » gives back the step as it was', async () => {
+    const headers = await fixtures.signIn();
+    const { id, route } = await go(headers);
+    const userId = await userIdOf(headers);
+    const [onSite, onTheWay] = route.steps.map((step) => step.id);
+
+    // On site (arrived), then skipped: « Annuler » keeps the arrival.
+    await markStepArrived(app.db, userId, id, onSite ?? '', first);
+    const skipped = await skipStep(app.db, userId, id, onSite ?? '', later);
+    expect(skipped.steps[0]).toMatchObject({ doneAt: null, skippedAt: later.toISOString() });
+    const skippedAgain = await skipStep(app.db, userId, id, onSite ?? '', new Date());
+    expect(skippedAgain.steps[0]?.skippedAt).toBe(later.toISOString());
+    const unskipped = await unskipStep(app.db, userId, id, onSite ?? '');
+    expect(unskipped.steps[0]).toEqual({
+      stepId: onSite,
+      arrivedAt: first.toISOString(),
+      doneAt: null,
+      skippedAt: null,
+    });
+
+    // On the way (never arrived), then skipped: « Annuler » gives an untouched step back.
+    await skipStep(app.db, userId, id, onTheWay ?? '', later);
+    const back = await unskipStep(app.db, userId, id, onTheWay ?? '');
+    expect(back.steps[1]).toEqual({
+      stepId: onTheWay,
+      arrivedAt: null,
+      doneAt: null,
+      skippedAt: null,
+    });
+    // Idempotent: unskipping a step that is not skipped changes nothing.
+    expect((await unskipStep(app.db, userId, id, onTheWay ?? '')).steps[1]).toEqual(back.steps[1]);
+  });
+
+  it('refuses to skip a done step with 409, leaving it done', async () => {
     const headers = await fixtures.signIn();
     const { id, route } = await go(headers);
     const userId = await userIdOf(headers);
     const stepId = route.steps[0]?.id ?? '';
-    await markStepDone(app.db, userId, id, stepId, new Date());
-    await expect(skipStep(app.db, userId, id, stepId, new Date())).rejects.toMatchObject({
+    await markStepDone(app.db, userId, id, stepId, first);
+    await expect(skipStep(app.db, userId, id, stepId, later)).rejects.toMatchObject({
       statusCode: 409,
     });
+    const [row] = await app.db
+      .select()
+      .from(plannedSteps)
+      .where(and(eq(plannedSteps.plannedRouteId, id), eq(plannedSteps.stepId, stepId)));
+    expect(row).toMatchObject({ doneAt: first, skippedAt: null });
   });
 });
+
 describe('POST /v1/me/planned/:id/steps/:stepId/done', () => {
   it('marks a step done once, and a skipped step done', async () => {
     const headers = await fixtures.signIn();
@@ -147,6 +178,42 @@ describe('POST /v1/me/planned/:id/steps/:stepId/done', () => {
     );
   });
 
+  it('answers 409 once the Go is stopped', async () => {
+    const headers = await fixtures.signIn();
+    const { id, route } = await go(headers);
+    const payload = { status: 'stopped' };
+    await app.inject({ method: 'PATCH', url: `/v1/me/planned/${id}`, headers, payload });
+    for (const response of [
+      await arrived(headers, id, route.steps[0]?.id),
+      await skip(headers, id, route.steps[0]?.id),
+      await unskip(headers, id, route.steps[0]?.id),
+    ]) {
+      expect(response.statusCode).toBe(409);
+      expect(ApiError.parse(response.json()).code).toBe('conflict');
+    }
+  });
+
+  it('shows the arrival and the skip to another phone of the account, on both reads', async () => {
+    const headers = await fixtures.signIn();
+    const { id, route } = await go(headers);
+    const [onSite, passed] = route.steps.map((step) => step.id);
+    await arrived(headers, id, onSite);
+    await skip(headers, id, passed);
+
+    const one = PlannedRoute.parse(
+      (await app.inject({ url: `/v1/me/planned/${id}`, headers })).json(),
+    );
+    const list = PlannedRouteList.parse(
+      (await app.inject({ url: '/v1/me/planned', headers })).json(),
+    );
+    for (const read of [one, list.items.find((item) => item.id === id)]) {
+      expect(read?.steps[0]).toMatchObject({ stepId: onSite, doneAt: null, skippedAt: null });
+      expect(read?.steps[0]?.arrivedAt).not.toBeNull();
+      expect(read?.steps[1]).toMatchObject({ stepId: passed, arrivedAt: null, doneAt: null });
+      expect(read?.steps[1]?.skippedAt).not.toBeNull();
+    }
+  });
+
   it("answers 404 for another user's planning", async () => {
     const { id, route } = await go(await fixtures.signIn());
     const response = await done(await fixtures.signIn(), id, route.steps[0]?.id);
@@ -173,7 +240,14 @@ describe('POST and DELETE /v1/me/planned/:id/steps/:stepId/(arrived|skip)', () =
     expect(skippedAt).not.toBeNull();
     expect(skipped.steps[0]?.doneAt).toBeNull();
     // Plannings are personal: never cached.
-    expect((await arrived(headers, id, first?.id)).headers['cache-control']).toBe('no-store');
+    for (const response of [
+      await arrived(headers, id, first?.id),
+      await skip(headers, id, first?.id),
+      await unskip(headers, id, first?.id),
+    ]) {
+      expect(response.headers['cache-control']).toBe('no-store');
+    }
+    await skip(headers, id, first?.id);
 
     const unskipped = PlannedRoute.parse((await unskip(headers, id, first?.id)).json());
     expect(unskipped.steps[0]).toEqual({
@@ -215,6 +289,42 @@ describe('POST and DELETE /v1/me/planned/:id/steps/:stepId/(arrived|skip)', () =
     expect(
       (await skip(headers, started.id, started.route.steps[0]?.id, { signal: {} })).statusCode,
     ).toBe(422);
+  });
+
+  it('answers 409 once the Go is stopped', async () => {
+    const headers = await fixtures.signIn();
+    const { id, route } = await go(headers);
+    const payload = { status: 'stopped' };
+    await app.inject({ method: 'PATCH', url: `/v1/me/planned/${id}`, headers, payload });
+    for (const response of [
+      await arrived(headers, id, route.steps[0]?.id),
+      await skip(headers, id, route.steps[0]?.id),
+      await unskip(headers, id, route.steps[0]?.id),
+    ]) {
+      expect(response.statusCode).toBe(409);
+      expect(ApiError.parse(response.json()).code).toBe('conflict');
+    }
+  });
+
+  it('shows the arrival and the skip to another phone of the account, on both reads', async () => {
+    const headers = await fixtures.signIn();
+    const { id, route } = await go(headers);
+    const [onSite, passed] = route.steps.map((step) => step.id);
+    await arrived(headers, id, onSite);
+    await skip(headers, id, passed);
+
+    const one = PlannedRoute.parse(
+      (await app.inject({ url: `/v1/me/planned/${id}`, headers })).json(),
+    );
+    const list = PlannedRouteList.parse(
+      (await app.inject({ url: '/v1/me/planned', headers })).json(),
+    );
+    for (const read of [one, list.items.find((item) => item.id === id)]) {
+      expect(read?.steps[0]).toMatchObject({ stepId: onSite, doneAt: null, skippedAt: null });
+      expect(read?.steps[0]?.arrivedAt).not.toBeNull();
+      expect(read?.steps[1]).toMatchObject({ stepId: passed, arrivedAt: null, doneAt: null });
+      expect(read?.steps[1]?.skippedAt).not.toBeNull();
+    }
   });
 
   it("answers 404 for another user's planning", async () => {
