@@ -84,6 +84,14 @@ function estimatedTrip(straightM: number, mode: Transport, estimated: boolean): 
   };
 }
 
+/** Our estimate of a trip from `from` to `to` in `mode`, never asked of the provider. */
+export function estimateTrip(from: LatLng, to: LatLng, mode: Transport): Transition {
+  const straightM = straightLineM(roundedPoint(from), roundedPoint(to));
+  return straightM === 0
+    ? { distanceM: 0, durationMin: 0, mode, estimated: true }
+    : estimatedTrip(straightM, mode, true);
+}
+
 async function transitionBetween(
   from: LatLng,
   to: LatLng,

@@ -13,6 +13,7 @@ export { stepMapsUrl, travelModeOf, type MapsStep, type MapsTravelMode } from '.
 export {
   computeTransitions,
   estimateOfMode,
+  estimateTrip,
   proposedMode,
   WALK_PROPOSAL_MAX_M,
   type ModeEstimate,
@@ -20,7 +21,15 @@ export {
   type TransitionStep,
   type TransitionTransport,
 } from './transitions';
-export { computeTimeline, conflictsOf, type TimelineStepInput } from './timeline';
+export { computeTimeline, conflictsOf, openUntil, type TimelineStepInput } from './timeline';
+export {
+  goTimeline,
+  stepAlertOf,
+  type GoDirectTrip,
+  type GoStepAlert,
+  type GoTimeline,
+  type GoTimelineStep,
+} from './go';
 export {
   defaultCoherenceThresholds,
   evaluateRoute,
