@@ -1,16 +1,23 @@
-import { RouteRemovedDetails, type RouteDetail } from '@widoo/shared';
+import { RouteRemovedDetails, type LatLng, type RouteDetail } from '@widoo/shared';
 import { ApiRequestError } from './errors';
 
 /**
  * What `GET /v1/routes/:id` gives the route sheet (E-05): the route as the caller may see it, or
- * the date it was withdrawn, a 410 the sheet shows as its own state (D-014). Any other failure is
- * thrown as an `ApiRequestError`.
+ * the date it was withdrawn and its zone (the start rounded to about 1 km, for « Voir des parcours
+ * proches »), a 410 the sheet shows as its own state (D-014, D-093). Any other failure is thrown
+ * as an `ApiRequestError`.
  */
 export type RouteSheetAnswer =
-  { kind: 'route'; route: RouteDetail } | { kind: 'removed'; removedAt: string };
+  { kind: 'route'; route: RouteDetail } | { kind: 'removed'; removedAt: string; near: LatLng };
 
 export interface GetRouteOptions {
   /** `share_token` of a private route, from its shared link. */
+  token?: string;
+  signal?: AbortSignal;
+}
+
+export interface GetRouteTimelineOptions {
+  /** `share_token` of a private route, from its shared link, as for its sheet. */
   token?: string;
   signal?: AbortSignal;
 }
@@ -19,6 +26,12 @@ export interface GetRouteOptions {
 export function routePath(id: string, token?: string): `/v1/${string}` {
   const path = `/v1/routes/${encodeURIComponent(id)}` as const;
   return token ? `${path}?${new URLSearchParams({ token }).toString()}` : path;
+}
+
+/** Path of the timeline of a route for a start, with the token of a private route. */
+export function routeTimelinePath(id: string, startsAt: string, token?: string): `/v1/${string}` {
+  const query = new URLSearchParams({ startsAt, ...(token && { token }) });
+  return `/v1/routes/${encodeURIComponent(id)}/timeline?${query.toString()}`;
 }
 
 /** The withdrawal of a 410 `route_removed`; null for any other error. */
@@ -31,7 +44,9 @@ export function removedOf(error: unknown): RouteSheetAnswer | null {
     return null;
   }
   const details = RouteRemovedDetails.safeParse(error.body?.details);
-  return details.success ? { kind: 'removed', removedAt: details.data.removedAt } : null;
+  return details.success
+    ? { kind: 'removed', removedAt: details.data.removedAt, near: details.data.near }
+    : null;
 }
 
 /** Query of `GET /v1/routes/:id/ratings`, by pages. */

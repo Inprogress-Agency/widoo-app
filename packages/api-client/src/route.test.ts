@@ -109,7 +109,7 @@ describe('getRoute', () => {
     expect(call()?.[0]).toBe(`http://10.0.2.2:8080/v1/routes/${id}?token=a+b%26c`);
   });
 
-  it('answers the date of a withdrawn route (410 route_removed)', async () => {
+  it('answers the date and the zone of a withdrawn route (410 route_removed)', async () => {
     const body = {
       code: 'route_removed',
       message: 'Removed',
@@ -118,12 +118,17 @@ describe('getRoute', () => {
     await expect(setup(json(410, body)).client.getRoute(id)).resolves.toEqual({
       kind: 'removed',
       removedAt: at,
+      near: { lat: 48.86, lng: 2.35 },
     });
   });
 
   it.each([
     ['a 404', json(404, { code: 'not_found', message: 'Not found' })],
     ['a 410 without its date', json(410, { code: 'route_removed', message: 'Removed' })],
+    [
+      'a 410 without its zone',
+      json(410, { code: 'route_removed', message: 'Removed', details: { removedAt: at } }),
+    ],
     ['a sheet this build cannot read', json(200, { ...route, effort: 'hard' })],
   ])('throws on %s', async (_, response) => {
     await expect(setup(response).client.getRoute(id)).rejects.toBeInstanceOf(ApiRequestError);
@@ -137,6 +142,14 @@ describe('getRouteTimeline', () => {
     await expect(client.getRouteTimeline(id, at)).resolves.toEqual(timeline);
     expect(call()?.[0]).toBe(
       `http://10.0.2.2:8080/v1/routes/${id}/timeline?startsAt=2026-10-13T08%3A00%3A00.000Z`,
+    );
+  });
+
+  it('sends the share token of a private route opened by its link', async () => {
+    const { client, call } = setup(json(200, route.timeline));
+    await client.getRouteTimeline(id, at, { token: 'a b&c' });
+    expect(call()?.[0]).toBe(
+      `http://10.0.2.2:8080/v1/routes/${id}/timeline?startsAt=2026-10-13T08%3A00%3A00.000Z&token=a+b%26c`,
     );
   });
 });

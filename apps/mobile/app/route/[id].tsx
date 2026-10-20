@@ -111,6 +111,7 @@ export default function RouteScreen() {
       <PlanSheet
         ref={planSheet}
         isOnline={isOnline}
+        token={token}
         onSubmit={async (choice) => {
           const isDone = await submitPlan(choice, {
             t,

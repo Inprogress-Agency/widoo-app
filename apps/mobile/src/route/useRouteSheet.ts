@@ -6,7 +6,10 @@ import { useIsOnline } from '../discovery/useRouteSearch';
 import { knownCard } from './knownCard';
 import { useRouteSheetSource } from './source';
 
-/** As the search, cached 30 seconds by the API. */
+/**
+ * The API never lets the sheet be stored (`no-store`, D-088): it stays in memory while it is read,
+ * asked again after 30 seconds, and never persisted (wiki API › Fiche parcours).
+ */
 const SHEET_STALE_TIME_MS = 30_000;
 
 export const routeSheetQueryKey = (id: string, token?: string) =>
