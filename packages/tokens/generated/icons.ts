@@ -1,4 +1,4 @@
-// Généré depuis tokens.json (version 37), ne pas modifier : pnpm --filter @widoo/tokens generate.
+// Généré depuis tokens.json (version 38), ne pas modifier : pnpm --filter @widoo/tokens generate.
 import type { Icon } from 'phosphor-react-native';
 import { ArmchairIcon } from 'phosphor-react-native/src/icons/Armchair';
 import { ArrowRightIcon } from 'phosphor-react-native/src/icons/ArrowRight';
@@ -31,6 +31,7 @@ import { CheckCircleIcon } from 'phosphor-react-native/src/icons/CheckCircle';
 import { CircleIcon } from 'phosphor-react-native/src/icons/Circle';
 import { CircleNotchIcon } from 'phosphor-react-native/src/icons/CircleNotch';
 import { ClockIcon } from 'phosphor-react-native/src/icons/Clock';
+import { ClockCountdownIcon } from 'phosphor-react-native/src/icons/ClockCountdown';
 import { ClockCounterClockwiseIcon } from 'phosphor-react-native/src/icons/ClockCounterClockwise';
 import { CloudRainIcon } from 'phosphor-react-native/src/icons/CloudRain';
 import { CloudSlashIcon } from 'phosphor-react-native/src/icons/CloudSlash';
@@ -85,6 +86,7 @@ import { SealCheckIcon } from 'phosphor-react-native/src/icons/SealCheck';
 import { ShieldCheckIcon } from 'phosphor-react-native/src/icons/ShieldCheck';
 import { ShoppingBagIcon } from 'phosphor-react-native/src/icons/ShoppingBag';
 import { SignOutIcon } from 'phosphor-react-native/src/icons/SignOut';
+import { SkipForwardIcon } from 'phosphor-react-native/src/icons/SkipForward';
 import { SlidersHorizontalIcon } from 'phosphor-react-native/src/icons/SlidersHorizontal';
 import { SmileyMehIcon } from 'phosphor-react-native/src/icons/SmileyMeh';
 import { SparkleIcon } from 'phosphor-react-native/src/icons/Sparkle';
@@ -142,6 +144,7 @@ export const icons: Record<IconName, Icon> = {
   circle: CircleIcon,
   'circle-notch': CircleNotchIcon,
   clock: ClockIcon,
+  'clock-countdown': ClockCountdownIcon,
   'clock-counter-clockwise': ClockCounterClockwiseIcon,
   'cloud-rain': CloudRainIcon,
   'cloud-slash': CloudSlashIcon,
@@ -196,6 +199,7 @@ export const icons: Record<IconName, Icon> = {
   'shield-check': ShieldCheckIcon,
   'shopping-bag': ShoppingBagIcon,
   'sign-out': SignOutIcon,
+  'skip-forward': SkipForwardIcon,
   'sliders-horizontal': SlidersHorizontalIcon,
   'smiley-meh': SmileyMehIcon,
   sparkle: SparkleIcon,
