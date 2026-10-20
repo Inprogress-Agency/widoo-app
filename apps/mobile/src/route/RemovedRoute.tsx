@@ -1,3 +1,4 @@
+import type { LatLng } from '@widoo/shared';
 import { StatusBar } from 'expo-status-bar';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
@@ -9,9 +10,11 @@ import { localDay, withoutFinalDot } from './sheetText';
 
 interface RemovedRouteProps {
   removedAt: string;
+  /** The start rounded to about 1 km (D-093), never the exact point. */
+  near: LatLng;
   onClose: () => void;
-  /** « Voir des parcours proches »: the home around its zone. */
-  onNearby: () => void;
+  /** « Voir des parcours proches »: the home centred on its zone. */
+  onNearby: (near: LatLng) => void;
 }
 
 /**
@@ -19,7 +22,7 @@ interface RemovedRouteProps {
  * crossed out, « Ce parcours n'est plus disponible », the date of the withdrawal, and « Voir des
  * parcours proches ». « Retirer des favoris » comes with the favorites (#39).
  */
-export function RemovedRoute({ removedAt, onClose, onNearby }: RemovedRouteProps) {
+export function RemovedRoute({ removedAt, near, onClose, onNearby }: RemovedRouteProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   return (
@@ -38,7 +41,7 @@ export function RemovedRoute({ removedAt, onClose, onNearby }: RemovedRouteProps
           icon="removed"
           title={t('route.removed.title')}
           body={t('route.removed.body', { date: withoutFinalDot(localDay(removedAt)) })}
-          action={<Button label={t('route.removed.nearby')} onPress={onNearby} />}
+          action={<Button label={t('route.removed.nearby')} onPress={() => onNearby(near)} />}
         />
       </View>
     </View>

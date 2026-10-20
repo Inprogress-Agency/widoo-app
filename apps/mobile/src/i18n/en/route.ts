@@ -128,7 +128,7 @@ export const route = {
     notYet: 'Coming soon',
     removed: {
       title: 'This route is no longer available',
-      body: 'Its creator removed it on {{date}}. There are still routes nearby to discover.',
+      body: 'This route was removed on {{date}}. There are still routes nearby to discover.',
       nearby: 'See routes nearby',
     },
   },

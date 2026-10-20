@@ -418,6 +418,23 @@ describe('zone chosen in the search (E-02)', () => {
   });
 });
 
+describe('« Voir des parcours proches » of a withdrawn route (E-05, D-093)', () => {
+  it('frames the zone of its start and searches the view the map settles on, once', () => {
+    openedWith('a');
+    store.getState().chooseZone(canal, 14);
+    store.getState().select('a');
+    store.getState().showNear(moved);
+    expect(store.getState()).toMatchObject({ zone: null, selectedRouteId: null });
+    expect(store.getState().framing?.view).toEqual(moved);
+    expect(canSearchZone(store.getState())).toBe(false);
+    store.getState().showView(moved, false);
+    expect(store.getState().search).toMatchObject({ view: moved, trigger: 'button' });
+    const near = store.getState().search;
+    store.getState().showView(home, true);
+    expect(store.getState().search).toBe(near);
+  });
+});
+
 describe('recentre (Ecrans › E-01, D-071)', () => {
   it('searches around the user again after a search elsewhere, with no button on the way', () => {
     openedWith('a');

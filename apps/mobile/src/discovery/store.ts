@@ -153,6 +153,11 @@ export interface DiscoveryActions {
    * « Rechercher dans cette zone » (Ecrans › E-01, D-071). A zone chosen in the search is left.
    */
   leaveZone: () => void;
+  /**
+   * « Voir des parcours proches » of a withdrawn route (E-05, D-093): the map frames `view`, the
+   * zone of its start, searched as soon as the map settles there, as a move of the app.
+   */
+  showNear: (view: MapView) => void;
 }
 
 export type DiscoveryStore = DiscoveryState & DiscoveryActions;
@@ -389,6 +394,17 @@ export function createDiscoveryStore() {
         set({
           zone: null,
           framing: { id: lastId, view: 'home' },
+          pendingTrigger: 'button',
+          hasMoved: false,
+        });
+      },
+      showNear: (view) => {
+        lastId += 1;
+        set({
+          zone: null,
+          isSearchOpen: false,
+          selectedRouteId: null,
+          framing: { id: lastId, view },
           pendingTrigger: 'button',
           hasMoved: false,
         });

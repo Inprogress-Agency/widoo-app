@@ -236,16 +236,18 @@ describe('RouteSheet (E-05)', () => {
     expect(screen.getByRole('header', { name: marais.title })).toBeTruthy();
   });
 
-  it('says a withdrawn route is no longer there, with the date and nearby routes', async () => {
+  it('says a withdrawn route is no longer there, with the date and the routes of its zone', async () => {
     const { onNearby, onClose } = await renderSheet({
       status: 'removed',
       removedAt: '2026-09-20T08:00:00.000Z',
+      near: { lat: 48.86, lng: 2.35 },
       known: null,
     });
     expect(await screen.findByText("Ce parcours n'est plus disponible")).toBeTruthy();
-    expect(screen.getByText(/l'a retiré le 20 sept\. Des parcours/)).toBeTruthy();
+    // Neutral, without saying who withdrew it (D-093).
+    expect(screen.getByText(/^Ce parcours a été retiré le 20 sept\. Des parcours/)).toBeTruthy();
     await fireEvent.press(screen.getByRole('button', { name: 'Voir des parcours proches' }));
-    expect(onNearby).toHaveBeenCalled();
+    expect(onNearby).toHaveBeenCalledWith({ lat: 48.86, lng: 2.35 });
     await fireEvent.press(screen.getByRole('button', { name: 'Fermer la fiche' }));
     expect(onClose).toHaveBeenCalled();
   });

@@ -345,7 +345,8 @@ export const fr = {
     notYet: 'Bientôt disponible',
     removed: {
       title: "Ce parcours n'est plus disponible",
-      body: "Son créateur l'a retiré le {{date}}. Des parcours proches restent à découvrir.",
+      // Neutral: a withdrawal comes from its creator, the team or a closed place (D-093, Q2).
+      body: 'Ce parcours a été retiré le {{date}}. Des parcours proches restent à découvrir.',
       nearby: 'Voir des parcours proches',
     },
   },
