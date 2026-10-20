@@ -4,13 +4,14 @@
  * and timeline of the trips served (Q6), every step in full or locked (D-014).
  */
 import { computeRoute, type RouteInput, type Transition } from '@widoo/orchestration';
-import type {
-  MyRouteReport,
-  RouteCard,
-  RouteDetail,
-  RouteReview,
-  SheetStep,
-  SheetTransition,
+import {
+  resolveBookingLink,
+  type MyRouteReport,
+  type RouteCard,
+  type RouteDetail,
+  type RouteReview,
+  type SheetStep,
+  type SheetTransition,
 } from '@widoo/shared';
 import { z } from 'zod';
 import { httpsOrNull } from '../search/repository';
@@ -54,6 +55,28 @@ export function routeInputOf(
   };
 }
 
+/**
+ * The « Réserver » link of a step and whether it is an affiliate one, by the rule of
+ * `resolveBookingLink` that `GET /go/:stepId` follows too: the creator's link first, the partner
+ * link of Widoo only when the creator set none and its program is not switched off. Only an https
+ * link is served, as nothing is ever opened to anything else.
+ */
+export function sheetBookingOf(
+  step: { bookingUrl: string | null; bookingIsAffiliate: boolean },
+  place: { partnerBookingUrl: string | null },
+  partnerProgramIsActive: boolean | null,
+): { bookingUrl: string | null; bookingIsAffiliate: boolean } {
+  const link = resolveBookingLink(step, {
+    partnerBookingUrl: place.partnerBookingUrl,
+    partnerProgramIsActive,
+  });
+  const bookingUrl = link ? httpsOrNull(link.url) : null;
+  return {
+    bookingUrl,
+    bookingIsAffiliate: link !== null && bookingUrl !== null && link.origin !== 'creator',
+  };
+}
+
 /** A trip as the sheet serves it: its line only when the provider gave one; the metro estimated. */
 export function sheetTransitionOf(trip: Transition | null): SheetTransition | null {
   return (
@@ -88,57 +111,63 @@ export function buildSheet(loaded: LoadedSheet, parts: SheetParts): RouteDetail 
     (route.computed as { access?: unknown } | null)?.access,
   ).data;
 
-  const sheetSteps = steps.map(({ step, place, hours, photos, placePhoto }, position) => {
-    const transition = sheetTransitionOf(trips[position] ?? null);
-    if (isLockedAt(position)) {
+  const sheetSteps = steps.map(
+    ({ step, place, partnerProgramIsActive, hours, photos, placePhoto }, position) => {
+      const transition = sheetTransitionOf(trips[position] ?? null);
+      if (isLockedAt(position)) {
+        return {
+          id: step.id,
+          position,
+          isLocked: true,
+          category: place.category,
+          durationMin: step.durationMin,
+          transition,
+        } satisfies SheetStep;
+      }
+      const { bookingUrl, bookingIsAffiliate } = sheetBookingOf(
+        step,
+        place,
+        partnerProgramIsActive,
+      );
       return {
         id: step.id,
         position,
-        isLocked: true,
-        category: place.category,
+        isLocked: false,
+        title: step.title,
+        description: step.description,
         durationMin: step.durationMin,
+        costPerPersonEur: step.costPerPerson,
+        bookingRequired: step.bookingRequired,
+        bookingUrl,
+        bookingProvider: step.bookingProvider,
+        bookingNote: step.bookingNote,
+        bookingIsAffiliate,
+        endsOn: step.endsOn,
+        transitionNote: step.transitionNote,
         transition,
+        place: {
+          id: place.id,
+          name: place.name,
+          category: place.category,
+          location: place.location,
+          address: place.address,
+          isIndoor: place.isIndoor,
+          photo: placePhoto,
+          verificationStatus: place.verificationStatus,
+          verifiedAt: place.verifiedAt?.toISOString() ?? null,
+          hours,
+        },
+        // No place signal is stored yet: the confirmations since the last verification only.
+        verification: {
+          confirmations: Math.floor(place.confirmationsSinceVerified),
+          lastConfirmedAt: place.verifiedAt?.toISOString() ?? null,
+          reports: null,
+        },
+        highlights: step.highlights ?? [],
+        photos,
       } satisfies SheetStep;
-    }
-    const bookingUrl = httpsOrNull(step.bookingUrl);
-    return {
-      id: step.id,
-      position,
-      isLocked: false,
-      title: step.title,
-      description: step.description,
-      durationMin: step.durationMin,
-      costPerPersonEur: step.costPerPerson,
-      bookingRequired: step.bookingRequired,
-      bookingUrl,
-      bookingProvider: step.bookingProvider,
-      bookingNote: step.bookingNote,
-      bookingIsAffiliate: step.bookingIsAffiliate && bookingUrl !== null,
-      endsOn: step.endsOn,
-      transitionNote: step.transitionNote,
-      transition,
-      place: {
-        id: place.id,
-        name: place.name,
-        category: place.category,
-        location: place.location,
-        address: place.address,
-        isIndoor: place.isIndoor,
-        photo: placePhoto,
-        verificationStatus: place.verificationStatus,
-        verifiedAt: place.verifiedAt?.toISOString() ?? null,
-        hours,
-      },
-      // No place signal is stored yet: the confirmations since the last verification only.
-      verification: {
-        confirmations: Math.floor(place.confirmationsSinceVerified),
-        lastConfirmedAt: place.verifiedAt?.toISOString() ?? null,
-        reports: null,
-      },
-      highlights: step.highlights ?? [],
-      photos,
-    } satisfies SheetStep;
-  });
+    },
+  );
 
   // The card's own pins give way to the steps of the sheet.
   return {
