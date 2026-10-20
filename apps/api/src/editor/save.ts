@@ -2,6 +2,7 @@
  * Saving what the author edited: into the route itself, or into the revision of a published
  * route, the published version staying online until the revision is validated.
  */
+import { mainTransportOf } from '@widoo/orchestration';
 import {
   budgetBucketOf,
   durationBucketOf,
@@ -13,7 +14,7 @@ import type { Tx } from '../db/client';
 import { envelopeOf } from '../db/geography';
 import { routeRevisions, routes } from '../db/schema';
 import { conflict } from '../errors';
-import { mainTransportOf, replaceSteps, type RouteContent } from './content';
+import { replaceSteps, type RouteContent } from './content';
 import { accessColumnOf } from '../transit/access';
 import type { RouteRow } from './lifecycle';
 import { evaluate, type Workspace } from './workspace';
