@@ -8,6 +8,7 @@ import { toUsersParams, usersListOptions } from '@/config/users-list';
 import { catalogRoutePathOf } from '@/containers/CatalogRoutesContainer';
 import { UserDecisionsContainer } from '@/containers/UserDecisionsContainer';
 import { useDebouncedCallback } from '@/hooks/useDebouncedCallback';
+import { useIsSlow } from '@/hooks/useIsSlow';
 import { useListQuery } from '@/hooks/useListQuery';
 import { useRemoteData } from '@/hooks/useRemoteData';
 import { getSessionClients } from '@/lib/auth/clients';
@@ -15,11 +16,15 @@ import { serializeListQuery } from '@/lib/list-query';
 import { sectionPaths } from '@/config/navigation';
 import { userNameOf } from '@/lib/user-display';
 import { messages } from '@/messages/fr';
-import { Button, DetailPanel, Pagination, SearchInput } from '@widoo/ui';
+import type { AdminUserDetail } from '@widoo/shared';
+import { Button, DetailPanel, DetailPanelSkeleton, Pagination, SearchInput } from '@widoo/ui';
+import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 const texts = messages.users;
 const searchDelayMs = 300;
+/** A card that loads faster than this keeps the previous one on screen, without a gray panel. */
+const skeletonDelayMs = 300;
 /** Parameter of the address that holds the account whose card is open next to the list. */
 const openUserParam = 'compte';
 
@@ -41,6 +46,15 @@ export function UsersContainer() {
   );
   const data = users.status === 'ready' ? users.data : undefined;
   const openUser = card.status === 'ready' ? card.data : null;
+  // The card shown last, kept on screen while the next one loads, so that the panel does not
+  // disappear and the list does not widen and narrow again at every click.
+  const [lastUser, setLastUser] = useState<AdminUserDetail | null>(null);
+  if (openUser && openUser !== lastUser) {
+    setLastUser(openUser);
+  } else if (!openId && lastUser) {
+    setLastUser(null);
+  }
+  const isCardSlow = useIsSlow(openId !== null && card.status === 'loading', skeletonDelayMs);
 
   /** The address of the list as it is, with the card of `userId` open, or none. */
   const showUser = (userId: string | null) => {
@@ -81,6 +95,45 @@ export function UsersContainer() {
     );
   };
 
+  /** The card open next to the list: the fresh one, or the previous one while the next loads. */
+  const renderPanel = () => {
+    if (openUser) {
+      return renderCard(openUser);
+    }
+    if (openId === null || card.status !== 'loading') {
+      return null;
+    }
+    return lastUser && !isCardSlow ? (
+      <div inert className="contents">
+        {renderCard(lastUser)}
+      </div>
+    ) : (
+      <DetailPanelSkeleton label={texts.panel.loading} />
+    );
+  };
+
+  const renderCard = (user: AdminUserDetail) => (
+    <DetailPanel
+      key={user.id}
+      title={userNameOf(user)}
+      status={<UserRoleBadge role={user.role} />}
+      closeLabel={messages.confirm.close}
+      onClose={() => showUser(null)}
+      actions={
+        <UserDecisionsContainer
+          user={user}
+          onSettled={reloadAll}
+          onDeleted={() => {
+            showUser(null);
+            if (users.status !== 'loading') users.reload();
+          }}
+        />
+      }
+    >
+      <UserPanelContent user={user} routePathOf={catalogRoutePathOf} />
+    </DetailPanel>
+  );
+
   return (
     <div className="flex items-stretch gap-24">
       <div className="flex min-w-0 flex-1 flex-col gap-16">
@@ -113,27 +166,7 @@ export function UsersContainer() {
           </div>
         ) : null}
       </div>
-      {openUser ? (
-        <DetailPanel
-          key={openUser.id}
-          title={userNameOf(openUser)}
-          status={<UserRoleBadge role={openUser.role} />}
-          closeLabel={messages.confirm.close}
-          onClose={() => showUser(null)}
-          actions={
-            <UserDecisionsContainer
-              user={openUser}
-              onSettled={reloadAll}
-              onDeleted={() => {
-                showUser(null);
-                if (users.status !== 'loading') users.reload();
-              }}
-            />
-          }
-        >
-          <UserPanelContent user={openUser} routePathOf={catalogRoutePathOf} />
-        </DetailPanel>
-      ) : null}
+      {renderPanel()}
     </div>
   );
 }

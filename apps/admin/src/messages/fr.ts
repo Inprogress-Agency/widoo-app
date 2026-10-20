@@ -815,6 +815,7 @@ export const messages = {
     },
     error: 'Les comptes ne se sont pas chargés.',
     panel: {
+      loading: 'Chargement de la fiche',
       id: 'Identifiant',
       email: 'E-mail',
       role: 'Rôle',
