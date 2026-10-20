@@ -3,7 +3,7 @@ import { and, eq, gt } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
-import { places, routeReports, routes, steps, users } from '../db/schema';
+import { media, places, routeReports, routes, steps, users } from '../db/schema';
 import { uuidv7 } from '../db/uuid';
 import { plannedFixtures } from '../planned/test-fixtures';
 import { testConfig } from '../test-config';
@@ -208,14 +208,39 @@ describe('GET /v1/routes/:id, the content of the sheet', () => {
 
   it('serves the zone, the tips, the credited photos, and no coherence warning', async () => {
     const id = await copy('published', { tips: ['Prévoir une gourde'] });
-    const response = await get(id);
-    const sheet = sheetOf(response.body);
-    expect(sheet).toMatchObject({ timezone: 'Europe/Paris', tips: ['Prévoir une gourde'] });
-    expect(sheet.photos.map((photo) => photo.url)).toEqual(sheet.photoUrls);
-    expect(sheet.timeline.steps.map((entry) => entry.stepId)).toEqual(
-      sheet.steps.map((step) => step.id),
-    );
-    expect(response.body).not.toMatch(/"warnings"|"errors"/);
+    // A fictitious free photo of the route, with its credit (D-052); deleted by the test.
+    const url = 'https://example.com/photo-fictive.jpg';
+    const credit = {
+      author: 'J. Moreau',
+      license: 'CC BY-SA 4.0',
+      sourceUrl: 'https://commons.wikimedia.org/wiki/File:Photo_fictive.jpg',
+    };
+    const [photo] = await app.db
+      .insert(media)
+      .values({
+        ownerType: 'route',
+        ownerId: id,
+        storagePath: url,
+        width: 1200,
+        height: 800,
+        source: 'commons',
+        ...credit,
+      })
+      .returning({ id: media.id });
+    try {
+      const response = await get(id);
+      const sheet = sheetOf(response.body);
+      expect(sheet).toMatchObject({ timezone: 'Europe/Paris', tips: ['Prévoir une gourde'] });
+      expect(sheet.photos).toEqual([{ url, credit }]);
+      // The photo objects replace the bare URLs, without a second definition (D-093).
+      expect(response.body).not.toMatch(/"photoUrls?"/);
+      expect(sheet.timeline.steps.map((entry) => entry.stepId)).toEqual(
+        sheet.steps.map((step) => step.id),
+      );
+      expect(response.body).not.toMatch(/"warnings"|"errors"/);
+    } finally {
+      if (photo) await app.db.delete(media).where(eq(media.id, photo.id));
+    }
   });
 
   it('serves the running report of the caller only, null without a token (D-057)', async () => {

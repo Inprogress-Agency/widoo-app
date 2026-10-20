@@ -27,10 +27,6 @@
       "isLocked": false,
       "status": "published",
       "description": "Trois musées gratuits dans des hôtels particuliers du Marais, sans jamais rester longtemps dehors, puis un goûter sous la halle du plus vieux marché couvert de Paris.",
-      "photoUrls": [
-        "https://images.unsplash.com/photo-1775210676191-f450802fa51e?w=1200&h=800&fit=crop&auto=format&q=80",
-        "https://images.unsplash.com/photo-1691472898646-7011d4d0ad55?w=1200&h=800&fit=crop&auto=format&q=80"
-      ],
       "photos": [
         {
           "url": "https://images.unsplash.com/photo-1775210676191-f450802fa51e?w=1200&h=800&fit=crop&auto=format&q=80",
@@ -115,7 +111,6 @@
             },
             "address": "6 place des Vosges, 75004 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -220,7 +215,6 @@
             },
             "address": "23 rue de Sévigné, 75003 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -318,7 +312,6 @@
             },
             "address": "8 rue Elzévir, 75003 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -401,7 +394,6 @@
             },
             "address": "39 rue de Bretagne, 75003 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -488,10 +480,6 @@
       "isLocked": false,
       "status": "published",
       "description": "Une montée douce vers la Butte : le mur des je t’aime, la vue depuis le parvis du Sacré-Cœur, les peintres de la place du Tertre, puis le musée et un dîner à la Maison Rose.",
-      "photoUrls": [
-        "https://images.unsplash.com/photo-1561370665-7e266065fce1?w=1200&h=800&fit=crop&auto=format&q=80",
-        "https://images.unsplash.com/photo-1623009070764-45002990256e?w=1200&h=800&fit=crop&auto=format&q=80"
-      ],
       "photos": [
         {
           "url": "https://images.unsplash.com/photo-1561370665-7e266065fce1?w=1200&h=800&fit=crop&auto=format&q=80",
@@ -582,7 +570,6 @@
             },
             "address": "square Jehan-Rictus, place des Abbesses, 75018 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -678,7 +665,6 @@
             },
             "address": "35 rue du Chevalier-de-la-Barre, 75018 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [],
@@ -724,7 +710,6 @@
             },
             "address": "place du Tertre, 75018 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [],
@@ -770,7 +755,6 @@
             },
             "address": "12 rue Cortot, 75018 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -860,7 +844,6 @@
             },
             "address": "2 rue de l’Abreuvoir, 75018 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -958,10 +941,6 @@
       "isLocked": false,
       "status": "published",
       "description": "Une balade en Vélib le long de l’eau : viennoiserie d’une boulangerie culte, écluses et passerelles, pause au bord du bassin de la Villette, puis les pelouses du parc.",
-      "photoUrls": [
-        "https://images.unsplash.com/photo-1642766603265-e33f8a27fb31?w=1200&h=800&fit=crop&auto=format&q=80",
-        "https://images.unsplash.com/photo-1548123833-0d46ee1d7400?w=1200&h=800&fit=crop&auto=format&q=80"
-      ],
       "photos": [
         {
           "url": "https://images.unsplash.com/photo-1642766603265-e33f8a27fb31?w=1200&h=800&fit=crop&auto=format&q=80",
@@ -1052,7 +1031,6 @@
             },
             "address": "34 rue Yves-Toudic, 75010 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -1134,7 +1112,6 @@
             },
             "address": "quai de Jemmapes, 75010 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [],
@@ -1180,7 +1157,6 @@
             },
             "address": "14 rue des Récollets, 75010 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -1276,7 +1252,6 @@
             },
             "address": "39 quai de la Loire, 75019 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -1366,7 +1341,6 @@
             },
             "address": "211 avenue Jean-Jaurès, 75019 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [],
@@ -1414,10 +1388,6 @@
       "isLocked": false,
       "status": "published",
       "description": "Maisons à colombages, impasses fleuries, baignade dans une piscine Art nouveau alimentée par un puits artésien, puis un dîner basque aux grandes tablées.",
-      "photoUrls": [
-        "https://images.unsplash.com/photo-1594676632059-b0707a8cca55?w=1200&h=800&fit=crop&auto=format&q=80",
-        "https://images.unsplash.com/photo-1683020369711-fa6e11acaccd?w=1200&h=800&fit=crop&auto=format&q=80"
-      ],
       "photos": [
         {
           "url": "https://images.unsplash.com/photo-1594676632059-b0707a8cca55?w=1200&h=800&fit=crop&auto=format&q=80",
@@ -1508,7 +1478,6 @@
             },
             "address": "10 rue Daviel, 75013 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [],
@@ -1554,7 +1523,6 @@
             },
             "address": "rue des Glycines, 75013 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [],
@@ -1600,7 +1568,6 @@
             },
             "address": "5 place Paul-Verlaine, 75013 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -1703,7 +1670,6 @@
             },
             "address": "rue de la Butte-aux-Cailles, 75013 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [],
@@ -1743,7 +1709,6 @@
             },
             "address": "30 rue des Cinq-Diamants, 75013 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -1890,10 +1855,6 @@
       "isLocked": false,
       "status": "published",
       "description": "Une boucle courte et gratuite : les murs repeints de la rue Dénoyez, le belvédère du parc de Belleville au coucher du soleil, puis les escaliers de la rue des Cascades.",
-      "photoUrls": [
-        "https://images.unsplash.com/photo-1682939033295-031f290adbd2?w=1200&h=800&fit=crop&auto=format&q=80",
-        "https://images.unsplash.com/photo-1682939036672-cf58620cf3e8?w=1200&h=800&fit=crop&auto=format&q=80"
-      ],
       "photos": [
         {
           "url": "https://images.unsplash.com/photo-1682939033295-031f290adbd2?w=1200&h=800&fit=crop&auto=format&q=80",
@@ -1978,7 +1939,6 @@
             },
             "address": "rue Dénoyez, 75020 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [],
@@ -2024,7 +1984,6 @@
             },
             "address": "place Fréhel, 75020 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [],
@@ -2070,7 +2029,6 @@
             },
             "address": "27 rue Piat, 75020 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -2160,7 +2118,6 @@
             },
             "address": "42 rue des Cascades, 75020 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [],
@@ -2204,10 +2161,6 @@
       "isLocked": false,
       "status": "published",
       "description": "Les arènes romaines, la ménagerie et ses pandas roux, un thé à la menthe à la Grande Mosquée, puis les squelettes et les animaux naturalisés de la Grande Galerie de l’Évolution.",
-      "photoUrls": [
-        "https://images.unsplash.com/photo-1578838389363-a62d9069d2c6?w=1200&h=800&fit=crop&auto=format&q=80",
-        "https://images.unsplash.com/photo-1654103399842-98a63767b6bc?w=1200&h=800&fit=crop&auto=format&q=80"
-      ],
       "photos": [
         {
           "url": "https://images.unsplash.com/photo-1578838389363-a62d9069d2c6?w=1200&h=800&fit=crop&auto=format&q=80",
@@ -2298,7 +2251,6 @@
             },
             "address": "49 rue Monge, 75005 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -2394,7 +2346,6 @@
             },
             "address": "57 rue Cuvier, 75005 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -2490,7 +2441,6 @@
             },
             "address": "39 rue Geoffroy-Saint-Hilaire, 75005 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -2586,7 +2536,6 @@
             },
             "address": "36 rue Geoffroy-Saint-Hilaire, 75005 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -2669,7 +2618,6 @@
             },
             "address": "57 rue Cuvier, 75005 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -2763,10 +2711,6 @@
       "isLocked": false,
       "status": "published",
       "description": "Une journée au sec, reliée par la ligne 4 : les vitraux de la Sainte-Chapelle, une librairie mythique, le Moyen Âge à Cluny, un bouillon parisien et Paris vu d’en haut.",
-      "photoUrls": [
-        "https://images.unsplash.com/photo-1571860424830-0271e6c9d9b2?w=1200&h=800&fit=crop&auto=format&q=80",
-        "https://images.unsplash.com/photo-1546444809-d64eccd9fb88?w=1200&h=800&fit=crop&auto=format&q=80"
-      ],
       "photos": [
         {
           "url": "https://images.unsplash.com/photo-1571860424830-0271e6c9d9b2?w=1200&h=800&fit=crop&auto=format&q=80",
@@ -2857,7 +2801,6 @@
             },
             "address": "10 boulevard du Palais, 75001 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -2953,7 +2896,6 @@
             },
             "address": "37 rue de la Bûcherie, 75005 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -3049,7 +2991,6 @@
             },
             "address": "28 rue du Sommerard, 75005 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -3138,7 +3079,6 @@
             },
             "address": "59 boulevard du Montparnasse, 75006 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -3228,7 +3168,6 @@
             },
             "address": "33 avenue du Maine, 75015 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -3322,10 +3261,6 @@
       "isLocked": false,
       "status": "published",
       "description": "Un après-midi pour les enfants : le spectacle de Guignol, la grotte et sa cascade, la montée au belvédère de la Sibylle, puis un goûter en terrasse chez Rosa Bonheur.",
-      "photoUrls": [
-        "https://images.unsplash.com/photo-1731666593725-197dc759038d?w=1200&h=800&fit=crop&auto=format&q=80",
-        "https://images.unsplash.com/photo-1731666595277-2082e64c8936?w=1200&h=800&fit=crop&auto=format&q=80"
-      ],
       "photos": [
         {
           "url": "https://images.unsplash.com/photo-1731666593725-197dc759038d?w=1200&h=800&fit=crop&auto=format&q=80",
@@ -3410,7 +3345,6 @@
             },
             "address": "avenue de la Grotte, parc des Buttes-Chaumont, 75019 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -3478,7 +3412,6 @@
             },
             "address": "parc des Buttes-Chaumont, 75019 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -3574,7 +3507,6 @@
             },
             "address": "parc des Buttes-Chaumont, 75019 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -3664,7 +3596,6 @@
             },
             "address": "2 avenue de la Cascade, 75019 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -3744,10 +3675,6 @@
       "isLocked": false,
       "status": "published",
       "description": "Un café dans un concept-store, le falafel de la rue des Rosiers, les cours d’antiquaires du village Saint-Paul et une glace Berthillon sur l’île Saint-Louis.",
-      "photoUrls": [
-        "https://images.unsplash.com/photo-1788101841904-669e8b5924b4?w=1200&h=800&fit=crop&auto=format&q=80",
-        "https://images.unsplash.com/photo-1563896171319-a5534fcf465f?w=1200&h=800&fit=crop&auto=format&q=80"
-      ],
       "photos": [
         {
           "url": "https://images.unsplash.com/photo-1788101841904-669e8b5924b4?w=1200&h=800&fit=crop&auto=format&q=80",
@@ -3832,7 +3759,6 @@
             },
             "address": "111 boulevard Beaumarchais, 75003 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -3945,7 +3871,6 @@
             },
             "address": "34 rue des Rosiers, 75004 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -4043,7 +3968,6 @@
             },
             "address": "23 rue Saint-Paul, 75004 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -4119,7 +4043,6 @@
             },
             "address": "29-31 rue Saint-Louis-en-l’Île, 75004 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -4199,10 +4122,6 @@
       "isLocked": false,
       "status": "published",
       "description": "Plus de sept kilomètres de marche sur l’ancienne voie ferrée de la Bastille, des jardins suspendus jusqu’au lac Daumesnil et au Parc floral. Prévoir de bonnes chaussures et un pique-nique.",
-      "photoUrls": [
-        "https://images.unsplash.com/photo-1663511870425-5dd7edf1c071?w=1200&h=800&fit=crop&auto=format&q=80",
-        "https://images.unsplash.com/photo-1663511433047-c0f9317e046a?w=1200&h=800&fit=crop&auto=format&q=80"
-      ],
       "photos": [
         {
           "url": "https://images.unsplash.com/photo-1663511870425-5dd7edf1c071?w=1200&h=800&fit=crop&auto=format&q=80",
@@ -4287,7 +4206,6 @@
             },
             "address": "avenue Daumesnil, 75012 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [],
@@ -4333,7 +4251,6 @@
             },
             "address": "rue Albinoni, 75012 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -4429,7 +4346,6 @@
             },
             "address": "route de Ceinture du Lac Daumesnil, 75012 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [],
@@ -4469,7 +4385,6 @@
             },
             "address": "route de la Pyramide, 75012 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -4563,10 +4478,6 @@
       "isLocked": true,
       "status": "published",
       "description": "Une montée douce vers la Butte : le mur des je t’aime, la vue depuis le parvis du Sacré-Cœur, les peintres de la place du Tertre, puis le musée et un dîner à la Maison Rose.",
-      "photoUrls": [
-        "https://images.unsplash.com/photo-1561370665-7e266065fce1?w=1200&h=800&fit=crop&auto=format&q=80",
-        "https://images.unsplash.com/photo-1623009070764-45002990256e?w=1200&h=800&fit=crop&auto=format&q=80"
-      ],
       "photos": [
         {
           "url": "https://images.unsplash.com/photo-1561370665-7e266065fce1?w=1200&h=800&fit=crop&auto=format&q=80",
@@ -4657,7 +4568,6 @@
             },
             "address": "square Jehan-Rictus, place des Abbesses, 75018 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -4805,10 +4715,6 @@
       "isLocked": false,
       "status": "private",
       "description": "Une balade en Vélib le long de l’eau : viennoiserie d’une boulangerie culte, écluses et passerelles, pause au bord du bassin de la Villette, puis les pelouses du parc.",
-      "photoUrls": [
-        "https://images.unsplash.com/photo-1642766603265-e33f8a27fb31?w=1200&h=800&fit=crop&auto=format&q=80",
-        "https://images.unsplash.com/photo-1548123833-0d46ee1d7400?w=1200&h=800&fit=crop&auto=format&q=80"
-      ],
       "photos": [
         {
           "url": "https://images.unsplash.com/photo-1642766603265-e33f8a27fb31?w=1200&h=800&fit=crop&auto=format&q=80",
@@ -4901,7 +4807,6 @@
             },
             "address": "34 rue Yves-Toudic, 75010 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -4983,7 +4888,6 @@
             },
             "address": "quai de Jemmapes, 75010 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [],
@@ -5029,7 +4933,6 @@
             },
             "address": "14 rue des Récollets, 75010 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -5125,7 +5028,6 @@
             },
             "address": "39 quai de la Loire, 75019 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -5215,7 +5117,6 @@
             },
             "address": "211 avenue Jean-Jaurès, 75019 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [],
@@ -5259,10 +5160,6 @@
       "isLocked": false,
       "status": "published",
       "description": "Un café dans un concept-store, le falafel de la rue des Rosiers, les cours d’antiquaires du village Saint-Paul et une glace Berthillon sur l’île Saint-Louis.",
-      "photoUrls": [
-        "https://images.unsplash.com/photo-1788101841904-669e8b5924b4?w=1200&h=800&fit=crop&auto=format&q=80",
-        "https://images.unsplash.com/photo-1563896171319-a5534fcf465f?w=1200&h=800&fit=crop&auto=format&q=80"
-      ],
       "photos": [
         {
           "url": "https://images.unsplash.com/photo-1788101841904-669e8b5924b4?w=1200&h=800&fit=crop&auto=format&q=80",
@@ -5369,7 +5266,6 @@
             },
             "address": "111 boulevard Beaumarchais, 75003 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -5482,7 +5378,6 @@
             },
             "address": "34 rue des Rosiers, 75004 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "flagged",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [
@@ -5583,7 +5478,6 @@
             },
             "address": "23 rue Saint-Paul, 75004 Paris",
             "isIndoor": false,
-            "photoUrl": null,
             "verificationStatus": "stale",
             "verifiedAt": "2026-05-23T08:00:00.000Z",
             "hours": [
@@ -5659,7 +5553,6 @@
             },
             "address": "29-31 rue Saint-Louis-en-l’Île, 75004 Paris",
             "isIndoor": true,
-            "photoUrl": null,
             "verificationStatus": "verified",
             "verifiedAt": "2026-09-25T08:00:00.000Z",
             "hours": [

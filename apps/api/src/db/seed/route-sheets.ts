@@ -1,6 +1,6 @@
 /**
- * Route sheets of the demo dataset (E-05), as `GET /v1/routes/:id` will answer them (#36), for
- * the app to show the sheet until that route exists: `pnpm fixtures:route-sheets` writes them in
+ * Route sheets of the demo dataset (E-05), as `GET /v1/routes/:id` answers them, for the tests
+ * of the app, which reads the API itself (#537): `pnpm fixtures:route-sheets` writes them in
  * `apps/mobile/src/route/generated/route-sheets.json`. Same ids, places and photos as the seed;
  * transitions estimated by the orchestration without a directions provider; a timeline from the
  * default start, without conflicts (#35 computes them). Four more sheets show the states of the
@@ -108,7 +108,6 @@ async function sheetOf(route: DemoRoute): Promise<RouteDetail> {
         location: place.location,
         address: place.address,
         isIndoor: place.isIndoor,
-        photoUrl: null,
         verificationStatus: 'verified',
         verifiedAt: datasetDate,
         hours: hoursOf(place),
@@ -166,7 +165,6 @@ async function sheetOf(route: DemoRoute): Promise<RouteDetail> {
     isLocked: false,
     status: 'published',
     description: route.description,
-    photoUrls: route.photos.map((photo) => photo.url),
     photos: route.photos.map((photo) => ({ url: photo.url, credit: null })),
     timezone: 'Europe/Paris',
     tips: route.tips,
