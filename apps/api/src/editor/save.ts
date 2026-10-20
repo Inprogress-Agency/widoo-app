@@ -17,7 +17,8 @@ import { conflict } from '../errors';
 import { replaceSteps, type RouteContent } from './content';
 import { accessColumnOf } from '../transit/access';
 import type { RouteRow } from './lifecycle';
-import { evaluate, type Workspace } from './workspace';
+import { evaluate } from './recompute';
+import type { Workspace } from './workspace';
 
 /**
  * Writes the content into the route itself, with what is derived from it: stored trips, transport,
