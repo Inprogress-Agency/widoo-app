@@ -1,3 +1,4 @@
+import type { GoStepAlert } from '@widoo/orchestration';
 import type { PlannedRouteStep } from '@widoo/shared';
 import type { TFunction } from 'i18next';
 import { formatDistance } from '../format/distance';
@@ -93,12 +94,17 @@ export function progressText(t: TFunction, progress: GoProgress) {
   return {
     start: t('go.progress.start', { time: start.short }),
     end: t('go.progress.end', { time: end.short }),
-    spoken: t('go.progress.spoken', {
-      count: progress.doneCount,
-      total: progress.total,
-      start: start.spoken,
-      end: end.spoken,
-    }),
+    spoken: [
+      t('go.progress.spoken', {
+        count: progress.doneCount,
+        total: progress.total,
+        start: start.spoken,
+        end: end.spoken,
+      }),
+      ...(progress.skippedCount > 0
+        ? [t('go.progress.skipped', { count: progress.skippedCount })]
+        : []),
+    ].join(', '),
   };
 }
 
@@ -139,4 +145,32 @@ export function timelineState(
     case 'upcoming':
       return { text: categoryOf(entry.step), tone: 'muted' };
   }
+}
+
+/**
+ * The step alert of the late (E-07): « Café Lomi ferme à 16:00 », « Vous arriverez vers 15:50, il
+ * restera 10 min. »; and what a screen reader says of it, in one piece.
+ */
+export function stepAlertText(t: TFunction, step: PlannedRouteStep, alert: GoStepAlert) {
+  const place = stepName(step);
+  const arrival = localTime(t, alert.arrivesAt);
+  const form = (kind: 'short' | 'spoken') => {
+    const at = (time: Spoken) => (kind === 'short' ? time.short : time.spoken);
+    if (alert.kind === 'closed') {
+      return {
+        title: t('go.alert.closed', { place }),
+        body: t('go.alert.closedBody', { arrival: at(arrival) }),
+      };
+    }
+    return {
+      title: t('go.alert.closes', { place, time: at(localTime(t, alert.closesAt)) }),
+      body: t('go.alert.closesBody', {
+        arrival: at(arrival),
+        duration: formatDuration(t, alert.remainingMin, kind),
+      }),
+    };
+  };
+  const short = form('short');
+  const spoken = form('spoken');
+  return { ...short, spoken: `${spoken.title}. ${spoken.body}` };
 }

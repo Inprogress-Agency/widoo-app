@@ -8,6 +8,7 @@ import {
   miniPlayerLabel,
   progressText,
   statusText,
+  stepAlertText,
   timelineState,
 } from './goText';
 
@@ -86,5 +87,34 @@ describe('E-07 texts, in English', () => {
     const progress = goProgress(planned, emptyGoLocal);
     expect(statusText(en, progress).short).toBe('2 stops done of 3');
     expect(miniPlayerLabel(en, progress)).toBe('Route under way, 2 stops done of 3. Reopen');
+  });
+
+  it('says the step alert of the late, and the steps skipped in the progress', () => {
+    const step = plannedFixture().route.steps[2];
+    if (!step) {
+      throw new Error('fixture');
+    }
+    // 15:50 and 16:00 in Paris.
+    const closing = stepAlertText(t, step, {
+      kind: 'closing',
+      arrivesAt: '2026-10-24T13:50:00.000Z',
+      closesAt: '2026-10-24T14:00:00.000Z',
+      remainingMin: 10,
+    });
+    expect(closing).toEqual({
+      title: 'Café fictif ferme à 16:00',
+      body: 'Vous arriverez vers 15:50, il restera 10\u00a0min.',
+      spoken:
+        'Café fictif ferme à 16 heures. Vous arriverez vers 15 heures 50, il restera 10 minutes.',
+    });
+    const closed = stepAlertText(t, step, {
+      kind: 'closed',
+      arrivesAt: '2026-10-24T14:10:00.000Z',
+    });
+    expect(closed.title).toBe('Café fictif sera fermé à votre arrivée');
+    expect(closed.body).toBe('Vous arriverez vers 16:10.');
+
+    const skipped = goProgress(plannedFixture({ 0: { skippedAt: at } }), emptyGoLocal);
+    expect(progressText(t, skipped).spoken).toMatch(/^0 étape faite sur 3, .*, 1 passée$/);
   });
 });

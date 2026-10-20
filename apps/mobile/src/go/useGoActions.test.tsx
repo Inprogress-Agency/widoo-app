@@ -48,6 +48,9 @@ function Commands({ planned, progress }: { planned: PlannedRoute; progress: GoPr
       <Pressable accessibilityRole="button" onPress={() => void actions.arrive(false)}>
         <Text>arrive</Text>
       </Pressable>
+      <Pressable accessibilityRole="button" onPress={() => void actions.skip('late')}>
+        <Text>skip</Text>
+      </Pressable>
     </>
   );
 }
@@ -134,5 +137,58 @@ describe("« J'y suis » of the Go", () => {
     await act(() => onlineManager.setOnline(true));
     await settle();
     expect(goLocal.localOf(plannedFixture().id).pending).toEqual([]);
+  });
+});
+
+describe('« Passer cette étape » and its « Annuler »', () => {
+  const id = plannedFixture().id;
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    goLocal.clear();
+    mocked.listPlanned.mockResolvedValue(page([plannedFixture()]));
+    await act(() => fakeAuth.setUser(user));
+  });
+  afterEach(() => {
+    onlineManager.setOnline(true);
+    queryClient.clear();
+  });
+
+  it('skips without a confirmation, and « Annuler » brings the step back', async () => {
+    mocked.skipPlannedStep.mockResolvedValue(plannedFixture({ 0: { skippedAt: at } }));
+    mocked.unskipPlannedStep.mockResolvedValue(plannedFixture());
+    await renderGo();
+    await fireEvent.press(await screen.findByRole('button', { name: 'skip' }));
+    expect(mocked.skipPlannedStep).toHaveBeenCalledWith(id, stepIds[0]);
+    expect(await screen.findByText('1 en_route')).toBeTruthy();
+    expect(analytics.track).toHaveBeenCalledWith('go_step_skipped', {
+      route_id: plannedFixture().route.id,
+      step_index: 0,
+      reason: 'late',
+    });
+    const toast = toastStore.getState().toast;
+    expect(toast?.title).toBe('Place fictive passé');
+    expect(toast?.subtitle).toMatch(/^Fin vers \d\d:\d\d$/);
+    expect(toast?.action?.label).toBe('Annuler');
+
+    await act(async () => toast?.action?.onPress());
+    await settle();
+    expect(mocked.unskipPlannedStep).toHaveBeenCalledWith(id, stepIds[0]);
+    expect(screen.getByText('0 en_route')).toBeTruthy();
+  });
+
+  it('is kept offline, « Annuler » included, and sends nothing once undone', async () => {
+    await renderGo();
+    await screen.findByRole('button', { name: 'skip' });
+    await act(() => onlineManager.setOnline(false));
+    await fireEvent.press(screen.getByRole('button', { name: 'skip' }));
+    expect(screen.getByText('1 en_route')).toBeTruthy();
+    expect(goLocal.localOf(id).pending.map((entry) => entry.action)).toEqual(['skip']);
+    await act(async () => toastStore.getState().toast?.action?.onPress());
+    expect(goLocal.localOf(id).pending).toEqual([]);
+    expect(screen.getByText('0 en_route')).toBeTruthy();
+    await act(() => onlineManager.setOnline(true));
+    await settle();
+    expect(mocked.skipPlannedStep).not.toHaveBeenCalled();
+    expect(mocked.unskipPlannedStep).not.toHaveBeenCalled();
   });
 });

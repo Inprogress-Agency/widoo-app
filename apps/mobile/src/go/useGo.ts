@@ -16,8 +16,10 @@ import { goQueryPrefix, OFFLINE_MAX_AGE_MS } from '../api/search-cache';
 import { session, useSession } from '../auth';
 import { useIsOnline } from '../discovery/useRouteSearch';
 import { plannedQueryKey, usePlannedLookup } from '../plan/planned';
+import { localTime } from '../route/sheetText';
 import { haptic } from '../ui/haptics';
 import { showToast } from '../ui/toastStore';
+import { stepName } from './goText';
 import { createGoLocalStore } from './localStore';
 import {
   actualMinutes,
@@ -320,6 +322,27 @@ export function useGoActions(
       if (await markDone(current.step.id)) {
         analytics.track('go_step_done', { route_id: routeId, step_index: current.index });
       }
+    },
+    /**
+     * « Passer cette étape », without a confirmation: cap on the next step, times recomputed, and
+     * the toast « Café Lomi passé » with « Annuler » (D-033). `late` from the step alert.
+     */
+    async skip(reason: 'late' | 'user') {
+      if (!current) {
+        return;
+      }
+      const { step, index } = current;
+      if (!(await send('skip', step.id))) {
+        return;
+      }
+      analytics.track('go_step_skipped', { route_id: routeId, step_index: index, reason });
+      const uid = session.store.getState().user?.uid ?? '';
+      const after = client.getQueryData<PlannedRoute | null>(goQueryKey(uid)) ?? planned;
+      const end = goProgress(after, goLocal.localOf(planned.id)).timeline.endsAt;
+      showToast('info', t('go.skip.done', { place: stepName(step) }), {
+        subtitle: t('go.progress.end', { time: localTime(t, end).short }),
+        action: { label: t('go.skip.undo'), onPress: () => void send('unskip', step.id) },
+      });
     },
     /**
      * « Itinéraire »: Google Maps to the step, in the mode of the trip to it, by the API; written
