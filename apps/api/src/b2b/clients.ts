@@ -6,7 +6,7 @@ import {
   type B2bClientPatch,
   type B2bClients,
 } from '@widoo/shared';
-import { asc, DrizzleQueryError, eq, sql } from 'drizzle-orm';
+import { and, asc, DrizzleQueryError, eq, inArray, sql } from 'drizzle-orm';
 import { recordAdminAction } from '../admin/actions';
 import type { Db, Tx } from '../db/client';
 import { b2bClientRoutes, b2bClients, routes } from '../db/schema';
@@ -180,6 +180,58 @@ export async function updateClient(
       targetId: id,
       before: Object.fromEntries(changed.map((field) => [field, current[field]])),
       after: patch,
+    });
+    return cardOf(tx, id);
+  });
+}
+
+/**
+ * Sets the routes of a partner, in the order of its page, replacing the former choice (A-10).
+ * Only published routes can be chosen: 409 `routes_unavailable` names the ones that cannot.
+ */
+export async function setClientRoutes(
+  db: Db,
+  actorId: string,
+  id: string,
+  routeIds: string[],
+): Promise<B2bClient> {
+  return db.transaction(async (tx) => {
+    const [client] = await tx
+      .select({ id: b2bClients.id })
+      .from(b2bClients)
+      .where(eq(b2bClients.id, id))
+      .for('update');
+    if (!client) {
+      throw httpError(404, 'Partner not found');
+    }
+    const found = await tx
+      .select({ id: routes.id })
+      .from(routes)
+      .where(and(inArray(routes.id, routeIds), eq(routes.status, 'published')));
+    const available = new Set(found.map((route) => route.id));
+    const unavailable = routeIds.filter((routeId) => !available.has(routeId));
+    if (unavailable.length > 0) {
+      throw httpError(409, 'Some routes cannot be chosen', 'conflict', {
+        reason: 'routes_unavailable',
+        routeIds: unavailable,
+      });
+    }
+    const before = await tx
+      .select({ routeId: b2bClientRoutes.routeId })
+      .from(b2bClientRoutes)
+      .where(eq(b2bClientRoutes.clientId, id))
+      .orderBy(asc(b2bClientRoutes.position));
+    await tx.delete(b2bClientRoutes).where(eq(b2bClientRoutes.clientId, id));
+    await tx
+      .insert(b2bClientRoutes)
+      .values(routeIds.map((routeId, position) => ({ clientId: id, routeId, position })));
+    await recordAdminAction(tx, {
+      actorId,
+      action: 'b2b_client.set_routes',
+      targetType: 'b2b_client',
+      targetId: id,
+      before: { routeIds: before.map((row) => row.routeId) },
+      after: { routeIds },
     });
     return cardOf(tx, id);
   });

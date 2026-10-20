@@ -1,4 +1,4 @@
-import { ApiError, B2bClient, type UserRole } from '@widoo/shared';
+import { ApiError, B2bClient, B2bClients, type UserRole } from '@widoo/shared';
 import { and, eq, inArray, like } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
@@ -67,6 +67,8 @@ async function addPartner(headers: Headers, values: Record<string, unknown> = {}
   expect(response.statusCode).toBe(201);
   return B2bClient.parse(response.json());
 }
+
+const publishedRoute = () => fixtures.copyDemoRoute({ status: 'published' });
 
 describe('who may read and write the partners', () => {
   it('is for editors and admins, not for a moderator, nor for someone signed out', async () => {
@@ -174,5 +176,69 @@ describe('PATCH /v1/admin/b2b-clients/:id', () => {
       404,
     );
     expect((await send('GET', admin.headers, `/${uuidv7()}`)).statusCode).toBe(404);
+  });
+});
+
+describe('PUT /v1/admin/b2b-clients/:id/routes', () => {
+  it('sets 3 to 10 published routes in order, replaces them, and lists them', async () => {
+    const editor = await signIn('editor');
+    const partner = await addPartner(editor.headers);
+    const [a, b, c, d] = await Promise.all([1, 2, 3, 4].map(publishedRoute));
+    if (!a || !b || !c || !d) throw new Error('Routes not created');
+
+    const set = await send('PUT', editor.headers, `/${partner.id}/routes`, { routeIds: [c, a, b] });
+
+    expect(set.statusCode).toBe(200);
+    const card = B2bClient.parse(set.json());
+    expect(card.routes.map((route) => [route.id, route.position, route.isPublished])).toEqual([
+      [c, 0, true],
+      [a, 1, true],
+      [b, 2, true],
+    ]);
+    expect(card.routeCount).toBe(3);
+    expect(card.cityNames.length).toBeGreaterThan(0);
+
+    const replaced = await send('PUT', editor.headers, `/${partner.id}/routes`, {
+      routeIds: [d, b, a],
+    });
+    expect(B2bClient.parse(replaced.json()).routes.map((route) => route.id)).toEqual([d, b, a]);
+    const listed = B2bClients.parse((await send('GET', editor.headers, '')).json());
+    expect(listed.items.find((item) => item.id === partner.id)).toMatchObject({ routeCount: 3 });
+    expect(await journalOf(partner.id)).toEqual([
+      'b2b_client.create',
+      'b2b_client.set_routes',
+      'b2b_client.set_routes',
+    ]);
+  });
+
+  it('refuses fewer than 3 routes, a route twice, and routes that are not published', async () => {
+    const editor = await signIn('editor');
+    const partner = await addPartner(editor.headers);
+    const [a, b, c] = await Promise.all([1, 2, 3].map(publishedRoute));
+    const draft = await fixtures.copyDemoRoute({ status: 'draft' });
+    if (!a || !b || !c) throw new Error('Routes not created');
+    const unknown = uuidv7();
+
+    expect(
+      (await send('PUT', editor.headers, `/${partner.id}/routes`, { routeIds: [a, b] })).statusCode,
+    ).toBe(422);
+    expect(
+      (await send('PUT', editor.headers, `/${partner.id}/routes`, { routeIds: [a, b, b] }))
+        .statusCode,
+    ).toBe(422);
+    const refused = await send('PUT', editor.headers, `/${partner.id}/routes`, {
+      routeIds: [a, draft, unknown],
+    });
+    expect(refused.statusCode).toBe(409);
+    expect(ApiError.parse(refused.json()).details).toEqual({
+      reason: 'routes_unavailable',
+      routeIds: [draft, unknown],
+    });
+    expect(
+      (await send('PUT', editor.headers, `/${uuidv7()}/routes`, { routeIds: [a, b, c] }))
+        .statusCode,
+    ).toBe(404);
+    const card = B2bClient.parse((await send('GET', editor.headers, `/${partner.id}`)).json());
+    expect(card.routes).toEqual([]);
   });
 });

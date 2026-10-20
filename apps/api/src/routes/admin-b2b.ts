@@ -1,8 +1,20 @@
-import { B2bClient, B2bClientInput, B2bClientPatch, B2bClients } from '@widoo/shared';
+import {
+  B2bClient,
+  B2bClientInput,
+  B2bClientPatch,
+  B2bClientRoutesInput,
+  B2bClients,
+} from '@widoo/shared';
 import type { FastifyRequest } from 'fastify';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { createClient, readClient, readClients, updateClient } from '../b2b/clients';
+import {
+  createClient,
+  readClient,
+  readClients,
+  setClientRoutes,
+  updateClient,
+} from '../b2b/clients';
 import { httpError } from '../errors';
 
 const security = [{ firebaseIdToken: [] }];
@@ -89,5 +101,21 @@ export const adminB2bRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (request) => updateClient(app.db, actorIdOf(request), request.params.id, request.body),
+  );
+
+  app.put(
+    '/admin/b2b-clients/:id/routes',
+    {
+      schema: {
+        tags,
+        summary: 'Choose the 3 to 10 published routes of a B2B partner, in order',
+        security,
+        params: ClientParams,
+        body: B2bClientRoutesInput,
+        response: { 200: B2bClient },
+      },
+    },
+    async (request) =>
+      setClientRoutes(app.db, actorIdOf(request), request.params.id, request.body.routeIds),
   );
 };
