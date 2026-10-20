@@ -1,6 +1,8 @@
 import {
   AffiliateProgram,
   AffiliatePrograms,
+  B2bClient,
+  B2bClients,
   BookableSteps,
   AdminActionFilters,
   AdminActions,
@@ -59,6 +61,9 @@ import {
   type AdminActionsQuery,
   type AffiliateProgramInput,
   type AffiliateProgramPatch,
+  type B2bClientInput,
+  type B2bClientPatch,
+  type B2bClientRoutesInput,
   type BookableStepsQuery,
   type AdminSignalsQuery,
   type UpdateSettingBody,
@@ -790,6 +795,56 @@ export function createApiClient(options: ApiClientOptions) {
         path: `/v1/admin/affiliate-programs/${programId}`,
         body: patch,
         schema: AffiliateProgram,
+        auth: true,
+      }),
+
+    /** `GET /v1/admin/b2b-clients`: the B2B partners (A-10). */
+    getB2bClients: (signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: '/v1/admin/b2b-clients',
+        schema: B2bClients,
+        auth: true,
+        signal,
+      }),
+
+    /** `GET /v1/admin/b2b-clients/:id`: the card of a partner. */
+    getB2bClient: (clientId: string, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/admin/b2b-clients/${clientId}`,
+        schema: B2bClient,
+        auth: true,
+        signal,
+      }),
+
+    /** `POST /v1/admin/b2b-clients`: registers a partner. */
+    createB2bClient: (client: B2bClientInput) =>
+      request({
+        method: 'POST',
+        path: '/v1/admin/b2b-clients',
+        body: client,
+        schema: B2bClient,
+        auth: true,
+      }),
+
+    /** `PATCH /v1/admin/b2b-clients/:id`: changes the fields given of a partner, never its slug. */
+    updateB2bClient: (clientId: string, patch: B2bClientPatch) =>
+      request({
+        method: 'PATCH',
+        path: `/v1/admin/b2b-clients/${clientId}`,
+        body: patch,
+        schema: B2bClient,
+        auth: true,
+      }),
+
+    /** `PUT /v1/admin/b2b-clients/:id/routes`: the 3 to 10 published routes of a partner, in order. */
+    setB2bClientRoutes: (clientId: string, body: B2bClientRoutesInput) =>
+      request({
+        method: 'PUT',
+        path: `/v1/admin/b2b-clients/${clientId}/routes`,
+        body,
+        schema: B2bClient,
         auth: true,
       }),
 
