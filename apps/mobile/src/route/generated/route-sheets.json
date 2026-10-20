@@ -14,7 +14,7 @@
       "transport": "walk",
       "district": "4e",
       "neighborhood": "Le Marais",
-      "durationMin": 245,
+      "durationMin": 243,
       "durationBucket": "half_day",
       "budgetPerPersonEur": 16,
       "budgetBucket": "low",
@@ -467,11 +467,11 @@
       "transport": "walk",
       "district": "18e",
       "neighborhood": "Montmartre",
-      "durationMin": 230,
+      "durationMin": 228,
       "durationBucket": "half_day",
       "budgetPerPersonEur": 50,
       "budgetBucket": "medium",
-      "distanceM": 1010,
+      "distanceM": 1007,
       "rating": {
         "average": null,
         "count": 0
@@ -492,7 +492,7 @@
       ],
       "timezone": "Europe/Paris",
       "tips": [],
-      "walkingDistanceM": 1010,
+      "walkingDistanceM": 1007,
       "effort": "easy",
       "startAccess": null,
       "creator": {
@@ -928,7 +928,7 @@
       "transport": "bike",
       "district": "10e",
       "neighborhood": "Canal Saint-Martin",
-      "durationMin": 215,
+      "durationMin": 208,
       "durationBucket": "half_day",
       "budgetPerPersonEur": 14,
       "budgetBucket": "low",
@@ -1375,11 +1375,11 @@
       "transport": "walk",
       "district": "13e",
       "neighborhood": "Butte-aux-Cailles",
-      "durationMin": 225,
+      "durationMin": 223,
       "durationBucket": "half_day",
       "budgetPerPersonEur": 22,
       "budgetBucket": "low",
-      "distanceM": 2070,
+      "distanceM": 2075,
       "rating": {
         "average": null,
         "count": 0
@@ -1400,7 +1400,7 @@
       ],
       "timezone": "Europe/Paris",
       "tips": ["Un maillot et un bonnet de bain pour la piscine"],
-      "walkingDistanceM": 2070,
+      "walkingDistanceM": 2075,
       "effort": "easy",
       "startAccess": null,
       "creator": {
@@ -1842,11 +1842,11 @@
       "transport": "walk",
       "district": "20e",
       "neighborhood": "Belleville",
-      "durationMin": 100,
+      "durationMin": 98,
       "durationBucket": "1_2h",
       "budgetPerPersonEur": 0,
       "budgetBucket": "free",
-      "distanceM": 1360,
+      "distanceM": 1359,
       "rating": {
         "average": null,
         "count": 0
@@ -1867,7 +1867,7 @@
       ],
       "timezone": "Europe/Paris",
       "tips": [],
-      "walkingDistanceM": 1360,
+      "walkingDistanceM": 1359,
       "effort": "easy",
       "startAccess": null,
       "creator": {
@@ -2148,7 +2148,7 @@
       "transport": "walk",
       "district": "5e",
       "neighborhood": "Quartier latin",
-      "durationMin": 355,
+      "durationMin": 357,
       "durationBucket": "full_day",
       "budgetPerPersonEur": 34,
       "budgetBucket": "medium",
@@ -2698,11 +2698,11 @@
       "transport": "metro",
       "district": "1er",
       "neighborhood": "Île de la Cité",
-      "durationMin": 345,
+      "durationMin": 347,
       "durationBucket": "full_day",
       "budgetPerPersonEur": 65,
       "budgetBucket": "medium",
-      "distanceM": 3370,
+      "distanceM": 3535,
       "rating": {
         "average": null,
         "count": 0
@@ -2723,7 +2723,7 @@
       ],
       "timezone": "Europe/Paris",
       "tips": [],
-      "walkingDistanceM": 1630,
+      "walkingDistanceM": 1235,
       "effort": "easy",
       "startAccess": null,
       "creator": {
@@ -3248,11 +3248,11 @@
       "transport": "walk",
       "district": "19e",
       "neighborhood": "Buttes-Chaumont",
-      "durationMin": 165,
+      "durationMin": 168,
       "durationBucket": "half_day",
       "budgetPerPersonEur": 14,
       "budgetBucket": "low",
-      "distanceM": 890,
+      "distanceM": 891,
       "rating": {
         "average": null,
         "count": 0
@@ -3273,7 +3273,7 @@
       ],
       "timezone": "Europe/Paris",
       "tips": [],
-      "walkingDistanceM": 890,
+      "walkingDistanceM": 891,
       "effort": "easy",
       "startAccess": null,
       "creator": {
@@ -3662,11 +3662,11 @@
       "transport": "walk",
       "district": "3e",
       "neighborhood": "Le Marais",
-      "durationMin": 135,
+      "durationMin": 137,
       "durationBucket": "1_2h",
       "budgetPerPersonEur": 26,
       "budgetBucket": "medium",
-      "distanceM": 2010,
+      "distanceM": 2014,
       "rating": {
         "average": null,
         "count": 0
@@ -3687,7 +3687,7 @@
       ],
       "timezone": "Europe/Paris",
       "tips": ["Des espèces pour les petites boutiques"],
-      "walkingDistanceM": 2010,
+      "walkingDistanceM": 2014,
       "effort": "easy",
       "startAccess": null,
       "creator": {
@@ -4109,7 +4109,7 @@
       "transport": "walk",
       "district": "12e",
       "neighborhood": "Bastille",
-      "durationMin": 335,
+      "durationMin": 337,
       "durationBucket": "full_day",
       "budgetPerPersonEur": 0,
       "budgetBucket": "free",
@@ -4145,7 +4145,7 @@
       "reviews": [],
       "timeline": {
         "startsAt": "2026-09-25T08:00:00.000Z",
-        "endsAt": "2026-09-25T12:51:00.000Z",
+        "endsAt": "2026-09-25T13:37:00.000Z",
         "steps": [
           {
             "stepId": "01a0d794-1000-7a56-b081-43f0d52e0aee",
@@ -4161,14 +4161,14 @@
           },
           {
             "stepId": "01a0d794-1000-78cb-bebf-ad7bb76ad43b",
-            "arrivesAt": "2026-09-25T09:48:00.000Z",
-            "leavesAt": "2026-09-25T11:03:00.000Z",
+            "arrivesAt": "2026-09-25T10:12:00.000Z",
+            "leavesAt": "2026-09-25T11:27:00.000Z",
             "conflicts": []
           },
           {
             "stepId": "01a0d794-1000-7206-8068-4b55098cf9ab",
-            "arrivesAt": "2026-09-25T11:21:00.000Z",
-            "leavesAt": "2026-09-25T12:51:00.000Z",
+            "arrivesAt": "2026-09-25T12:07:00.000Z",
+            "leavesAt": "2026-09-25T13:37:00.000Z",
             "conflicts": []
           }
         ]
@@ -4235,10 +4235,10 @@
           "endsOn": null,
           "transitionNote": "Suivre la Coulée verte jusqu’à la porte de Montempoivre.",
           "transition": {
-            "distanceM": 3366,
-            "durationMin": 18,
-            "mode": "metro",
-            "estimated": false,
+            "distanceM": 3125,
+            "durationMin": 42,
+            "mode": "walk",
+            "estimated": true,
             "geometry": null
           },
           "place": {
@@ -4330,10 +4330,10 @@
           "endsOn": null,
           "transitionNote": null,
           "transition": {
-            "distanceM": 3254,
-            "durationMin": 18,
-            "mode": "metro",
-            "estimated": false,
+            "distanceM": 3021,
+            "durationMin": 40,
+            "mode": "walk",
+            "estimated": true,
             "geometry": null
           },
           "place": {
@@ -4465,11 +4465,11 @@
       "transport": "walk",
       "district": "18e",
       "neighborhood": "Montmartre",
-      "durationMin": 230,
+      "durationMin": 228,
       "durationBucket": "half_day",
       "budgetPerPersonEur": 50,
       "budgetBucket": "medium",
-      "distanceM": 1010,
+      "distanceM": 1007,
       "rating": {
         "average": null,
         "count": 0
@@ -4490,7 +4490,7 @@
       ],
       "timezone": "Europe/Paris",
       "tips": [],
-      "walkingDistanceM": 1010,
+      "walkingDistanceM": 1007,
       "effort": "easy",
       "startAccess": null,
       "creator": {
@@ -4702,7 +4702,7 @@
       "transport": "bike",
       "district": "10e",
       "neighborhood": "Canal Saint-Martin",
-      "durationMin": 215,
+      "durationMin": 208,
       "durationBucket": "half_day",
       "budgetPerPersonEur": 14,
       "budgetBucket": "low",
@@ -5147,11 +5147,11 @@
       "transport": "walk",
       "district": "3e",
       "neighborhood": "Le Marais",
-      "durationMin": 135,
+      "durationMin": 137,
       "durationBucket": "1_2h",
       "budgetPerPersonEur": 26,
       "budgetBucket": "medium",
-      "distanceM": 2010,
+      "distanceM": 2014,
       "rating": {
         "average": 4.7,
         "count": 3
@@ -5172,7 +5172,7 @@
       ],
       "timezone": "Europe/Paris",
       "tips": ["Des espèces pour les petites boutiques"],
-      "walkingDistanceM": 2010,
+      "walkingDistanceM": 2014,
       "effort": "easy",
       "startAccess": null,
       "creator": {

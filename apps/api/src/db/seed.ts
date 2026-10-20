@@ -8,8 +8,10 @@
  * identical, and an edited JSON is applied on the next run. Places, routes and authors are
  * upserted; the hours, steps and photos of the seed places and routes are rewritten.
  */
+import type { Transition } from '@widoo/orchestration';
 import { certificationSettingKeys, defaultCertificationThresholds } from '@widoo/shared';
 import { and, eq, inArray, sql } from 'drizzle-orm';
+import { storedComputedOf } from '../editor/computed';
 import { stableRecommendationOf } from '../recommendation/stable';
 import { accessColumnOf } from '../transit/access';
 import type { Db } from './client';
@@ -26,7 +28,8 @@ import {
   users,
 } from './schema';
 import { anecdoteQuestionsAtLaunch } from './seed/anecdote-questions';
-import { bucketsOf, demoDataset, paris, type DemoPlace, type DemoRoute } from './seed/demo-routes';
+import { orchestrationOf, placesOfRoute } from './seed/demo-orchestration';
+import { demoDataset, paris, type DemoPlace, type DemoRoute } from './seed/demo-routes';
 import { namedUuidv7 } from './uuid';
 
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
@@ -167,6 +170,8 @@ async function seedRoutes(tx: Tx, cityId: string) {
         endsOn: step.endsOn ?? null,
         transitionNote: step.transitionNote ?? null,
         highlights: step.highlights ?? null,
+        // Our estimate in the mode of the step, as the editor stores it (D-088).
+        transition: transitionColumnOf(orchestrationOf(route).transitions[position] ?? null),
       })),
     ),
   );
@@ -210,13 +215,19 @@ async function seedRoutes(tx: Tx, cityId: string) {
   if (stepPhotos.length > 0) await tx.insert(media).values(stepPhotos);
 }
 
+/** `steps.transition` of a trip: what `replaceSteps` writes, without the line of a provider. */
+const transitionColumnOf = (trip: Transition | null) =>
+  trip && {
+    distanceM: trip.distanceM,
+    durationMin: trip.durationMin,
+    mode: trip.mode,
+    estimated: trip.estimated,
+  };
+
 function routeRow(route: DemoRoute, cityId: string) {
-  const stepPlaces = route.steps.map((step) => {
-    const place = demoDataset.places.find((candidate) => candidate.key === step.place);
-    if (!place) throw new Error(`Unknown place ${step.place}`);
-    return place;
-  });
+  const stepPlaces = placesOfRoute(route);
   const locations = stepPlaces.map((place) => place.location);
+  const { result, computed } = orchestrationOf(route);
   return {
     cityId,
     authorId: route.author === null ? null : seedId(`user:${route.author}`),
@@ -227,14 +238,15 @@ function routeRow(route: DemoRoute, cityId: string) {
     moods: route.moods,
     audiences: route.audiences,
     conditions: route.conditions,
-    transport: route.transport,
+    transport: computed.transport,
     suggestedStart: route.suggestedStart ?? null,
     tips: route.tips,
     startLocation: locations[0],
     bounds: envelopeOf(locations),
-    // The access is computed like the editor does, from the reference stations (D-050).
-    computed: { ...route.computed, access: accessColumnOf(locations[0]) },
-    ...bucketsOf(route),
+    // Computed by the engine like the editor does, with the access of the first step (D-050).
+    computed: storedComputedOf(result, accessColumnOf(locations[0])),
+    durationBucket: computed.durationBucket,
+    budgetBucket: computed.budgetBucket,
     publishedAt: seedAt,
     // As the nightly job would compute it on the dataset date: no rating, every place verified.
     recommendation: stableRecommendationOf(
@@ -242,7 +254,7 @@ function routeRow(route: DemoRoute, cityId: string) {
         isOfficial: route.author === null,
         rating: { average: null, count: 0 },
         publishedAt: seedAt,
-        computedAt: new Date(route.computed.computed_at),
+        computedAt: new Date(computed.computedAt),
         placeStatuses: stepPlaces.map(() => 'verified' as const),
         firstCategory: stepPlaces[0]?.category ?? null,
       },

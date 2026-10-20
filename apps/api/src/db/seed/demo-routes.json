@@ -740,7 +740,6 @@
       "moods": ["culture", "romantic"],
       "audiences": ["couple", "friends", "solo"],
       "conditions": ["no_booking", "wheelchair", "indoor", "rainy"],
-      "transport": "walk",
       "photos": [
         {
           "url": "https://images.unsplash.com/photo-1775210676191-f450802fa51e?w=1200&h=800&fit=crop&auto=format&q=80",
@@ -753,15 +752,6 @@
           "height": 800
         }
       ],
-      "computed": {
-        "duration_min": 245,
-        "budget_per_person_eur": 16,
-        "distance_m": 1320,
-        "walking_m": 1320,
-        "effort": "easy",
-        "warnings": [],
-        "computed_at": "2026-09-25T08:00:00.000Z"
-      },
       "steps": [
         {
           "place": "maison-victor-hugo",
@@ -831,7 +821,6 @@
       "moods": ["romantic", "instagrammable", "culture"],
       "audiences": ["couple"],
       "conditions": ["outdoor", "sunny"],
-      "transport": "walk",
       "suggestedStart": "15:30",
       "photos": [
         {
@@ -845,15 +834,6 @@
           "height": 800
         }
       ],
-      "computed": {
-        "duration_min": 230,
-        "budget_per_person_eur": 50,
-        "distance_m": 1010,
-        "walking_m": 1010,
-        "effort": "easy",
-        "warnings": [],
-        "computed_at": "2026-09-25T08:00:00.000Z"
-      },
       "steps": [
         {
           "place": "mur-des-je-t-aime",
@@ -901,7 +881,6 @@
       "moods": ["relax", "sport", "instagrammable"],
       "audiences": ["friends", "solo"],
       "conditions": ["no_booking", "outdoor", "sunny"],
-      "transport": "bike",
       "photos": [
         {
           "url": "https://images.unsplash.com/photo-1642766603265-e33f8a27fb31?w=1200&h=800&fit=crop&auto=format&q=80",
@@ -914,40 +893,35 @@
           "height": 800
         }
       ],
-      "computed": {
-        "duration_min": 215,
-        "budget_per_person_eur": 14,
-        "distance_m": 4430,
-        "walking_m": 0,
-        "effort": "easy",
-        "warnings": [],
-        "computed_at": "2026-09-25T08:00:00.000Z"
-      },
       "steps": [
         {
           "place": "du-pain-et-des-idees",
           "description": "Le « pain des amis » et l’escargot pistache-chocolat. Fermé le week-end.",
           "durationMin": 20,
-          "costPerPerson": 6
+          "costPerPerson": 6,
+          "transitionMode": "bike"
         },
         {
           "place": "ecluse-des-recollets",
           "description": "Regarder une péniche passer l’écluse depuis la passerelle, à côté de l’Hôtel du Nord.",
           "durationMin": 20,
-          "costPerPerson": 0
+          "costPerPerson": 0,
+          "transitionMode": "bike"
         },
         {
           "place": "jardin-villemin",
           "description": "Un jardin partagé caché derrière le canal, pour une première pause.",
           "durationMin": 30,
           "costPerPerson": 0,
-          "transitionNote": "Reprendre le quai de Valmy vers le nord, piste cyclable sur la gauche."
+          "transitionNote": "Reprendre le quai de Valmy vers le nord, piste cyclable sur la gauche.",
+          "transitionMode": "bike"
         },
         {
           "place": "pavillon-des-canaux",
           "description": "Un café dans une maison au bord de l’eau : on s’installe dans la baignoire ou sur la terrasse.",
           "durationMin": 60,
-          "costPerPerson": 8
+          "costPerPerson": 8,
+          "transitionMode": "bike"
         },
         {
           "place": "parc-de-la-villette",
@@ -965,7 +939,6 @@
       "moods": ["unusual", "food"],
       "audiences": ["friends"],
       "conditions": ["no_booking", "outdoor", "sunny"],
-      "transport": "walk",
       "tips": ["Un maillot et un bonnet de bain pour la piscine"],
       "photos": [
         {
@@ -979,15 +952,6 @@
           "height": 800
         }
       ],
-      "computed": {
-        "duration_min": 225,
-        "budget_per_person_eur": 22,
-        "distance_m": 2070,
-        "walking_m": 2070,
-        "effort": "easy",
-        "warnings": [],
-        "computed_at": "2026-09-25T08:00:00.000Z"
-      },
       "steps": [
         {
           "place": "petite-alsace",
@@ -1029,7 +993,6 @@
       "moods": ["unusual", "instagrammable"],
       "audiences": ["couple", "friends", "solo", "dog_friendly"],
       "conditions": ["no_booking", "outdoor", "sunny"],
-      "transport": "walk",
       "photos": [
         {
           "url": "https://images.unsplash.com/photo-1682939033295-031f290adbd2?w=1200&h=800&fit=crop&auto=format&q=80",
@@ -1042,15 +1005,6 @@
           "height": 800
         }
       ],
-      "computed": {
-        "duration_min": 100,
-        "budget_per_person_eur": 0,
-        "distance_m": 1360,
-        "walking_m": 1360,
-        "effort": "easy",
-        "warnings": [],
-        "computed_at": "2026-09-25T08:00:00.000Z"
-      },
       "steps": [
         {
           "place": "rue-denoyez",
@@ -1087,7 +1041,6 @@
       "moods": ["nature", "culture"],
       "audiences": ["family", "kids_friendly"],
       "conditions": ["no_booking", "wheelchair", "outdoor", "sunny"],
-      "transport": "walk",
       "tips": ["Un pique-nique pour le déjeuner", "Une gourde par enfant"],
       "photos": [
         {
@@ -1101,15 +1054,6 @@
           "height": 800
         }
       ],
-      "computed": {
-        "duration_min": 355,
-        "budget_per_person_eur": 34,
-        "distance_m": 1980,
-        "walking_m": 1980,
-        "effort": "easy",
-        "warnings": [],
-        "computed_at": "2026-09-25T08:00:00.000Z"
-      },
       "steps": [
         {
           "place": "arenes-de-lutece",
@@ -1151,7 +1095,6 @@
       "moods": ["culture", "shopping"],
       "audiences": ["solo"],
       "conditions": ["indoor", "rainy"],
-      "transport": "metro",
       "photos": [
         {
           "url": "https://images.unsplash.com/photo-1571860424830-0271e6c9d9b2?w=1200&h=800&fit=crop&auto=format&q=80",
@@ -1164,15 +1107,6 @@
           "height": 800
         }
       ],
-      "computed": {
-        "duration_min": 345,
-        "budget_per_person_eur": 65,
-        "distance_m": 3370,
-        "walking_m": 1630,
-        "effort": "easy",
-        "warnings": [],
-        "computed_at": "2026-09-25T08:00:00.000Z"
-      },
       "steps": [
         {
           "place": "sainte-chapelle",
@@ -1219,7 +1153,6 @@
       "moods": ["nature", "relax"],
       "audiences": ["family", "kids_friendly"],
       "conditions": ["no_booking", "outdoor", "sunny"],
-      "transport": "walk",
       "photos": [
         {
           "url": "https://images.unsplash.com/photo-1731666593725-197dc759038d?w=1200&h=800&fit=crop&auto=format&q=80",
@@ -1232,15 +1165,6 @@
           "height": 800
         }
       ],
-      "computed": {
-        "duration_min": 165,
-        "budget_per_person_eur": 14,
-        "distance_m": 890,
-        "walking_m": 890,
-        "effort": "easy",
-        "warnings": [],
-        "computed_at": "2026-09-25T08:00:00.000Z"
-      },
       "steps": [
         {
           "place": "theatre-guignol-buttes-chaumont",
@@ -1277,7 +1201,6 @@
       "moods": ["food", "shopping"],
       "audiences": ["couple", "friends"],
       "conditions": ["no_booking", "indoor"],
-      "transport": "walk",
       "tips": ["Des espèces pour les petites boutiques"],
       "photos": [
         {
@@ -1291,15 +1214,6 @@
           "height": 800
         }
       ],
-      "computed": {
-        "duration_min": 135,
-        "budget_per_person_eur": 26,
-        "distance_m": 2010,
-        "walking_m": 2010,
-        "effort": "easy",
-        "warnings": [],
-        "computed_at": "2026-09-25T08:00:00.000Z"
-      },
       "steps": [
         {
           "place": "merci",
@@ -1372,7 +1286,6 @@
       "moods": ["sport", "nature"],
       "audiences": ["couple", "friends", "solo"],
       "conditions": ["no_booking", "outdoor", "sunny"],
-      "transport": "walk",
       "photos": [
         {
           "url": "https://images.unsplash.com/photo-1663511870425-5dd7edf1c071?w=1200&h=800&fit=crop&auto=format&q=80",
@@ -1385,34 +1298,28 @@
           "height": 800
         }
       ],
-      "computed": {
-        "duration_min": 335,
-        "budget_per_person_eur": 0,
-        "distance_m": 7250,
-        "walking_m": 7250,
-        "effort": "intense",
-        "warnings": [],
-        "computed_at": "2026-09-25T08:00:00.000Z"
-      },
       "steps": [
         {
           "place": "viaduc-des-arts",
           "description": "Monter sur la Coulée verte par l’escalier de l’avenue Daumesnil.",
           "durationMin": 30,
-          "costPerPerson": 0
+          "costPerPerson": 0,
+          "transitionMode": "walk"
         },
         {
           "place": "jardin-de-reuilly",
           "description": "Pelouse et passerelle au-dessus du jardin, pause pique-nique.",
           "durationMin": 45,
           "costPerPerson": 0,
-          "transitionNote": "Suivre la Coulée verte jusqu’à la porte de Montempoivre."
+          "transitionNote": "Suivre la Coulée verte jusqu’à la porte de Montempoivre.",
+          "transitionMode": "walk"
         },
         {
           "place": "lac-daumesnil",
           "description": "Le tour du lac et de ses deux îles, par le pont suspendu.",
           "durationMin": 75,
-          "costPerPerson": 0
+          "costPerPerson": 0,
+          "transitionMode": "walk"
         },
         {
           "place": "parc-floral",
