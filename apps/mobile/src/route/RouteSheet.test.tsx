@@ -1,6 +1,6 @@
 import { describe, expect, it, jest } from '@jest/globals';
 import { fireEvent, render, screen } from '@testing-library/react-native';
-import { RouteDetail, type RouteCard } from '@widoo/shared';
+import { RouteDetail, type RouteCard, type RouteDetailStep } from '@widoo/shared';
 import { accessibility } from '@widoo/tokens';
 import fixtures from './generated/route-sheets.json';
 import { RouteSheet, type RouteSheetProps } from './RouteSheet';
@@ -98,6 +98,35 @@ describe('RouteSheet (E-05)', () => {
     expect(screen.getByRole('button', { name: /^Étape 1 sur 4.*replié$/ })).toBeTruthy();
     expect(screen.getAllByText(/min à pied \(/).length).toBe(3);
     expect(screen.getByLabelText(/^Fin du parcours, /)).toBeTruthy();
+  });
+
+  it('credits a free photo on the cover and on the photo of its step', async () => {
+    // Fictitious credit of a free photo of Wikimedia Commons (D-052).
+    const credit = {
+      author: 'J. Moreau',
+      license: 'CC BY-SA 4.0',
+      sourceUrl: 'https://commons.wikimedia.org/wiki/File:Exemple.jpg',
+    };
+    const [cover, ...others] = marais.photos as [RouteDetail['photos'][number]];
+    const [start, ...rest] = marais.steps as [RouteDetailStep];
+    const photo = { url: cover.url, credit };
+    await renderSheet(
+      ready({
+        ...marais,
+        photos: [{ ...cover, credit }, ...others],
+        steps: [{ ...start, place: { ...start.place, photo } }, ...rest],
+      }),
+    );
+    const label = 'Photo de J. Moreau, licence CC BY-SA 4.0';
+    expect(await screen.findAllByRole('button', { name: label })).toHaveLength(1);
+    await fireEvent.press(screen.getByRole('button', { name: /^Étape 1 sur 4/ }));
+    expect(screen.getAllByRole('button', { name: label })).toHaveLength(2);
+  });
+
+  it('shows no credit on the photos of the creator', async () => {
+    await renderSheet(ready(marais));
+    await screen.findByRole('header', { name: marais.title });
+    expect(screen.queryByText(/^© /)).toBeNull();
   });
 
   it('tells a reported place under the tiles, its step marked and unfolded with the banner', async () => {

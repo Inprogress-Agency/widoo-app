@@ -61,6 +61,14 @@ export const common = {
     new: 'New',
     certified: 'Certified creator',
   },
+  photoCredit: {
+    short: '© {{author}}',
+    label: 'Photo by {{author}}, licence {{license}}',
+    hint: 'Shows the licence and the source',
+    by: 'Photo by {{author}}',
+    source: 'See on Wikimedia Commons',
+    close: 'Close the credit',
+  },
   auth: {
     dialog: 'Sign-in',
     close: 'Close the sign-in',
@@ -156,6 +164,7 @@ export const common = {
   | 'rating'
   | 'favorite'
   | 'badges'
+  | 'photoCredit'
   | 'auth'
   | 'consent'
 >;

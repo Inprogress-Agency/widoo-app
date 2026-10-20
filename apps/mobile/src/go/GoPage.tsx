@@ -1,4 +1,4 @@
-import type { PlannedRoute, RouteDetail } from '@widoo/shared';
+import type { Photo, PlannedRoute, RouteDetail } from '@widoo/shared';
 import { colors, immersive, motion } from '@widoo/tokens';
 import { Image } from 'expo-image';
 import { StatusBar } from 'expo-status-bar';
@@ -18,6 +18,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon, uiIcon } from '../ui/Icon';
+import { PhotoCredit } from '../ui/PhotoCredit';
 import { Text } from '../ui/Text';
 import { GoCommands } from './GoCommands';
 import { GoProgressBar } from './GoProgressBar';
@@ -54,9 +55,9 @@ interface GoPageProps {
 }
 
 /** The photo of the step, from the full route: its place, else the cover of the route. */
-function photoOf(route: RouteDetail | null, stepId: string | null): string | null {
+function photoOf(route: RouteDetail | null, stepId: string | null): Photo | null {
   const step = route?.steps.find((candidate) => candidate.id === stepId);
-  return (step && !step.isLocked ? step.place.photoUrl : null) ?? route?.coverUrl ?? null;
+  return (step && !step.isLocked ? step.place.photo : null) ?? route?.photos[0] ?? null;
 }
 
 /** A disc on the photo: ink at 40 % (`scrim`), white icon, 44 points. */
@@ -133,7 +134,7 @@ export function GoPage({
     opacity: interpolate(scrollY.get(), [0, immersive.photoHeight], [0, SCROLL_DARKEN], 'clamp'),
   }));
 
-  const photoUrl = photoOf(route, current?.step.id ?? null);
+  const photo = photoOf(route, current?.step.id ?? null);
   const status = statusText(t, progress);
   const line = lineText(t, progress, distanceM);
   const bar = progressText(t, planned, progress);
@@ -150,10 +151,10 @@ export function GoPage({
         pointerEvents="none"
         style={[styles.photo, { height: immersive.photoHeight }, photoStyle]}
       >
-        {photoUrl && (
-          <Animated.View key={photoUrl} entering={fade} style={StyleSheet.absoluteFill}>
+        {photo && (
+          <Animated.View key={photo.url} entering={fade} style={StyleSheet.absoluteFill}>
             <Image
-              source={{ uri: photoUrl }}
+              source={{ uri: photo.url }}
               contentFit="cover"
               accessibilityIgnoresInvertColors
               style={StyleSheet.absoluteFill}
@@ -269,6 +270,12 @@ export function GoPage({
           {/* The map of the route comes later: its place keeps the title centred. */}
           <View className="size-disc" />
         </View>
+        {/* The credit of a free photo, under the place of the map button (D-052). */}
+        {photo?.credit && (
+          <View className="self-end">
+            <PhotoCredit credit={photo.credit} />
+          </View>
+        )}
         {!isOnline && (
           <Animated.View
             entering={fade}
