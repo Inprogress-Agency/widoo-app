@@ -1,4 +1,4 @@
-import type { Photo, PlannedRoute, RouteDetail } from '@widoo/shared';
+import type { PlannedRoute, RouteDetail } from '@widoo/shared';
 import { colors, immersive, motion } from '@widoo/tokens';
 import { Image } from 'expo-image';
 import { StatusBar } from 'expo-status-bar';
@@ -24,6 +24,7 @@ import { GoCommands } from './GoCommands';
 import { GoProgressBar } from './GoProgressBar';
 import { GoStepAlert } from './GoStepAlert';
 import { TextVeil } from './TextVeil';
+import { bigPhotoOf, goPhotoUrls } from './goPhotos';
 import { headerSpoken, lineText, progressText, statusText, stepName } from './goText';
 import { distanceToCurrent, isArrivalSuggested, type GoProgress } from './progress';
 import { useGoPosition } from './useGoPosition';
@@ -41,7 +42,7 @@ const fade = FadeIn.duration(motion.durations.fade).reduceMotion(ReduceMotion.Ne
 interface GoPageProps {
   planned: PlannedRoute;
   progress: GoProgress;
-  /** The full route, for the photos and « Pratique »; null until it answers, or offline. */
+  /** The full route, for the photo of a place and the cover; null until it answers, or offline. */
   route: RouteDetail | null;
   isOnline: boolean;
   /** Height the sheet « Le parcours » keeps at the bottom when half open. */
@@ -55,12 +56,6 @@ interface GoPageProps {
   onSkip: () => void;
   /** The sections of the step, under the commands (Pratique, Le mot de…, Ensuite). */
   children?: ReactNode;
-}
-
-/** The photo of the step, from the full route: its place, else the cover of the route. */
-function photoOf(route: RouteDetail | null, stepId: string | null): Photo | null {
-  const step = route?.steps.find((candidate) => candidate.id === stepId);
-  return (step && !step.isLocked ? step.place.photo : null) ?? route?.photos[0] ?? null;
 }
 
 /** A disc on the photo: ink at 40 % (`scrim`), white icon, 44 points. */
@@ -124,6 +119,14 @@ export function GoPage({
     }
   }, [isOnline, t]);
 
+  // Every photo of the way kept on the phone from the start, for the steps reached offline.
+  const photoUrls = goPhotoUrls(planned, route).join('\n');
+  useEffect(() => {
+    if (photoUrls) {
+      void Image.prefetch(photoUrls.split('\n'), 'disk');
+    }
+  }, [photoUrls]);
+
   const onScroll = useAnimatedScrollHandler((event) => {
     scrollY.set(event.contentOffset.y);
   });
@@ -138,7 +141,7 @@ export function GoPage({
     opacity: interpolate(scrollY.get(), [0, immersive.photoHeight], [0, SCROLL_DARKEN], 'clamp'),
   }));
 
-  const photo = photoOf(route, current?.step.id ?? null);
+  const photo = bigPhotoOf(current?.step ?? null, route);
   const status = statusText(t, progress);
   const line = lineText(t, progress, distanceM);
   const bar = progressText(t, progress);
