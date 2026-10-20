@@ -1,4 +1,9 @@
-import type { AdminRatingsQuery, AdminReportsQuery, AdminSignalsQuery } from '@widoo/shared';
+import type {
+  AdminRatingsQuery,
+  AdminReportsQuery,
+  AdminSignalsQuery,
+  AdminSupportQuery,
+} from '@widoo/shared';
 
 /** A query string from the values that are set, in the order of `keys`. */
 function queryStringOf(
@@ -26,3 +31,7 @@ export const signalsQueryString = (params: Partial<AdminSignalsQuery>) =>
 /** Query string of the ratings with a comment, as the API reads it. */
 export const ratingsQueryString = (params: Partial<AdminRatingsQuery>) =>
   queryStringOf(params, ['rating', 'routeId', 'cursor']);
+
+/** Query string of the support messages, as the API reads it. */
+export const supportQueryString = (params: Partial<AdminSupportQuery>) =>
+  queryStringOf(params, ['status', 'cursor']);

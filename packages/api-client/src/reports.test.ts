@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { ratingsQueryString, reportsQueryString, signalsQueryString } from './reports';
+import {
+  ratingsQueryString,
+  reportsQueryString,
+  signalsQueryString,
+  supportQueryString,
+} from './reports';
 
 describe('reportsQueryString', () => {
   it('is empty for the whole list, and writes the reason and the page', () => {
@@ -20,6 +25,15 @@ describe('ratingsQueryString', () => {
   it('writes the note as a number and the route', () => {
     expect(ratingsQueryString({ rating: 2, routeId: '0198c1de-0000-7000-8000-000000000001' })).toBe(
       'rating=2&routeId=0198c1de-0000-7000-8000-000000000001',
+    );
+  });
+});
+
+describe('supportQueryString', () => {
+  it('writes the status and the page, and nothing for the whole list', () => {
+    expect(supportQueryString({})).toBe('');
+    expect(supportQueryString({ status: 'unhandled', cursor: 'NTA' })).toBe(
+      'status=unhandled&cursor=NTA',
     );
   });
 });
