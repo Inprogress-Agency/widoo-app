@@ -2,7 +2,7 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { GoCommands } from './GoCommands';
 import { emptyGoLocal, goProgress } from './progress';
-import { plannedFixture, stepIds } from './testPlanned';
+import { kept, plannedFixture, stepIds } from './testPlanned';
 
 const at = '2026-10-24T08:22:00.000Z';
 
@@ -33,17 +33,17 @@ describe('GoCommands', () => {
   });
 
   it('offers the next step on site, then « Terminer la sortie » on the last one', async () => {
-    const onSite = goProgress(plannedFixture(), { ...emptyGoLocal, arrivedStepIds: [stepIds[0]] });
+    const onSite = goProgress(plannedFixture(), kept(['arrived', stepIds[0]]));
     const { handlers, view } = renderCommands(onSite);
     await view;
     await fireEvent.press(screen.getByRole('button', { name: 'Étape suivante : Musée fictif' }));
     expect(handlers.onNext).toHaveBeenCalled();
     expect(screen.queryByRole('link')).toBeNull();
 
-    const last = goProgress(plannedFixture({ 0: { doneAt: at }, 1: { doneAt: at } }), {
-      ...emptyGoLocal,
-      arrivedStepIds: [stepIds[2]],
-    });
+    const last = goProgress(
+      plannedFixture({ 0: { doneAt: at }, 1: { doneAt: at } }),
+      kept(['arrived', stepIds[2]]),
+    );
     const second = renderCommands(last);
     await second.view;
     await fireEvent.press(screen.getByRole('button', { name: 'Terminer la sortie' }));

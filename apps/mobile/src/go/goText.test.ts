@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { i18next } from '../i18n';
 import { emptyGoLocal, goProgress } from './progress';
-import { plannedFixture, stepIds } from './testPlanned';
+import { kept, plannedFixture, stepIds } from './testPlanned';
 import {
   headerSpoken,
   lineText,
@@ -27,7 +27,7 @@ describe('E-07 texts, in French', () => {
 
   it('says the step on site, until when', () => {
     const planned = plannedFixture({ 0: { doneAt: at } });
-    const progress = goProgress(planned, { ...emptyGoLocal, arrivedStepIds: [stepIds[1]] });
+    const progress = goProgress(planned, kept(['arrived', stepIds[1]]));
     expect(statusText(t, progress).short).toBe('Étape 2 sur 3, vous y êtes');
     expect(lineText(t, progress, 10)?.short).toBe("Musée, 45 min prévues, jusqu'à 12:45 environ");
     expect(miniPlayerLabel(t, progress)).toBe(

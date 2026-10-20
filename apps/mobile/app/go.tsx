@@ -42,7 +42,7 @@ function Go({ planned, progress, onEnded }: GoProps) {
         sheetPeek={GO_SHEET_PEEK}
         onCollapse={collapse}
         onDirections={() => void actions.directions()}
-        onArrived={actions.arrive}
+        onArrived={(isSuggested) => void actions.arrive(isSuggested)}
         onNext={() => void actions.next()}
         onFinish={finish}
       >

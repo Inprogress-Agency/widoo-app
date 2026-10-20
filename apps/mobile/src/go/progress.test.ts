@@ -8,7 +8,7 @@ import {
   goProgress,
   isArrivalSuggested,
 } from './progress';
-import { plannedFixture, stepIds } from './testPlanned';
+import { kept, plannedFixture, stepIds } from './testPlanned';
 
 const at = '2026-10-24T08:30:00.000Z';
 
@@ -27,7 +27,7 @@ describe('goProgress', () => {
   });
 
   it("is on site after « J'y suis », kept on the phone", () => {
-    const local = { ...emptyGoLocal, arrivedStepIds: [stepIds[0]] };
+    const local = kept(['arrived', stepIds[0]]);
     expect(goProgress(plannedFixture(), local).phase).toBe('on_site');
   });
 
@@ -38,7 +38,7 @@ describe('goProgress', () => {
 
   it('moves to the next step once one is done, by the API or offline', () => {
     const planned = plannedFixture({ 0: { doneAt: at } });
-    const offline = { ...emptyGoLocal, pendingDone: [{ stepId: stepIds[1], at }] };
+    const offline = kept(['done', stepIds[1]]);
     const progress = goProgress(planned, offline);
     expect(progress.current?.index).toBe(2);
     expect(progress.next).toBeNull();
@@ -52,6 +52,20 @@ describe('goProgress', () => {
     expect(progress.current?.index).toBe(1);
     expect(progress.skippedCount).toBe(1);
     expect(progress.doneCount).toBe(0);
+  });
+
+  it('applies the actions kept on the phone as the API would', () => {
+    const skipped = goProgress(plannedFixture(), kept(['skip', stepIds[0]]));
+    expect(skipped.steps[0]?.status).toBe('skipped');
+    expect(skipped.current?.index).toBe(1);
+    // « Annuler » kept offline brings back a step the API knows skipped.
+    const back = goProgress(plannedFixture({ 0: { skippedAt: at } }), kept(['unskip', stepIds[0]]));
+    expect(back.current?.index).toBe(0);
+    // A step done cannot be skipped any more, and a skipped step done counts as done.
+    const done = goProgress(plannedFixture({ 0: { doneAt: at } }), kept(['skip', stepIds[0]]));
+    expect(done.steps[0]?.status).toBe('done');
+    const late = goProgress(plannedFixture({ 0: { skippedAt: at } }), kept(['done', stepIds[0]]));
+    expect(late.steps[0]?.status).toBe('done');
   });
 
   it('has no step left once all are done', () => {
@@ -91,7 +105,7 @@ describe('arrival suggestion', () => {
     expect(isArrivalSuggested(progress, far)).toBe(false);
     expect(distanceToCurrent(progress, null)).toBeNull();
     expect(isArrivalSuggested(progress, null)).toBe(false);
-    const onSite = goProgress(plannedFixture(), { ...emptyGoLocal, arrivedStepIds: [stepIds[0]] });
+    const onSite = goProgress(plannedFixture(), kept(['arrived', stepIds[0]]));
     expect(isArrivalSuggested(onSite, 10)).toBe(false);
   });
 });

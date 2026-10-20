@@ -1,4 +1,5 @@
 import type { PlannedRoute, PlannedStepProgress } from '@widoo/shared';
+import type { GoLocal, GoStepAction } from './progress';
 
 /** Fictitious ids of the three steps of `plannedFixture`. */
 export const stepIds = [
@@ -91,3 +92,8 @@ export function plannedFixture(
     updatedAt: at,
   };
 }
+
+/** What the phone keeps of the Go: these actions, not sent yet, taken at 10:30 in Paris. */
+export const kept = (...actions: [GoStepAction, string][]): GoLocal => ({
+  pending: actions.map(([action, stepId]) => ({ action, stepId, at: '2026-10-24T08:30:00.000Z' })),
+});
