@@ -19,13 +19,20 @@ import { plannedQueryKey, usePlannedLookup } from '../plan/planned';
 import { haptic } from '../ui/haptics';
 import { showToast } from '../ui/toastStore';
 import { createGoLocalStore } from './localStore';
-import { actualMinutes, doneRatio, emptyGoLocal, goProgress, type GoProgress } from './progress';
+import {
+  actualMinutes,
+  doneRatio,
+  emptyGoLocal,
+  goProgress,
+  type GoProgress,
+  type GoStepAction,
+} from './progress';
 import { startGo } from './startGo';
 
 const storage = createMMKV({ id: 'go' });
 const STATE_KEY = 'state';
 
-/** What the phone keeps of the Go under way: « J'y suis » and the steps done offline. */
+/** What the phone keeps of the Go under way: the actions of its steps not sent yet. */
 export const goLocal = createGoLocalStore({
   get: () => storage.getString(STATE_KEY),
   set: (value) => storage.set(STATE_KEY, value),
@@ -137,27 +144,53 @@ export function useStartGo() {
   };
 }
 
-/** Sends the steps done offline once the network is back (E-07, hors connexion). */
-async function sendPending(client: QueryClient, plannedId: string) {
-  for (const { stepId } of goLocal.localOf(plannedId).pendingDone) {
+/** The route of each action of a step (#503): each answers the Go up to date. */
+const sendOf: Record<GoStepAction, (id: string, stepId: string) => Promise<PlannedRoute>> = {
+  arrived: (id, stepId) => api.markPlannedStepArrived(id, stepId),
+  done: (id, stepId) => api.markPlannedStepDone(id, stepId),
+  skip: (id, stepId) => api.skipPlannedStep(id, stepId),
+  unskip: (id, stepId) => api.unskipPlannedStep(id, stepId),
+};
+
+/** Sends the kept actions in their order, until none is left or the network fails again. */
+async function drain(client: QueryClient, plannedId: string) {
+  for (let sentCount = 0; ; sentCount++) {
+    const entry = goLocal.localOf(plannedId).pending[0];
+    if (!entry) {
+      // A read asked at the return of the network may answer before them: read the Go again.
+      if (sentCount > 0) {
+        void client.invalidateQueries({ queryKey: goQueryPrefix });
+      }
+      return;
+    }
     try {
-      setGo(client, await api.markPlannedStepDone(plannedId, stepId));
+      setGo(client, await sendOf[entry.action](plannedId, entry.stepId));
     } catch (error) {
       if (isUnreachable(error)) {
         return;
       }
-      // Refused (the Go closed meanwhile): nothing more to send for this step.
+      // Refused (the Go closed meanwhile, the step done elsewhere): nothing more to send for it.
     }
-    goLocal.sent(plannedId, stepId);
+    goLocal.sent(plannedId, entry);
   }
 }
 
-/** At the root: the steps done offline leave at the return of the network. */
+let sending: Promise<void> | null = null;
+
+/** Sends the actions kept offline (E-07, hors connexion), one sending at a time. */
+function sendPending(client: QueryClient, plannedId: string): Promise<void> {
+  sending ??= drain(client, plannedId).finally(() => {
+    sending = null;
+  });
+  return sending;
+}
+
+/** At the root: the actions kept offline leave at the return of the network. */
 export function GoSync() {
   const client = useQueryClient();
   const isOnline = useIsOnline();
   const { planned } = useGo();
-  const pendingCount = useStore(goLocal.store, (state) => state.local.pendingDone.length);
+  const pendingCount = useStore(goLocal.store, (state) => state.local.pending.length);
   useEffect(() => {
     if (isOnline && planned && pendingCount > 0) {
       void sendPending(client, planned.id);
@@ -185,11 +218,15 @@ export function useGoActions(
   const failed = () =>
     showToast('error', t('go.toast.actionFailed'), { subtitle: t('go.toast.failedBody') });
 
-  /** The current step done: sent, or kept on the phone offline. */
-  const markDone = async (stepId: string) => {
-    if (onlineManager.isOnline()) {
+  /**
+   * An action of a step: sent at once, or kept on the phone offline and sent at the return of the
+   * network, after those kept before it. False when the API refused it.
+   */
+  const send = async (action: GoStepAction, stepId: string) => {
+    const isOnline = onlineManager.isOnline();
+    if (isOnline && goLocal.localOf(planned.id).pending.length === 0) {
       try {
-        setGo(client, await api.markPlannedStepDone(planned.id, stepId));
+        setGo(client, await sendOf[action](planned.id, stepId));
         return true;
       } catch (error) {
         if (!isUnreachable(error)) {
@@ -198,10 +235,15 @@ export function useGoActions(
         }
       }
     }
-    goLocal.queueDone(planned.id, stepId, new Date());
-    showToast('info', t('go.kept'));
+    goLocal.queue(planned.id, action, stepId, new Date());
+    if (isOnline) {
+      void sendPending(client, planned.id);
+    } else {
+      showToast('info', t('go.kept'));
+    }
     return true;
   };
+  const markDone = (stepId: string) => send('done', stepId);
 
   const close = async (status: 'completed' | 'stopped') => {
     if (current && progress.phase === 'on_site' && status === 'completed') {
@@ -242,18 +284,19 @@ export function useGoActions(
   };
 
   return {
-    /** « J'y suis »: never by itself, with the pill shown or not (D-029). */
-    arrive(isSuggested: boolean) {
+    /** « J'y suis »: never by itself, with the pill shown or not (D-029); written by the API. */
+    async arrive(isSuggested: boolean) {
       if (!current) {
         return;
       }
-      goLocal.arrive(planned.id, current.step.id);
       haptic('arrived');
-      analytics.track('go_arrived', {
-        route_id: routeId,
-        step_index: current.index,
-        suggested: isSuggested,
-      });
+      if (await send('arrived', current.step.id)) {
+        analytics.track('go_arrived', {
+          route_id: routeId,
+          step_index: current.index,
+          suggested: isSuggested,
+        });
+      }
     },
     /** « Étape suivante »: the step of the moment done, cap on the next one. */
     async next() {
@@ -272,7 +315,7 @@ export function useGoActions(
       if (!current) {
         return;
       }
-      const isLocalAhead = goLocal.localOf(planned.id).pendingDone.length > 0;
+      const isLocalAhead = goLocal.localOf(planned.id).pending.length > 0;
       const url =
         onlineManager.isOnline() && !isLocalAhead
           ? await api

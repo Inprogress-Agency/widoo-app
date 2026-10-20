@@ -1,5 +1,11 @@
 import { straightLineM } from '@widoo/orchestration';
-import type { LatLng, PlannedRoute, PlannedRouteStep, TimelineStep } from '@widoo/shared';
+import type {
+  LatLng,
+  PlannedRoute,
+  PlannedRouteStep,
+  PlannedStepProgress,
+  TimelineStep,
+} from '@widoo/shared';
 
 /**
  * Where a Go stands (Ecrans › E-07), a pure function of the planning and of what the phone keeps:
@@ -9,16 +15,39 @@ import type { LatLng, PlannedRoute, PlannedRouteStep, TimelineStep } from '@wido
 /** « Vous semblez être sur place » under this distance from the step (seuil proposé, E-07). */
 export const ARRIVAL_SUGGESTION_M = 100;
 
-/**
- * What the phone keeps of a Go until the API takes it: the steps « J'y suis » reached (no route
- * writes `arrived_at` yet, #418), and the steps done offline, sent when the network is back.
- */
-export interface GoLocal {
-  arrivedStepIds: readonly string[];
-  pendingDone: readonly { stepId: string; at: string }[];
+/** An action of a step of the Go (E-07): « J'y suis », « Étape suivante », « Passer », « Annuler ». */
+export type GoStepAction = 'arrived' | 'done' | 'skip' | 'unskip';
+
+/** An action taken offline, or not yet answered, sent in order once the network is back. */
+export interface GoPendingAction {
+  action: GoStepAction;
+  stepId: string;
+  /** When it was taken on the phone. */
+  at: string;
 }
 
-export const emptyGoLocal: GoLocal = { arrivedStepIds: [], pendingDone: [] };
+/** What the phone keeps of a Go until the API takes it: the actions not sent yet, in order. */
+export interface GoLocal {
+  pending: readonly GoPendingAction[];
+}
+
+export const emptyGoLocal: GoLocal = { pending: [] };
+
+type StepState = Omit<PlannedStepProgress, 'stepId'>;
+
+/** The state of a step once an action the API does not know yet is applied, as the API would. */
+function applied(state: StepState, { action, at }: GoPendingAction): StepState {
+  switch (action) {
+    case 'arrived':
+      return { ...state, arrivedAt: state.arrivedAt ?? at };
+    case 'done':
+      return { ...state, doneAt: state.doneAt ?? at, skippedAt: null };
+    case 'skip':
+      return state.doneAt ? state : { ...state, skippedAt: state.skippedAt ?? at };
+    case 'unskip':
+      return { ...state, skippedAt: null };
+  }
+}
 
 export type GoStepStatus = 'done' | 'skipped' | 'current' | 'upcoming';
 
@@ -26,7 +55,7 @@ export interface GoStep {
   step: PlannedRouteStep;
   index: number;
   status: GoStepStatus;
-  /** When it was done, by the API or offline; null otherwise. */
+  /** When it was done, by the API or on the phone offline; null otherwise. */
   doneAt: string | null;
   times: TimelineStep | null;
 }
@@ -46,13 +75,20 @@ export interface GoProgress {
 
 /** The progress of `planned`, with what the phone keeps. */
 export function goProgress(planned: PlannedRoute, local: GoLocal): GoProgress {
-  const progressOf = new Map(planned.steps.map((entry) => [entry.stepId, entry]));
+  const progressOf = new Map<string, StepState>(
+    planned.steps.map(({ stepId, ...state }) => [stepId, state]),
+  );
+  for (const pending of local.pending) {
+    const state = progressOf.get(pending.stepId);
+    if (state) {
+      progressOf.set(pending.stepId, applied(state, pending));
+    }
+  }
   const timesOf = new Map(planned.timeline.steps.map((entry) => [entry.stepId, entry]));
-  const pending = new Map(local.pendingDone.map((entry) => [entry.stepId, entry.at]));
   let isCurrentFound = false;
   const steps = planned.route.steps.map((step, index): GoStep => {
     const progress = progressOf.get(step.id);
-    const doneAt = progress?.doneAt ?? pending.get(step.id) ?? null;
+    const doneAt = progress?.doneAt ?? null;
     let status: GoStepStatus;
     if (doneAt) {
       status = 'done';
@@ -67,10 +103,7 @@ export function goProgress(planned: PlannedRoute, local: GoLocal): GoProgress {
     return { step, index, status, doneAt, times: timesOf.get(step.id) ?? null };
   });
   const current = steps.find((entry) => entry.status === 'current') ?? null;
-  const isArrived =
-    current !== null &&
-    (progressOf.get(current.step.id)?.arrivedAt != null ||
-      local.arrivedStepIds.includes(current.step.id));
+  const isArrived = current !== null && progressOf.get(current.step.id)?.arrivedAt != null;
   return {
     steps,
     current,
