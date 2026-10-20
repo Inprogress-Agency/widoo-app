@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { reportStatuses } from '../reports';
 import { taxonomies } from '../taxonomies';
-import { HttpsUrl, LatLng } from './common';
+import { LatLng } from './common';
 import { Place } from './place';
 import {
   Photo,
@@ -144,9 +144,7 @@ export const RouteDetail = z
     isLocked: z.boolean(),
     status: z.enum(taxonomies.routeStatuses),
     description: z.string(),
-    /** Photos of the carousel, the cover first. */
-    photoUrls: z.array(HttpsUrl),
-    /** The same photos with their credit (D-052), in the same order. */
+    /** Photos of the carousel, the cover first, with the credit of a free photo (D-052). */
     photos: z.array(Photo),
     /** IANA zone of the city: the hours and the timeline are its local times. */
     timezone: z.string().min(1),

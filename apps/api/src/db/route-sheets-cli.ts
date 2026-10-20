@@ -1,6 +1,6 @@
 /**
- * `pnpm fixtures:route-sheets`: writes the route sheets of the demo dataset where the app reads
- * them until `GET /v1/routes/:id` exists (#36). Fictitious data only, no network nor database.
+ * `pnpm fixtures:route-sheets`: writes the route sheets of the demo dataset where the tests of
+ * the app read them. Fictitious data only, no network nor database.
  */
 import { writeFileSync } from 'node:fs';
 import { routeSheetFixtures, routeSheetFixturesPath } from './seed/route-sheets';

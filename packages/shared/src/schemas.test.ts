@@ -23,7 +23,6 @@ const place = {
   location,
   address: '1 rue Fictive, Paris',
   isIndoor: true,
-  photoUrl: null,
   verificationStatus: 'verified',
   verifiedAt: null,
   hours: [hours],

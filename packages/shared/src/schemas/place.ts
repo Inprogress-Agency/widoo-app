@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { taxonomies } from '../taxonomies';
-import { HttpsUrl, LatLng } from './common';
+import { LatLng } from './common';
 
 /** One opening slot, several per day for split hours. No slot on a day: closed; none at all: unknown. */
 export const PlaceHours = z.object({
@@ -22,7 +22,6 @@ export const Place = z.object({
   location: LatLng,
   address: z.string().min(1),
   isIndoor: z.boolean(),
-  photoUrl: HttpsUrl.nullable(),
   verificationStatus: z.enum(taxonomies.verificationStatuses),
   verifiedAt: z.iso.datetime().nullable(),
   hours: z.array(PlaceHours),
