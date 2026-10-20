@@ -13,8 +13,9 @@ import { uuidv7 } from '../db/uuid';
 import { bodyValidationError } from '../errors';
 import type { User } from '../users/repository';
 import type { RouteContent } from './content';
+import { placesOf } from './recompute';
 import { saveContent } from './save';
-import { ownedRoute, ownRouteOf, placesOf, workspaceOf } from './workspace';
+import { ownedRoute, ownRouteOf, workspaceOf } from './workspace';
 
 /**
  * A draft of the caller, without steps. Its city is the active one until the first step gives
