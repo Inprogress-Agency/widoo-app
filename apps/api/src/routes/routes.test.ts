@@ -1,8 +1,15 @@
-import { AppConfig, defaultCertificationThresholds, labels, taxonomies } from '@widoo/shared';
+import {
+  AppConfig,
+  bucketSettingKeys,
+  defaultBucketThresholds,
+  defaultCertificationThresholds,
+  labels,
+  taxonomies,
+} from '@widoo/shared';
 import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
-import { anecdoteQuestions } from '../db/schema';
+import { anecdoteQuestions, settings } from '../db/schema';
 import { seed } from '../db/seed';
 import { anecdoteQuestionsAtLaunch } from '../db/seed/anecdote-questions';
 import { testConfig } from '../test-config';
@@ -75,6 +82,32 @@ describe('system routes', () => {
         '/v1/routes/search/count',
       ]),
     );
+  });
+});
+
+describe('the buckets of settings on /v1/config', () => {
+  // Shared database, parallel files: a full day one minute longer, which classifies no route of
+  // the other files differently, deleted at the end.
+  const durationMin = { ...defaultBucketThresholds.durationMin, full_day: 721 };
+  let app: Awaited<ReturnType<typeof buildApp>>;
+  beforeAll(async () => {
+    app = await buildApp(testConfig());
+    await app.db
+      .insert(settings)
+      .values({ key: bucketSettingKeys.durationMin, value: durationMin })
+      .onConflictDoUpdate({ target: settings.key, set: { value: durationMin } });
+  });
+  afterAll(async () => {
+    await app.db.delete(settings).where(eq(settings.key, bucketSettingKeys.durationMin));
+    await app.close();
+  });
+
+  it('serves the bounds read from settings, each group on its default without a row', async () => {
+    const config = AppConfig.parse((await app.inject({ url: '/v1/config' })).json());
+    expect(config.thresholds).toEqual({
+      budgetEur: defaultBucketThresholds.budgetEur,
+      durationMin,
+    });
   });
 });
 

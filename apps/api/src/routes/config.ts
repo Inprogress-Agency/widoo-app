@@ -1,7 +1,13 @@
-import { AppConfig, defaultBucketThresholds, labels, taxonomies } from '@widoo/shared';
+import {
+  AppConfig,
+  bucketSettingKeys,
+  bucketThresholdsOf,
+  labels,
+  taxonomies,
+} from '@widoo/shared';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { legalVersions } from '../legal/documents';
-import { createCachedSetting } from '../search/settings';
+import { createCachedSetting, readSettings } from '../search/settings';
 import { createAppVersions } from '../system/app-versions';
 import { createCertificationThresholds } from '../users/certification';
 import { readActiveAnecdoteQuestions } from '../users/profile';
@@ -9,15 +15,20 @@ import { readActiveAnecdoteQuestions } from '../users/profile';
 type Options = { minAppVersion: string };
 
 /**
- * Startup configuration of the app and the admin. Bucket thresholds are the shared defaults
- * until the API reads them from the `settings` table; the anecdote questions, the certification
- * thresholds and the build versions of each platform are read from the database and kept one
- * minute per process, so that the team changes them without a deployment.
+ * Startup configuration of the app and the admin. The bucket bounds the engine classifies with,
+ * the anecdote questions, the certification thresholds and the build versions of each platform
+ * are read from the database and kept one minute per process, so that the team changes them
+ * without a deployment.
  */
 export const configRoutes: FastifyPluginAsyncZod<Options> = async (app, { minAppVersion }) => {
   const anecdoteQuestions = createCachedSetting(
     () => readActiveAnecdoteQuestions(app.db),
     (questions) => questions,
+  );
+  // The same bounds as the editor's (`orchestrationSettingsOf`), each group on its default.
+  const bucketThresholds = createCachedSetting(
+    () => readSettings(app.db, Object.values(bucketSettingKeys)),
+    bucketThresholdsOf,
   );
   const certificationThresholds = createCertificationThresholds(app.db);
   const appVersions = createAppVersions(app.db, minAppVersion);
@@ -34,7 +45,8 @@ export const configRoutes: FastifyPluginAsyncZod<Options> = async (app, { minApp
       },
     },
     async (_request, reply) => {
-      const [questions, thresholds, versions] = await Promise.all([
+      const [buckets, questions, thresholds, versions] = await Promise.all([
+        bucketThresholds(),
         anecdoteQuestions(),
         certificationThresholds(),
         appVersions(),
@@ -46,7 +58,7 @@ export const configRoutes: FastifyPluginAsyncZod<Options> = async (app, { minApp
         legal: legalVersions,
         taxonomies,
         labels,
-        thresholds: defaultBucketThresholds,
+        thresholds: buckets,
         anecdoteQuestions: questions,
         certificationThresholds: thresholds,
       };
