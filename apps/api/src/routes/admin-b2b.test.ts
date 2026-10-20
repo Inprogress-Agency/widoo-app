@@ -1,5 +1,5 @@
 import { ApiError, B2bClient, B2bClients, type UserRole } from '@widoo/shared';
-import { and, eq, inArray, like } from 'drizzle-orm';
+import { and, asc, eq, inArray, like } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
@@ -51,10 +51,15 @@ const send = (
   url: string,
   payload?: object,
 ) => app.inject({ method, url: `/v1/admin/b2b-clients${url}`, headers, payload });
+// In the order it was written: without an `order by`, Postgres answers in any order.
 const journalOf = async (targetId: string) =>
-  (await app.db.select().from(adminActions).where(eq(adminActions.targetId, targetId))).map(
-    (row) => row.action,
-  );
+  (
+    await app.db
+      .select()
+      .from(adminActions)
+      .where(eq(adminActions.targetId, targetId))
+      .orderBy(asc(adminActions.createdAt), asc(adminActions.id))
+  ).map((row) => row.action);
 
 /** A partner created by the API, with the card it answered. */
 async function addPartner(headers: Headers, values: Record<string, unknown> = {}) {
