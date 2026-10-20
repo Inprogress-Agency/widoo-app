@@ -1,5 +1,4 @@
 import BottomSheet, { BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import type { PlannedRoute } from '@widoo/shared';
 import { filterIcons, size } from '@widoo/tokens';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -24,7 +23,6 @@ export const GO_SHEET_PEEK = size['sheet-rest'];
 const STRETCHED_TOP = 110;
 
 interface GoSheetProps {
-  planned: PlannedRoute;
   progress: GoProgress;
   onFinish: () => void;
   onStop: () => void;
@@ -37,7 +35,7 @@ function TimelineRow({ entry, progress }: { entry: GoStep; progress: GoProgress 
   const time = entry.times ? localTime(t, entry.times.arrivesAt) : null;
   const state = timelineState(t, entry, progress.phase);
   const duration = formatDuration(t, entry.step.durationMin, 'short');
-  const transition = entry.step.transition ? transitionText(t, entry.step.transition) : null;
+  const transition = entry.transition ? transitionText(t, entry.transition) : null;
   const isPast = entry.status === 'done' || entry.status === 'skipped';
   return (
     <View className="flex-row gap-12">
@@ -66,7 +64,7 @@ function TimelineRow({ entry, progress }: { entry: GoStep; progress: GoProgress 
           ) : (
             <StepDot category={entry.step.place.category} isActive={entry.status === 'current'} />
           )}
-          {entry.step.transition && (
+          {entry.index < progress.total - 1 && (
             <View className="w-4 flex-1 border-l border-dashed border-rail" />
           )}
         </View>
@@ -82,14 +80,14 @@ function TimelineRow({ entry, progress }: { entry: GoStep; progress: GoProgress 
           <Text variant="body-medium" color={toneColor[state.tone]}>
             {state.text}
           </Text>
-          {transition && entry.step.transition && (
+          {transition && entry.transition && (
             <View
               accessible
               accessibilityLabel={transition.spoken}
               className="flex-row items-center gap-8 pt-8"
             >
               <Icon
-                name={filterIcons.transports[entry.step.transition.mode]}
+                name={filterIcons.transports[entry.transition.mode]}
                 size="icon-s"
                 color="muted"
               />
@@ -110,14 +108,14 @@ function TimelineRow({ entry, progress }: { entry: GoStep; progress: GoProgress 
  * screen readers. The timeline of the outing with the state of each step, then « Terminer la
  * sortie » and « Arrêter le parcours ». No Google Maps link for the whole route (D-032).
  */
-export function GoSheet({ planned, progress, onFinish, onStop }: GoSheetProps) {
+export function GoSheet({ progress, onFinish, onStop }: GoSheetProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
   const sheet = useRef<BottomSheet>(null);
   const [index, setIndex] = useState(0);
-  const start = localTime(t, planned.timeline.startsAt);
-  const end = localTime(t, planned.timeline.endsAt);
+  const start = localTime(t, progress.timeline.startsAt);
+  const end = localTime(t, progress.timeline.endsAt);
   const snapPoints = [GO_SHEET_PEEK + insets.bottom, height - STRETCHED_TOP];
   return (
     <BottomSheet

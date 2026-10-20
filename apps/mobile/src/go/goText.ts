@@ -1,4 +1,4 @@
-import type { PlannedRoute, PlannedRouteStep } from '@widoo/shared';
+import type { PlannedRouteStep } from '@widoo/shared';
 import type { TFunction } from 'i18next';
 import { formatDistance } from '../format/distance';
 import { formatDuration } from '../format/duration';
@@ -83,10 +83,13 @@ export function headerSpoken(t: TFunction, progress: GoProgress, distanceM: numb
   ].join(' ');
 }
 
-/** « Départ 10:00 » and « Fin vers 17:00 », and the bar as a screen reader reads it. */
-export function progressText(t: TFunction, planned: PlannedRoute, progress: GoProgress) {
-  const start = localTime(t, planned.timeline.startsAt);
-  const end = localTime(t, planned.timeline.endsAt);
+/**
+ * « Départ 10:00 » and « Fin vers 17:00 », the end recomputed as the Go goes, and the bar as a
+ * screen reader reads it.
+ */
+export function progressText(t: TFunction, progress: GoProgress) {
+  const start = localTime(t, progress.timeline.startsAt);
+  const end = localTime(t, progress.timeline.endsAt);
   return {
     start: t('go.progress.start', { time: start.short }),
     end: t('go.progress.end', { time: end.short }),

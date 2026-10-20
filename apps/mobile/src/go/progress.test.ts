@@ -91,6 +91,62 @@ describe('goProgress', () => {
   });
 });
 
+describe('the times of the Go', () => {
+  const saturday = 5;
+  /** The fixture with the café closing at `closes` in Paris on Saturdays. */
+  function withCafeClosing(closes: string) {
+    const planned = plannedFixture({ 0: { doneAt: '2026-10-24T08:45:00.000Z' } });
+    const cafe = planned.route.steps[2];
+    if (cafe) {
+      cafe.place.hours = [
+        { weekday: saturday, opens: '08:00', closes, validFrom: null, validTo: null },
+      ];
+    }
+    return planned;
+  }
+
+  it('pushes « Fin vers » when the step of the moment is late', () => {
+    const planned = plannedFixture({ 0: { doneAt: '2026-10-24T08:45:00.000Z' } });
+    const onTime = goProgress(planned, emptyGoLocal, new Date('2026-10-24T08:50:00.000Z'));
+    expect(onTime.timeline.endsAt).toBe('2026-10-24T10:39:00.000Z');
+    const late = goProgress(planned, emptyGoLocal, new Date('2026-10-24T09:30:00.000Z'));
+    expect(late.steps[1]?.times?.arrivesAt).toBe('2026-10-24T09:30:00.000Z');
+    expect(late.timeline.endsAt).toBe('2026-10-24T11:12:00.000Z');
+  });
+
+  it('has no time for a skipped step, and a direct trip across it', () => {
+    const progress = goProgress(
+      plannedFixture({ 1: { skippedAt: at } }),
+      emptyGoLocal,
+      new Date('2026-10-24T07:00:00.000Z'),
+    );
+    expect(progress.steps[1]?.times).toBeNull();
+    expect(progress.steps[1]?.transition).toBeNull();
+    // From the park to the café, in the mode of the trip that left the park: by bike.
+    expect(progress.steps[0]?.transition).toMatchObject({ mode: 'bike', estimated: true });
+    const last = goProgress(plannedFixture({ 2: { skippedAt: at } }), emptyGoLocal);
+    expect(last.steps[1]?.transition).toBeNull();
+  });
+
+  it('alerts en route on a step that will close before half of its time', () => {
+    // Late: the café is reached at 13:00 in Paris (11:00Z), now; 45 min planned.
+    const now = new Date('2026-10-24T11:00:00.000Z');
+    const closing = goProgress(withCafeClosing('13:20'), kept(['done', stepIds[1]]), now);
+    expect(closing.current?.index).toBe(2);
+    expect(closing.alert).toMatchObject({ kind: 'closing', remainingMin: 20 });
+    const closed = goProgress(withCafeClosing('12:30'), kept(['done', stepIds[1]]), now);
+    expect(closed.alert?.kind).toBe('closed');
+    const fine = goProgress(withCafeClosing('18:00'), kept(['done', stepIds[1]]), now);
+    expect(fine.alert).toBeNull();
+    const there = goProgress(
+      withCafeClosing('13:20'),
+      kept(['done', stepIds[1]], ['arrived', stepIds[2]]),
+      now,
+    );
+    expect(there.alert).toBeNull();
+  });
+});
+
 describe('arrival suggestion', () => {
   const progress = goProgress(plannedFixture(), emptyGoLocal);
 

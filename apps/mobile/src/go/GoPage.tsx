@@ -137,7 +137,7 @@ export function GoPage({
   const photo = photoOf(route, current?.step.id ?? null);
   const status = statusText(t, progress);
   const line = lineText(t, progress, distanceM);
-  const bar = progressText(t, planned, progress);
+  const bar = progressText(t, progress);
   const stateKey = `${current?.step.id ?? 'end'}-${progress.phase}`;
 
   return (

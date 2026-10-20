@@ -48,7 +48,7 @@ function Go({ planned, progress, onEnded }: GoProps) {
       >
         <GoSections progress={progress} route={route} now={new Date()} />
       </GoPage>
-      <GoSheet planned={planned} progress={progress} onFinish={finish} onStop={actions.stop} />
+      <GoSheet progress={progress} onFinish={finish} onStop={actions.stop} />
     </>
   );
 }
