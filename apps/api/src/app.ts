@@ -25,6 +25,7 @@ import { adminReportsRoutes } from './routes/admin-reports';
 import { adminActionsRoutes } from './routes/admin-actions';
 import { adminAffiliationRoutes } from './routes/admin-affiliation';
 import { adminB2bRoutes } from './routes/admin-b2b';
+import { adminSupportRoutes } from './routes/admin-support';
 import { publicPartnersRoutes } from './routes/public-partners';
 import { adminSettingsRoutes } from './routes/admin-settings';
 import { adminUsersRoutes } from './routes/admin-users';
@@ -167,6 +168,7 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   await app.register(adminActionsRoutes, { prefix: '/v1' });
   await app.register(adminAffiliationRoutes, { prefix: '/v1' });
   await app.register(adminB2bRoutes, { prefix: '/v1' });
+  await app.register(adminSupportRoutes, { prefix: '/v1' });
   await app.register(publicPartnersRoutes, { prefix: '/v1' });
   await app.register(goRoutes, { prefix: '/v1' });
   await app.register(searchRoutesPlugin, { prefix: '/v1' });
