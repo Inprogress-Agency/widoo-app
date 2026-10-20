@@ -1,6 +1,12 @@
+import { bucketSettingKeys, defaultBucketThresholds } from '@widoo/shared';
 import { describe, expect, it } from 'vitest';
 import { defaultCoherenceThresholds } from './evaluate';
-import { coherenceSettingKeys, coherenceThresholdsOf } from './settings';
+import {
+  coherenceSettingKeys,
+  coherenceThresholdsOf,
+  orchestrationSettingKeys,
+  orchestrationSettingsOf,
+} from './settings';
 
 describe('coherenceThresholdsOf', () => {
   it('keeps the thresholds of the wiki without any row', () => {
@@ -50,5 +56,35 @@ describe('coherenceThresholdsOf', () => {
     expect(new Set(Object.values(coherenceSettingKeys)).size).toBe(
       Object.keys(coherenceSettingKeys).length,
     );
+  });
+});
+
+describe('orchestrationSettingsOf', () => {
+  it('keeps the thresholds and buckets of the wiki without any row', () => {
+    expect(orchestrationSettingsOf({})).toEqual({
+      thresholds: defaultCoherenceThresholds,
+      buckets: defaultBucketThresholds,
+    });
+  });
+
+  it('reads the rules and the buckets from their keys, each on its own', () => {
+    const durationMin = { '1_2h': 120, half_day: 240, full_day: 600 };
+    const settings = orchestrationSettingsOf({
+      'coherence.max_steps': 12,
+      'buckets.duration_min': durationMin,
+      'buckets.budget_eur': { free: 0, low: 90, medium: 40 },
+    });
+    expect(settings).toEqual({
+      thresholds: { ...defaultCoherenceThresholds, maxSteps: 12 },
+      buckets: { ...defaultBucketThresholds, durationMin },
+    });
+  });
+
+  it('names every key it reads', () => {
+    expect(orchestrationSettingKeys).toEqual([
+      ...Object.values(coherenceSettingKeys),
+      ...Object.values(bucketSettingKeys),
+    ]);
+    expect(new Set(orchestrationSettingKeys).size).toBe(orchestrationSettingKeys.length);
   });
 });

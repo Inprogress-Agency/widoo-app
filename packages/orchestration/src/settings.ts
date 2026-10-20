@@ -2,6 +2,7 @@
  * Thresholds of the coherence rules as the team sets them in `settings`, without a deployment
  * (Orchestration › Règles de cohérence, D-032): one key per threshold.
  */
+import { bucketSettingKeys, bucketThresholdsOf, type BucketThresholds } from '@widoo/shared';
 import { defaultCoherenceThresholds, type CoherenceThresholds } from './evaluate';
 
 type Threshold = keyof CoherenceThresholds;
@@ -64,4 +65,23 @@ export function coherenceThresholdsOf(
     }
   }
   return thresholds;
+}
+
+/** Every `settings` key the engine reads: the thresholds of the rules and the bucket bounds. */
+export const orchestrationSettingKeys: readonly string[] = [
+  ...Object.values(coherenceSettingKeys),
+  ...Object.values(bucketSettingKeys),
+];
+
+/** What `computeRoute` reads from `settings`, each value missing or invalid on its default. */
+export interface OrchestrationSettings {
+  thresholds: CoherenceThresholds;
+  buckets: BucketThresholds;
+}
+
+/** The thresholds and buckets of the engine from the `settings` values by key. */
+export function orchestrationSettingsOf(
+  values: Readonly<Record<string, unknown>>,
+): OrchestrationSettings {
+  return { thresholds: coherenceThresholdsOf(values), buckets: bucketThresholdsOf(values) };
 }
