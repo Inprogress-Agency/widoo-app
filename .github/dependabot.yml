@@ -5,13 +5,47 @@ updates:
     schedule:
       interval: weekly
       day: monday
+    # Titre et commit au format du dépôt (pr-policy.yml) : « chore(infra): Bump … ».
+    commit-message:
+      prefix: chore(infra)
     groups:
       minor-and-patch:
         update-types: [minor, patch]
+    # Paquets fixés par le SDK Expo (#555). Leurs versions sont celles de
+    # node_modules/expo/bundledNativeModules.json pour le SDK de l'app : elles montent ensemble,
+    # avec le SDK, par `npx expo install --fix` (montée suivie par #556), jamais une à une. Une
+    # mineure de Dependabot y apporte les versions du SDK suivant et casse le typecheck mobile,
+    # ce qui bloque aussi les vraies mineures du groupe. Toutes versions confondues, patchs
+    # compris : le SDK les fixe aussi. Seules les montées de version sont concernées : les
+    # alertes Dependabot restent actives, et `pnpm audit` en CI bloque toujours une alerte élevée.
+    # À tenir à jour à chaque ajout d'un paquet de bundledNativeModules.json dans apps/mobile.
+    ignore:
+      - dependency-name: expo
+      - dependency-name: expo-*
+      - dependency-name: babel-preset-expo
+      - dependency-name: jest-expo
+      - dependency-name: react
+      - dependency-name: react-native
+      - dependency-name: '@types/react'
+      - dependency-name: react-native-gesture-handler
+      - dependency-name: react-native-reanimated
+      - dependency-name: react-native-worklets
+      - dependency-name: react-native-screens
+      - dependency-name: react-native-safe-area-context
+      - dependency-name: react-native-svg
+      - dependency-name: '@shopify/flash-list'
+      - dependency-name: '@shopify/react-native-skia'
+      - dependency-name: '@sentry/react-native'
+      # Les types suivent le runtime : Node 22 en CI, dans .nvmrc et dans l'image de l'API.
+      # Une majeure décrirait des API absentes du runtime ; elle se monte à la main, avec Node.
+      - dependency-name: '@types/node'
+        update-types: [version-update:semver-major]
     open-pull-requests-limit: 5
     labels: [type:chore, area:infra]
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: monthly
+    commit-message:
+      prefix: chore(process)
     labels: [type:chore, area:process]
