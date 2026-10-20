@@ -1,14 +1,12 @@
 /**
  * Demo dataset (#32): ten Paris routes on real places, fictitious but credible. Descriptions are
  * written for the demo, photos come from Unsplash (free licence), no real person appears: the
- * two authors are invented and have no email. `computed` is entered by hand until the
- * orchestration engine (v0.3); the buckets are derived from it with the shared thresholds.
+ * two authors are invented and have no email. Nothing the engine computes is entered: trips,
+ * `computed`, buckets and transport come from the orchestration (`demo-orchestration.ts`).
  * The JSON is parsed at load, so a typo fails loudly instead of seeding a broken route.
  */
 import {
   bookingNoteMaxLength,
-  budgetBucketOf,
-  durationBucketOf,
   HttpsUrl,
   LatLng,
   PhotoCredit,
@@ -29,7 +27,6 @@ import raw from './demo-routes.json';
 const Key = z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, 'kebab-case key');
 const LocalTime = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'HH:MM');
 const euros = z.number().nonnegative();
-const meters = z.number().int().nonnegative();
 
 const DemoPlace = z.object({
   key: Key,
@@ -84,21 +81,11 @@ const DemoStep = z.object({
   /** Last day of an ephemeral step (D-050). */
   endsOn: z.iso.date().optional(),
   transitionNote: z.string().min(1).optional(),
+  /** Mode of the trip to the next step, as the creator chose it; absent: the proposed one (D-048). */
+  transitionMode: z.enum(taxonomies.transports).optional(),
   /** « À ne pas manquer » of E-07 (D-029). */
   highlights: StepHighlights.optional(),
   photos: z.array(DemoStepPhoto).max(stepPhotosMax).default([]),
-});
-
-/** Stored as is in `routes.computed`: snake_case keys, like the other computed jsonb columns. */
-const Computed = z.object({
-  duration_min: z.number().int().positive(),
-  /** Sum of the step costs per person, as `budgetOf` computes it (D-032). */
-  budget_per_person_eur: euros,
-  distance_m: meters,
-  walking_m: meters,
-  effort: z.enum(['easy', 'moderate', 'intense']),
-  warnings: z.array(z.string()),
-  computed_at: z.iso.datetime(),
 });
 
 const DemoRoute = z.object({
@@ -111,13 +98,11 @@ const DemoRoute = z.object({
   moods: z.array(z.enum(taxonomies.moods)).min(1),
   audiences: z.array(z.enum(taxonomies.audiences)).min(1),
   conditions: z.array(z.enum(taxonomies.conditions)),
-  transport: z.enum(taxonomies.transports),
   /** « Départ conseillé » of the creator; absent: computed (D-050). */
   suggestedStart: LocalTime.optional(),
   /** « À prévoir », lines of the creator (D-048). */
   tips: z.array(z.string().min(1).max(routeTipMaxLength)).max(routeTipsMax).default([]),
   photos: z.array(DemoPhoto).min(1),
-  computed: Computed,
   steps: z.array(DemoStep).min(3).max(6),
 });
 
@@ -195,13 +180,6 @@ export const paris = {
 /** Budget per person: the sum of the estimated step costs (wiki Orchestration). */
 export const budgetOf = (route: DemoRoute): number =>
   route.steps.reduce((sum, step) => sum + step.costPerPerson, 0);
-
-export const bucketsOf = (
-  route: DemoRoute,
-): { durationBucket: DurationBucket; budgetBucket: BudgetBucket } => ({
-  durationBucket: durationBucketOf(route.computed.duration_min),
-  budgetBucket: budgetBucketOf(route.computed.budget_per_person_eur),
-});
 
 /**
  * Filter values that no demo route carries, on purpose: the ticket asks for free to medium

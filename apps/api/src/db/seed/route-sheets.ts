@@ -2,15 +2,13 @@
  * Route sheets of the demo dataset (E-05), as `GET /v1/routes/:id` answers them, for the tests
  * of the app, which reads the API itself (#537): `pnpm fixtures:route-sheets` writes them in
  * `apps/mobile/src/route/generated/route-sheets.json`. Same ids, places and photos as the seed;
- * transitions estimated by the orchestration without a directions provider; a timeline from the
- * default start, without conflicts (#35 computes them). Four more sheets show the states of the
+ * trips and numbers of the engine, as the seed stores them (`demo-orchestration.ts`); a timeline
+ * from the default start, without conflicts. Four more sheets show the states of the
  * sheet, all fictitious: a locked Premium route, a private one, one with a reported place, and a
  * withdrawn route.
  */
 import { fileURLToPath } from 'node:url';
-import { computeTransitions } from '@widoo/orchestration';
 import type {
-  LatLng,
   RouteDetail,
   RouteDetailStep,
   RouteRemovedDetails,
@@ -18,7 +16,8 @@ import type {
   SheetStep,
 } from '@widoo/shared';
 import { seedId } from '../seed';
-import { bucketsOf, demoDataset, type DemoPlace, type DemoRoute } from './demo-routes';
+import { bucketsOf, hoursOf, orchestrationOf, placesOfRoute } from './demo-orchestration';
+import { demoDataset, type DemoPlace, type DemoRoute } from './demo-routes';
 
 /** Where the app reads them. */
 export const routeSheetFixturesPath = fileURLToPath(
@@ -31,9 +30,8 @@ export interface RouteSheetFixtures {
   removed: ({ id: string } & RouteRemovedDetails)[];
 }
 
-const { datasetDate, places, routes, authors } = demoDataset;
+const { datasetDate, routes, authors } = demoDataset;
 const day = datasetDate.slice(0, 10);
-const placeOf = new Map(places.map((place) => [place.key, place]));
 const minute = 60_000;
 
 /**
@@ -53,28 +51,9 @@ function startOf(route: DemoRoute): Date {
   return new Date(`${day}T${time}:00${offset ?? '+00:00'}`);
 }
 
-function placeOfStep(key: string): DemoPlace {
-  const place = placeOf.get(key);
-  if (!place) throw new Error(`Unknown place ${key}`);
-  return place;
-}
-
-const hoursOf = (place: DemoPlace) =>
-  place.hours.flatMap(({ weekdays, opens, closes }) =>
-    weekdays.map((weekday) => ({ weekday, opens, closes, validFrom: null, validTo: null })),
-  );
-
-async function sheetOf(route: DemoRoute): Promise<RouteDetail> {
-  const stepPlaces = route.steps.map((step) => placeOfStep(step.place));
-  // Walking routes take the proposed mode of each trip; the bike route keeps the bike (D-048).
-  const mode = route.transport === 'bike' ? 'bike' : null;
-  const transitions = await computeTransitions(
-    stepPlaces.map((place): { location: LatLng; mode: typeof mode } => ({
-      location: place.location,
-      mode,
-    })),
-    { directions: null, cache: null },
-  );
+function sheetOf(route: DemoRoute): RouteDetail {
+  const stepPlaces = placesOfRoute(route);
+  const { transitions, computed } = orchestrationOf(route);
   const steps: RouteDetailStep[] = route.steps.map((step, position) => {
     const place = stepPlaces[position] as DemoPlace;
     const transition = transitions[position] ?? null;
@@ -152,14 +131,14 @@ async function sheetOf(route: DemoRoute): Promise<RouteDetail> {
     moods: route.moods,
     audiences: route.audiences,
     conditions: route.conditions,
-    transport: route.transport,
+    transport: computed.transport,
     district: start.addressComponents.arrondissement,
     neighborhood: start.addressComponents.neighborhood,
-    durationMin: route.computed.duration_min,
-    durationBucket: bucketsOf(route).durationBucket,
-    budgetPerPersonEur: route.computed.budget_per_person_eur,
-    budgetBucket: bucketsOf(route).budgetBucket,
-    distanceM: route.computed.distance_m,
+    durationMin: computed.durationMin,
+    durationBucket: computed.durationBucket,
+    budgetPerPersonEur: computed.budgetPerPersonEur,
+    budgetBucket: computed.budgetBucket,
+    distanceM: computed.distanceM,
     rating: { average: null, count: 0 },
     stepCount: steps.length,
     isLocked: false,
@@ -168,8 +147,8 @@ async function sheetOf(route: DemoRoute): Promise<RouteDetail> {
     photos: route.photos.map((photo) => ({ url: photo.url, credit: null })),
     timezone: 'Europe/Paris',
     tips: route.tips,
-    walkingDistanceM: route.computed.walking_m,
-    effort: route.computed.effort,
+    walkingDistanceM: computed.walkingM,
+    effort: computed.effort,
     startAccess: null,
     creator: {
       routesPublished: routes.filter((other) => other.author === route.author).length,
@@ -270,17 +249,17 @@ function reported(sheet: RouteDetail): RouteDetail {
   return { ...sheet, steps, rating: { average: 4.7, count: reviews.length }, reviews };
 }
 
-const sheetByKey = async (key: string) => {
+const sheetByKey = (key: string) => {
   const route = routes.find((candidate) => candidate.key === key);
   if (!route) throw new Error(`Unknown route ${key}`);
   return sheetOf(route);
 };
 
 export async function routeSheetFixtures(): Promise<RouteSheetFixtures> {
-  const sheets = await Promise.all(routes.map(sheetOf));
-  const premium = locked(variant(await sheetByKey('montmartre-a-deux'), 'premium'));
-  const shared = variant(await sheetByKey('canal-saint-martin-a-velo'), 'private');
-  const flagged = reported(variant(await sheetByKey('marais-gourmand'), 'reported'));
+  const sheets = routes.map(sheetOf);
+  const premium = locked(variant(sheetByKey('montmartre-a-deux'), 'premium'));
+  const shared = variant(sheetByKey('canal-saint-martin-a-velo'), 'private');
+  const flagged = reported(variant(sheetByKey('marais-gourmand'), 'reported'));
   return {
     routes: [
       ...sheets,
