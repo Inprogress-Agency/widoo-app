@@ -1,9 +1,16 @@
-import { straightLineM } from '@widoo/orchestration';
+import {
+  goTimeline,
+  stepAlertOf,
+  straightLineM,
+  type GoStepAlert,
+  type GoTimeline,
+} from '@widoo/orchestration';
 import type {
   LatLng,
   PlannedRoute,
   PlannedRouteStep,
   PlannedStepProgress,
+  StepTransition,
   TimelineStep,
 } from '@widoo/shared';
 
@@ -57,7 +64,13 @@ export interface GoStep {
   status: GoStepStatus;
   /** When it was done, by the API or on the phone offline; null otherwise. */
   doneAt: string | null;
+  /** Its times in the timeline of the Go, recomputed as it goes; null once skipped. */
   times: TimelineStep | null;
+  /**
+   * The trip from it to the next step not skipped: the planned one, or our estimate of the direct
+   * trip across skipped steps; null for a skipped step and for the last one.
+   */
+  transition: StepTransition | null;
 }
 
 export interface GoProgress {
@@ -71,10 +84,18 @@ export interface GoProgress {
   doneCount: number;
   skippedCount: number;
   total: number;
+  /** The timeline of the Go at the time of the progress: « Fin vers » is its `endsAt`. */
+  timeline: GoTimeline;
+  /** The step alert of the step of the moment, en route (closed on arrival, or closing soon). */
+  alert: GoStepAlert | null;
 }
 
-/** The progress of `planned`, with what the phone keeps. */
-export function goProgress(planned: PlannedRoute, local: GoLocal): GoProgress {
+/** The progress of `planned` at `now`, with what the phone keeps. */
+export function goProgress(
+  planned: PlannedRoute,
+  local: GoLocal,
+  now: Date = new Date(),
+): GoProgress {
   const progressOf = new Map<string, StepState>(
     planned.steps.map(({ stepId, ...state }) => [stepId, state]),
   );
@@ -84,7 +105,28 @@ export function goProgress(planned: PlannedRoute, local: GoLocal): GoProgress {
       progressOf.set(pending.stepId, applied(state, pending));
     }
   }
-  const timesOf = new Map(planned.timeline.steps.map((entry) => [entry.stepId, entry]));
+  const dateOf = (iso: string | null | undefined) => (iso ? new Date(iso) : null);
+  const timeline = goTimeline(
+    planned.route.steps.map((step) => {
+      const state = progressOf.get(step.id);
+      return {
+        id: step.id,
+        durationMin: step.durationMin,
+        location: step.place.location,
+        transition: step.transition,
+        hours: step.place.hours,
+        alwaysOpen: step.place.alwaysOpen,
+        arrivedAt: dateOf(state?.arrivedAt),
+        doneAt: dateOf(state?.doneAt),
+        skippedAt: dateOf(state?.skippedAt),
+      };
+    }),
+    planned.timeline,
+    now,
+    planned.route.timezone,
+  );
+  const timesOf = new Map(timeline.steps.map((entry) => [entry.stepId, entry]));
+  const directOf = new Map(timeline.directTrips.map((trip) => [trip.fromStepId, trip.transition]));
   let isCurrentFound = false;
   const steps = planned.route.steps.map((step, index): GoStep => {
     const progress = progressOf.get(step.id);
@@ -100,10 +142,36 @@ export function goProgress(planned: PlannedRoute, local: GoLocal): GoProgress {
       status = 'current';
       isCurrentFound = true;
     }
-    return { step, index, status, doneAt, times: timesOf.get(step.id) ?? null };
+    const isSkipped = status === 'skipped';
+    return {
+      step,
+      index,
+      status,
+      doneAt,
+      times: isSkipped ? null : (timesOf.get(step.id) ?? null),
+      transition: isSkipped ? null : (directOf.get(step.id) ?? step.transition),
+    };
   });
+  // A trip that led to a skipped step, with no step kept after it, leads nowhere now.
+  for (const [index, entry] of steps.entries()) {
+    if (steps[index + 1]?.status === 'skipped' && !directOf.has(entry.step.id)) {
+      entry.transition = null;
+    }
+  }
   const current = steps.find((entry) => entry.status === 'current') ?? null;
   const isArrived = current !== null && progressOf.get(current.step.id)?.arrivedAt != null;
+  const alert =
+    current && !isArrived && current.times
+      ? stepAlertOf(
+          {
+            durationMin: current.step.durationMin,
+            hours: current.step.place.hours,
+            alwaysOpen: current.step.place.alwaysOpen,
+          },
+          current.times,
+          planned.route.timezone,
+        )
+      : null;
   return {
     steps,
     current,
@@ -112,6 +180,8 @@ export function goProgress(planned: PlannedRoute, local: GoLocal): GoProgress {
     doneCount: steps.filter((entry) => entry.status === 'done').length,
     skippedCount: steps.filter((entry) => entry.status === 'skipped').length,
     total: steps.length,
+    timeline,
+    alert,
   };
 }
 

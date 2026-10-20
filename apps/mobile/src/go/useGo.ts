@@ -4,7 +4,7 @@ import { stepMapsUrl } from '@widoo/orchestration';
 import type { PlannedRoute } from '@widoo/shared';
 import { router } from 'expo-router';
 import type { TFunction } from 'i18next';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Linking } from 'react-native';
 import { createMMKV } from 'react-native-mmkv';
@@ -57,6 +57,16 @@ const setGo = (client: QueryClient, planned: PlannedRoute | null) => {
   }
 };
 
+/** The time of the moment, again every minute: a Go late pushes its times as it goes. */
+function useMinute(): Date {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(timer);
+  }, []);
+  return now;
+}
+
 /** The Go in progress of the account and where it stands; null signed out or without one. */
 export function useGo(): { planned: PlannedRoute | null; progress: GoProgress | null } {
   const uid = useSession((state) => state.user?.uid ?? null);
@@ -70,7 +80,11 @@ export function useGo(): { planned: PlannedRoute | null; progress: GoProgress | 
   const local = useStore(goLocal.store, (state) =>
     planned && state.plannedId === planned.id ? state.local : emptyGoLocal,
   );
-  const progress = useMemo(() => (planned ? goProgress(planned, local) : null), [planned, local]);
+  const now = useMinute();
+  const progress = useMemo(
+    () => (planned ? goProgress(planned, local, now) : null),
+    [planned, local, now],
+  );
   return { planned, progress };
 }
 

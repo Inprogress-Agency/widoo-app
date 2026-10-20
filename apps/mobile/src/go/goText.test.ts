@@ -27,16 +27,21 @@ describe('E-07 texts, in French', () => {
 
   it('says the step on site, until when', () => {
     const planned = plannedFixture({ 0: { doneAt: at } });
-    const progress = goProgress(planned, kept(['arrived', stepIds[1]]));
+    // Arrived at 10:30, after the end of the first step at 10:22: the times follow.
+    const progress = goProgress(
+      planned,
+      kept(['arrived', stepIds[1]]),
+      new Date('2026-10-24T08:31:00.000Z'),
+    );
     expect(statusText(t, progress).short).toBe('Étape 2 sur 3, vous y êtes');
-    expect(lineText(t, progress, 10)?.short).toBe("Musée, 45 min prévues, jusqu'à 12:45 environ");
+    expect(lineText(t, progress, 10)?.short).toBe("Musée, 45 min prévues, jusqu'à 11:15 environ");
     expect(miniPlayerLabel(t, progress)).toBe(
       'Parcours en cours, étape 2 sur 3, Musée fictif, vous y êtes. Rouvrir',
     );
-    expect(progressText(t, planned, progress)).toEqual({
+    expect(progressText(t, progress)).toEqual({
       start: 'Départ 10:00',
-      end: 'Fin vers 14:00',
-      spoken: '1 étape faite sur 3, départ 10 heures, fin vers 14 heures',
+      end: 'Fin vers 12:12',
+      spoken: '1 étape faite sur 3, départ 10 heures, fin vers 12 heures 12',
     });
     expect(progress.steps.map((entry) => timelineState(t, entry, progress.phase).text)).toEqual([
       'Fait à 10:22',
