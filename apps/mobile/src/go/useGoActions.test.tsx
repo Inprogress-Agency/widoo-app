@@ -142,6 +142,7 @@ describe("« J'y suis » of the Go", () => {
     await renderGo();
     await fireEvent.press(await screen.findByRole('button', { name: 'arrive' }));
     await settle();
+    expect(toastStore.getState().toast?.title).toBe('Réponse gardée, envoyée au retour du réseau');
     expect(goLocal.localOf(plannedFixture().id).pending.map((entry) => entry.action)).toEqual([
       'arrived',
     ]);
@@ -189,6 +190,21 @@ describe('« Passer cette étape » and its « Annuler »', () => {
     await settle();
     expect(mocked.unskipPlannedStep).toHaveBeenCalledWith(id, stepIds[0]);
     expect(screen.getByText('0 en_route')).toBeTruthy();
+  });
+
+  it('keeps an action behind one the API did not answer, and says so', async () => {
+    mocked.skipPlannedStep.mockRejectedValue(unreachable());
+    await renderGo();
+    await fireEvent.press(await screen.findByRole('button', { name: 'skip' }));
+    await settle();
+    expect(toastStore.getState().toast?.title).toBe('Place fictive passé');
+    await fireEvent.press(screen.getByRole('button', { name: 'arrive' }));
+    await settle();
+    // The skip was tried again before it, in vain: both wait for the network.
+    expect(mocked.skipPlannedStep.mock.calls.length).toBeGreaterThanOrEqual(2);
+    expect(goLocal.localOf(id).pending.map((entry) => entry.action)).toEqual(['skip', 'arrived']);
+    expect(toastStore.getState().toast?.title).toBe('Réponse gardée, envoyée au retour du réseau');
+    expect(screen.getByText('1 on_site')).toBeTruthy();
   });
 
   it('is kept offline, « Annuler » included, and sends nothing once undone', async () => {

@@ -248,7 +248,16 @@ export function useGoActions(
    */
   const send = async (action: GoStepAction, stepId: string) => {
     const isOnline = onlineManager.isOnline();
-    if (isOnline && goLocal.localOf(planned.id).pending.length === 0) {
+    // Online behind actions not sent yet: it leaves after them, in their order, or stays kept.
+    if (isOnline && goLocal.localOf(planned.id).pending.length > 0) {
+      goLocal.queue(planned.id, action, stepId, new Date());
+      await sendPending(client, planned.id);
+      if (goLocal.localOf(planned.id).pending.length > 0) {
+        showToast('info', t('go.kept'));
+      }
+      return true;
+    }
+    if (isOnline) {
       try {
         setGo(client, await sendOf[action](planned.id, stepId));
         return true;
@@ -259,12 +268,9 @@ export function useGoActions(
         }
       }
     }
+    // Offline, or no answer reached the phone: kept for the return of the network.
     goLocal.queue(planned.id, action, stepId, new Date());
-    if (isOnline) {
-      void sendPending(client, planned.id);
-    } else {
-      showToast('info', t('go.kept'));
-    }
+    showToast('info', t('go.kept'));
     return true;
   };
   const markDone = (stepId: string) => send('done', stepId);
