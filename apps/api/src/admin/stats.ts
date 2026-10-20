@@ -18,6 +18,9 @@ type StatsRow = {
   reports_late: number;
   reports_oldest: Date | null;
   flagged_places: number;
+  support: number;
+  support_late: number;
+  support_oldest: Date | null;
   published_routes: number;
   premium_routes: number;
   official_routes: number;
@@ -54,6 +57,10 @@ export async function readAdminStats(
         where status = 'open' and created_at < ${lateBefore}::timestamptz) as reports_late,
       (select min(created_at) from route_reports where status = 'open') as reports_oldest,
       (select count(*)::int from places where verification_status = 'flagged') as flagged_places,
+      (select count(*)::int from support_messages where handled_at is null) as support,
+      (select count(*)::int from support_messages
+        where handled_at is null and created_at < ${lateBefore}::timestamptz) as support_late,
+      (select min(created_at) from support_messages where handled_at is null) as support_oldest,
       (select count(*)::int from routes where status = 'published') as published_routes,
       (select count(*)::int from routes
         where status = 'published' and access = 'premium') as premium_routes,
@@ -75,9 +82,9 @@ export async function readAdminStats(
     throw new Error('Dashboard figures not read');
   }
 
-  // What waits in each section. Support messages, AI drafts and failed translations have no
-  // table yet: nothing can wait there, and each one gets its query with its section. The signals
-  // of places join the reports with `place_signals`.
+  // What waits in each section. AI drafts and failed translations have no table yet: nothing can
+  // wait there, and each one gets its query with its section. The signals of places join the
+  // reports with `place_signals`.
   const nothing: AdminToHandle = { count: 0, lateCount: 0, oldestSince: null };
   const waiting: Record<CountedAdminSection, AdminToHandle> = {
     moderation: {
@@ -90,7 +97,11 @@ export async function readAdminStats(
       lateCount: row.reports_late,
       oldestSince: row.reports_oldest ? new Date(row.reports_oldest).toISOString() : null,
     },
-    support: nothing,
+    support: {
+      count: row.support,
+      lateCount: row.support_late,
+      oldestSince: row.support_oldest ? new Date(row.support_oldest).toISOString() : null,
+    },
     aiDrafts: nothing,
     translations: nothing,
   };
