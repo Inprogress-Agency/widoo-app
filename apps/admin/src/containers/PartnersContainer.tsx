@@ -1,11 +1,13 @@
 'use client';
 
 import { PartnerActions } from '@/components/b2b/PartnerActions';
+import { PartnerStats } from '@/components/b2b/PartnerStats';
 import { PartnerPanelContent } from '@/components/b2b/PartnerPanelContent';
 import { PartnersTable } from '@/components/b2b/PartnersTable';
 import { PageMessage } from '@/components/states/PageMessage';
 import { sectionPaths } from '@/config/navigation';
 import { catalogRoutePathOf } from '@/containers/CatalogRoutesContainer';
+import { PartnerLinksContainer } from '@/containers/PartnerLinksContainer';
 import { PartnerFormContainer } from '@/containers/PartnerFormContainer';
 import { PartnerRoutesContainer } from '@/containers/PartnerRoutesContainer';
 import { useCardOnScreen } from '@/hooks/useCardOnScreen';
@@ -66,6 +68,8 @@ export function PartnersContainer() {
       }
     >
       <PartnerPanelContent partner={partner} routePathOf={catalogRoutePathOf} />
+      <PartnerLinksContainer partner={partner} />
+      <PartnerStats source={partner.source} />
     </DetailPanel>
   );
 

@@ -15,6 +15,7 @@ describe('parseEnv', () => {
       NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL: undefined,
       NEXT_PUBLIC_POSTHOG_URL: undefined,
       NEXT_PUBLIC_REVENUECAT_URL: undefined,
+      NEXT_PUBLIC_SITE_URL: undefined,
     });
   });
 
@@ -64,5 +65,21 @@ describe('parseEnv', () => {
     expect(() =>
       parseEnv({ ...valid, NEXT_PUBLIC_REVENUECAT_URL: 'http://plain.example' }),
     ).toThrow(/NEXT_PUBLIC_REVENUECAT_URL/);
+  });
+
+  it('reads the origin of the public site, and refuses a path or a trailing slash', () => {
+    expect(parseEnv({ ...valid, NEXT_PUBLIC_SITE_URL: 'https://widooapp.com' })).toMatchObject({
+      NEXT_PUBLIC_SITE_URL: 'https://widooapp.com',
+    });
+    expect(parseEnv({ ...valid, NEXT_PUBLIC_SITE_URL: '' }).NEXT_PUBLIC_SITE_URL).toBeUndefined();
+    for (const value of [
+      'https://widooapp.com/',
+      'https://widooapp.com/fr',
+      'ftp://widooapp.com',
+    ]) {
+      expect(() => parseEnv({ ...valid, NEXT_PUBLIC_SITE_URL: value })).toThrow(
+        /NEXT_PUBLIC_SITE_URL/,
+      );
+    }
   });
 });

@@ -1253,6 +1253,27 @@ export const messages = {
       create: 'Ajouter',
       save: 'Enregistrer',
     },
+    links: {
+      title: 'Page et QR codes',
+      siteUrlMissing:
+        "L'adresse du site n'est pas réglée (NEXT_PUBLIC_SITE_URL) : le lien de la page et les QR codes ne peuvent pas être écrits.",
+      pageHint: {
+        prospect:
+          'La page se lit avec son lien, mais le site la garde hors des moteurs de recherche tant que le partenaire n’est pas actif.',
+        active: 'La page est en ligne.',
+        suspended: 'La page n’est plus accessible : elle répond comme une page introuvable.',
+        ended: 'La page n’est plus accessible : elle répond comme une page introuvable.',
+      },
+      page: 'Page du partenaire',
+      app: 'Application (source mesurée)',
+      qrCodeOf: (label: string) => `QR code : ${label}`,
+      download: 'Télécharger le QR code',
+    },
+    stats: {
+      title: 'Clics et installations',
+      notWired: (source: string) =>
+        `Pas encore branché : les clics et les installations venus de la source ${source} s’afficheront ici quand PostHog sera relié à l’admin.`,
+    },
     routesDialog: {
       title: 'Choisir les parcours',
       description: (min: number, max: number) =>

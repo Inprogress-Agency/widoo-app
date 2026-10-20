@@ -43,6 +43,16 @@ const Env = z.object({
     .optional()
     .transform((value) => value || undefined)
     .pipe(z.string().startsWith('pk.').optional()),
+  /**
+   * Origin of the public site, where the pages of the B2B partners (`/p/<slug>`) and the link of
+   * the stores (`/app?src=…`) live: the admin writes them in the links and QR codes of A-10.
+   * Empty: A-10 says it is not set, and gives no link.
+   */
+  NEXT_PUBLIC_SITE_URL: z
+    .string()
+    .optional()
+    .transform((value) => value || undefined)
+    .pipe(Origin.optional()),
   /** Local Auth emulator; empty on staging and production. */
   NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL: z
     .string()

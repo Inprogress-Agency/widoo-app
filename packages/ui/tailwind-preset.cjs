@@ -83,7 +83,9 @@ module.exports = {
       // tailles », « Navigation », « En-tête », A-01) and missing from tokens.json: to move there
       // (DESIGN), then remove from here.
       // `map`: the map of a position in a form (A-04, no board: to size with DESIGN).
-      height: { header: '64px', screen: '100dvh', fit: 'fit-content', map: '280px' },
+      // `qr`: a QR code on the card of a B2B partner (A-10), no board: to size with DESIGN (à reporter
+      // dans tokens.json).
+      height: { header: '64px', screen: '100dvh', fit: 'fit-content', map: '280px', qr: '96px' },
       minHeight: { 0: '0px', field: '40px', screen: '100dvh', textarea: '72px' },
       // A menu of many choices (the route filter of A-03) scrolls past `menu`; to size with DESIGN
       // (à reporter dans tokens.json). The detail panel stays in view while the list scrolls: the
@@ -93,6 +95,7 @@ module.exports = {
       spacing: { 0: '0px' },
       minWidth: { 0: '0px' },
       width: {
+        qr: '96px',
         sidebar: '248px',
         'sidebar-icons': '72px',
         'detail-panel': '400px',
