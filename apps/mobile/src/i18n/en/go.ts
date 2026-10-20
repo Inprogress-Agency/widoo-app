@@ -24,6 +24,8 @@ export const go = {
       end: 'Ends around {{time}}',
       spoken_one: '{{count}} stop done of {{total}}, start {{start}}, ends around {{end}}',
       spoken_other: '{{count}} stops done of {{total}}, start {{start}}, ends around {{end}}',
+      skipped_one: '{{count}} skipped',
+      skipped_other: '{{count}} skipped',
     },
     directions: 'Directions',
     directionsLabel: 'Directions to {{place}}, opens Google Maps',
@@ -35,6 +37,18 @@ export const go = {
     discover: 'Discover the stop',
     offline: 'Offline, the outing goes on',
     kept: 'Answer kept, sent when the network is back',
+    alert: {
+      closes: '{{place}} closes at {{time}}',
+      closesBody: 'You will get there around {{arrival}}, {{duration}} will be left.',
+      closed: '{{place}} will be closed when you get there',
+      closedBody: 'You will get there around {{arrival}}.',
+    },
+    skip: {
+      action: 'Skip this stop',
+      actionLabel: 'Skip this stop, {{place}}',
+      done: '{{place}} skipped',
+      undo: 'Undo',
+    },
     sections: {
       practical: 'Practical',
       word: "{{name}}'s word",

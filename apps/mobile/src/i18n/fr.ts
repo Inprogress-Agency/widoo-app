@@ -460,6 +460,8 @@ export const fr = {
       end: 'Fin vers {{time}}',
       spoken_one: '{{count}} étape faite sur {{total}}, départ {{start}}, fin vers {{end}}',
       spoken_other: '{{count}} étapes faites sur {{total}}, départ {{start}}, fin vers {{end}}',
+      skipped_one: '{{count}} passée',
+      skipped_other: '{{count}} passées',
     },
     directions: 'Itinéraire',
     directionsLabel: 'Itinéraire vers {{place}}, ouvre Google Maps',
@@ -471,6 +473,19 @@ export const fr = {
     discover: "Découvrir l'étape",
     offline: 'Hors connexion, la sortie continue',
     kept: 'Réponse gardée, envoyée au retour du réseau',
+    // The step alert of the late (D-033): closed on arrival, or less than half of its time left.
+    alert: {
+      closes: '{{place}} ferme à {{time}}',
+      closesBody: 'Vous arriverez vers {{arrival}}, il restera {{duration}}.',
+      closed: '{{place}} sera fermé à votre arrivée',
+      closedBody: 'Vous arriverez vers {{arrival}}.',
+    },
+    skip: {
+      action: 'Passer cette étape',
+      actionLabel: 'Passer cette étape, {{place}}',
+      done: '{{place}} passé',
+      undo: 'Annuler',
+    },
     sections: {
       practical: 'Pratique',
       word: 'Le mot de {{name}}',

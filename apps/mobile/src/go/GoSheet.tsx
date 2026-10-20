@@ -61,6 +61,11 @@ function TimelineRow({ entry, progress }: { entry: GoStep; progress: GoProgress 
             <View className="size-step-dot items-center justify-center rounded-pill bg-green-soft">
               <Icon {...uiIcon('done')} size="icon-s" color="green-ink" />
             </View>
+          ) : entry.status === 'skipped' ? (
+            // `mappings.immersive.skippedStep`: a surface dot with the sign of a step skipped.
+            <View className="size-step-dot items-center justify-center rounded-pill bg-surface">
+              <Icon name="play" weight="fill" size="icon-s" color="muted" />
+            </View>
           ) : (
             <StepDot category={entry.step.place.category} isActive={entry.status === 'current'} />
           )}

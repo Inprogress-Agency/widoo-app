@@ -45,6 +45,7 @@ function Go({ planned, progress, onEnded }: GoProps) {
         onArrived={(isSuggested) => void actions.arrive(isSuggested)}
         onNext={() => void actions.next()}
         onFinish={finish}
+        onSkip={() => void actions.skip('late')}
       >
         <GoSections progress={progress} route={route} now={new Date()} />
       </GoPage>

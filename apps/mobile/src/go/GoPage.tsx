@@ -22,6 +22,7 @@ import { PhotoCredit } from '../ui/PhotoCredit';
 import { Text } from '../ui/Text';
 import { GoCommands } from './GoCommands';
 import { GoProgressBar } from './GoProgressBar';
+import { GoStepAlert } from './GoStepAlert';
 import { TextVeil } from './TextVeil';
 import { headerSpoken, lineText, progressText, statusText, stepName } from './goText';
 import { distanceToCurrent, isArrivalSuggested, type GoProgress } from './progress';
@@ -50,6 +51,8 @@ interface GoPageProps {
   onArrived: (isSuggested: boolean) => void;
   onNext: () => void;
   onFinish: () => void;
+  /** « Passer cette étape » of the step alert. */
+  onSkip: () => void;
   /** The sections of the step, under the commands (Pratique, Le mot de…, Ensuite). */
   children?: ReactNode;
 }
@@ -91,6 +94,7 @@ export function GoPage({
   onArrived,
   onNext,
   onFinish,
+  onSkip,
   children,
 }: GoPageProps) {
   const { t } = useTranslation();
@@ -188,6 +192,7 @@ export function GoPage({
                 </Text>
               </Animated.View>
             )}
+            <GoStepAlert progress={progress} onSkip={onSkip} />
             <Animated.View
               key={stateKey}
               entering={fade}
