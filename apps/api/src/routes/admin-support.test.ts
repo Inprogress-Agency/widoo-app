@@ -1,5 +1,7 @@
 import {
   AdminSupportMessage,
+  AdminCounters,
+  AdminStats,
   AdminSupportMessages,
   ApiError,
   SupportAlreadyHandledDetails,
@@ -235,5 +237,36 @@ describe('POST /v1/admin/support/:id/handled', () => {
       .from(supportMessages)
       .where(eq(supportMessages.id, row.id));
     expect(stored?.handledAt).toBeNull();
+  });
+});
+
+describe('the counters of the support', () => {
+  const counterOf = async (headers: Headers) =>
+    AdminCounters.parse((await app.inject({ url: '/v1/admin/counters', headers })).json()).support;
+  const tileOf = async (headers: Headers) =>
+    AdminStats.parse((await app.inject({ url: '/v1/admin/stats', headers })).json()).toHandle
+      .support;
+
+  // Other test files write messages meanwhile: the figures are read as « at least ».
+  it('counts the messages to handle, and those waiting for more than 72 hours', async () => {
+    const moderator = await signIn('moderator');
+    await addMessage(10);
+    const old = await addMessage(80 * 60);
+
+    const counter = await counterOf(moderator.headers);
+    const tile = await tileOf(moderator.headers);
+
+    expect(counter?.count).toBeGreaterThanOrEqual(2);
+    expect(counter?.lateCount).toBeGreaterThanOrEqual(1);
+    expect(tile?.count).toBeGreaterThanOrEqual(2);
+    expect(tile?.lateCount).toBeGreaterThanOrEqual(1);
+    expect(new Date(tile?.oldestSince ?? '').getTime()).toBeLessThanOrEqual(
+      old.createdAt.getTime(),
+    );
+  });
+
+  it('gives an editor no counter of the support', async () => {
+    const editor = await signIn('editor');
+    expect(await counterOf(editor.headers)).toBeUndefined();
   });
 });

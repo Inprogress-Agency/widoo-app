@@ -5,9 +5,9 @@ import {
   type AdminCounters,
   type UserRole,
 } from '@widoo/shared';
-import { eq, sql } from 'drizzle-orm';
+import { eq, isNull, sql } from 'drizzle-orm';
 import type { Db } from '../db/client';
-import { places, routeReports, routes } from '../db/schema';
+import { places, routeReports, routes, supportMessages } from '../db/schema';
 
 /**
  * Routes waiting for the team. Late after 72 hours without a change: until the history of a
@@ -50,8 +50,21 @@ async function countOpenReports(db: Db, now: Date): Promise<AdminCounter> {
   };
 }
 
+/** The messages of « Nous écrire » the team has not handled, late after 72 hours. */
+async function countUnhandledSupport(db: Db, now: Date): Promise<AdminCounter> {
+  const lateBefore = new Date(now.getTime() - adminLateAfterHours * 60 * 60 * 1000);
+  const [row] = await db
+    .select({
+      count: sql<number>`count(*)::int`,
+      lateCount: sql<number>`(count(*) filter (where ${supportMessages.createdAt} < ${lateBefore.toISOString()}::timestamptz))::int`,
+    })
+    .from(supportMessages)
+    .where(isNull(supportMessages.handledAt));
+  return row ?? { count: 0, lateCount: 0 };
+}
+
 /**
- * Counters of the navigation of the admin, for the sections `role` opens. Support, AI drafts and
+ * Counters of the navigation of the admin, for the sections `role` opens. AI drafts and
  * translations join as their tables arrive with their sections.
  */
 export async function readAdminCounters(
@@ -65,6 +78,9 @@ export async function readAdminCounters(
   }
   if (canOpenAdminSection(role, 'reports')) {
     counters.reports = await countOpenReports(db, now);
+  }
+  if (canOpenAdminSection(role, 'support')) {
+    counters.support = await countUnhandledSupport(db, now);
   }
   return counters;
 }
