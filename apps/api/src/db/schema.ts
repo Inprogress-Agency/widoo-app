@@ -333,7 +333,10 @@ export const routes = pgTable(
     startLocation: geographyPoint('start_location'),
     /** Envelope of the steps; null while the route has none. */
     bounds: geographyBBox('bounds'),
-    /** Orchestration result: duration, budget, distance, walking, effort, warnings, `computed_at`. */
+    /**
+     * Orchestration result on our estimates (D-088), `storedComputedOf`: duration, budget,
+     * distance, walking, effort, derived conditions, start, warnings and proposals, access.
+     */
     computed: jsonb('computed'),
     durationBucket: durationBucket('duration_bucket'),
     budgetBucket: budgetBucket('budget_bucket'),
