@@ -52,6 +52,11 @@ export const go = {
     sections: {
       practical: 'Practical',
       word: "{{name}}'s word",
+      mustSee: "Don't miss",
+      images: 'In pictures',
+      photoCount_one: '{{count}} photo',
+      photoCount_other: '{{count}} photos',
+      photo: 'Photo {{position}} of {{count}}',
       next: 'Next',
       path: "{{name}}'s way",
       nextStep: '{{category}}, {{duration}}, around {{time}}',

@@ -1,13 +1,15 @@
-import type { RouteDetail, RouteDetailStep } from '@widoo/shared';
-import type { UiIconKey } from '@widoo/tokens';
+import type { Photo, RouteDetail, RouteDetailStep } from '@widoo/shared';
+import { motion, spacing, type UiIconKey } from '@widoo/tokens';
+import { Image } from 'expo-image';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Linking, Pressable, View } from 'react-native';
+import { Linking, Pressable, ScrollView, View } from 'react-native';
 import { analytics } from '../analytics';
 import { formatDuration } from '../format/duration';
 import { taxonomyLabels } from '../i18n/labels';
 import { hoursLine, localTime, transitionText } from '../route/sheetText';
 import { Icon, uiIcon } from '../ui/Icon';
+import { PhotoCredit } from '../ui/PhotoCredit';
 import { Text } from '../ui/Text';
 import { stepName } from './goText';
 import type { GoProgress } from './progress';
@@ -94,11 +96,89 @@ function Practical({ step, routeId, now }: { step: RouteDetailStep; routeId: str
   );
 }
 
+/** « À ne pas manquer »: one to three points, numbered, each read as one element with its number. */
+function MustSee({ highlights }: { highlights: readonly string[] }) {
+  const { t } = useTranslation();
+  if (highlights.length === 0) {
+    return null;
+  }
+  return (
+    <Section icon="must-see" title={t('go.sections.mustSee')}>
+      {highlights.map((point, index) => (
+        <View key={`${index}:${point}`} accessible className="flex-row gap-16">
+          <Text variant="number-l" color="info-on-strong" style={{ minWidth: spacing['space-24'] }}>
+            {index + 1}
+          </Text>
+          <Text variant="body-medium" color="on-strong" className="shrink">
+            {point}
+          </Text>
+        </View>
+      ))}
+    </Section>
+  );
+}
+
+/** A photo of « En images », measured on the mockup (Ecrans › E-07, contenu, suite). */
+const GALLERY_PHOTO = { width: 220, height: 160 };
+
+/**
+ * « En images »: up to five photos swiped sideways, past the margins of the page, the credit of a
+ * free photo at its bottom right (D-052). Not a card: its title and count sit on the page. Each
+ * photo is read « Photo 1 sur 5 », then its credit, a button.
+ */
+function InPictures({ photos }: { photos: readonly Photo[] }) {
+  const { t } = useTranslation();
+  const count = photos.length;
+  if (count === 0) {
+    return null;
+  }
+  return (
+    <View className="gap-12">
+      <View className="flex-row flex-wrap items-baseline justify-between gap-x-8">
+        <Text variant="title-s" color="on-strong" accessibilityRole="header" className="shrink">
+          {t('go.sections.images')}
+        </Text>
+        <Text variant="body-s" color="on-strong-muted">
+          {t('go.sections.photoCount', { count })}
+        </Text>
+      </View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        // Past the side margin of the page (`GoPage`, 20 points), to the edges of the screen.
+        className="-mx-20"
+        contentContainerClassName="gap-10 px-20"
+      >
+        {photos.map((photo, index) => (
+          <View key={`${index}:${photo.url}`}>
+            <Image
+              source={{ uri: photo.url }}
+              contentFit="cover"
+              transition={motion.durations.fade}
+              accessible
+              accessibilityRole="image"
+              accessibilityLabel={t('go.sections.photo', { position: index + 1, count })}
+              accessibilityIgnoresInvertColors
+              className="rounded-block bg-surface-strong-raised"
+              style={GALLERY_PHOTO}
+            />
+            {photo.credit && (
+              <View className="absolute bottom-8 right-8">
+                <PhotoCredit credit={photo.credit} />
+              </View>
+            )}
+          </View>
+        ))}
+      </ScrollView>
+    </View>
+  );
+}
+
 /**
  * The content of the step under the commands (Ecrans › E-07), in this order: Pratique, the word
- * of the creator, Ensuite; an empty section does not show. No « Écouter » (out of the MVP,
- * D-029); « À ne pas manquer » and « En images » wait for the API to give the highlights and
- * the photos of a step.
+ * of the creator, À ne pas manquer, En images, Ensuite; an empty section does not show. No
+ * « Écouter » (out of the MVP, D-029). The points and the photos come with the planning, kept on
+ * the phone: they show offline too.
  */
 export function GoSections({ progress, route, now }: GoSectionsProps) {
   const { t } = useTranslation();
@@ -120,6 +200,8 @@ export function GoSections({ progress, route, now }: GoSectionsProps) {
           </Text>
         </Section>
       )}
+      <MustSee highlights={current.step.highlights} />
+      <InPictures photos={current.step.photos} />
       {next && (
         <Section icon="next-step" title={t('go.sections.next')}>
           <View accessible className="gap-4">

@@ -16,6 +16,22 @@ const times = [
   ['09:00', '10:45'],
   ['11:00', '11:45'],
 ] as const;
+/**
+ * « À ne pas manquer » and « En images » of the second step: a free photo with its credit, then
+ * a creator's photo without any; the other steps have none.
+ */
+export const museumHighlights = ['La salle fictive', "L'atelier fictif"];
+export const museumPhotos = [
+  {
+    url: 'https://example.com/photos/musee-fictif-1.jpg',
+    credit: {
+      author: 'J. Moreau',
+      license: 'CC BY-SA 4.0',
+      sourceUrl: 'https://commons.wikimedia.org/wiki/File:Musee-fictif.jpg',
+    },
+  },
+  { url: 'https://example.com/photos/musee-fictif-2.jpg', credit: null },
+];
 /** The trip of each step to the next one, in a mode of its own (#510); null for the last one. */
 const trips = [
   { distanceM: 900, durationMin: 12, mode: 'bike', estimated: true },
@@ -65,8 +81,8 @@ export function plannedFixture(
           alwaysOpen: false,
           hours: [],
         },
-        highlights: [],
-        photos: [],
+        highlights: index === 1 ? museumHighlights : [],
+        photos: index === 1 ? museumPhotos : [],
       })),
     },
     timeline: {
