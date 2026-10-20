@@ -183,9 +183,9 @@ describe('POST and DELETE /v1/me/planned/:id/steps/:stepId/(arrived|skip)', () =
       skippedAt: null,
     });
     // Idempotent: unskipping a step that was never skipped anyway.
-    expect(PlannedRoute.parse((await unskip(headers, id, first?.id)).json()).steps[0]?.skippedAt).toBe(
-      null,
-    );
+    expect(
+      PlannedRoute.parse((await unskip(headers, id, first?.id)).json()).steps[0]?.skippedAt,
+    ).toBe(null);
   });
 
   it('refuses to skip a done step with 409', async () => {

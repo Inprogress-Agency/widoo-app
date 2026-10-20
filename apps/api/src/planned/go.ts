@@ -88,7 +88,12 @@ export function skipStep(
 }
 
 /** Skips a step of the caller's Go no more (« Annuler »), keeping its arrival. Idempotent. */
-export function unskipStep(db: Db, userId: string, id: string, stepId: string): Promise<PlannedRoute> {
+export function unskipStep(
+  db: Db,
+  userId: string,
+  id: string,
+  stepId: string,
+): Promise<PlannedRoute> {
   return changeStepOfGo(db, userId, id, stepId, (step) =>
     step.skippedAt ? { skippedAt: null } : null,
   );

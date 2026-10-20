@@ -13,7 +13,13 @@ import { z } from 'zod';
 import { canAccessRoute } from '../access/route-access';
 import { routeViewerOf } from '../access/route-viewer';
 import { httpError, premiumRequired } from '../errors';
-import { markStepArrived, markStepDone, nextStepMapsUrl, skipStep, unskipStep } from '../planned/go';
+import {
+  markStepArrived,
+  markStepDone,
+  nextStepMapsUrl,
+  skipStep,
+  unskipStep,
+} from '../planned/go';
 import { createPlanned, listPlanned, ownedPlanned, readPlanned } from '../planned/repository';
 import { snapshotOf } from '../planned/snapshot';
 import { updatePlanned } from '../planned/update';
@@ -139,7 +145,7 @@ export const plannedRoutesPlugin: FastifyPluginAsyncZod = async (app) => {
     {
       schema: {
         tags,
-        summary: 'Mark a step of my Go arrived (« J\'y suis »)',
+        summary: "Mark a step of my Go arrived (« J'y suis »)",
         security,
         params: PlannedStepParams,
         // Like `done`: no body until `place_signals` (#49).
