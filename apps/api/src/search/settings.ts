@@ -22,7 +22,7 @@ export async function readSetting(db: Db | Tx, key: string): Promise<unknown> {
 
 /** Values of several `settings` rows by key; an absent row has no entry. */
 export async function readSettings(
-  db: Db,
+  db: Db | Tx,
   keys: readonly string[],
 ): Promise<Record<string, unknown>> {
   const rows = await db

@@ -2,14 +2,15 @@
  * A route as its author edits it: the route row, locked, its open revision when it is published,
  * and the content the editor shows. Only the author reaches it: any other caller reads 404.
  */
-import type { OwnRoute } from '@widoo/shared';
+import type { OwnRoute, RouteEvaluation } from '@widoo/shared';
 import { and, eq } from 'drizzle-orm';
 import type { Tx } from '../db/client';
 import { routes } from '../db/schema';
 import { httpError } from '../errors';
+import { evaluationFrom } from './computed';
 import { openRevisionOf, routeContentOf, type OpenRevision, type RouteContent } from './content';
 import type { RouteRow } from './lifecycle';
-import { evaluate } from './recompute';
+import { recomputeRoute } from './recompute';
 
 export type Workspace = { route: RouteRow; revision: OpenRevision | null; content: RouteContent };
 
@@ -31,14 +32,18 @@ export async function workspaceOf(tx: Tx, route: RouteRow): Promise<Workspace> {
 }
 
 /** The orchestration result of the content, for the submission. */
-export async function evaluationOf(tx: Tx, workspace: Workspace, now: Date) {
-  return (await evaluate(tx, workspace.route.id, workspace.content, now)).evaluation;
+export async function evaluationOf(
+  tx: Tx,
+  workspace: Workspace,
+  now: Date,
+): Promise<RouteEvaluation> {
+  return evaluationFrom((await recomputeRoute(tx, workspace.route, workspace.content, now)).result);
 }
 
 /** The route as the editor shows it, with the orchestration result of its content. */
 export async function ownRouteOf(tx: Tx, workspace: Workspace, now: Date): Promise<OwnRoute> {
   const { route, revision, content } = workspace;
-  const { placeById, transitions, evaluation } = await evaluate(tx, route.id, content, now);
+  const { placeById, transitions, result } = await recomputeRoute(tx, route, content, now);
   return {
     id: route.id,
     status: route.status,
@@ -91,6 +96,6 @@ export async function ownRouteOf(tx: Tx, workspace: Workspace, now: Date): Promi
         },
       };
     }),
-    ...evaluation,
+    ...evaluationFrom(result),
   };
 }
