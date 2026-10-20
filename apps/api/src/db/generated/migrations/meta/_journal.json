@@ -148,6 +148,13 @@
       "when": 1792469898176,
       "tag": "0020_add_affiliation",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1792475741279,
+      "tag": "0021_add_b2b_clients",
+      "breakpoints": true
     }
   ]
 }
