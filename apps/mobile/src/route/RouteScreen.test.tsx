@@ -6,6 +6,7 @@ import { router } from 'expo-router';
 import RouteScreen from '../../app/route/[id]';
 import { analytics } from '../analytics';
 import { api } from '../api/client';
+import { discoveryStore } from '../discovery/useRouteSearch';
 import { plannedFixture } from '../go/testPlanned';
 import type { PlanChoice } from '../plan/PlanSheet';
 import { fakeAuth } from '../test/fakeAuth';
@@ -30,9 +31,25 @@ jest.mock('../api/query-client', () => ({
     '@tanstack/react-query',
   ).QueryClient)(),
 }));
-jest.mock('../api/client', () => ({
-  api: { listPlanned: jest.fn(), updatePlanned: jest.fn(), createPlanned: jest.fn() },
-}));
+// The sheet goes through the client of the app, on answers of the API simulated by the test.
+const mockFetch = jest.fn<typeof fetch>();
+jest.mock('../api/client', () => {
+  const { createApiClient } =
+    jest.requireActual<typeof import('@widoo/api-client')>('@widoo/api-client');
+  const client = createApiClient({
+    baseUrl: 'http://api.test',
+    fetch: (input, init) => mockFetch(input, init),
+  });
+  return {
+    api: {
+      listPlanned: jest.fn(),
+      updatePlanned: jest.fn(),
+      createPlanned: jest.fn(),
+      getRoute: client.getRoute,
+      getRouteTimeline: client.getRouteTimeline,
+    },
+  };
+});
 // Signed in already: the account asked for is there.
 jest.mock('../auth/signIn', () => ({
   signInFlow: { requireAccount: (_reason: string, then: () => void) => then() },
@@ -49,15 +66,35 @@ jest.mock('./RouteSheet', () => {
     RouteSheet: ({
       state,
       onPlan,
+      onNearby,
     }: {
-      state: { status: string; route?: unknown };
+      state:
+        | { status: 'ready'; route: unknown }
+        | { status: 'removed'; near: { lat: number; lng: number } }
+        | { status: 'error'; isOffline: boolean }
+        | { status: 'loading' };
       onPlan: (route: unknown) => void;
-    }) =>
-      state.status === 'ready' ? (
-        <Pressable accessibilityRole="button" onPress={() => onPlan(state.route)}>
-          <Text>Programmer</Text>
-        </Pressable>
-      ) : null,
+      onNearby: (near: { lat: number; lng: number }) => void;
+    }) => {
+      switch (state.status) {
+        case 'ready':
+          return (
+            <Pressable accessibilityRole="button" onPress={() => onPlan(state.route)}>
+              <Text>Programmer</Text>
+            </Pressable>
+          );
+        case 'removed':
+          return (
+            <Pressable accessibilityRole="button" onPress={() => onNearby(state.near)}>
+              <Text>Voir des parcours proches</Text>
+            </Pressable>
+          );
+        case 'error':
+          return <Text>{state.isOffline ? 'Hors connexion' : 'Erreur'}</Text>;
+        default:
+          return null;
+      }
+    },
   };
 });
 const mockOpenSheet = jest.fn();
@@ -91,17 +128,27 @@ const listPlanned = jest.mocked(api.listPlanned);
 let client = new QueryClient();
 afterEach(() => client.clear());
 
-async function renderRoute(params: Record<string, string>) {
+/** The screen on the source the test gives, or on the one of the app: the API. */
+async function renderRoute(
+  params: Record<string, string>,
+  given: RouteSheetSource | null = source,
+) {
   mockParams = params;
   client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } });
+  const screenOf = <RouteScreen />;
   await render(
     <QueryClientProvider client={client}>
-      <RouteSheetSourceContext value={source}>
-        <RouteScreen />
-      </RouteSheetSourceContext>
+      {given ? (
+        <RouteSheetSourceContext value={given}>{screenOf}</RouteSheetSourceContext>
+      ) : (
+        screenOf
+      )}
     </QueryClientProvider>,
   );
 }
+
+const json = (status: number, body: unknown) =>
+  new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
 
 describe('E-05, the way to « Votre sortie »', () => {
   beforeEach(async () => {
@@ -138,5 +185,59 @@ describe('E-05, the way to « Votre sortie »', () => {
     const options = jest.mocked(showToast).mock.calls[0]?.[2];
     await act(async () => options?.action?.onPress());
     expect(push).toHaveBeenLastCalledWith({ pathname: '/outing/[id]', params: { id: missed.id } });
+  });
+});
+
+describe('E-05 on the answers of the API', () => {
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    onlineManager.setOnline(true);
+    listPlanned.mockResolvedValue({ items: [], nextCursor: null });
+    await act(() => fakeAuth.setUser(user));
+  });
+
+  it('reads the sheet from GET /v1/routes/:id when no source is given', async () => {
+    mockFetch.mockResolvedValue(json(200, route));
+    await renderRoute({ id: route.id }, null);
+    expect(await screen.findByRole('button', { name: 'Programmer' })).toBeTruthy();
+    expect(mockFetch.mock.calls[0]?.[0]).toBe(`http://api.test/v1/routes/${route.id}`);
+  });
+
+  it('sends the token of a private link with the request of the sheet', async () => {
+    mockFetch.mockResolvedValue(json(200, route));
+    await renderRoute({ id: route.id, token: 'lien-prive-fictif-0001' }, null);
+    await screen.findByRole('button', { name: 'Programmer' });
+    expect(mockFetch.mock.calls[0]?.[0]).toBe(
+      `http://api.test/v1/routes/${route.id}?token=lien-prive-fictif-0001`,
+    );
+  });
+
+  it('centres the home on the zone of a withdrawn route, from the 410', async () => {
+    const near = { lat: 48.86, lng: 2.35 };
+    const details = { removedAt: '2026-09-20T08:00:00.000Z', near };
+    mockFetch.mockResolvedValue(json(410, { code: 'route_removed', message: 'Gone', details }));
+    await renderRoute({ id: route.id }, null);
+    await fireEvent.press(await screen.findByRole('button', { name: 'Voir des parcours proches' }));
+    const framing = discoveryStore.getState().framing;
+    const view = framing && framing.view !== 'home' ? framing.view : null;
+    expect(view?.bbox.south).toBeLessThan(near.lat);
+    expect(view?.bbox.north).toBeGreaterThan(near.lat);
+    expect(view?.bbox.west).toBeLessThan(near.lng);
+    expect(view?.bbox.east).toBeGreaterThan(near.lng);
+    expect(router.dismissTo).toHaveBeenCalledWith('/');
+  });
+
+  it.each([
+    [
+      'cannot be reached',
+      () => Promise.reject(new TypeError('Network request failed')),
+      'Hors connexion',
+    ],
+    ['fails', async () => json(500, { code: 'internal_error', message: 'Failure' }), 'Erreur'],
+  ])('shows the error state of the sheet when the API %s', async (_, answer, text) => {
+    mockFetch.mockImplementation(answer);
+    await renderRoute({ id: route.id }, null);
+    expect(await screen.findByText(text)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Programmer' })).toBeNull();
   });
 });
