@@ -122,6 +122,21 @@ describe("« J'y suis » of the Go", () => {
     expect(screen.getByText('0 on_site')).toBeTruthy();
   });
 
+  it('leaves once the API answers the Go again, the phone online all along', async () => {
+    mocked.markPlannedStepArrived.mockRejectedValue(unreachable());
+    await renderGo();
+    await fireEvent.press(await screen.findByRole('button', { name: 'arrive' }));
+    await settle();
+    expect(goLocal.localOf(plannedFixture().id).pending).toHaveLength(1);
+
+    // The API is back: a read of the Go (a change of tab, the app back) sends what was kept.
+    mocked.markPlannedStepArrived.mockResolvedValue(plannedFixture({ 0: { arrivedAt: at } }));
+    mocked.listPlanned.mockResolvedValue(page([plannedFixture({ 0: { arrivedAt: at } })]));
+    await act(() => queryClient.invalidateQueries());
+    await settle();
+    expect(goLocal.localOf(plannedFixture().id).pending).toEqual([]);
+  });
+
   it('stays kept when the network fails on the way, and leaves at its return', async () => {
     mocked.markPlannedStepArrived.mockRejectedValue(unreachable());
     await renderGo();

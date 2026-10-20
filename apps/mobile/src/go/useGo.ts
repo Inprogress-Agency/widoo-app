@@ -70,9 +70,14 @@ function useMinute(): Date {
 }
 
 /** The Go in progress of the account and where it stands; null signed out or without one. */
-export function useGo(): { planned: PlannedRoute | null; progress: GoProgress | null } {
+export function useGo(): {
+  planned: PlannedRoute | null;
+  progress: GoProgress | null;
+  /** When the API last answered the Go: 0 before any answer. */
+  readAt: number;
+} {
   const uid = useSession((state) => state.user?.uid ?? null);
-  const { data } = useQuery({
+  const { data, dataUpdatedAt } = useQuery({
     queryKey: goQueryKey(uid ?? ''),
     queryFn: fetchGo,
     enabled: uid !== null,
@@ -87,7 +92,7 @@ export function useGo(): { planned: PlannedRoute | null; progress: GoProgress | 
     () => (planned ? goProgress(planned, local, now) : null),
     [planned, local, now],
   );
-  return { planned, progress };
+  return { planned, progress, readAt: dataUpdatedAt };
 }
 
 /**
@@ -201,17 +206,20 @@ function sendPending(client: QueryClient, plannedId: string): Promise<void> {
   return sending;
 }
 
-/** At the root: the actions kept offline leave at the return of the network. */
+/**
+ * At the root: the actions kept offline leave at the return of the network, and each time the
+ * API answers the Go again, for an API that was unreachable while the phone stayed online.
+ */
 export function GoSync() {
   const client = useQueryClient();
   const isOnline = useIsOnline();
-  const { planned } = useGo();
+  const { planned, readAt } = useGo();
   const pendingCount = useStore(goLocal.store, (state) => state.local.pending.length);
   useEffect(() => {
     if (isOnline && planned && pendingCount > 0) {
       void sendPending(client, planned.id);
     }
-  }, [client, isOnline, planned, pendingCount]);
+  }, [client, isOnline, planned, pendingCount, readAt]);
   return null;
 }
 
