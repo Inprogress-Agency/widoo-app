@@ -1,12 +1,25 @@
 import { AdminSupportMessage, AdminSupportMessages, AdminSupportQuery } from '@widoo/shared';
+import type { FastifyRequest } from 'fastify';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { httpError } from '../errors';
-import { readSupportMessage, readSupportMessages } from '../support/admin';
+import {
+  markSupportMessageHandled,
+  readSupportMessage,
+  readSupportMessages,
+} from '../support/admin';
 
 const security = [{ firebaseIdToken: [] }];
 const tags = ['admin'];
 const MessageParams = z.object({ id: z.uuid() });
+
+/** Set by the guard of the section, which every route of this plugin runs first. */
+function actorIdOf(request: FastifyRequest): string {
+  if (!request.user) {
+    throw httpError(401, 'Missing bearer token');
+  }
+  return request.user.id;
+}
 
 /**
  * The messages of « Nous écrire » for the team (A-13, wiki API › Admin): moderators and admins
@@ -50,5 +63,19 @@ export const adminSupportRoutes: FastifyPluginAsyncZod = async (app) => {
       }
       return message;
     },
+  );
+
+  app.post(
+    '/admin/support/:id/handled',
+    {
+      schema: {
+        tags,
+        summary: 'Mark a message of « Nous écrire » handled',
+        security,
+        params: MessageParams,
+        response: { 200: AdminSupportMessage },
+      },
+    },
+    async (request) => markSupportMessageHandled(app.db, actorIdOf(request), request.params.id),
   );
 };

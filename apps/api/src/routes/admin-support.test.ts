@@ -1,6 +1,8 @@
 import {
   AdminSupportMessage,
   AdminSupportMessages,
+  ApiError,
+  SupportAlreadyHandledDetails,
   type SupportTopic,
   type UserRole,
 } from '@widoo/shared';
@@ -8,7 +10,7 @@ import { eq, inArray } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
-import { supportMessages, users } from '../db/schema';
+import { adminActions, supportMessages, users } from '../db/schema';
 import { uuidv7 } from '../db/uuid';
 import { testConfig } from '../test-config';
 
@@ -23,6 +25,7 @@ beforeAll(async () => {
   app = await buildApp(testConfig(), { tokenVerifier: verifier });
 });
 afterAll(async () => {
+  await app.db.delete(adminActions).where(inArray(adminActions.targetId, messageIds));
   await app.db.delete(supportMessages).where(inArray(supportMessages.id, messageIds));
   await app.db.delete(users).where(inArray(users.id, authorIds));
   await app.db.delete(users).where(inArray(users.firebaseUid, teamUids));
@@ -169,6 +172,64 @@ describe('GET /v1/admin/support/:id', () => {
 
     expect((await get(admin.headers, `/${uuidv7()}`)).statusCode).toBe(404);
     expect((await get(editor.headers, `/${row.id}`)).statusCode).toBe(403);
+    const [stored] = await app.db
+      .select()
+      .from(supportMessages)
+      .where(eq(supportMessages.id, row.id));
+    expect(stored?.handledAt).toBeNull();
+  });
+});
+
+const handle = (headers: Headers, id: string) =>
+  app.inject({ method: 'POST', url: `/v1/admin/support/${id}/handled`, headers });
+
+describe('POST /v1/admin/support/:id/handled', () => {
+  it('marks a message handled, moves it down the list, and journals it', async () => {
+    const moderator = await signIn('moderator');
+    const row = await addMessage(20);
+
+    const response = await handle(moderator.headers, row.id);
+
+    expect(response.statusCode).toBe(200);
+    const card = AdminSupportMessage.parse(response.json());
+    expect(card.handledAt).not.toBeNull();
+    const unhandled = await listed(moderator.headers, '?status=unhandled');
+    expect(unhandled.items.map((item) => item.id)).not.toContain(row.id);
+    const [entry] = await app.db
+      .select()
+      .from(adminActions)
+      .where(eq(adminActions.targetId, row.id));
+    expect(entry).toMatchObject({
+      action: 'support_message.handle',
+      targetType: 'support_message',
+      actorId: moderator.id,
+      before: { handledAt: null },
+    });
+  });
+
+  it('answers 409 already_decided to a second decision, with the time of the first', async () => {
+    const admin = await signIn('admin');
+    const other = await signIn('moderator');
+    const row = await addMessage(20);
+    const first = AdminSupportMessage.parse((await handle(other.headers, row.id)).json());
+
+    const again = await handle(admin.headers, row.id);
+
+    expect(again.statusCode).toBe(409);
+    const error = ApiError.parse(again.json());
+    expect(error.code).toBe('already_decided');
+    expect(SupportAlreadyHandledDetails.parse(error.details)).toEqual({
+      handledAt: first.handledAt,
+    });
+  });
+
+  it('answers 404 to an unknown message, and refuses an editor without writing', async () => {
+    const admin = await signIn('admin');
+    const editor = await signIn('editor');
+    const row = await addMessage(20);
+
+    expect((await handle(admin.headers, uuidv7())).statusCode).toBe(404);
+    expect((await handle(editor.headers, row.id)).statusCode).toBe(403);
     const [stored] = await app.db
       .select()
       .from(supportMessages)
