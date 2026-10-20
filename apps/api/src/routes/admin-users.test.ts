@@ -1,5 +1,5 @@
 import { AdminUserDetail, AdminUsers, ApiError, MyDataExport, type UserRole } from '@widoo/shared';
-import { eq, inArray } from 'drizzle-orm';
+import { asc, eq, inArray } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { canAccessRoute } from '../access/route-access';
 import { buildApp } from '../app';
@@ -79,10 +79,15 @@ const send = (
   url: string,
   payload?: object,
 ) => app.inject({ method, url: `/v1/admin${url}`, headers, payload });
+// In the order it was written: without an `order by`, Postgres answers in any order.
 const journalOf = async (targetId: string) =>
-  (await app.db.select().from(adminActions).where(eq(adminActions.targetId, targetId))).map(
-    (row) => row.action,
-  );
+  (
+    await app.db
+      .select()
+      .from(adminActions)
+      .where(eq(adminActions.targetId, targetId))
+      .orderBy(asc(adminActions.createdAt), asc(adminActions.id))
+  ).map((row) => row.action);
 
 describe('GET /v1/admin/users', () => {
   it('is for moderators and admins, not for an editor', async () => {
