@@ -5,23 +5,28 @@ import type { SharedRoute, SharedRouteResult } from './types';
 /**
  * The fields of `GET /v1/routes/:id` (#36) the page needs. The steps are only counted: their
  * content is never read, so a Premium route, whose steps are reduced, reads like any other.
+ * Picked from the shape: zod refuses `pick` on `RouteDetail`, which carries refinements on its
+ * steps and its access.
  */
-const SharedRouteResponse = RouteDetail.pick({
-  id: true,
-  title: true,
-  coverUrl: true,
-  isOfficial: true,
-  author: true,
-  access: true,
-  moods: true,
-  district: true,
-  neighborhood: true,
-  durationMin: true,
-  budgetPerPersonEur: true,
-  distanceM: true,
-  rating: true,
-  status: true,
-}).extend({ steps: z.array(z.unknown()) });
+const SharedRouteResponse = z
+  .object(RouteDetail.shape)
+  .pick({
+    id: true,
+    title: true,
+    coverUrl: true,
+    isOfficial: true,
+    author: true,
+    access: true,
+    moods: true,
+    district: true,
+    neighborhood: true,
+    durationMin: true,
+    budgetPerPersonEur: true,
+    distanceM: true,
+    rating: true,
+    status: true,
+  })
+  .extend({ steps: z.array(z.unknown()) });
 
 /** Body of a `410` (#36): the date of the removal, when the API gives it. */
 const RemovedResponse = z.object({ removedAt: z.iso.datetime().optional() }).loose();
