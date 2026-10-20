@@ -120,6 +120,26 @@ export function conflictsOf(
 }
 
 /**
+ * When the opening that holds `instant` ends, read in `timeZone`: the closing time a step faces on
+ * arrival. Null when the place is closed then, or its hours are unknown.
+ */
+export function openUntil(
+  hours: readonly PlaceHours[],
+  instant: Date,
+  timeZone: string,
+): Date | null {
+  if (hours.length === 0) {
+    return null;
+  }
+  const minuteStart = Math.floor(instant.getTime() / MINUTE_MS) * MINUTE_MS;
+  const local = localTimeOf(instant, timeZone);
+  const open = openIntervalsOf(hours, local).intervals.find(
+    ({ start, end }) => start <= local.minute && local.minute < end,
+  );
+  return open ? new Date(minuteStart + (open.end - local.minute) * MINUTE_MS) : null;
+}
+
+/**
  * Timeline for `startsAt`: each step arrives when the previous one is left and its trip done.
  * The conflicts are read in `timeZone`, the IANA zone of the city.
  */
