@@ -1316,6 +1316,11 @@ export const messages = {
       text: 'Les messages envoyés par « Nous écrire » apparaissent ici.',
     },
     error: 'Les messages ne se sont pas chargés.',
+    toasts: {
+      handled: 'Message marqué traité',
+      alreadyHandled: "Un autre membre de l'équipe l'a déjà traité.",
+      failed: "Le message n'a pas pu être marqué traité.",
+    },
     panel: {
       loading: 'Chargement du message',
       status: 'Statut',
@@ -1328,6 +1333,7 @@ export const messages = {
       locale: 'Langue',
       locales: { fr: 'Français', en: 'Anglais' },
       message: 'Message',
+      markHandled: 'Marquer traité',
       howToAnswer: (locale: 'fr' | 'en') =>
         `La réponse par e-mail depuis l’admin n’est pas encore là. Écrivez à l’adresse ci-dessus depuis votre messagerie, en ${locale === 'fr' ? 'français' : 'anglais'}, puis marquez le message traité.`,
     },
