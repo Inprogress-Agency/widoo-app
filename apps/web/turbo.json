@@ -3,6 +3,14 @@
   "extends": ["//"],
   "tasks": {
     "build": {
+      "env": [
+        "SITE_URL",
+        "SITE_ALIAS_HOSTS",
+        "SITE_INDEXABLE",
+        "APP_STORE_URL",
+        "PLAY_STORE_URL",
+        "WIDOO_API_URL"
+      ],
       "outputs": [".next/**", "!.next/cache/**"]
     }
   }
