@@ -3,6 +3,7 @@ import {
   type B2bClient,
   type B2bClientInput,
   type B2bClientListItem,
+  type B2bClientPatch,
   type B2bClients,
 } from '@widoo/shared';
 import { asc, DrizzleQueryError, eq, sql } from 'drizzle-orm';
@@ -152,4 +153,34 @@ export async function createClient(
     // Two partners created at once with the same slug: the unique constraint answers the second.
     throw isSlugViolation(error) ? slugTaken() : error;
   }
+}
+
+/** Changes the fields given of a partner, with its journal line (before and after). 404 if unknown. */
+export async function updateClient(
+  db: Db,
+  actorId: string,
+  id: string,
+  patch: B2bClientPatch,
+  now = new Date(),
+): Promise<B2bClient> {
+  return db.transaction(async (tx) => {
+    const [current] = await tx.select().from(b2bClients).where(eq(b2bClients.id, id)).for('update');
+    if (!current) {
+      throw httpError(404, 'Partner not found');
+    }
+    await tx
+      .update(b2bClients)
+      .set({ ...patch, updatedAt: now })
+      .where(eq(b2bClients.id, id));
+    const changed = Object.keys(patch) as (keyof B2bClientPatch)[];
+    await recordAdminAction(tx, {
+      actorId,
+      action: 'b2b_client.update',
+      targetType: 'b2b_client',
+      targetId: id,
+      before: Object.fromEntries(changed.map((field) => [field, current[field]])),
+      after: patch,
+    });
+    return cardOf(tx, id);
+  });
 }
