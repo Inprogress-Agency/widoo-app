@@ -1,5 +1,7 @@
 import {
   AffiliateProgram,
+  AdminSupportMessage,
+  AdminSupportMessages,
   AffiliatePrograms,
   B2bClient,
   B2bClients,
@@ -61,6 +63,7 @@ import {
   type AdminActionsQuery,
   type AffiliateProgramInput,
   type AffiliateProgramPatch,
+  type AdminSupportQuery,
   type B2bClientInput,
   type B2bClientPatch,
   type B2bClientRoutesInput,
@@ -113,7 +116,12 @@ import { catalogPlacesQueryString, catalogQueryString } from './catalog';
 import { actionsQueryString } from './actions';
 import { bookableStepsQueryString } from './affiliation';
 import { usersQueryString } from './users';
-import { ratingsQueryString, reportsQueryString, signalsQueryString } from './reports';
+import {
+  ratingsQueryString,
+  reportsQueryString,
+  signalsQueryString,
+  supportQueryString,
+} from './reports';
 
 /**
  * Typed client of the API, one method per route, answers validated by the `shared` schemas.
@@ -845,6 +853,35 @@ export function createApiClient(options: ApiClientOptions) {
         path: `/v1/admin/b2b-clients/${clientId}/routes`,
         body,
         schema: B2bClient,
+        auth: true,
+      }),
+
+    /** `GET /v1/admin/support`: the messages of « Nous écrire », the ones to handle first (A-13). */
+    getAdminSupport: (params: Partial<AdminSupportQuery>, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/admin/support?${supportQueryString(params)}`,
+        schema: AdminSupportMessages,
+        auth: true,
+        signal,
+      }),
+
+    /** `GET /v1/admin/support/:id`: a message in full. */
+    getAdminSupportMessage: (messageId: string, signal?: AbortSignal) =>
+      request({
+        method: 'GET',
+        path: `/v1/admin/support/${messageId}`,
+        schema: AdminSupportMessage,
+        auth: true,
+        signal,
+      }),
+
+    /** `POST /v1/admin/support/:id/handled`: marks a message handled. */
+    markSupportMessageHandled: (messageId: string) =>
+      request({
+        method: 'POST',
+        path: `/v1/admin/support/${messageId}/handled`,
+        schema: AdminSupportMessage,
         auth: true,
       }),
 
