@@ -7,10 +7,14 @@ import { useState } from 'react';
 
 const texts = messages.b2b.toasts;
 
-/** The toast of a failed save: a slug taken, a refused field, or any other failure. */
+/** The toast of a failed save: a slug taken, routes that cannot be chosen, a refused field, or any other failure. */
 function failureTitleOf(error: unknown): string {
   if (error instanceof ApiRequestError) {
-    if (error.status === 409) return texts.slugTaken;
+    if (error.status === 409) {
+      return error.body?.details?.reason === 'routes_unavailable'
+        ? texts.routesUnavailable
+        : texts.slugTaken;
+    }
     if (error.status === 400 || error.status === 422) return texts.invalid;
   }
   return texts.failed;
@@ -42,5 +46,7 @@ export function usePartnerActions(onSaved: (partner: B2bClient) => void) {
     create: (partner: B2bClientInput) => send(() => api.createB2bClient(partner), texts.created),
     update: (partnerId: string, patch: B2bClientPatch) =>
       send(() => api.updateB2bClient(partnerId, patch), texts.updated),
+    setRoutes: (partnerId: string, routeIds: string[]) =>
+      send(() => api.setB2bClientRoutes(partnerId, { routeIds }), texts.routesSaved),
   };
 }
