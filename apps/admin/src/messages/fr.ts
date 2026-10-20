@@ -867,6 +867,12 @@ export const messages = {
       delete: 'Supprimer le compte',
     },
     dialogs: {
+      signInAgain: {
+        title: 'Reconnexion nécessaire',
+        description:
+          'Pour votre sécurité, cette action demande une connexion récente avec le code de votre application d’authentification. Reconnectez-vous : vous reviendrez sur cette page, puis vous recommencerez l’action.',
+        confirm: 'Se reconnecter',
+      },
       reason: 'Motif',
       reasonHint: "Gardé dans le journal et sur le compte, visible par l'équipe.",
       role: {
