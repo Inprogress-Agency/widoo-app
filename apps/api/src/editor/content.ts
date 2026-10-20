@@ -9,7 +9,6 @@ import {
   StepTransition,
   taxonomies,
   type RouteRevisionStatus,
-  type Transport,
 } from '@widoo/shared';
 import { and, asc, eq, inArray } from 'drizzle-orm';
 import { z } from 'zod';
@@ -111,19 +110,6 @@ export function transitionsOf(
     }),
     { directions: null, cache: null },
   );
-}
-
-/** Transport of a route: the mode of its trips that covers the most distance (D-048). */
-export function mainTransportOf(transitions: readonly (Transition | null)[]): Transport {
-  const byMode = new Map<Transport, number>();
-  for (const trip of transitions) {
-    if (trip) byMode.set(trip.mode, (byMode.get(trip.mode) ?? 0) + trip.distanceM);
-  }
-  let main: Transport = 'walk';
-  for (const [mode, distanceM] of byMode) {
-    if (distanceM > (byMode.get(main) ?? 0)) main = mode;
-  }
-  return main;
 }
 
 /** Replaces the steps of a route by the content's, their ids kept, their trips stored. */
