@@ -1,6 +1,7 @@
 'use client';
 
 import { PageMessage } from '@/components/states/PageMessage';
+import { SupportActions } from '@/components/support/SupportActions';
 import { SupportPanelContent } from '@/components/support/SupportPanelContent';
 import { SupportStatusBadge } from '@/components/support/SupportStatusBadge';
 import { SupportTable } from '@/components/support/SupportTable';
@@ -8,6 +9,7 @@ import { sectionPaths } from '@/config/navigation';
 import { supportListOptions, toSupportParams } from '@/config/support-list';
 import { useCardOnScreen } from '@/hooks/useCardOnScreen';
 import { useListQuery } from '@/hooks/useListQuery';
+import { useSupportActions } from '@/hooks/useSupportActions';
 import { useRemoteData } from '@/hooks/useRemoteData';
 import { getSessionClients } from '@/lib/auth/clients';
 import { serializeListQuery } from '@/lib/list-query';
@@ -42,6 +44,10 @@ export function SupportContainer() {
   );
   const { fresh: openMessage, isLoading: isCardLoading, stale } = useCardOnScreen(openId, card);
   const data = messagesList.status === 'ready' ? messagesList.data : undefined;
+  const actions = useSupportActions(() => {
+    if (messagesList.status !== 'loading') messagesList.reload();
+    if (card.status !== 'loading') card.reload();
+  });
 
   /** The address of the list as it is, with the card of `messageId` open, or none. */
   const showMessage = (messageId: string | null) => {
@@ -62,6 +68,14 @@ export function SupportContainer() {
       status={<SupportStatusBadge isHandled={message.handledAt !== null} />}
       closeLabel={messages.confirm.close}
       onClose={() => showMessage(null)}
+      actions={
+        message.handledAt === null ? (
+          <SupportActions
+            onMarkHandled={() => void actions.markHandled(message.id)}
+            isBusy={actions.isBusy}
+          />
+        ) : undefined
+      }
     >
       <SupportPanelContent
         message={message}
