@@ -1,10 +1,11 @@
 import { ApiError, B2bClient, type UserRole } from '@widoo/shared';
-import { eq, inArray, like } from 'drizzle-orm';
+import { and, eq, inArray, like } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
 import { adminActions, b2bClients, users } from '../db/schema';
 import { uuidv7 } from '../db/uuid';
+import { plannedFixtures } from '../planned/test-fixtures';
 import { testConfig } from '../test-config';
 
 // Shared database, parallel files: slugs carry a marker, routes are copies of the demo, accounts
@@ -16,6 +17,7 @@ let slugCount = 0;
 const slugOf = (name: string) => `${marker}-${name}-${(slugCount += 1)}`;
 
 let app: Awaited<ReturnType<typeof buildApp>>;
+const fixtures = plannedFixtures(() => app, verifier);
 beforeAll(async () => {
   app = await buildApp(testConfig(), { tokenVerifier: verifier });
 });
@@ -29,6 +31,7 @@ afterAll(async () => {
     await app.db.delete(adminActions).where(inArray(adminActions.targetId, ids));
     await app.db.delete(b2bClients).where(inArray(b2bClients.id, ids));
   }
+  await fixtures.cleanUp();
   await app.db.delete(users).where(inArray(users.firebaseUid, teamUids));
   await app.close();
 });
@@ -124,5 +127,52 @@ describe('POST /v1/admin/b2b-clients', () => {
     ]) {
       expect((await send('POST', editor.headers, '', payload)).statusCode).toBe(422);
     }
+  });
+});
+
+describe('PATCH /v1/admin/b2b-clients/:id', () => {
+  it('changes the fields given, keeps the others, and journals the before and after', async () => {
+    const admin = await signIn('admin');
+    const created = await addPartner(admin.headers, { notes: 'À rappeler' });
+
+    const response = await send('PATCH', admin.headers, `/${created.id}`, {
+      status: 'active',
+      monthlyPriceCents: 6000,
+      startedAt: '2026-11-01',
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(B2bClient.parse(response.json())).toMatchObject({
+      status: 'active',
+      monthlyPriceCents: 6000,
+      startedAt: '2026-11-01',
+      notes: 'À rappeler',
+      slug: created.slug,
+    });
+    const [entry] = await app.db
+      .select()
+      .from(adminActions)
+      .where(
+        and(eq(adminActions.targetId, created.id), eq(adminActions.action, 'b2b_client.update')),
+      );
+    expect(entry).toMatchObject({
+      actorId: admin.id,
+      before: { status: 'prospect', monthlyPriceCents: null, startedAt: null },
+      after: { status: 'active', monthlyPriceCents: 6000, startedAt: '2026-11-01' },
+    });
+  });
+
+  it('refuses the slug, an empty change, and answers 404 to an unknown partner', async () => {
+    const admin = await signIn('admin');
+    const created = await addPartner(admin.headers);
+
+    expect(
+      (await send('PATCH', admin.headers, `/${created.id}`, { slug: 'new-slug' })).statusCode,
+    ).toBe(422);
+    expect((await send('PATCH', admin.headers, `/${created.id}`, {})).statusCode).toBe(422);
+    expect((await send('PATCH', admin.headers, `/${uuidv7()}`, { name: 'X' })).statusCode).toBe(
+      404,
+    );
+    expect((await send('GET', admin.headers, `/${uuidv7()}`)).statusCode).toBe(404);
   });
 });

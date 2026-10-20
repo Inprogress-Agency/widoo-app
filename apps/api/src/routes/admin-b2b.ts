@@ -1,8 +1,8 @@
-import { B2bClient, B2bClientInput, B2bClients } from '@widoo/shared';
+import { B2bClient, B2bClientInput, B2bClientPatch, B2bClients } from '@widoo/shared';
 import type { FastifyRequest } from 'fastify';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { createClient, readClient, readClients } from '../b2b/clients';
+import { createClient, readClient, readClients, updateClient } from '../b2b/clients';
 import { httpError } from '../errors';
 
 const security = [{ firebaseIdToken: [] }];
@@ -74,5 +74,20 @@ export const adminB2bRoutes: FastifyPluginAsyncZod = async (app) => {
     },
     async (request, reply) =>
       reply.status(201).send(await createClient(app.db, actorIdOf(request), request.body)),
+  );
+
+  app.patch(
+    '/admin/b2b-clients/:id',
+    {
+      schema: {
+        tags,
+        summary: 'Change a B2B partner (never its slug)',
+        security,
+        params: ClientParams,
+        body: B2bClientPatch,
+        response: { 200: B2bClient },
+      },
+    },
+    async (request) => updateClient(app.db, actorIdOf(request), request.params.id, request.body),
   );
 };
