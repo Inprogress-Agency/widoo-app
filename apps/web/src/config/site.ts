@@ -13,8 +13,11 @@ export const site = parseEnv({
 /** Publisher of the app, named in the footer and the structured data. */
 export const publisher = { name: 'Inprogress Agency' } as const;
 
-/** Address of the team for the visitors (E-21 › Questions, pied de page). */
-export const contactEmail = 'contact@widoo.app';
+/**
+ * Address of the team for the visitors (E-21 › Questions, pied de page), on the domain of the
+ * site: widoo.app belongs to someone else (D-069, D-077).
+ */
+export const contactEmail = 'contact@widooapp.com';
 
 /** Paths of the legal pages, under the language (#242, E-19 › aligner). */
 export const legalPaths = { terms: '/conditions', privacy: '/confidentialite' } as const;
