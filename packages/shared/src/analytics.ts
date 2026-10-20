@@ -174,8 +174,8 @@ export const analyticsEvents = {
     fields: z.array(z.enum(['photo', 'bio', 'neighborhood', 'anecdotes', 'featured'])).nonempty(),
   }),
   paywall_shown: z.strictObject({
-    reason: z.enum(['premium_route', 'create_limit', 'premium_card']),
-    source: z.enum(['route', 'profile', 'profile_edit', 'settings', 'create', 'planned']),
+    reason: z.enum(['premium_route', 'premium_card']),
+    source: z.enum(['route', 'profile', 'profile_edit', 'settings', 'planned']),
   }),
   paywall_dismissed: purchase,
   purchase_started: purchase,

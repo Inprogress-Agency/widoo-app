@@ -140,6 +140,8 @@ describe('events of D-023, D-029 and D-033', () => {
   const invalid: [AnalyticsEventName, unknown][] = [
     ['paywall_shown', { reason: 'plans_limit', source: 'route' }],
     ['paywall_shown', { reason: 'premium_route' }],
+    ['paywall_shown', { reason: 'create_limit', source: 'profile' }],
+    ['paywall_shown', { reason: 'premium_route', source: 'create' }],
     ['profile_updated', { fields: [] }],
     ['profile_updated', { fields: ['email'] }],
     ['go_stopped', { route_id, steps_done_ratio: 1.5 }],
@@ -161,6 +163,14 @@ describe('events of D-023, D-029 and D-033', () => {
 
   it('are in the catalog', () => {
     expect(Object.keys(analyticsEvents)).toEqual(expect.arrayContaining(Object.keys(valid)));
+  });
+
+  it('keep the two paywall reasons left by D-094', () => {
+    for (const reason of ['premium_route', 'premium_card']) {
+      expect(checkAnalyticsEvent('paywall_shown', { reason, source: 'planned' }).success).toBe(
+        true,
+      );
+    }
   });
 });
 
