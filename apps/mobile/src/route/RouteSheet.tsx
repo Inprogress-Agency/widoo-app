@@ -171,7 +171,8 @@ export function RouteSheet({
 
   const title = card?.title ?? '';
   const reported = route ? reportedLine(t, route.steps) : null;
-  const photoUrls = route?.photoUrls ?? (card?.coverUrl ? [card.coverUrl] : []);
+  // The card of the list has its cover only, without its credit, until the sheet answers.
+  const photos = route?.photos ?? (card?.coverUrl ? [{ url: card.coverUrl, credit: null }] : []);
   const creatorName = route?.isOfficial ? 'Widoo' : (route?.author?.firstName ?? 'Widoo');
 
   return (
@@ -202,7 +203,7 @@ export function RouteSheet({
             }}
           >
             <RouteHero
-              photoUrls={photoUrls}
+              photos={photos}
               scrollY={scrollY}
               badges={{
                 isVerified: card?.isVerified ?? false,

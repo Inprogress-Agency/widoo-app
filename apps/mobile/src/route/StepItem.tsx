@@ -8,6 +8,7 @@ import { Linking, Pressable, StyleSheet, View, type LayoutChangeEvent } from 're
 import Animated, { FadeIn, LinearTransition, ReduceMotion } from 'react-native-reanimated';
 import { formatDuration } from '../format/duration';
 import { Icon, uiIcon } from '../ui/Icon';
+import { PhotoCredit } from '../ui/PhotoCredit';
 import { StepDot } from '../ui/StepDot';
 import { Text } from '../ui/Text';
 import { TextLink } from '../ui/TextLink';
@@ -119,14 +120,21 @@ function StepDetail({
           </Text>
         </View>
       )}
-      {step.place.photoUrl && (
-        <Image
-          source={{ uri: step.place.photoUrl }}
-          contentFit="cover"
-          transition={motion.durations.fade}
-          accessibilityIgnoresInvertColors
-          className="aspect-video rounded-photo"
-        />
+      {step.place.photo && (
+        <View>
+          <Image
+            source={{ uri: step.place.photo.url }}
+            contentFit="cover"
+            transition={motion.durations.fade}
+            accessibilityIgnoresInvertColors
+            className="aspect-video rounded-photo"
+          />
+          {step.place.photo.credit && (
+            <View className="absolute bottom-8 right-8">
+              <PhotoCredit credit={step.place.photo.credit} />
+            </View>
+          )}
+        </View>
       )}
       {hours && (
         <DetailLine icon="duration">

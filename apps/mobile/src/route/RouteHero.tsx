@@ -1,3 +1,4 @@
+import type { Photo } from '@widoo/shared';
 import { motion, radius, size, spacing } from '@widoo/tokens';
 import { Image } from 'expo-image';
 import { useRef, useState } from 'react';
@@ -19,6 +20,7 @@ import Animated, {
 import { Badge } from '../ui/Badge';
 import { Icon, uiIcon } from '../ui/Icon';
 import { PhotoCounter } from '../ui/PhotoCounter';
+import { PhotoCredit } from '../ui/PhotoCredit';
 
 /** What the photo shows on it, as on the card (Ecrans › E-05, haut). */
 export interface HeroBadges {
@@ -30,24 +32,26 @@ export interface HeroBadges {
 }
 
 interface RouteHeroProps {
-  photoUrls: readonly string[];
+  /** The cover first; a free photo carries its credit (D-052). */
+  photos: readonly Photo[];
   badges: HeroBadges;
   /** Offset of the sheet: the photo goes at half its speed (M-10). */
   scrollY: SharedValue<number>;
 }
 
 /**
- * Photo of the sheet over 380 points (`hero-h`), a carousel swiped sideways with its counter,
- * Vérifié, Signature and Premium on it, or Privé. Read as one adjustable element, « Photo 1 sur
+ * Photo of the sheet over 380 points (`hero-h`), a carousel swiped sideways with its counter and
+ * the credit of a free photo at its left, Vérifié, Signature and Premium on it, or Privé. Read as one adjustable element, « Photo 1 sur
  * 6 »: swiping up or down changes the photo. With « Réduire les animations », no parallax.
  */
-export function RouteHero({ photoUrls, badges, scrollY }: RouteHeroProps) {
+export function RouteHero({ photos, badges, scrollY }: RouteHeroProps) {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
   const isReducedMotion = useReducedMotion();
-  const list = useRef<FlatList<string>>(null);
+  const list = useRef<FlatList<Photo>>(null);
   const [index, setIndex] = useState(0);
-  const count = photoUrls.length;
+  const count = photos.length;
+  const credit = photos[index]?.credit ?? null;
 
   const parallax = useAnimatedStyle(() => {
     const offset = scrollY.get();
@@ -85,8 +89,8 @@ export function RouteHero({ photoUrls, badges, scrollY }: RouteHeroProps) {
           >
             <FlatList
               ref={list}
-              data={photoUrls}
-              keyExtractor={(url, position) => `${position}:${url}`}
+              data={photos}
+              keyExtractor={(photo, position) => `${position}:${photo.url}`}
               horizontal
               pagingEnabled
               showsHorizontalScrollIndicator={false}
@@ -98,7 +102,7 @@ export function RouteHero({ photoUrls, badges, scrollY }: RouteHeroProps) {
               })}
               renderItem={({ item }) => (
                 <Image
-                  source={{ uri: item }}
+                  source={{ uri: item.url }}
                   contentFit="cover"
                   transition={motion.durations.fade}
                   style={{ width, height: size['hero-h'] }}
@@ -118,11 +122,11 @@ export function RouteHero({ photoUrls, badges, scrollY }: RouteHeroProps) {
       </Animated.View>
       {/* The badges sit above the rounded top of the sheet, which covers the photo's bottom. */}
       <View
-        pointerEvents="none"
+        pointerEvents="box-none"
         className="absolute inset-x-16 flex-row items-end gap-6"
         style={styles.badges}
       >
-        <View className="flex-1 flex-row flex-wrap gap-6">
+        <View pointerEvents="none" className="flex-1 flex-row flex-wrap gap-6">
           {badges.isPrivate ? (
             <Badge kind="private" />
           ) : (
@@ -133,6 +137,7 @@ export function RouteHero({ photoUrls, badges, scrollY }: RouteHeroProps) {
           )}
           {badges.isPremium && <Badge kind="premium" />}
         </View>
+        {credit && <PhotoCredit credit={credit} />}
         {count > 1 && <PhotoCounter index={index} count={count} />}
       </View>
     </View>

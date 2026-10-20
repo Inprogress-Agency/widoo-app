@@ -1143,6 +1143,15 @@ export const fr = {
     new: 'Nouveau',
     certified: 'Créateur certifié',
   },
+  // Credit of a free photo of Wikimedia Commons, on the photo wherever it shows (D-052).
+  photoCredit: {
+    short: '© {{author}}',
+    label: 'Photo de {{author}}, licence {{license}}',
+    hint: 'Affiche la licence et la source',
+    by: 'Photo de {{author}}',
+    source: 'Voir sur Wikimedia Commons',
+    close: 'Fermer le crédit',
+  },
   // E-10, the sign-in sheet: the title says the action waiting for an account (D-033).
   auth: {
     dialog: 'Connexion',
