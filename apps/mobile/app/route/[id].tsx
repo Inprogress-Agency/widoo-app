@@ -1,12 +1,13 @@
-import type { RouteDetail } from '@widoo/shared';
+import { zoneSearchBox, type LatLng, type RouteDetail } from '@widoo/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
-import { Linking, Share } from 'react-native';
+import { Linking, Share, useWindowDimensions } from 'react-native';
 import { analytics } from '../../src/analytics';
 import { openCreatorProfile } from '../../src/creator/navigation';
 import { signInFlow } from '../../src/auth/signIn';
 import { useStartGo } from '../../src/go/useGo';
 import { discoveryStore, useDiscovery, useIsOnline } from '../../src/discovery/useRouteSearch';
+import { zoomForBbox } from '../../src/map/geo';
 import { usePlannedLookup, usePlannedRoute, usePlanActions } from '../../src/plan/planned';
 import { PlanSheet, type PlanSheetMethods } from '../../src/plan/PlanSheet';
 import { plannedDateText } from '../../src/plan/planText';
@@ -44,8 +45,16 @@ export default function RouteScreen() {
     (discovery) => discovery.results?.items.some((route) => route.id === id) ?? false,
   );
 
+  const { width } = useWindowDimensions();
   const goHome = () => {
     router.dismissTo('/');
+  };
+  // « Voir des parcours proches » of a withdrawn route: the home centred on the 3 km around the
+  // zone of its start, as a zone chosen in the search (D-093).
+  const showNear = (near: LatLng) => {
+    const bbox = zoneSearchBox(near, null);
+    discoveryStore.getState().showNear({ bbox, zoom: zoomForBbox(bbox, width) });
+    goHome();
   };
   // Planning asks for an account (D-038): signed out, the sheet E-10 first, then E-06. A planned
   // route opens « Votre sortie » (E-08).
@@ -101,7 +110,7 @@ export default function RouteScreen() {
               }
             : null
         }
-        onNearby={goHome}
+        onNearby={showNear}
         onOpenCreator={(author) => openCreatorProfile(author, 'route')}
         onOpenReviews={(id) => router.push({ pathname: '/reviews/[id]', params: { id } })}
         onScrollDepth={(depth) => analytics.track('route_scrolled', { route_id: id, depth })}

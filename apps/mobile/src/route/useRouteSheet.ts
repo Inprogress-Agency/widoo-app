@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiRequestError } from '@widoo/api-client';
-import type { RouteCard, RouteDetail } from '@widoo/shared';
+import type { LatLng, RouteCard, RouteDetail } from '@widoo/shared';
 import { useMemo } from 'react';
 import { useIsOnline } from '../discovery/useRouteSearch';
 import { knownCard } from './knownCard';
@@ -17,12 +17,12 @@ export const routeSheetQueryKey = (id: string, token?: string) =>
 
 /**
  * What the route sheet shows (Ecrans › E-05): the card of the list at once, the detail once it
- * answers, the date of a withdrawn route, or the failure with what is known.
+ * answers, the date and the zone of a withdrawn route, or the failure with what is known.
  */
 export type RouteSheetState =
   | { status: 'loading'; known: RouteCard | null }
   | { status: 'ready'; route: RouteDetail }
-  | { status: 'removed'; removedAt: string; known: RouteCard | null }
+  | { status: 'removed'; removedAt: string; near: LatLng; known: RouteCard | null }
   | { status: 'error'; isOffline: boolean; known: RouteCard | null };
 
 /** No answer reached the device: « Hors connexion » rather than the error of the detail. */
@@ -49,7 +49,8 @@ export function useRouteSheet(id: string, token?: string) {
   if (query.data?.kind === 'route') {
     state = { status: 'ready', route: query.data.route };
   } else if (query.data?.kind === 'removed') {
-    state = { status: 'removed', removedAt: query.data.removedAt, known };
+    const { removedAt, near } = query.data;
+    state = { status: 'removed', removedAt, near, known };
   } else if (query.isError) {
     state = { status: 'error', isOffline: !isOnline || isUnreachable(query.error), known };
   } else {

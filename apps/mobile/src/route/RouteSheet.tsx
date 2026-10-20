@@ -1,4 +1,4 @@
-import type { RouteCard, RouteDetail } from '@widoo/shared';
+import type { LatLng, RouteCard, RouteDetail } from '@widoo/shared';
 import { motion, size, spacing } from '@widoo/tokens';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -38,7 +38,8 @@ export interface RouteSheetProps {
   plannedDate: { label: string; spoken: string } | null;
   /** « Voir sur la carte », when the route is among the results of the home (E-04). */
   onSeeOnMap: (() => void) | null;
-  onNearby: () => void;
+  /** « Voir des parcours proches » of a withdrawn route: the home centred on its zone. */
+  onNearby: (near: LatLng) => void;
   /** « Voir le profil » of the creator box, to its public profile (E-16). */
   onOpenCreator?: (author: NonNullable<RouteDetail['author']>) => void;
   /** « Voir les 128 avis », to every review (E-05, D-013). */
@@ -166,7 +167,14 @@ export function RouteSheet({
   const pulled = useAnimatedStyle(() => ({ transform: [{ translateY: pull.get() }] }));
 
   if (state.status === 'removed') {
-    return <RemovedRoute removedAt={state.removedAt} onClose={onClose} onNearby={onNearby} />;
+    return (
+      <RemovedRoute
+        removedAt={state.removedAt}
+        near={state.near}
+        onClose={onClose}
+        onNearby={onNearby}
+      />
+    );
   }
 
   const title = card?.title ?? '';

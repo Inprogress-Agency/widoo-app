@@ -10,6 +10,7 @@ import {
   selectedRoute,
 } from '../../../src/discovery/store';
 import { useBackClosesSelection } from '../../../src/discovery/useBackClosesSelection';
+import { useIsInSight } from '../../../src/discovery/useIsInSight';
 import { useDiscovery, useRouteSearch } from '../../../src/discovery/useRouteSearch';
 import { FiltersPanel } from '../../../src/filters/FiltersPanel';
 import { QuickChips } from '../../../src/filters/QuickChips';
@@ -49,6 +50,9 @@ export default function HomeScreen() {
   const isSearchable = useDiscovery((state) => canSearchZone(state, isOnline));
   const isRecenterShown = useDiscovery(canRecenter);
   const framing = useDiscovery((state) => state.framing);
+  // A framing asked from a screen over the home (« Voir des parcours proches », E-05) waits for
+  // the home to be in sight: a map under another screen does not follow its camera.
+  const isInSight = useIsInSight();
   const showView = useDiscovery((state) => state.showView);
   const searchZone = useDiscovery((state) => state.searchZone);
   const chosenZone = useDiscovery((state) => state.zone);
@@ -81,7 +85,7 @@ export default function HomeScreen() {
               center={position ?? parisCenter}
               hasPosition={position !== null}
               onViewChange={showView}
-              framing={framing}
+              framing={isInSight ? framing : null}
               selectedRoute={route}
               focusedRoute={focused}
               bottomInset={sheetCover}
