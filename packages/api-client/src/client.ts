@@ -47,7 +47,9 @@ import {
   removedOf,
   routePath,
   routeRatingsPath,
+  routeTimelinePath,
   type GetRouteOptions,
+  type GetRouteTimelineOptions,
   type RouteRatingsParams,
   type RouteSheetAnswer,
 } from './route';
@@ -169,14 +171,17 @@ export function createApiClient(options: ApiClientOptions) {
       }
     },
 
-    /** `GET /v1/routes/:id/timeline`: the times of the steps for a start, and their conflicts. */
-    getRouteTimeline: (id: string, startsAt: string, signal?: AbortSignal) =>
+    /**
+     * `GET /v1/routes/:id/timeline`: the times of the steps for a start, and their conflicts; a
+     * private route opened by its link sends its token, as for its sheet.
+     */
+    getRouteTimeline: (id: string, startsAt: string, options: GetRouteTimelineOptions = {}) =>
       request({
         method: 'GET',
-        path: `/v1/routes/${encodeURIComponent(id)}/timeline?${new URLSearchParams({ startsAt }).toString()}`,
+        path: routeTimelinePath(id, startsAt, options.token),
         schema: RouteTimeline,
         auth: 'optional',
-        signal,
+        signal: options.signal,
       }),
 
     /**

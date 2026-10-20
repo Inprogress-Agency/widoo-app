@@ -48,6 +48,8 @@ export interface PlanSheetMethods {
 interface PlanSheetProps {
   ref?: Ref<PlanSheetMethods>;
   isOnline: boolean;
+  /** `share_token` of a private route opened by its link, for its timeline. */
+  token?: string;
   /** Plans or moves; true when done, which closes the sheet. */
   onSubmit: (choice: PlanChoice) => Promise<boolean>;
   onToggleBooking: (route: RouteDetail, step: RouteDetailStep, isChecked: boolean) => void;
@@ -95,6 +97,7 @@ function initialDraft(route: RouteDetail, planned: PlannedRoute | null, now: Dat
 export function PlanSheet({
   ref,
   isOnline,
+  token,
   onSubmit,
   onToggleBooking,
   onBook,
@@ -133,6 +136,7 @@ export function PlanSheet({
     draft?.route.id ?? '',
     startsAt,
     draft !== null && isOnline,
+    token,
   );
   const steps = draft ? unlockedSteps(draft.route) : [];
   const notice =
