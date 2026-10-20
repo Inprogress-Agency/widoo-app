@@ -3,11 +3,14 @@ import {
   type AdminSupportMessage,
   type AdminSupportMessages,
   type AdminSupportQuery,
+  type SupportAlreadyHandledDetails,
 } from '@widoo/shared';
 import { and, count, desc, eq, isNotNull, isNull, sql, type SQL } from 'drizzle-orm';
+import { recordAdminAction } from '../admin/actions';
 import { neighbourCursors, offsetOfCursor } from '../admin/page-cursor';
-import type { Db } from '../db/client';
+import type { Db, Tx } from '../db/client';
 import { supportMessages, users } from '../db/schema';
+import { httpError } from '../errors';
 
 /** Characters of a message the list shows, on one line. */
 const previewLength = 120;
@@ -80,7 +83,10 @@ export async function readSupportMessages(
 }
 
 /** A message in full, or null when it does not exist. */
-export async function readSupportMessage(db: Db, id: string): Promise<AdminSupportMessage | null> {
+export async function readSupportMessage(
+  db: Db | Tx,
+  id: string,
+): Promise<AdminSupportMessage | null> {
   const [row] = await db
     .select({
       id: supportMessages.id,
@@ -113,4 +119,44 @@ export async function readSupportMessage(db: Db, id: string): Promise<AdminSuppo
     createdAt: row.createdAt.toISOString(),
     handledAt: row.handledAt?.toISOString() ?? null,
   };
+}
+
+/**
+ * Marks a message handled by the team (A-13), with its journal line. 404 for an unknown message,
+ * 409 `already_decided` with the time when another member handled it first.
+ */
+export async function markSupportMessageHandled(
+  db: Db,
+  actorId: string,
+  id: string,
+  now = new Date(),
+): Promise<AdminSupportMessage> {
+  return db.transaction(async (tx) => {
+    const [current] = await tx
+      .select({ handledAt: supportMessages.handledAt })
+      .from(supportMessages)
+      .where(eq(supportMessages.id, id))
+      .for('update');
+    if (!current) {
+      throw httpError(404, 'Message not found');
+    }
+    if (current.handledAt) {
+      const details: SupportAlreadyHandledDetails = { handledAt: current.handledAt.toISOString() };
+      throw httpError(409, 'Message already handled', 'already_decided', details);
+    }
+    await tx.update(supportMessages).set({ handledAt: now }).where(eq(supportMessages.id, id));
+    await recordAdminAction(tx, {
+      actorId,
+      action: 'support_message.handle',
+      targetType: 'support_message',
+      targetId: id,
+      before: { handledAt: null },
+      after: { handledAt: now.toISOString() },
+    });
+    const message = await readSupportMessage(tx, id);
+    if (!message) {
+      throw httpError(404, 'Message not found');
+    }
+    return message;
+  });
 }
