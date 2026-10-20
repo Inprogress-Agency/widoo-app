@@ -1,7 +1,7 @@
 import { canRateOuting, minDoneStepsToRate, type PlannedRoute } from '@widoo/shared';
 import type { TFunction } from 'i18next';
 import { formatDuration } from '../format/duration';
-import { parisTime, type Spoken } from '../route/sheetText';
+import { localTime, type Spoken } from '../route/sheetText';
 
 /**
  * Texts of the end of an outing (Ecrans › E-15), pure functions of the outing, so that the
@@ -35,7 +35,7 @@ export function endTiles(t: TFunction, outing: PlannedRoute, now: Date): EndTile
     0,
     (new Date(endedAt).getTime() - new Date(outing.startsAt).getTime()) / 60_000,
   );
-  const end = parisTime(t, endedAt);
+  const end = localTime(t, endedAt);
   return [
     {
       key: 'done',

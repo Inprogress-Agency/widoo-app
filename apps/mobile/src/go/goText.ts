@@ -3,7 +3,7 @@ import type { TFunction } from 'i18next';
 import { formatDistance } from '../format/distance';
 import { formatDuration } from '../format/duration';
 import { taxonomyLabels } from '../i18n/labels';
-import { parisTime, type Spoken } from '../route/sheetText';
+import { localTime, type Spoken } from '../route/sheetText';
 import type { GoProgress, GoStep } from './progress';
 
 /**
@@ -52,7 +52,7 @@ export function lineText(
   const form = (kind: 'short' | 'spoken') => {
     const duration = formatDuration(t, step.durationMin, kind);
     if (progress.phase === 'on_site' && current.times) {
-      const time = parisTime(t, current.times.leavesAt);
+      const time = localTime(t, current.times.leavesAt);
       return t('go.line.onSite', {
         category,
         duration,
@@ -85,8 +85,8 @@ export function headerSpoken(t: TFunction, progress: GoProgress, distanceM: numb
 
 /** « Départ 10:00 » and « Fin vers 17:00 », and the bar as a screen reader reads it. */
 export function progressText(t: TFunction, planned: PlannedRoute, progress: GoProgress) {
-  const start = parisTime(t, planned.timeline.startsAt);
-  const end = parisTime(t, planned.timeline.endsAt);
+  const start = localTime(t, planned.timeline.startsAt);
+  const end = localTime(t, planned.timeline.endsAt);
   return {
     start: t('go.progress.start', { time: start.short }),
     end: t('go.progress.end', { time: end.short }),
@@ -123,7 +123,7 @@ export function timelineState(
   switch (entry.status) {
     case 'done':
       return {
-        text: t('go.sheet.doneAt', { time: entry.doneAt ? parisTime(t, entry.doneAt).short : '' }),
+        text: t('go.sheet.doneAt', { time: entry.doneAt ? localTime(t, entry.doneAt).short : '' }),
         tone: 'done',
       };
     case 'skipped':

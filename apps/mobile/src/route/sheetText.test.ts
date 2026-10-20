@@ -5,7 +5,7 @@ import fixtures from './generated/route-sheets.json';
 import {
   agoText,
   hoursLine,
-  parisTime,
+  localTime,
   reportedLine,
   tilesText,
   todaySlots,
@@ -65,12 +65,12 @@ describe('budget tile (D-032)', () => {
 });
 
 describe('times and hours of the steps', () => {
-  it('writes a time of Paris, said in words', () => {
-    expect(parisTime(t, '2026-09-25T08:35:00.000Z')).toEqual({
+  it('writes a time of Paris by default, said in words', () => {
+    expect(localTime(t, '2026-09-25T08:35:00.000Z')).toEqual({
       short: '10:35',
       spoken: '10 heures 35',
     });
-    expect(parisTime(t, '2026-09-25T08:00:00.000Z').spoken).toBe('10 heures');
+    expect(localTime(t, '2026-09-25T08:00:00.000Z').spoken).toBe('10 heures');
   });
 
   it('keeps the slots of the day, split hours included, and the valid seasons only', () => {
@@ -79,6 +79,19 @@ describe('times and hours of the steps', () => {
       .slice(0, 1)
       .map((slot) => ({ ...slot, validFrom: '2026-06-01', validTo: '2026-09-30' }));
     expect(todaySlots(summer, monday)).toEqual([]);
+  });
+
+  it('reads the times and the day in the zone of the city, not in the one of the phone', () => {
+    expect(localTime(t, '2026-09-25T08:35:00.000Z', 'America/New_York').short).toBe('04:35');
+    // Monday 12 October at 23:30 in Paris: still Monday there, already Tuesday in Tokyo.
+    const late = new Date('2026-10-12T21:30:00.000Z');
+    expect(todaySlots(hours, late, 'Europe/Paris').map((slot) => slot.weekday)).toEqual([0]);
+    expect(todaySlots(hours, late, 'Asia/Tokyo').map((slot) => slot.weekday)).toEqual([1, 1]);
+    const open = hoursLine(t, step({ place: { ...base.place, hours } }), late, 'Asia/Tokyo');
+    expect(open).toMatchObject({
+      kind: 'open',
+      hours: "aujourd'hui, 09:00 – 12:00, 14:00 – 18:00",
+    });
   });
 
   it('says open today, closed today, or the usual hours of a reported place (D-013)', () => {

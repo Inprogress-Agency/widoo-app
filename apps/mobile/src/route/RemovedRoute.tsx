@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusMessage } from '../components/StatusMessage';
 import { Button } from '../ui/Button';
 import { DiscButton } from '../ui/DiscButton';
-import { parisDay, withoutFinalDot } from './sheetText';
+import { localDay, withoutFinalDot } from './sheetText';
 
 interface RemovedRouteProps {
   removedAt: string;
@@ -37,7 +37,7 @@ export function RemovedRoute({ removedAt, onClose, onNearby }: RemovedRouteProps
         <StatusMessage
           icon="removed"
           title={t('route.removed.title')}
-          body={t('route.removed.body', { date: withoutFinalDot(parisDay(removedAt)) })}
+          body={t('route.removed.body', { date: withoutFinalDot(localDay(removedAt)) })}
           action={<Button label={t('route.removed.nearby')} onPress={onNearby} />}
         />
       </View>

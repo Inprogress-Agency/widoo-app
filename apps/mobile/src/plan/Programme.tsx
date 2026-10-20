@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { formatDuration } from '../format/duration';
-import { parisDay, transitionText } from '../route/sheetText';
+import { localDay, transitionText } from '../route/sheetText';
 import { Icon, uiIcon } from '../ui/Icon';
 import { StepDot } from '../ui/StepDot';
 import { Text } from '../ui/Text';
@@ -111,7 +111,7 @@ function ProgrammeRow({
   const { t } = useTranslation();
   const name = step.title ?? step.place.name;
   const category = taxonomyLabels().placeCategories[step.place.category];
-  const until = step.endsOn ? t('plan.until', { date: parisDay(step.endsOn) }) : null;
+  const until = step.endsOn ? t('plan.until', { date: localDay(step.endsOn) }) : null;
   const marked = mark ? markText(t, mark) : null;
   const trip = step.transition ? transitionText(t, step.transition) : null;
   const label = [
