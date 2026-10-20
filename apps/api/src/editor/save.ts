@@ -12,13 +12,15 @@ import { conflict } from '../errors';
 import { replaceSteps, type RouteContent } from './content';
 import { accessColumnOf } from '../transit/access';
 import type { RouteRow } from './lifecycle';
+import { storedComputedOf } from './computed';
 import { recomputeRoute } from './recompute';
 import type { Workspace } from './workspace';
 
 /**
  * Writes the content into the route itself, with what is derived from it: stored trips, transport,
- * start, envelope, city of the first step, `computed` with the access of the first step (D-050)
- * and its buckets: the access follows the first step at every save.
+ * start, envelope, city of the first step, `computed` recomputed by the engine on our estimates
+ * (D-088) with the access of the first step (D-050), and its buckets: all follow the steps at
+ * every save.
  */
 export async function writeInPlace(
   tx: Tx,
@@ -32,7 +34,7 @@ export async function writeInPlace(
     const place = placeById.get(step.placeId);
     return place ? [place] : [];
   });
-  const { computed, warnings } = result;
+  const { computed } = result;
   const [written] = await tx
     .update(routes)
     .set({
@@ -48,18 +50,7 @@ export async function writeInPlace(
       startLocation: located[0]?.location ?? null,
       bounds: located.length > 0 ? envelopeOf(located.map((place) => place.location)) : null,
       cityId: located[0]?.cityId ?? route.cityId,
-      // Snake case, as the search reads it.
-      computed: computed && {
-        duration_min: computed.durationMin,
-        budget_per_person_eur: computed.budgetPerPersonEur,
-        distance_m: computed.distanceM,
-        walking_m: computed.walkingM,
-        effort: computed.effort,
-        warnings: warnings.map((issue) => issue.code),
-        access: accessColumnOf(located[0]?.location),
-        computed_at: computed.computedAt,
-      },
-      // Of the bounds read from `settings`, by the engine.
+      computed: storedComputedOf(result, accessColumnOf(located[0]?.location)),
       durationBucket: computed?.durationBucket ?? null,
       budgetBucket: computed?.budgetBucket ?? null,
     })
