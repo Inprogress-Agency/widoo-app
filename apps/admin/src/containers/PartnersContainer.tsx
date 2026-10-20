@@ -7,6 +7,7 @@ import { PageMessage } from '@/components/states/PageMessage';
 import { sectionPaths } from '@/config/navigation';
 import { catalogRoutePathOf } from '@/containers/CatalogRoutesContainer';
 import { PartnerFormContainer } from '@/containers/PartnerFormContainer';
+import { PartnerRoutesContainer } from '@/containers/PartnerRoutesContainer';
 import { useCardOnScreen } from '@/hooks/useCardOnScreen';
 import { useRemoteData } from '@/hooks/useRemoteData';
 import { getSessionClients } from '@/lib/auth/clients';
@@ -32,7 +33,7 @@ export function PartnersContainer() {
   );
   const { fresh: openPartner, isLoading: isCardLoading, stale } = useCardOnScreen(openId, card);
   const items = partners.status === 'ready' ? partners.data.items : undefined;
-  const [dialog, setDialog] = useState<'create' | 'edit' | null>(null);
+  const [dialog, setDialog] = useState<'create' | 'edit' | 'routes' | null>(null);
 
   const showPartner = (partnerId: string | null) =>
     router.replace(
@@ -57,7 +58,12 @@ export function PartnersContainer() {
       title={partner.name}
       closeLabel={messages.confirm.close}
       onClose={() => showPartner(null)}
-      actions={<PartnerActions onEdit={() => setDialog('edit')} />}
+      actions={
+        <PartnerActions
+          onEdit={() => setDialog('edit')}
+          onChooseRoutes={() => setDialog('routes')}
+        />
+      }
     >
       <PartnerPanelContent partner={partner} routePathOf={catalogRoutePathOf} />
     </DetailPanel>
@@ -111,7 +117,14 @@ export function PartnersContainer() {
         )}
       </div>
       {renderPanel()}
-      {dialog ? (
+      {dialog === 'routes' && openPartner ? (
+        <PartnerRoutesContainer
+          partner={openPartner}
+          onClose={() => setDialog(null)}
+          onSaved={handleSaved}
+        />
+      ) : null}
+      {dialog === 'create' || dialog === 'edit' ? (
         <PartnerFormContainer
           partner={dialog === 'edit' ? openPartner : null}
           onClose={() => setDialog(null)}

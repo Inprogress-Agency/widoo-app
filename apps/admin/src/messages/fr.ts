@@ -1227,6 +1227,7 @@ export const messages = {
       routePosition: (position: number) => `${position}.`,
       notPublished: 'Hors ligne',
       edit: 'Modifier',
+      chooseRoutes: 'Choisir les parcours',
     },
     add: 'Ajouter un partenaire',
     form: {
@@ -1252,10 +1253,31 @@ export const messages = {
       create: 'Ajouter',
       save: 'Enregistrer',
     },
+    routesDialog: {
+      title: 'Choisir les parcours',
+      description: (min: number, max: number) =>
+        `De ${min} à ${max} parcours publiés, dans l’ordre de la page du partenaire.`,
+      chosen: (count: number) =>
+        count > 1 ? `${count} parcours choisis` : `${count} parcours choisi`,
+      noneChosen: 'Aucun parcours choisi pour le moment.',
+      search: 'Ajouter un parcours',
+      searchPlaceholder: 'Rechercher un parcours publié',
+      searching: 'Recherche en cours…',
+      noResult: 'Aucun parcours publié ne correspond.',
+      add: 'Ajouter',
+      alreadyChosen: 'Choisi',
+      moveUp: (title: string) => `Monter « ${title} »`,
+      moveDown: (title: string) => `Descendre « ${title} »`,
+      remove: (title: string) => `Retirer « ${title} »`,
+      confirm: 'Enregistrer les parcours',
+    },
     toasts: {
       created: 'Partenaire ajouté',
       updated: 'Partenaire modifié',
       slugTaken: 'Un partenaire a déjà cet identifiant.',
+      routesSaved: 'Parcours enregistrés',
+      routesUnavailable:
+        'Un parcours ne peut plus être choisi : seuls les parcours publiés le peuvent. La liste est relue.',
       invalid:
         'Un champ est refusé : texte brut seulement, adresse e-mail valide, prix de 0 à 100 000 €.',
       failed: "Le partenaire n'a pas pu être enregistré.",

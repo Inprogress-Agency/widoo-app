@@ -23,6 +23,8 @@ type ConfirmDialogProps = {
   confirmLabel: string;
   /** The action is running: the buttons wait for its answer. */
   isBusy?: boolean;
+  /** The fields do not allow the action yet (a choice not complete): the button waits. */
+  isConfirmDisabled?: boolean;
   /**
    * `destructive` (default): the red button of an action that removes or refuses. `primary`: an
    * action that asks for a text without destroying anything (a message to an author).
@@ -46,6 +48,7 @@ export function ConfirmDialog({
   closeLabel,
   confirmLabel,
   isBusy = false,
+  isConfirmDisabled = false,
   confirmVariant = 'destructive',
 }: ConfirmDialogProps) {
   const handleSubmit = (event: FormEvent) => {
@@ -76,7 +79,7 @@ export function ConfirmDialog({
               <Button variant="secondary" onClick={onCancel}>
                 {cancelLabel}
               </Button>
-              <Button type="submit" variant={confirmVariant} disabled={isBusy}>
+              <Button type="submit" variant={confirmVariant} disabled={isBusy || isConfirmDisabled}>
                 {confirmLabel}
               </Button>
             </div>
