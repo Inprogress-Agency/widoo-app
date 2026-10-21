@@ -70,7 +70,14 @@ const listed = (ids: string[]): RouteSearchResult => ({
 function showZone(ids: string[]) {
   const results = listed(ids);
   discoveryStore.setState({
-    search: { id: 1, view: testView, filters: {}, trigger: 'initial', filtersSource: null },
+    search: {
+      id: 1,
+      view: testView,
+      filters: {},
+      trigger: 'initial',
+      filtersSource: null,
+      revealAt: null,
+    },
     status: 'success',
     results,
     resultsAt: 1_000,
