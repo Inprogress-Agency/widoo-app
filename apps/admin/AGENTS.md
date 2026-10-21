@@ -34,3 +34,12 @@ pnpm --filter @widoo/admin dev          # http://localhost:5173
 pnpm --filter @widoo/admin build && pnpm --filter @widoo/admin start
 pnpm --filter @widoo/admin lint && pnpm --filter @widoo/admin typecheck && pnpm --filter @widoo/admin test
 ```
+
+En local, avec l'émulateur Auth (sans second facteur) et des données fictives à traiter :
+
+```bash
+firebase emulators:start --only auth --project demo-widoo   # liens de connexion dans sa sortie
+FIREBASE_PROJECT_ID=demo-widoo FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 pnpm --filter api dev
+pnpm --filter api db:seed && pnpm --filter api db:seed:recette   # parcours en attente, signalements, support
+docker compose exec db psql -U widoo -d widoo -c "update users set role = 'admin' where email = '<adresse>'"
+```
