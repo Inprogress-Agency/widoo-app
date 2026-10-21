@@ -17,9 +17,20 @@ const wikiCodes = [
   'internal_error',
 ];
 
+/**
+ * The codes of the admin (wiki Admin-Web), not yet cited by API › Conventions: until that page
+ * lists them (#618), the test compares to both lists.
+ */
+const adminCodes = [
+  'mfa_required',
+  'recent_sign_in_required',
+  'account_suspended',
+  'already_decided',
+];
+
 describe('apiErrorCodes', () => {
-  it('holds the stable codes of the wiki, `internal_error`, and no other', () => {
-    expect([...apiErrorCodes].toSorted()).toEqual(wikiCodes.toSorted());
+  it('holds the stable codes of the wiki, those of the admin, `internal_error`, and no other', () => {
+    expect([...apiErrorCodes].toSorted()).toEqual([...wikiCodes, ...adminCodes].toSorted());
   });
 });
 
