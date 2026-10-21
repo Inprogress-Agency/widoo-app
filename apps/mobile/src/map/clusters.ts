@@ -52,3 +52,17 @@ export function clusterPoints(
 
 /** Zoom levels a tap on a cluster goes in: two, each a zone four times smaller. */
 export const clusterZoomStep = 2;
+
+/**
+ * Zoom a tap on a cluster goes to, from `zoom`. A badge « 1 » goes at least to `listedZoom`, that
+ * of the opening view of about 3 km, a zone always under the threshold of the clusters
+ * (Filtres-et-Recherche › Recherche par zone): its route is listed there, and selected (D-108).
+ */
+export function clusterZoom(
+  cluster: Pick<RouteCluster, 'count'>,
+  zoom: number,
+  listedZoom: number,
+): number {
+  const zoomIn = zoom + clusterZoomStep;
+  return cluster.count === 1 ? Math.max(zoomIn, listedZoom) : zoomIn;
+}

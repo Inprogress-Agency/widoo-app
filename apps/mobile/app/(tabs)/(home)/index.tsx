@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   activeFilterCount,
   canRecenter,
+  canSearchClusters,
   canSearchZone,
   focusedRoute,
   selectedRoute,
@@ -49,6 +50,8 @@ export default function HomeScreen() {
   const focused = useDiscovery(focusedRoute);
   const isSearchable = useDiscovery((state) => canSearchZone(state, isOnline));
   const isRecenterShown = useDiscovery(canRecenter);
+  const isClusterSearched = useDiscovery((state) => canSearchClusters(state, isOnline));
+  const pressCluster = useDiscovery((state) => state.pressCluster);
   const framing = useDiscovery((state) => state.framing);
   // A framing asked from a screen over the home (« Voir des parcours proches », E-05) waits for
   // the home to be in sight: a map under another screen does not follow its camera.
@@ -91,6 +94,9 @@ export default function HomeScreen() {
               bottomInset={sheetCover}
               topInset={topBarHeight}
               onSelect={(next) => select(next?.id ?? null)}
+              // A badge searches the zone it zooms in on, a badge « 1 » shows its route (D-108).
+              onClusterPress={(cluster) => pressCluster(cluster, isOnline)}
+              isClusterSearched={isClusterSearched}
               onOpenRoute={(next, step) => openRoute(next, 'marker', step)}
               searchControl={
                 isSearchable ? (

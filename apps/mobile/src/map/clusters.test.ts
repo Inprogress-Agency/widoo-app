@@ -1,6 +1,6 @@
 import { size } from '@widoo/tokens';
 import { describe, expect, it } from 'vitest';
-import { clusterPoints, clusterRadius } from './clusters';
+import { clusterPoints, clusterRadius, clusterZoom } from './clusters';
 
 describe('clusterRadius', () => {
   it('never draws a disc smaller than a touch target, and grows with the count', () => {
@@ -23,5 +23,17 @@ describe('clusterPoints', () => {
     ]);
     expect(points.features.map((feature) => feature.properties.label)).toEqual(['12', '3']);
     expect(new Set(points.features.map((feature) => feature.properties.clusterId)).size).toBe(2);
+  });
+});
+
+describe('clusterZoom', () => {
+  it('zooms two levels in on a badge of more than one route', () => {
+    expect(clusterZoom({ count: 12 }, 10.5, 14.2)).toBe(12.5);
+  });
+
+  it('takes a badge « 1 » at least to the zoom of a listed zone, to show its route', () => {
+    expect(clusterZoom({ count: 1 }, 10.5, 14.2)).toBe(14.2);
+    // Already close: two levels in, as any badge.
+    expect(clusterZoom({ count: 1 }, 13, 14.2)).toBe(15);
   });
 });

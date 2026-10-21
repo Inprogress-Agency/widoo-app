@@ -27,7 +27,7 @@ import { colors } from '@widoo/tokens';
 import type { Framing, MapView } from '../discovery/store';
 import { isOpeningZone } from '../discovery/zone';
 import { formatDuration } from '../format/duration';
-import { clusterId, clusterPoints, clusterZoomStep } from './clusters';
+import { clusterId, clusterPoints, clusterZoom } from './clusters';
 import { bboxCenter, initialSpanM, toBbox, toLngLat, zoomForSpan, type LngLat } from './geo';
 import {
   cameraPaddingOf,
@@ -91,6 +91,13 @@ interface RouteMapProps {
   topInset?: number;
   /** A marker, or null for a tap elsewhere on the map. */
   onSelect: (route: RouteCard | null) => void;
+  /** A cluster badge, told before the map zooms in on it (Ecrans › E-01, D-108). */
+  onClusterPress: (cluster: RouteCluster) => void;
+  /**
+   * A cluster badge also searches the zone it zooms in on, and a badge « 1 » shows its route;
+   * offline, it only zooms. Screen readers tell which.
+   */
+  isClusterSearched: boolean;
   /** « Voir plus » of the tooltip: the route sheet (E-05), at the step it points at. */
   onOpenRoute: (route: RouteCard, step: TooltipStep) => void;
   /** « Rechercher dans cette zone », or the pill of a search on its way. */
@@ -123,6 +130,8 @@ export function RouteMap({
   bottomInset: sheetCover,
   topInset = 0,
   onSelect,
+  onClusterPress,
+  isClusterSearched,
   onOpenRoute,
   searchControl,
   hasRecenter = true,
@@ -382,10 +391,22 @@ export function RouteMap({
       frameRoute(route, bottom);
     }
   };
-  const reframe = useEffectEvent(frameAgain);
+  // A selection the map did not make, the route of a badge « 1 » once its zone is answered
+  // (D-108), is framed as a tap on its marker would.
+  const reframe = useEffectEvent((route: RouteCard, bottom: number) => {
+    if (framedFor.current === '') {
+      if (frameRoute(route, restCover)) {
+        framedFor.current = frameKey(route, restCover);
+      }
+      return;
+    }
+    frameAgain(route, bottom);
+  });
   useEffect(() => {
     if (selectedRoute) {
       reframe(selectedRoute, bottomInset);
+    } else {
+      framedFor.current = '';
     }
   }, [selectedRoute, bottomInset, topInset]);
   const handleStartTooltipHeight = (height: number) => {
@@ -408,17 +429,30 @@ export function RouteMap({
 
   const clusterShape = useMemo(() => clusterPoints(clusters ?? []), [clusters]);
   /**
-   * A tap on a cluster zooms in on it, as the user would with a gesture: « Rechercher dans cette
-   * zone » then lists its routes.
+   * A tap on a cluster zooms in on it, a badge « 1 » at least to a zone listed as the opening one;
+   * the view the map settles on is searched at once (D-108). Offline, the zoom is the user's own,
+   * as a gesture would be.
    */
   const zoomOnCluster = (cluster: RouteCluster) => {
+    onClusterPress(cluster);
     isGestureMove.current = true;
     heldHome.current = null;
     camera.current?.setCamera({
       centerCoordinate: toLngLat(cluster.center),
-      zoomLevel: zoom.current + clusterZoomStep,
+      zoomLevel: clusterZoom(
+        cluster,
+        zoom.current,
+        zoomForSpan(cluster.center, initialSpanM, width),
+      ),
       ...cameraAnimation,
     });
+  };
+  /** What a badge does, as a screen reader says it: zoom, and search or show its route. */
+  const clusterLabel = ({ count }: RouteCluster) => {
+    if (!isClusterSearched) {
+      return t('map.cluster', { count });
+    }
+    return count === 1 ? t('map.clusterRoute') : t('map.clusterSearch', { count });
   };
   const clusterOf = (id: unknown) => clusters?.find((cluster) => clusterId(cluster) === id);
 
@@ -434,7 +468,7 @@ export function RouteMap({
     })),
     ...(clusters ?? []).map((cluster) => ({
       name: clusterId(cluster),
-      label: t('map.cluster', { count: cluster.count }),
+      label: clusterLabel(cluster),
     })),
   ];
   const handleAccessibilityAction = (event: AccessibilityActionEvent) => {
