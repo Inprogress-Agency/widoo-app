@@ -101,7 +101,7 @@ describe('sign-in flow', () => {
     expect(state()).toMatchObject({ step: 'sent', email: 'camille@exemple.fr', sentAt: 1_000 });
     expect(kept()).toEqual({ email: 'camille@exemple.fr', intent: 'favorite' });
 
-    expect(flow.openLink('https://widoo.app/r/route-1')).toBe(false);
+    expect(flow.openLink('https://widooapp.com/r/route-1')).toBe(false);
     expect(flow.openLink(link)).toBe(true);
     await vi.waitFor(() => expect(state().step).toBe('welcome'));
     expect(deps.trackCompleted).toHaveBeenCalledWith(
