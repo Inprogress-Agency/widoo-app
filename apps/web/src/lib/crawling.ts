@@ -6,12 +6,16 @@ import { localizedPath } from './seo';
 const home: Record<SiteLocale, string> = { fr: '/', en: '/' };
 
 /**
- * Every indexable page in every language, each linked to its other versions: the home page, and
- * the legal pages once the API serves their texts (`withLegal`, #242), with their path in each
- * language.
+ * Every indexable page in every language, each linked to its other versions: the home page, the
+ * legal pages once the API serves their texts (`withLegal`, #242), and the legal notice, written
+ * in the site (#590), with their path in each language.
  */
 export function buildSitemap(siteUrl: string, withLegal: boolean): MetadataRoute.Sitemap {
-  const pages = [home, ...(withLegal ? legalDocs.map((doc) => legalPaths[doc]) : [])];
+  const pages = [
+    home,
+    ...(withLegal ? legalDocs.map((doc) => legalPaths[doc]) : []),
+    legalPaths.notice,
+  ];
   return pages.flatMap((paths) => {
     const languages = Object.fromEntries(
       locales.map((locale) => [

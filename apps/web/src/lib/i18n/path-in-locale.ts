@@ -1,4 +1,4 @@
-import { legalDocOfPath, legalPaths } from '@/config/legal';
+import { legalPageOfPath, legalPaths } from '@/config/legal';
 import type { SiteLocale } from '@/config/locales';
 
 /**
@@ -7,7 +7,7 @@ import type { SiteLocale } from '@/config/locales';
  */
 export function pathInLocale(pathname: string, locale: SiteLocale): string {
   const rest = pathname.replace(/^\/(fr|en)(?=\/|$)/, '');
-  const legal = legalDocOfPath(rest);
+  const legal = legalPageOfPath(rest);
   if (legal) return `/${locale}${legalPaths[legal][locale]}`;
   return `/${locale}${rest === '/' ? '' : rest}`;
 }

@@ -2,11 +2,17 @@ import { describe, expect, it } from 'vitest';
 import { buildRobots, buildSitemap } from './crawling';
 
 describe('buildSitemap', () => {
-  it('lists the home page in both languages, linked to each other', () => {
+  it('lists the home page and the legal notice in both languages, linked to each other', () => {
     const languages = { 'fr-FR': 'https://widoo.example/fr', en: 'https://widoo.example/en' };
+    const notice = {
+      'fr-FR': 'https://widoo.example/fr/mentions-legales',
+      en: 'https://widoo.example/en/legal-notice',
+    };
     expect(buildSitemap('https://widoo.example', false)).toEqual([
       { url: 'https://widoo.example/fr', alternates: { languages } },
       { url: 'https://widoo.example/en', alternates: { languages } },
+      { url: 'https://widoo.example/fr/mentions-legales', alternates: { languages: notice } },
+      { url: 'https://widoo.example/en/legal-notice', alternates: { languages: notice } },
     ]);
   });
 
@@ -19,6 +25,8 @@ describe('buildSitemap', () => {
       'https://widoo.example/en/terms',
       'https://widoo.example/fr/confidentialite',
       'https://widoo.example/en/privacy',
+      'https://widoo.example/fr/mentions-legales',
+      'https://widoo.example/en/legal-notice',
     ]);
     expect(buildSitemap('https://widoo.example', true)[3]?.alternates).toEqual({
       languages: {

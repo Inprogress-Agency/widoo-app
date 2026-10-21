@@ -1,4 +1,4 @@
-import { legalDocOfPath, legalPaths } from '@/config/legal';
+import { legalPageOfPath, legalPaths } from '@/config/legal';
 import { isSiteLocale } from '@/config/locales';
 import { negotiateLocale } from './i18n/negotiate';
 
@@ -21,8 +21,9 @@ export type RoutingDecision =
  * What the proxy does with a request (Site-Web › Référencement, Langues):
  * - a request on an alias host (`www`, former domain) moves to the canonical site, 308;
  * - `/` sends to the language of the browser, 307, never cached; so do the short addresses of the
- *   legal pages cited by the stores (`/conditions`, `/confidentialite`, `/terms`, `/privacy`, #242),
- *   each to its path in that language;
+ *   legal pages cited by the stores (`/conditions`, `/confidentialite`, `/terms`, `/privacy`, #242)
+ *   and of the legal notice (`/mentions-legales`, `/legal-notice`, #590), each to its path in that
+ *   language;
  * - a path with a language prefix is served as is;
  * - any other path is served in the language of the browser, without changing the address, so
  *   that an unknown address shows the missing page in the right language; its query goes with
@@ -51,7 +52,7 @@ export function decideRouting(input: RoutingInput): RoutingDecision {
       negotiated: true,
     };
   }
-  const legal = legalDocOfPath(input.pathname);
+  const legal = legalPageOfPath(input.pathname);
   if (legal) {
     return {
       kind: 'redirect',

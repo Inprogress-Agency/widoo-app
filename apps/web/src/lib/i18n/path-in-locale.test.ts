@@ -10,5 +10,6 @@ describe('pathInLocale', () => {
   it('gives a legal page its path in the other language', () => {
     expect(pathInLocale('/en/terms', 'fr')).toBe('/fr/conditions');
     expect(pathInLocale('/fr/confidentialite', 'en')).toBe('/en/privacy');
+    expect(pathInLocale('/fr/mentions-legales', 'en')).toBe('/en/legal-notice');
   });
 });
