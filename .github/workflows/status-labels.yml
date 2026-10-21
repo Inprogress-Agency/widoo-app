@@ -36,10 +36,12 @@ jobs:
       github.event_name != 'issues'
       || (github.event.action != 'labeled' && github.event.action != 'unlabeled')
       || contains(fromJSON('["status:ready", "status:blocked", "type:epic", "type:design", "needs-design", "inbox", "human"]'), github.event.label.name)
-    runs-on: ubuntu-latest
+    # ubuntu-latest passe à Ubuntu 26 (actions/runner-images#14748) : épinglé sur 24.04, à remonter
+    # à ubuntu-26.04 après une CI et un déploiement staging verts dessus.
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 

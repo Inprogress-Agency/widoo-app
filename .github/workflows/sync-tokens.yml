@@ -22,7 +22,9 @@ concurrency:
 jobs:
   sync:
     name: Sync tokens.json from the wiki
-    runs-on: ubuntu-latest
+    # ubuntu-latest passe à Ubuntu 26 (actions/runner-images#14748) : épinglé sur 24.04, à remonter
+    # à ubuntu-26.04 après une CI et un déploiement staging verts dessus.
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       # Jeton vérifié à chaque passage, pas seulement le jour où le wiki change : expiré, révoqué, en
@@ -47,13 +49,13 @@ jobs:
           echo "Jeton TOKENS_SYNC_TOKEN valide${expiration:+, expire le $expiration}."
 
       # Aucun jeton dans le dépôt cloné : l'installation des dépendances ne peut pas le lire.
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
           cache: pnpm
