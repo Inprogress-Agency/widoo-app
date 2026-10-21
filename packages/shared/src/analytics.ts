@@ -63,7 +63,8 @@ export const analyticsEvents = {
   map_search_zone: z.strictObject({
     zoom: z.number().min(0).max(24),
     results_count: count,
-    trigger: z.enum(['initial', 'button', 'geocode']),
+    /** `cluster`: the search a tap on a cluster badge starts at once (D-108). */
+    trigger: z.enum(['initial', 'button', 'geocode', 'cluster']),
   }),
   /** The weather applies no filter (D-010, D-067): no `weather` source. */
   filters_applied: z.strictObject({

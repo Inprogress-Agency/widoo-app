@@ -67,6 +67,17 @@ describe('checkAnalyticsEvent', () => {
     });
   });
 
+  it('takes the search a cluster badge starts, as a trigger of its own (D-108)', () => {
+    const search = { zoom: 13.2, results_count: 4, trigger: 'cluster' };
+    expect(checkAnalyticsEvent('map_search_zone', search)).toEqual({
+      success: true,
+      properties: search,
+    });
+    expect(checkAnalyticsEvent('map_search_zone', { ...search, trigger: 'badge' }).success).toBe(
+      false,
+    );
+  });
+
   it('refuses an event the page Analytics does not name', () => {
     expect(checkAnalyticsEvent('screen_viewed', {})).toEqual({
       success: false,
