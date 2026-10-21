@@ -9,6 +9,8 @@ export const apiErrorCodes = [
   'conflict',
   'rate_limited',
   'coherence_blocked',
+  /** 410 of a confirmation link that expired, was already used or was cancelled (D-062). */
+  'link_expired',
   'premium_required',
   /** 410 of a withdrawn route, with `details.removedAt` (`RouteRemovedDetails`). */
   'route_removed',
@@ -20,6 +22,8 @@ export const apiErrorCodes = [
   'account_suspended',
   /** 409 on a moderation decision: another member of the team decided first (D-087). */
   'already_decided',
+  /** 403 of a route that needs an account, called with the token of an anonymous account (D-099). */
+  'account_required',
   'internal_error',
 ] as const;
 
