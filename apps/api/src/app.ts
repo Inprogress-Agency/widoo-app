@@ -38,6 +38,7 @@ import { defaultInternalJobs, internalRoutes, type InternalJobs } from './routes
 import { legalRoutes } from './routes/legal';
 import { meRoutes } from './routes/me';
 import { meExportRoutes } from './routes/me-export';
+import { placesRoutes } from './routes/places';
 import { plannedRoutesPlugin } from './routes/planned';
 import { routeRatingsPlugin } from './routes/ratings';
 import { routeReportsRoutes } from './routes/route-reports';
@@ -182,6 +183,7 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   });
   await app.register(usersRoutes, { prefix: '/v1' });
   await app.register(editorRoutes, { prefix: '/v1' });
+  await app.register(placesRoutes, { prefix: '/v1' });
   await app.register(geocodeRoutes, {
     prefix: '/v1',
     geocoder: options.geocoder ?? geocoderOf(config, app.log),
