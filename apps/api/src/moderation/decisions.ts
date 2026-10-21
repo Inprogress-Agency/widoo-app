@@ -9,6 +9,7 @@ import { eq } from 'drizzle-orm';
 import { recordAdminAction } from '../admin/actions';
 import type { Db } from '../db/client';
 import { moderationActionsTable, routes } from '../db/schema';
+import { moveRoute } from '../editor/lifecycle';
 import { httpError } from '../errors';
 
 type DecidableAction = Exclude<ModerationAction, 'edit'>;
@@ -34,8 +35,8 @@ export type ModerationDecisionInput = {
 };
 
 /**
- * Applies a decision to a route: its new status, a row in its moderation history and a row in
- * the journal of the admin, all in one transaction. The route is locked while the decision is
+ * Applies a decision to a route: its new status (by `moveRoute`), a row in its moderation history
+ * and a row in the journal of the admin, all in one transaction. The route is locked while the decision is
  * made: when two members of the team decide at once, the second one finds a route that no longer
  * waits and receives 409 `already_decided` with the status the first one gave it.
  */
@@ -48,7 +49,7 @@ export async function decideRoute(
 
   return db.transaction(async (tx) => {
     const [route] = await tx
-      .select({ status: routes.status })
+      .select()
       .from(routes)
       .where(eq(routes.id, input.routeId))
       .for('update');
@@ -64,10 +65,9 @@ export async function decideRoute(
         ? 'needs_fix'
         : transitions[input.action].to;
 
-    await tx
-      .update(routes)
-      .set({ status: to, ...(to === 'published' ? { publishedAt: now } : {}) })
-      .where(eq(routes.id, input.routeId));
+    // The first publication keeps its date, each withdrawal is dated, and a route that goes
+    // offline leaves the profiles that featured it.
+    await moveRoute(tx, route, to, 'moderator', now);
     await tx.insert(moderationActionsTable).values({
       routeId: input.routeId,
       actorId: input.actorId,

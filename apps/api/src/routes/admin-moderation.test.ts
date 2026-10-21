@@ -11,7 +11,13 @@ import { eq, inArray } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
-import { adminActions, moderationActionsTable, routes, users } from '../db/schema';
+import {
+  adminActions,
+  moderationActionsTable,
+  routes,
+  userFeaturedRoutes,
+  users,
+} from '../db/schema';
 import { seed, seedId } from '../db/seed';
 import { uuidv7 } from '../db/uuid';
 import { testConfig } from '../test-config';
@@ -81,6 +87,8 @@ async function addRoute(status: RouteStatus, hoursAgo = 1, title = 'Montmartre')
   return id;
 }
 
+const routeOf = async (id: string) =>
+  (await app.db.select().from(routes).where(eq(routes.id, id)))[0];
 const statusOf = async (id: string) =>
   (await app.db.select({ status: routes.status }).from(routes).where(eq(routes.id, id)))[0]?.status;
 const queue = (headers: Record<string, string>, query = '') =>
@@ -255,12 +263,68 @@ describe('decisions', () => {
     expect(action).toMatchObject({ action: 'reject', ...refusal });
   });
 
-  it('unpublishes a published route', async () => {
+  it('unpublishes a published route: dated, and out of the profiles that featured it', async () => {
     const moderator = await signIn('moderator');
     const id = await addRoute('published');
+    const firstPublishedAt = new Date('2026-10-01T08:00:00Z');
+    await app.db.update(routes).set({ publishedAt: firstPublishedAt }).where(eq(routes.id, id));
+    await app.db.insert(userFeaturedRoutes).values({ userId: authorId, routeId: id, position: 1 });
+
+    const before = Date.now();
+    expect((await decide(moderator.headers, id, 'unpublish', refusal)).statusCode).toBe(200);
+    const route = await routeOf(id);
+    expect(route?.status).toBe('unpublished');
+    expect(route?.unpublishedAt?.getTime()).toBeGreaterThanOrEqual(before);
+    expect(route?.publishedAt).toEqual(firstPublishedAt);
+    const featured = await app.db
+      .select()
+      .from(userFeaturedRoutes)
+      .where(eq(userFeaturedRoutes.routeId, id));
+    expect(featured).toEqual([]);
+  });
+
+  it('unpublishes a route to fix', async () => {
+    const moderator = await signIn('moderator');
+    const id = await addRoute('needs_fix');
 
     expect((await decide(moderator.headers, id, 'unpublish', refusal)).statusCode).toBe(200);
     expect(await statusOf(id)).toBe('unpublished');
+  });
+
+  it('keeps the date of the first publication when a route is published again', async () => {
+    const moderator = await signIn('moderator');
+    const id = await addRoute('pending');
+    const firstPublishedAt = new Date('2026-10-01T08:00:00Z');
+    await app.db.update(routes).set({ publishedAt: firstPublishedAt }).where(eq(routes.id, id));
+
+    expect((await decide(moderator.headers, id, 'publish')).statusCode).toBe(200);
+    expect((await routeOf(id))?.publishedAt).toEqual(firstPublishedAt);
+  });
+
+  it('dates the first publication', async () => {
+    const moderator = await signIn('moderator');
+    const id = await addRoute('pending');
+
+    const before = Date.now();
+    expect((await decide(moderator.headers, id, 'publish')).statusCode).toBe(200);
+    expect((await routeOf(id))?.publishedAt?.getTime()).toBeGreaterThanOrEqual(before);
+  });
+
+  it.each<[string, RouteStatus, Record<string, unknown> | undefined]>([
+    ['publish', 'unpublished', undefined],
+    ['publish', 'draft', undefined],
+    ['reject', 'published', refusal],
+    ['request-changes', 'rejected', { message: 'À reprendre.' }],
+    ['unpublish', 'pending', refusal],
+    ['unpublish', 'private', refusal],
+  ])('refuses to %s a route %s, outside its life cycle', async (action, status, payload) => {
+    const moderator = await signIn('moderator');
+    const id = await addRoute(status);
+
+    const response = await decide(moderator.headers, id, action, payload);
+    expect(response.statusCode).toBe(409);
+    expect(ApiError.parse(response.json()).code).toBe('already_decided');
+    expect(await statusOf(id)).toBe(status);
   });
 
   it.each([

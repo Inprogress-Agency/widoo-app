@@ -172,6 +172,22 @@ describe('POST /v1/admin/routes/:id/republish', () => {
     expect(journal).toEqual([]);
   });
 
+  it('keeps the date of the first publication and clears the one of the withdrawal', async () => {
+    const admin = await signIn('admin');
+    const id = await addRoute('Daté', { status: 'unpublished' });
+    const firstPublishedAt = (await routeOf(id))?.publishedAt;
+    await app.db
+      .update(routes)
+      .set({ unpublishedAt: new Date('2026-10-01T08:00:00Z') })
+      .where(eq(routes.id, id));
+
+    expect((await act(admin.headers, id, 'republish', body)).statusCode).toBe(200);
+    const route = await routeOf(id);
+    expect(firstPublishedAt).toBeInstanceOf(Date);
+    expect(route?.publishedAt).toEqual(firstPublishedAt);
+    expect(route?.unpublishedAt).toBeNull();
+  });
+
   it('is for admins only, and needs a reason', async () => {
     const moderator = await signIn('moderator');
     const admin = await signIn('admin');

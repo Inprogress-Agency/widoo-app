@@ -12,7 +12,15 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
 import { createCatalogPlace } from '../catalog/place-writes';
-import { adminActions, moderationActionsTable, places, routes, steps, users } from '../db/schema';
+import {
+  adminActions,
+  moderationActionsTable,
+  places,
+  routes,
+  steps,
+  userFeaturedRoutes,
+  users,
+} from '../db/schema';
 import { seed, seedId } from '../db/seed';
 import { uuidv7 } from '../db/uuid';
 import { testConfig } from '../test-config';
@@ -242,6 +250,28 @@ describe('POST /v1/admin/places/:id/close', () => {
       action: 'place.close',
       reason: 'Fermé définitivement depuis septembre.',
     });
+  });
+
+  it('moves the routes by their life cycle: out of the profiles that featured them', async () => {
+    const moderator = await signIn('moderator');
+    const { placeId, routeId } = await addPlace('Mis en avant', 'flagged', 'published');
+    await app.db
+      .insert(userFeaturedRoutes)
+      .values({ userId: adminId, routeId: routeId ?? '', position: 1 });
+
+    const response = await act(moderator.headers, placeId, 'close', { reason: 'Fermé.' });
+    expect(response.statusCode).toBe(200);
+    const [route] = await app.db
+      .select()
+      .from(routes)
+      .where(eq(routes.id, routeId ?? ''));
+    expect(route?.status).toBe('needs_fix');
+    expect(route?.unpublishedAt).toBeNull();
+    const featured = await app.db
+      .select()
+      .from(userFeaturedRoutes)
+      .where(eq(userFeaturedRoutes.routeId, routeId ?? ''));
+    expect(featured).toEqual([]);
   });
 
   it('needs a reason, and leaves the place and its routes as they were', async () => {
