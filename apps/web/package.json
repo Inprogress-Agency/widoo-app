@@ -15,21 +15,21 @@
     "@phosphor-icons/react": "2.1.10",
     "@widoo/shared": "workspace:*",
     "clsx": "^2.1.1",
-    "next": "16.3.8",
+    "next": "16.4.2",
     "qrcode": "^1.5.4",
     "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "react-dom": "19.3.1",
     "server-only": "^0.0.1",
-    "zod": "^4.6.5"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@types/node": "^22.20.4",
+    "@types/node": "^22.20.5",
     "@types/qrcode": "^1.5.6",
     "@types/react": "~19.2.2",
-    "@types/react-dom": "~19.2.2",
+    "@types/react-dom": "~19.3.0",
     "@widoo/tokens": "workspace:*",
     "autoprefixer": "^10.6.1",
-    "postcss": "^8.5.28",
+    "postcss": "^8.5.30",
     "tailwindcss": "3.4.19"
   }
 }
