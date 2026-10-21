@@ -41,6 +41,7 @@ export * from './schemas/legal';
 export * from './schemas/me';
 export * from './schemas/moderation';
 export * from './schemas/place';
+export * from './schemas/place-write';
 export * from './schemas/planned';
 export * from './schemas/place-import';
 export * from './schemas/profile';
