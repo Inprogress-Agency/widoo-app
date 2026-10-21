@@ -47,7 +47,7 @@ describe('Textes légaux', () => {
       screen.getByRole('header', { name: 'Politique de confidentialité de Widoo' }),
     ).toBeTruthy();
     expect(screen.getByRole('header', { name: "L'essentiel" })).toBeTruthy();
-    expect(screen.getByText('Mise à jour le 28 septembre 2026')).toBeTruthy();
+    expect(screen.getByText('Mise à jour le 21 octobre 2026')).toBeTruthy();
     expect(getLegalDocument).toHaveBeenCalledWith('privacy', 'fr', expect.anything());
   });
 
