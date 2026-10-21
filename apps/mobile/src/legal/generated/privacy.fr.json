@@ -1,7 +1,7 @@
 {
   "doc": "privacy",
-  "version": "2026-09-28",
-  "updatedAt": "2026-09-28T00:00:00.000Z",
+  "version": "2026-10-21",
+  "updatedAt": "2026-10-21T00:00:00.000Z",
   "locale": "fr",
   "title": "Politique de confidentialité de Widoo",
   "summary": [
@@ -12,7 +12,7 @@
   "sections": [
     {
       "title": "1. Qui est responsable de vos données",
-      "body": "Inprogress Agency, société par actions simplifiée, 14 avenue Georges Pompidou, 93360 Neuilly-Plaisance, RCS Bobigny 908 744 444, édite Widoo et décide de l'usage de vos données.\n\nPour toute question sur vos données ou pour exercer vos droits : contact@widoo.app, ou « Nous écrire » dans l'app (sujet « Données »)."
+      "body": "Inprogress Agency, société par actions simplifiée, 14 avenue Georges Pompidou, 93360 Neuilly-Plaisance, RCS Bobigny 908 744 444, édite Widoo et décide de l'usage de vos données.\n\nPour toute question sur vos données ou pour exercer vos droits : contact@widooapp.com, ou « Nous écrire » dans l'app (sujet « Données »)."
     },
     {
       "title": "2. Les données que nous utilisons",
@@ -20,7 +20,7 @@
     },
     {
       "title": "3. Qui reçoit vos données",
-      "body": "- L'équipe Widoo, pour ce dont elle a besoin : support, relecture des parcours, sécurité.\n- Les autres utilisateurs voient ce que vous publiez : votre profil s'il est public, vos parcours, et vos avis avec votre prénom ou pseudo, votre initiale, la date et la note.\n- Nos prestataires, qui traitent les données pour notre compte et selon nos instructions :\n  - Google Cloud : hébergement de nos serveurs, de la base de données et des photos, à Paris ;\n  - Firebase (Google) : connexion à votre compte et envoi des notifications [lieu de traitement à vérifier] ;\n  - Expo : envoi des notifications et mises à jour de l'app [lieu de traitement à vérifier] ;\n  - Mapbox : affichage des cartes et recherche de lieux ; Mapbox reçoit l'adresse IP du téléphone et la zone de carte affichée [lieu de traitement à vérifier] ;\n  - PostHog, dans l'Union européenne : mesure d'audience, seulement avec votre accord ;\n  - Sentry, dans l'Union européenne : rapports de plantage ;\n  - RevenueCat : suivi des abonnements achetés dans les stores [lieu de traitement à vérifier] ;\n  - Google Cloud Vertex AI (Union européenne) : traduction des parcours publiés et des avis ; il reçoit le texte, pas votre profil ;\n  - Brevo (France, Union européenne) : envoi des e-mails de connexion, de confirmation d'adresse et des réponses du support.\n- Apple et Google, quand vous vous connectez avec leur compte ou achetez Premium par leur store : ils agissent alors selon leurs propres politiques.\n- Google Maps, quand vous touchez « Itinéraire » pendant une sortie : l'adresse de l'étape suivante lui est transmise et Google Maps s'ouvre, selon la politique de Google.\n- Les autorités, si la loi nous y oblige.\n\nNous ne vendons pas vos données et nous ne les utilisons pas pour de la publicité."
+      "body": "- L'équipe Widoo, pour ce dont elle a besoin : support, relecture des parcours, sécurité.\n- Les autres utilisateurs voient ce que vous publiez : votre profil s'il est public, vos parcours, et vos avis avec votre prénom ou pseudo, votre initiale, la date et la note.\n- Nos prestataires, qui traitent les données pour notre compte et selon nos instructions :\n  - Google Cloud : hébergement de nos serveurs, de la base de données et des photos, à Paris ;\n  - Firebase (Google) : connexion à votre compte et envoi des notifications [lieu de traitement à vérifier] ;\n  - Expo : envoi des notifications et mises à jour de l'app [lieu de traitement à vérifier] ;\n  - Mapbox : affichage des cartes et recherche de lieux ; Mapbox reçoit l'adresse IP du téléphone et la zone de carte affichée [lieu de traitement à vérifier] ;\n  - PostHog, dans l'Union européenne : mesure d'audience, seulement avec votre accord ;\n  - Sentry, dans l'Union européenne : rapports de plantage ;\n  - RevenueCat : suivi des abonnements achetés dans les stores [lieu de traitement à vérifier] ;\n  - Google Cloud Vertex AI (Union européenne) : traduction des parcours publiés et des avis ; il reçoit le texte, pas votre profil ;\n  - Brevo (France, Union européenne) : envoi des e-mails de connexion, de confirmation d'adresse et des réponses du support ;\n  - Vercel (États-Unis) : hébergement du site widooapp.com ; il reçoit l'adresse IP et les données techniques de connexion des visiteurs du site, qui ne dépose aucun cookie.\n- Apple et Google, quand vous vous connectez avec leur compte ou achetez Premium par leur store : ils agissent alors selon leurs propres politiques.\n- Google Maps, quand vous touchez « Itinéraire » pendant une sortie : l'adresse de l'étape suivante lui est transmise et Google Maps s'ouvre, selon la politique de Google.\n- Les autorités, si la loi nous y oblige.\n\nNous ne vendons pas vos données et nous ne les utilisons pas pour de la publicité."
     },
     {
       "title": "4. Données traitées hors de l'Union européenne",
@@ -28,7 +28,7 @@
     },
     {
       "title": "5. Vos droits",
-      "body": "Vous pouvez à tout moment :\n\n- accéder à vos données et les récupérer dans un fichier : Réglages › Confidentialité › Télécharger mes données ;\n- les corriger : Modifier le profil, Réglages › E-mail ;\n- les effacer : Réglages › Supprimer mon compte ;\n- retirer votre consentement à la mesure d'audience : Réglages › Confidentialité ; à la position et aux notifications : réglages du téléphone ;\n- vous opposer à un traitement fondé sur notre intérêt légitime, ou en demander la limitation ;\n- définir des directives sur le sort de vos données après votre décès.\n\nPour tout le reste, écrivez à contact@widoo.app. Nous répondons dans un délai d'un mois. En cas de doute sur votre identité, nous pouvons vous demander de le confirmer depuis l'adresse de votre compte.\n\nSi vous estimez que vos droits ne sont pas respectés, vous pouvez adresser une réclamation à la CNIL (cnil.fr, 3 place de Fontenoy, TSA 80715, 75334 Paris Cedex 07)."
+      "body": "Vous pouvez à tout moment :\n\n- accéder à vos données et les récupérer dans un fichier : Réglages › Confidentialité › Télécharger mes données ;\n- les corriger : Modifier le profil, Réglages › E-mail ;\n- les effacer : Réglages › Supprimer mon compte ;\n- retirer votre consentement à la mesure d'audience : Réglages › Confidentialité ; à la position et aux notifications : réglages du téléphone ;\n- vous opposer à un traitement fondé sur notre intérêt légitime, ou en demander la limitation ;\n- définir des directives sur le sort de vos données après votre décès.\n\nPour tout le reste, écrivez à contact@widooapp.com. Nous répondons dans un délai d'un mois. En cas de doute sur votre identité, nous pouvons vous demander de le confirmer depuis l'adresse de votre compte.\n\nSi vous estimez que vos droits ne sont pas respectés, vous pouvez adresser une réclamation à la CNIL (cnil.fr, 3 place de Fontenoy, TSA 80715, 75334 Paris Cedex 07)."
     },
     {
       "title": "6. Sécurité",
