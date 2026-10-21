@@ -10,7 +10,7 @@ import Link from 'next/link';
 
 /**
  * Footer of the home page (E-21): logo, « © 2026 Inprogress Agency, conçu à Paris », the legal
- * pages (#242), the contact and FR | EN. Computer: one row; tablet: logo and languages, the links,
+ * pages (#242, #590), the contact and FR | EN. Computer: one row; tablet: logo and languages, the links,
  * then the copyright; phone: logo, the links one under the other (44 px each to the touch), then
  * the copyright and the languages. In the code the logo, the links and the languages come in the
  * order of the keyboard (D-070); the grid lays them out.
@@ -42,6 +42,9 @@ export function SiteFooter({
         </Link>
         <Link href={localizedPath(locale, legalPaths.privacy[locale])} className={link}>
           {texts.privacy}
+        </Link>
+        <Link href={localizedPath(locale, legalPaths.notice[locale])} className={link}>
+          {texts.notice}
         </Link>
         <a href={`mailto:${contactEmail}`} className={link}>
           {contactEmail}

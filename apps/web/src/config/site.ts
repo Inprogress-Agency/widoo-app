@@ -14,8 +14,8 @@ export const site = parseEnv({
 export const publisher = { name: 'Inprogress Agency' } as const;
 
 /**
- * Address of the team for the visitors (E-21 › Questions, pied de page), on the domain of the
- * site: widoo.app belongs to someone else (D-069, D-077).
+ * Address of the team for the visitors (E-21 › Questions, pied de page), on widooapp.com, the
+ * domain of the site (D-106, D-109), the only one Inprogress owns (D-077).
  */
 export const contactEmail = 'contact@widooapp.com';
 

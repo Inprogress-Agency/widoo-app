@@ -161,6 +161,7 @@ export const en: Messages = {
     links: 'Footer links',
     terms: 'Terms of use',
     privacy: 'Privacy policy',
+    notice: 'Legal notice',
   },
   legal: {
     updated: 'Updated on {date}',
@@ -170,6 +171,8 @@ export const en: Messages = {
       terms:
         'The rules for using Widoo, the app of ready-made outings in Paris: account, routes, Premium, moderation.',
       privacy: 'The data Widoo uses, why, who receives it and how to exercise your rights.',
+      notice:
+        'The publisher of Widoo, its publication director and the hosts of the website and the app.',
     },
   },
   notFound: {

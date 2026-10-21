@@ -160,6 +160,7 @@ export const fr = {
     links: 'Liens du pied de page',
     terms: 'Conditions d’utilisation',
     privacy: 'Politique de confidentialité',
+    notice: 'Mentions légales',
   },
   legal: {
     updated: 'Mise à jour le {date}',
@@ -170,6 +171,8 @@ export const fr = {
         'Les règles d’utilisation de Widoo, l’app de sorties toutes prêtes à Paris\u00a0: compte, parcours, Premium, modération.',
       privacy:
         'Les données que Widoo utilise, pourquoi, qui les reçoit et comment exercer vos droits.',
+      notice:
+        'L’éditeur de Widoo, son directeur de la publication et les hébergeurs du site et de l’app.',
     },
   },
   notFound: {

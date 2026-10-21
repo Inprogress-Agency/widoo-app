@@ -72,6 +72,9 @@ describe('decideRouting', () => {
     expect(decideRouting({ ...request, pathname: '/privacy', search: '?src=store' })).toMatchObject(
       { location: '/fr/confidentialite?src=store' },
     );
+    expect(
+      decideRouting({ ...request, pathname: '/mentions-legales', acceptLanguage: 'en' }),
+    ).toMatchObject({ kind: 'redirect', location: '/en/legal-notice', status: 307 });
   });
 
   it('does not take a path that only starts like a language for a prefix', () => {

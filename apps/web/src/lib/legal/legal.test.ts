@@ -1,4 +1,4 @@
-import { legalDocOfPath } from '@/config/legal';
+import { legalPageOfPath } from '@/config/legal';
 import { describe, expect, it, vi } from 'vitest';
 import { fetchLegalText } from './fetch';
 import { toLegalBlocks, toLegalText } from './from-api';
@@ -65,12 +65,14 @@ describe('fetchLegalText', () => {
   });
 });
 
-describe('legalDocOfPath', () => {
+describe('legalPageOfPath', () => {
   it('finds the text of a path in either language, and nothing else', () => {
-    expect(legalDocOfPath('/conditions')).toBe('terms');
-    expect(legalDocOfPath('/terms/')).toBe('terms');
-    expect(legalDocOfPath('/privacy')).toBe('privacy');
-    expect(legalDocOfPath('/confidentialite')).toBe('privacy');
-    expect(legalDocOfPath('/r/conditions')).toBeNull();
+    expect(legalPageOfPath('/conditions')).toBe('terms');
+    expect(legalPageOfPath('/terms/')).toBe('terms');
+    expect(legalPageOfPath('/privacy')).toBe('privacy');
+    expect(legalPageOfPath('/confidentialite')).toBe('privacy');
+    expect(legalPageOfPath('/mentions-legales')).toBe('notice');
+    expect(legalPageOfPath('/legal-notice')).toBe('notice');
+    expect(legalPageOfPath('/r/conditions')).toBeNull();
   });
 });
