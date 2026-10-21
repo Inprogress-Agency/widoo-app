@@ -25,6 +25,9 @@ export const routeTransitions: readonly Transition[] = [
   { from: 'published', to: 'needs_fix', by: ['system', 'moderator'] },
   { from: 'needs_fix', to: 'pending', by: ['author'] },
   { from: 'published', to: 'unpublished', by: ['author', 'moderator'] },
+  // The team takes down a route to fix (A-02, A-04) and puts an unpublished one back (A-04).
+  { from: 'needs_fix', to: 'unpublished', by: ['moderator'] },
+  { from: 'unpublished', to: 'published', by: ['moderator'] },
   { from: 'rejected', to: 'draft', by: ['author'] },
   { from: 'draft', to: 'published', by: ['editor'] },
   { from: 'private', to: 'published', by: ['editor'] },
