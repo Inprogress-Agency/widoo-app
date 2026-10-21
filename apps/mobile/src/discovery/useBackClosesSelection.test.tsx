@@ -61,7 +61,14 @@ describe('useBackClosesSelection', () => {
   beforeEach(() => {
     resetDiscovery();
     discoveryStore.setState({
-      search: { id: 1, view: testView, filters: {}, trigger: 'initial', filtersSource: null },
+      search: {
+        id: 1,
+        view: testView,
+        filters: {},
+        trigger: 'initial',
+        filtersSource: null,
+        revealAt: null,
+      },
       status: 'success',
       results: { items: [route], nextCursor: null, clusters: null },
     });

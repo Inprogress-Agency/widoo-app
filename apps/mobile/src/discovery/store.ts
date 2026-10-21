@@ -2,7 +2,9 @@ import type { RouteSearchParams } from '@widoo/api-client';
 import {
   routeFilterGroups,
   type AnalyticsEvents,
+  type LatLng,
   type RouteCard,
+  type RouteCluster,
   type RouteFilterGroup,
   type RouteSearchResult,
   type RouteSort,
@@ -36,6 +38,8 @@ export interface ZoneSearch {
   trigger: SearchTrigger;
   /** The filters were just changed by a chip or the panel: its answer sends `filters_applied`. */
   filtersSource: FiltersSource | null;
+  /** A badge « 1 » was tapped there: its answer selects the route that starts there (D-108). */
+  revealAt: LatLng | null;
 }
 
 /** `offline`: the search waits for the network; the last results known stay on screen. */
@@ -92,6 +96,8 @@ export interface DiscoveryState {
   isSearchOpen: boolean;
   /** The next view the map settles on is searched, with this trigger: back around the user. */
   pendingTrigger: SearchTrigger | null;
+  /** The search of the next view selects the route that starts there: a badge « 1 » (D-108). */
+  pendingReveal: LatLng | null;
   /** Sort of the « Voir tout » lists, kept for the session (Ecrans › E-04, sheet de tri). */
   sort: RouteSort;
 }
@@ -104,6 +110,12 @@ export interface DiscoveryActions {
   showView: (view: MapView, isManual: boolean) => void;
   /** Searches the zone on screen with the active filters. */
   searchZone: (trigger: SearchTrigger) => void;
+  /**
+   * A cluster badge, before the map zooms in on it: the view it settles on is searched at once,
+   * and a badge « 1 » selects its route there, as a tap on its marker (Ecrans › E-01, D-108).
+   * Offline, the map only zooms.
+   */
+  pressCluster: (cluster: RouteCluster, isOnline: boolean) => void;
   /** « Élargir la zone »: the map zooms out once, the search doubles its zone around the centre. */
   widenZone: () => void;
   /** « Retirer les N filtres », then searches the same zone again. */
@@ -180,6 +192,7 @@ export const initialDiscoveryState: DiscoveryState = {
   zone: null,
   isSearchOpen: false,
   pendingTrigger: null,
+  pendingReveal: null,
 };
 
 /** Number of active filters, the N of « Retirer les N filtres ». */
@@ -221,6 +234,32 @@ export function canSearchZone(state: DiscoveryState, isOnline = true): boolean {
 }
 
 /**
+ * A cluster badge searches the zone it zooms in on, as « Rechercher dans cette zone » would; offline,
+ * where the button is hidden, it only zooms (Ecrans › E-01, D-082, D-108).
+ */
+export function canSearchClusters(state: DiscoveryState, isOnline = true): boolean {
+  return isOnline && state.search !== null && state.status !== 'offline';
+}
+
+/**
+ * Starts of a route and of a cluster of one are the same point, read from the same column; the
+ * margin, under a metre, only absorbs the rounding of the mean.
+ */
+const sameStartDeg = 1e-5;
+
+/** The route that starts at `point`, among `routes`: the route of a badge « 1 ». */
+function routeStartingAt(routes: readonly RouteCard[], point: LatLng): RouteCard | undefined {
+  return routes.find((route) => {
+    const start = route.steps[0]?.location;
+    return (
+      start !== undefined &&
+      Math.abs(start.lat - point.lat) < sameStartDeg &&
+      Math.abs(start.lng - point.lng) < sameStartDeg
+    );
+  });
+}
+
+/**
  * The recentre button: in every state the map shows, with or without results, while a search
  * loads, offline or without a position, so that it never blinks on the way to an empty zone;
  * hidden only while a route is selected (Ecrans › E-01, D-082; E-04).
@@ -241,10 +280,11 @@ export function createDiscoveryStore() {
       view: MapView,
       trigger: SearchTrigger,
       filtersSource: FiltersSource | null = null,
+      revealAt: LatLng | null = null,
     ) => {
       lastId += 1;
       set({
-        search: { id: lastId, view, filters: get().filters, trigger, filtersSource },
+        search: { id: lastId, view, filters: get().filters, trigger, filtersSource, revealAt },
         status: 'loading',
         hasMoved: false,
       });
@@ -257,18 +297,31 @@ export function createDiscoveryStore() {
         if (!isSearchableZone(view.bbox)) {
           return;
         }
-        const { search, hasMoved, pendingTrigger } = get();
-        set({ view, hasMoved: hasMoved || (isManual && search !== null), pendingTrigger: null });
+        const { search, hasMoved, pendingTrigger, pendingReveal } = get();
+        set({
+          view,
+          hasMoved: hasMoved || (isManual && search !== null),
+          pendingTrigger: null,
+          pendingReveal: null,
+        });
         if (search === null) {
           startSearch(view, 'initial');
         } else if (pendingTrigger) {
-          startSearch(view, pendingTrigger);
+          startSearch(view, pendingTrigger, null, pendingReveal);
         }
       },
       searchZone: (trigger) => {
         const { view } = get();
         if (view) {
           startSearch(view, trigger);
+        }
+      },
+      pressCluster: (cluster, isOnline) => {
+        if (canSearchClusters(get(), isOnline)) {
+          set({
+            pendingTrigger: 'cluster',
+            pendingReveal: cluster.count === 1 ? cluster.center : null,
+          });
         }
       },
       widenZone: () => {
@@ -339,13 +392,18 @@ export function createDiscoveryStore() {
         // it is still there; the answer of another search starts it over, with no card to come
         // round to.
         const isRefresh = status === 'success';
+        // The route of a badge « 1 », once its zone is answered; none if the answer leaves it out.
+        const revealed =
+          !isRefresh && search.revealAt
+            ? routeStartingAt(result.items, search.revealAt)
+            : undefined;
         set({
           results: result,
           answer: result,
           resultsAt: fetchedAt,
           answerId: isRefresh ? answerId : answerId + 1,
           status: 'success',
-          selectedRouteId: isListed(selectedRouteId) ? selectedRouteId : null,
+          selectedRouteId: revealed?.id ?? (isListed(selectedRouteId) ? selectedRouteId : null),
           focusedRouteId: isRefresh && isListed(focusedRouteId) ? focusedRouteId : null,
         });
         return true;

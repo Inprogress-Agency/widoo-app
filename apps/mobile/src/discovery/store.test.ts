@@ -1,8 +1,9 @@
-import type { RouteCard, RouteSearchResult } from '@widoo/shared';
+import type { RouteCard, RouteCluster, RouteSearchResult } from '@widoo/shared';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
   activeFilterCount,
   canRecenter,
+  canSearchClusters,
   canSearchZone,
   createDiscoveryStore,
   focusedRoute,
@@ -552,5 +553,133 @@ describe('recentre button', () => {
     expect(canSearchZone(store.getState(), true)).toBe(true);
     expect(canSearchZone(store.getState(), false)).toBe(false);
     expect(canRecenter(store.getState())).toBe(true);
+  });
+});
+
+describe('cluster badges (Ecrans › E-01, D-108)', () => {
+  // Fictitious routes, each starting at a place of its own, and the zone a badge zooms in on.
+  const startingAt = (id: string, lat: number, lng: number): RouteCard => {
+    const base = route(id);
+    const [first] = base.steps;
+    if (!first) {
+      throw new Error('A route has a start');
+    }
+    return { ...base, steps: [{ ...first, location: { lat, lng } }] };
+  };
+  const wide: MapView = { bbox: { west: 2.2, south: 48.8, east: 2.5, north: 48.92 }, zoom: 11 };
+  const arrival: MapView = {
+    bbox: { west: 2.33, south: 48.86, east: 2.37, north: 48.88 },
+    zoom: 13.5,
+  };
+  const clustered = (...clusters: RouteCluster[]): RouteSearchResult => ({
+    items: [],
+    nextCursor: null,
+    clusters,
+  });
+  const three = { center: { lat: 48.871, lng: 2.352 }, count: 3 };
+  const one = { center: { lat: 48.8652, lng: 2.3611 }, count: 1 };
+  const listing = (...routes: RouteCard[]): RouteSearchResult => ({
+    items: routes,
+    nextCursor: null,
+    clusters: null,
+  });
+
+  /** The map opens on a zone too large to list, answered with clusters. */
+  function openedWide() {
+    store.getState().showView(wide, false);
+    store.getState().receive(searchId(), clustered(three, one));
+  }
+
+  it('searches the zone a badge zooms in on at once, without the button', () => {
+    openedWide();
+    const before = searchId();
+    store.getState().pressCluster(three, true);
+    // The camera moves on its own: the map settles on the zone of arrival.
+    store.getState().showView(arrival, true);
+    const state = store.getState();
+    expect(state.search).toMatchObject({ view: arrival, trigger: 'cluster', revealAt: null });
+    expect(searchId()).toBeGreaterThan(before);
+    expect(state.status).toBe('loading');
+    expect(canSearchZone(state)).toBe(false);
+  });
+
+  it('searches with the active filters, and only the view the badge leads to', () => {
+    openedWide();
+    store.getState().toggleFilter({ group: 'moods', value: 'culture' });
+    store.getState().receive(searchId(), clustered(three));
+    store.getState().pressCluster(three, true);
+    store.getState().showView(arrival, true);
+    expect(store.getState().search).toMatchObject({ filters: { moods: ['culture'] } });
+    store.getState().receive(searchId(), listing(startingAt('a', 48.87, 2.35)));
+    // The next move is the user's again: no search, the button.
+    const settled = searchId();
+    store.getState().showView(moved, true);
+    expect(searchId()).toBe(settled);
+    expect(canSearchZone(store.getState())).toBe(true);
+  });
+
+  it('never selects a route after a badge of more than one', () => {
+    openedWide();
+    store.getState().pressCluster(three, true);
+    store.getState().showView(arrival, true);
+    store.getState().receive(searchId(), listing(startingAt('a', 48.871, 2.352)));
+    expect(store.getState().selectedRouteId).toBeNull();
+  });
+
+  it('selects the route of a badge « 1 » once its zone is answered, as a tap on its marker', () => {
+    openedWide();
+    store.getState().pressCluster(one, true);
+    store.getState().showView(arrival, true);
+    expect(store.getState().search?.revealAt).toEqual(one.center);
+    const own = startingAt('own', 48.8652, 2.3611);
+    store.getState().receive(searchId(), listing(startingAt('near', 48.866, 2.361), own));
+    const state = store.getState();
+    expect(state.selectedRouteId).toBe('own');
+    expect(selectedRoute(state)).toBe(own);
+    // As over a tapped marker: neither the button nor the recentre button (E-04).
+    expect(canSearchZone({ ...state, hasMoved: true })).toBe(false);
+    expect(canRecenter(state)).toBe(false);
+  });
+
+  it('shows the zone without a selection when the answer leaves the route of the badge out', () => {
+    openedWide();
+    store.getState().pressCluster(one, true);
+    store.getState().showView(arrival, true);
+    store.getState().receive(searchId(), listing(startingAt('near', 48.866, 2.361)));
+    expect(store.getState().selectedRouteId).toBeNull();
+    expect(store.getState().results?.items).toHaveLength(1);
+  });
+
+  it('lets the route of a badge « 1 » go as any selection, and never selects it again', () => {
+    openedWide();
+    store.getState().pressCluster(one, true);
+    store.getState().showView(arrival, true);
+    const id = searchId();
+    store.getState().receive(id, listing(startingAt('own', 48.8652, 2.3611)), 1000);
+    store.getState().select(null);
+    // A fresher answer of the same search, a refresh: the user's choice stays.
+    store.getState().receive(id, listing(startingAt('own', 48.8652, 2.3611)), 2000);
+    expect(store.getState().selectedRouteId).toBeNull();
+  });
+
+  it('only zooms offline: no search, the results kept on screen', () => {
+    openedWide();
+    const before = searchId();
+    store.getState().pressCluster(one, false);
+    store.getState().showView(arrival, true);
+    expect(searchId()).toBe(before);
+    expect(store.getState().search?.trigger).toBe('initial');
+    expect(store.getState().results?.clusters).toHaveLength(2);
+    expect(store.getState().pendingReveal).toBeNull();
+  });
+
+  it('only zooms after a search that found no network, even with the device back online', () => {
+    store.getState().showView(wide, false);
+    store.getState().goOffline(searchId(), { result: clustered(three), fetchedAt: 1000 });
+    const before = searchId();
+    expect(canSearchClusters(store.getState(), true)).toBe(false);
+    store.getState().pressCluster(three, true);
+    store.getState().showView(arrival, true);
+    expect(searchId()).toBe(before);
   });
 });
