@@ -50,6 +50,18 @@ describe('i18n', () => {
     expect(i18next.t('duration.spoken.hours', { count: 14 })).toBe('14 heures');
   });
 
+  it('tells screen readers what a cluster badge does, in both languages (D-108)', async () => {
+    expect(i18next.t('map.clusterSearch', { count: 3 })).toBe(
+      '3 parcours, zoomer et rechercher ici',
+    );
+    expect(i18next.t('map.clusterRoute')).toBe("1 parcours, zoomer et l'afficher");
+    expect(i18next.t('map.cluster', { count: 3 })).toBe('3 parcours, zoomer');
+    await i18next.changeLanguage('en');
+    expect(i18next.t('map.clusterSearch', { count: 3 })).toBe('3 routes, zoom in and search here');
+    expect(i18next.t('map.clusterRoute')).toBe('1 route, zoom in and show it');
+    expect(i18next.t('map.cluster', { count: 3 })).toBe('3 routes, zoom in');
+  });
+
   it('switches to English without a restart, with the English plural rules', async () => {
     await i18next.changeLanguage('en');
     expect(i18next.t('tabs.routes')).toBe('Routes');
