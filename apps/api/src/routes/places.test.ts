@@ -143,6 +143,25 @@ describe('POST /places', () => {
     expect(found.items.map((item) => item.id)).toEqual([place.id]);
   });
 
+  it('records the last day of an ephemeral place, and lets the creator clear it', async () => {
+    const headers = await fixtures.signIn();
+    const endsOnOf = async (id: string) => {
+      const [row] = await app.db
+        .select({ endsOn: places.endsOn })
+        .from(places)
+        .where(eq(places.id, id));
+      return row?.endsOn;
+    };
+    const ephemeral = await createdBy(headers, 'Expo Éphémère Sept', spot(), {
+      endsOn: '2027-01-17',
+    });
+    expect(await endsOnOf(ephemeral.id)).toBe('2027-01-17');
+    expect((await edit(headers, ephemeral.id, { endsOn: null })).statusCode).toBe(200);
+    expect(await endsOnOf(ephemeral.id)).toBeNull();
+    const lasting = await createdBy(headers, 'Café Durable Huit');
+    expect(await endsOnOf(lasting.id)).toBeNull();
+  });
+
   it('offers the close place of a close name instead, unless the creator insists', async () => {
     const headers = await fixtures.signIn();
     const existing = await createdBy(headers, 'Café de Flore Doublon', flore);
@@ -217,6 +236,7 @@ describe('POST /places', () => {
       { websiteUrl: 'http://exemple.fr' },
       { surprise: true },
       { category: 'spa' },
+      { endsOn: '17/01/2027' },
     ]) {
       const response = await create(headers, { ...body('Café Invalide'), ...extra });
       expect(response.statusCode).toBe(422);

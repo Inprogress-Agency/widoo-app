@@ -75,6 +75,8 @@ const placeFields = {
   phone: plainText(30).nullable(),
   /** « Accessible à toute heure » (a park, a street): no hours (D-049). */
   alwaysOpen: z.boolean(),
+  /** Last day of an ephemeral place (an exhibition, a pop-up); after it, the place leaves (D-050). */
+  endsOn: z.iso.date().nullable(),
   hours: z.array(PlaceHours).max(placeHoursMax),
 };
 
@@ -90,6 +92,7 @@ export const CreatePlace = z.strictObject({
   websiteUrl: placeFields.websiteUrl.default(null),
   phone: placeFields.phone.default(null),
   alwaysOpen: placeFields.alwaysOpen.default(false),
+  endsOn: placeFields.endsOn.default(null),
   hours: placeFields.hours.default([]),
   force: z.boolean().default(false),
 });
@@ -108,6 +111,7 @@ export const UpdatePlace = z
     websiteUrl: placeFields.websiteUrl,
     phone: placeFields.phone,
     alwaysOpen: placeFields.alwaysOpen,
+    endsOn: placeFields.endsOn,
     hours: placeFields.hours,
   })
   .partial()
