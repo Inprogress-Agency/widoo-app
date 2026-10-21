@@ -1,7 +1,15 @@
-import { CreatePlace, Place, PlaceSearchQuery, PlaceSearchResult } from '@widoo/shared';
+import {
+  CreatePlace,
+  Place,
+  PlaceSearchQuery,
+  PlaceSearchResult,
+  UpdatePlace,
+} from '@widoo/shared';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
+import { z } from 'zod';
 import { createPlace } from '../places/create';
 import { searchPlaces } from '../places/search';
+import { updatePlace } from '../places/update';
 import { currentUser } from './me';
 
 const security = [{ firebaseIdToken: [] }];
@@ -46,5 +54,20 @@ export const placesRoutes: FastifyPluginAsyncZod = async (app) => {
       const place = await createPlace(app.db, currentUser(request).id, request.body, new Date());
       return reply.status(201).send(place);
     },
+  );
+
+  app.patch(
+    '/places/:id',
+    {
+      schema: {
+        tags,
+        summary: 'Edit a place: its creator while only their routes use it, or a moderator',
+        security,
+        params: z.strictObject({ id: z.uuid() }),
+        body: UpdatePlace,
+        response: { 200: Place },
+      },
+    },
+    async (request) => updatePlace(app.db, currentUser(request), request.params.id, request.body),
   );
 };

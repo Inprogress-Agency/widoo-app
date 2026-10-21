@@ -40,6 +40,8 @@ const search = (headers: Headers, query: string) =>
   app.inject({ url: `/v1/places/search?${query}`, headers });
 const create = (headers: Headers, payload: object) =>
   app.inject({ method: 'POST', url: '/v1/places', headers, payload });
+const edit = (headers: Headers, id: string, payload: object) =>
+  app.inject({ method: 'PATCH', url: `/v1/places/${id}`, headers, payload });
 
 /** A valid body; each test names its own place, as the database is shared. */
 const body = (name: string, location = spot(), extra: object = {}) => ({
@@ -223,5 +225,66 @@ describe('POST /places', () => {
 
   it('refuses an anonymous caller', async () => {
     expect((await create({}, body('Café Anonyme'))).statusCode).toBe(401);
+  });
+});
+
+describe('PATCH /places/:id', () => {
+  it('lets the creator edit their place, hours replaced as a whole', async () => {
+    const headers = await fixtures.signIn();
+    const place = await createdBy(headers, 'Chez Ouistiti Deux', spot(), {
+      hours: [{ weekday: 0, opens: '08:00', closes: '18:00', validFrom: null, validTo: null }],
+    });
+    const response = await edit(headers, place.id, {
+      phone: '+33 1 23 45 67 89',
+      priceRange: 'medium',
+      hours: [{ weekday: 2, opens: '09:00', closes: '12:00', validFrom: null, validTo: null }],
+    });
+    expect(response.statusCode).toBe(200);
+    expect(Place.parse(response.json())).toMatchObject({
+      name: 'Chez Ouistiti Deux',
+      hours: [{ weekday: 2, opens: '09:00', closes: '12:00' }],
+    });
+  });
+
+  it("refuses another user, and the creator once another author's route uses the place", async () => {
+    const creator = await fixtures.signIn();
+    const stranger = await fixtures.signIn();
+    const place = await createdBy(creator, 'Chez Ouistiti Trois');
+    expect((await edit(stranger, place.id, { phone: '0102030405' })).statusCode).toBe(403);
+
+    const route = await app.inject({
+      method: 'POST',
+      url: '/v1/routes',
+      headers: stranger,
+      payload: { title: 'Un parcours qui passe par là' },
+    });
+    const put = await app.inject({
+      method: 'PUT',
+      url: `/v1/routes/${route.json<{ id: string }>().id}/steps`,
+      headers: stranger,
+      payload: { steps: [{ placeId: place.id, durationMin: 30 }] },
+    });
+    expect(put.statusCode).toBe(200);
+    expect((await edit(creator, place.id, { phone: '0102030405' })).statusCode).toBe(403);
+  });
+
+  it('lets a moderator edit any place', async () => {
+    const creator = await fixtures.signIn();
+    const moderator = await fixtures.signIn('moderator');
+    const place = await createdBy(creator, 'Chez Ouistiti Quatre');
+    const response = await edit(moderator, place.id, { category: 'bar' });
+    expect(response.statusCode).toBe(200);
+    expect(Place.parse(response.json()).category).toBe('bar');
+  });
+
+  it('refuses a new position that no city holds, an empty body, an unknown place', async () => {
+    const headers = await fixtures.signIn();
+    const place = await createdBy(headers, 'Chez Ouistiti Cinq');
+    expect((await edit(headers, place.id, { location: { lat: 0, lng: 0 } })).statusCode).toBe(422);
+    expect((await edit(headers, place.id, {})).statusCode).toBe(422);
+    const missing = await edit(headers, '01997a4e-8c00-7000-8000-0000000000ff', {
+      phone: '0102030405',
+    });
+    expect(missing.statusCode).toBe(404);
   });
 });
