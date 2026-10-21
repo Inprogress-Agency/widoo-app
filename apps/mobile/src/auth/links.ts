@@ -2,11 +2,11 @@ import * as IntentLauncher from 'expo-intent-launcher';
 import { Linking, Platform } from 'react-native';
 
 /**
- * Legal texts on the site, as proposed in Ecrans › E-21 until their native pages (E-19) and the
- * site's own paths (#242).
+ * Legal texts on the site's pages (#242): the short paths redirect to `/fr/…` or `/en/…` by the
+ * browser's language.
  */
-export const TERMS_URL = 'https://widoo.app/conditions';
-export const PRIVACY_URL = 'https://widoo.app/confidentialite';
+export const TERMS_URL = 'https://widooapp.com/conditions';
+export const PRIVACY_URL = 'https://widooapp.com/confidentialite';
 
 /** `Intent.FLAG_ACTIVITY_NEW_TASK`: the mail app opens in its own task. */
 const NEW_TASK = 0x10000000;
