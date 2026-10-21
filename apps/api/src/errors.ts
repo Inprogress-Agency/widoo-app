@@ -54,6 +54,17 @@ export function pendingRoutesLimitReached(limit: number) {
   });
 }
 
+/**
+ * 429 `rate_limited` of a place creation over the daily limit of the account (wiki
+ * Securite-et-RGPD › Limitation de débit): `details.limit` is the number said to the creator.
+ */
+export function placeCreationLimitReached(limit: number) {
+  return Object.assign(new Error('Too many places created today'), {
+    statusCode: 429,
+    details: { reason: 'place_creation', limit },
+  });
+}
+
 /** 409 `conflict` of a request the current state refuses, that state in `details`. */
 export function conflict(message: string, details: Record<string, unknown>) {
   return Object.assign(new Error(message), { statusCode: 409, details });
