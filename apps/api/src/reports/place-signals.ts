@@ -5,11 +5,12 @@ import {
   type PlaceActionResult,
   type PlaceAlreadyDecidedDetails,
 } from '@widoo/shared';
-import { eq, inArray, sql } from 'drizzle-orm';
+import { and, eq, exists, sql } from 'drizzle-orm';
 import { neighbourCursors, offsetOfCursor } from '../admin/page-cursor';
 import { recordAdminAction } from '../admin/actions';
 import type { Db } from '../db/client';
-import { moderationActionsTable, places, routes } from '../db/schema';
+import { moderationActionsTable, places, routes, steps } from '../db/schema';
+import { moveRoute } from '../editor/lifecycle';
 import { httpError } from '../errors';
 
 type PlaceRow = {
@@ -122,12 +123,13 @@ export async function verifyPlace(
 
 /**
  * Closes a place (A-03): its status becomes `closed`, and the published routes that go through it
- * become `needs_fix`, each with a line in its history. The reason is required. A place that is
+ * become `needs_fix` by `moveRoute`, a decision of the team, each with a line in its history. The reason is required. A place that is
  * already closed answers 409 `already_decided`.
  */
 export async function closePlace(
   db: Db,
   input: PlaceActionInput & { reason: string },
+  now = new Date(),
 ): Promise<PlaceActionResult> {
   return db.transaction(async (tx) => {
     const [place] = await tx
@@ -146,14 +148,28 @@ export async function closePlace(
       .set({ verificationStatus: 'closed' })
       .where(eq(places.id, input.placeId));
 
-    const concerned = await tx.execute<{ id: string }>(sql`
-      select r.id from routes r
-      where r.status = 'published'
-        and exists (select 1 from steps s where s.route_id = r.id and s.place_id = ${input.placeId})
-      for update`);
-    const routeIds = concerned.map((row) => row.id);
+    const concerned = await tx
+      .select()
+      .from(routes)
+      .where(
+        and(
+          eq(routes.status, 'published'),
+          exists(
+            tx
+              .select({ id: steps.id })
+              .from(steps)
+              .where(and(eq(steps.routeId, routes.id), eq(steps.placeId, input.placeId))),
+          ),
+        ),
+      )
+      .orderBy(routes.id)
+      .for('update');
+    const routeIds = concerned.map((route) => route.id);
+    // A decision of the team, like « Demander des modifications » on a published route (A-02).
+    for (const route of concerned) {
+      await moveRoute(tx, route, 'needs_fix', 'moderator', now);
+    }
     if (routeIds.length > 0) {
-      await tx.update(routes).set({ status: 'needs_fix' }).where(inArray(routes.id, routeIds));
       await tx.insert(moderationActionsTable).values(
         routeIds.map((routeId) => ({
           routeId,

@@ -3,6 +3,7 @@ import { eq } from 'drizzle-orm';
 import { recordAdminAction } from '../admin/actions';
 import type { Db } from '../db/client';
 import { moderationActionsTable, routes } from '../db/schema';
+import { moveRoute } from '../editor/lifecycle';
 import { httpError } from '../errors';
 
 type RouteActionInput = {
@@ -23,7 +24,7 @@ export async function republishRoute(
 ): Promise<CatalogRouteAction> {
   return db.transaction(async (tx) => {
     const [route] = await tx
-      .select({ status: routes.status, isOfficial: routes.isOfficial })
+      .select()
       .from(routes)
       .where(eq(routes.id, input.routeId))
       .for('update');
@@ -35,10 +36,8 @@ export async function republishRoute(
       throw httpError(409, 'Route is not unpublished', 'already_decided', details);
     }
 
-    await tx
-      .update(routes)
-      .set({ status: 'published', publishedAt: now })
-      .where(eq(routes.id, input.routeId));
+    // Keeps the date of the first publication and clears the one of the withdrawal.
+    await moveRoute(tx, route, 'published', 'moderator', now);
     await tx.insert(moderationActionsTable).values({
       routeId: input.routeId,
       actorId: input.actorId,
