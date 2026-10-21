@@ -3,7 +3,8 @@ import { AppLocale } from './me';
 
 /**
  * Legal texts served by `GET /legal/:doc` (E-19, D-063): the app keeps the last version received,
- * ships a copy for the first launch, and widoo.app publishes the same text (D-068).
+ * ships a copy for the first launch, and the site widooapp.com publishes the same text (D-068,
+ * D-109).
  */
 export const legalDocs = ['terms', 'privacy'] as const;
 export const LegalDoc = z.enum(legalDocs);

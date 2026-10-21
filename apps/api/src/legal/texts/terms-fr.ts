@@ -1,9 +1,9 @@
 /**
  * Text for the users of the wiki page Conditions-d-utilisation, between its two
- * separators: draft of 2026-09-28 (D-063), to be reviewed by a lawyer before the stores; the
- * passages in square brackets are still to complete in the wiki. Changed in the wiki first,
- * then here, with a new version in `../documents.ts`. Links to other wiki pages are kept as
- * their text.
+ * separators: draft of 2026-09-28 (D-063), revised on 2026-10-20 (D-107), to be reviewed by a
+ * lawyer before the stores; the passages in square brackets are still to complete in the wiki.
+ * Changed in the wiki first, then here, with a new version in `../documents.ts`. Links to other
+ * wiki pages are kept as their text.
  */
 export const termsFr = `
 ## Conditions d'utilisation de Widoo
@@ -14,9 +14,9 @@ Mise à jour le [date de publication].
 
 Widoo est une application éditée par Inprogress Agency, société par actions simplifiée au capital de 5 000 euros, immatriculée au registre du commerce et des sociétés de Bobigny sous le numéro 908 744 444, dont le siège est situé 14 avenue Georges Pompidou, 93360 Neuilly-Plaisance (TVA intracommunautaire FR38908744444). Directeur de la publication : Ilan Amzallag, président.
 
-Pour nous écrire : contact@widoo.app, ou « Nous écrire » dans Réglages › Aide et contact.
+Pour nous écrire : contact@widooapp.com, ou « Nous écrire » dans Réglages › Aide et contact.
 
-Widoo est hébergé par Google Cloud EMEA Limited, 70 Sir John Rogerson's Quay, Dublin 2, D02 R296, Irlande ; nos serveurs et notre base de données sont situés à Paris.
+L'application Widoo est hébergée par Google Cloud EMEA Limited, 70 Sir John Rogerson's Quay, Dublin 2, D02 R296, Irlande ; nos serveurs et notre base de données sont situés à Paris. Le site widooapp.com est hébergé par Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723, États-Unis.
 
 ### 2. À quoi servent ces conditions
 
@@ -71,7 +71,7 @@ Nous pouvons publier votre parcours, vous demander des modifications ou le refus
 
 Vous garantissez détenir les droits sur les textes et les photos que vous publiez, ou utiliser des photos libres en respectant leur licence. Widoo affiche le crédit des photos libres proposées dans l'éditeur (auteur, licence, source).
 
-Vous restez propriétaire de vos contenus. En publiant un parcours, vous accordez à Inprogress Agency une licence gratuite, non exclusive et valable dans le monde entier pour l'héberger, le reproduire, l'afficher, le traduire, l'adapter à l'affichage de l'app et le diffuser dans Widoo et sur widoo.app, ainsi que pour faire connaître Widoo en citant votre prénom ou pseudo, sauf si votre profil est masqué. Cette licence dure tant que vos droits existent, y compris après la suppression de votre compte (article 3). Avec votre accord, l'équipe peut corriger directement une information mineure comme un horaire ou une adresse.
+Vous restez propriétaire de vos contenus. En publiant un parcours, vous accordez à Inprogress Agency une licence gratuite, non exclusive et valable dans le monde entier pour l'héberger, le reproduire, l'afficher, le traduire, l'adapter à l'affichage de l'app et le diffuser dans Widoo et sur widooapp.com, ainsi que pour faire connaître Widoo en citant votre prénom ou pseudo, sauf si votre profil est masqué. Cette licence dure tant que vos droits existent, y compris après la suppression de votre compte (article 3). Avec votre accord, l'équipe peut corriger directement une information mineure comme un horaire ou une adresse.
 
 Un parcours privé n'est visible que par vous et par les personnes à qui vous envoyez son lien.
 
@@ -79,11 +79,11 @@ Un parcours privé n'est visible que par vous et par les personnes à qui vous e
 
 Vous pouvez noter un parcours après l'avoir fait, dès que vous avez vécu au moins la moitié de ses étapes, et laisser un commentaire de 280 caractères au plus ; un seul avis par parcours, que vous pouvez modifier. Votre avis est public, avec votre prénom ou pseudo. Il doit porter sur votre expérience, sans propos injurieux, discriminatoire ou promotionnel ; un avis qui ne respecte pas ces règles peut être masqué. Pendant ou après une sortie, vous pouvez confirmer qu'un lieu est tel que décrit, ou signaler qu'il a changé : ces vérifications informent les visiteurs suivants. Merci de noter et de vérifier avec sincérité : un avis ou une vérification ne peut être ni acheté ni échangé.
 
-Pour signaler un parcours qui enfreint ces conditions ou la loi, touchez « Signaler ce parcours » sur sa fiche. Vous pouvez aussi écrire à contact@widoo.app en indiquant le parcours ou le contenu concerné, ce qui pose problème et pourquoi, et votre adresse e-mail. Nous examinons chaque signalement et vous informons de la suite donnée.
+Pour signaler un parcours qui enfreint ces conditions ou la loi, touchez « Signaler ce parcours » sur sa fiche. Vous pouvez aussi écrire à contact@widooapp.com en indiquant le parcours ou le contenu concerné, ce qui pose problème et pourquoi, et votre adresse e-mail. Nous examinons chaque signalement et vous informons de la suite donnée.
 
 ### 8. Modération
 
-Pour protéger les utilisateurs et respecter la loi, nous pouvons retirer un contenu, refuser une publication, masquer un parcours ou suspendre un compte, et supprimer un compte en cas de manquement grave ou répété à ces conditions. Sauf urgence ou obligation légale, nous vous prévenons avant. Chaque décision vous est expliquée, avec son motif ; vous pouvez la contester en répondant au message ou en écrivant à contact@widoo.app, et nous réexaminons alors la décision.
+Pour protéger les utilisateurs et respecter la loi, nous pouvons retirer un contenu, refuser une publication, masquer un parcours ou suspendre un compte, et supprimer un compte en cas de manquement grave ou répété à ces conditions. Sauf urgence ou obligation légale, nous vous prévenons avant. Chaque décision vous est expliquée, avec son motif ; vous pouvez la contester en répondant au message ou en écrivant à contact@widooapp.com, et nous réexaminons alors la décision.
 
 ### 9. Widoo Premium
 
@@ -123,5 +123,5 @@ Nous pouvons faire évoluer ces conditions, par exemple quand l'app change. Pour
 
 Ces conditions sont soumises au droit français.
 
-En cas de difficulté, écrivez-nous d'abord à contact@widoo.app : nous cherchons avec vous une solution. Si elle n'aboutit pas, vous pouvez recourir gratuitement au médiateur de la consommation : [nom, adresse et site du médiateur]. Vous pouvez aussi saisir le tribunal compétent.
+En cas de difficulté, écrivez-nous d'abord à contact@widooapp.com : nous cherchons avec vous une solution. Si elle n'aboutit pas, vous pouvez recourir gratuitement au médiateur de la consommation : [nom, adresse et site du médiateur]. Vous pouvez aussi saisir le tribunal compétent.
 `;

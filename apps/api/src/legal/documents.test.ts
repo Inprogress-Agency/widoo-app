@@ -47,6 +47,9 @@ describe('legalDocumentOf', () => {
     expect(document.sections[0]?.title).toMatch(/^1\. /);
     // Wiki links do not leave the wiki.
     expect(JSON.stringify(document)).not.toMatch(/\]\(/);
+    // The site's domain, never one that is not Inprogress's (D-107, D-109).
+    expect(JSON.stringify(document)).not.toMatch(/widoo\.app/);
+    expect(JSON.stringify(document)).toMatch(/contact@widooapp\.com/);
   });
 
   it('serves the French text, saying so, while the English one is not written', () => {

@@ -1,9 +1,9 @@
 /**
  * Text for the users of the wiki page Politique-de-confidentialite, between its two
- * separators: draft of 2026-09-28 (D-063), to be reviewed by a lawyer before the stores; the
- * passages in square brackets are still to complete in the wiki. Changed in the wiki first,
- * then here, with a new version in `../documents.ts`. Links to other wiki pages are kept as
- * their text.
+ * separators: draft of 2026-09-28 (D-063), revised on 2026-10-20 (D-107), to be reviewed by a
+ * lawyer before the stores; the passages in square brackets are still to complete in the wiki.
+ * Changed in the wiki first, then here, with a new version in `../documents.ts`. Links to other
+ * wiki pages are kept as their text.
  */
 export const privacyFr = `
 ## Politique de confidentialité de Widoo
@@ -20,7 +20,7 @@ Mise à jour le [date de publication].
 
 Inprogress Agency, société par actions simplifiée, 14 avenue Georges Pompidou, 93360 Neuilly-Plaisance, RCS Bobigny 908 744 444, édite Widoo et décide de l'usage de vos données.
 
-Pour toute question sur vos données ou pour exercer vos droits : contact@widoo.app, ou « Nous écrire » dans l'app (sujet « Données »).
+Pour toute question sur vos données ou pour exercer vos droits : contact@widooapp.com, ou « Nous écrire » dans l'app (sujet « Données »).
 
 ### 2. Les données que nous utilisons
 
@@ -53,7 +53,8 @@ Le fichier créé par « Télécharger mes données » est préparé à votre de
   - Sentry, dans l'Union européenne : rapports de plantage ;
   - RevenueCat : suivi des abonnements achetés dans les stores [lieu de traitement à vérifier] ;
   - Google Cloud Vertex AI (Union européenne) : traduction des parcours publiés et des avis ; il reçoit le texte, pas votre profil ;
-  - Brevo (France, Union européenne) : envoi des e-mails de connexion, de confirmation d'adresse et des réponses du support.
+  - Brevo (France, Union européenne) : envoi des e-mails de connexion, de confirmation d'adresse et des réponses du support ;
+  - Vercel (États-Unis) : hébergement du site widooapp.com ; il reçoit l'adresse IP et les données techniques de connexion des visiteurs du site, qui ne dépose aucun cookie.
 - Apple et Google, quand vous vous connectez avec leur compte ou achetez Premium par leur store : ils agissent alors selon leurs propres politiques.
 - Google Maps, quand vous touchez « Itinéraire » pendant une sortie : l'adresse de l'étape suivante lui est transmise et Google Maps s'ouvre, selon la politique de Google.
 - Les autorités, si la loi nous y oblige.
@@ -75,7 +76,7 @@ Vous pouvez à tout moment :
 - vous opposer à un traitement fondé sur notre intérêt légitime, ou en demander la limitation ;
 - définir des directives sur le sort de vos données après votre décès.
 
-Pour tout le reste, écrivez à contact@widoo.app. Nous répondons dans un délai d'un mois. En cas de doute sur votre identité, nous pouvons vous demander de le confirmer depuis l'adresse de votre compte.
+Pour tout le reste, écrivez à contact@widooapp.com. Nous répondons dans un délai d'un mois. En cas de doute sur votre identité, nous pouvons vous demander de le confirmer depuis l'adresse de votre compte.
 
 Si vous estimez que vos droits ne sont pas respectés, vous pouvez adresser une réclamation à la CNIL (cnil.fr, 3 place de Fontenoy, TSA 80715, 75334 Paris Cedex 07).
 
