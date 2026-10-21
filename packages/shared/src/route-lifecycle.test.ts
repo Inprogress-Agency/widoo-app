@@ -26,6 +26,8 @@ const allowed = new Set([
   'needs_fix>pending:author',
   'published>unpublished:author',
   'published>unpublished:moderator',
+  'needs_fix>unpublished:moderator',
+  'unpublished>published:moderator',
   'rejected>draft:author',
   'draft>published:editor',
   'private>published:editor',
