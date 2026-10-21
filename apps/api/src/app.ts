@@ -40,6 +40,7 @@ import { meRoutes } from './routes/me';
 import { meExportRoutes } from './routes/me-export';
 import { plannedRoutesPlugin } from './routes/planned';
 import { routeRatingsPlugin } from './routes/ratings';
+import { routeReportsRoutes } from './routes/route-reports';
 import { routeSheetRoutes } from './routes/route-sheet';
 import { searchRoutesPlugin } from './routes/search';
 import { supportRoutes } from './routes/support';
@@ -173,6 +174,7 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   await app.register(goRoutes, { prefix: '/v1' });
   await app.register(searchRoutesPlugin, { prefix: '/v1' });
   await app.register(routeRatingsPlugin, { prefix: '/v1' });
+  await app.register(routeReportsRoutes, { prefix: '/v1' });
   await app.register(routeSheetRoutes, {
     prefix: '/v1',
     directions:
