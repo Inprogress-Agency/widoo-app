@@ -8,25 +8,34 @@ import type { Padding } from './tooltip';
  */
 export const stepDotClearance = size['step-dot-active'] / 2;
 
-/** Gap between the bar at the top of the map and a tooltip hanging over the highest step. */
-export const topBarGap = spacing['space-8'];
+/**
+ * Gap between the bar at the top of the map and a tooltip hanging over the highest step: the
+ * margin a tooltip keeps from the edges of the screen (Ecrans › E-04, #626).
+ */
+export const topBarGap = spacing['space-16'];
 
-/** Least height left to the route when the tooltip pushes it down: one step touch target. */
+/** Least height left to the route between the tooltip and the sheet: one step touch target. */
 export const minRouteBand = size['touch-min'];
 
+/** Least room the camera frames the route in, when the bar, the tooltip and the sheet leave none. */
+export const leastRouteBand = 1;
+
 /**
- * Padding of the camera around a selected route: the route fills the lower half of the map, its
- * tooltip the upper half, above the room kept for the results sheet (`sheetCover`, the floating
- * tab bar included) plus the clearance of a step dot, so that the last step never sits half under
- * the sheet. Across, the margin of the screen already holds the clearance of a dot; at the top,
- * the tooltip hangs over the start and covers the upper half of its dot.
+ * Padding of the camera around a selected route (Ecrans › E-04, D-089): the route and the tooltip
+ * of its start fit whole in the map left in sight, under the bar at the top of the map (status
+ * bar, search pill and quick chips, `topBarHeight` as laid out) and above the room kept for the
+ * results sheet (`sheetCover`, the floating tab bar included). At the bottom, the clearance of a
+ * step dot, so that the last step never sits half under the sheet; across, the margin of the
+ * screen already holds it.
  *
- * The upper half grows when the tooltip would pass under the bar at the top of the map (status
- * bar, search pill and quick chips, `topBarHeight` as laid out): the highest step then sits the
- * measured height of the tooltip, and a gap, below the bar, so that no tooltip of the route
- * hangs under it while the map is not moved. Both heights are 0 before their layout. It grows
- * only while the route keeps `minRouteBand` between the tooltip and the sheet: below, the map
- * would zoom out of the route's neighbourhood (#305); it never shrinks under the upper half.
+ * At the top, the highest step sits the measured height of its tooltip, and a gap, below the bar:
+ * no tooltip of the route hangs under the bar while the map is not moved (#322, #626), however
+ * far the map zooms out for it (D-089). Above that, the tooltip is given the upper half of the
+ * map, as long as the route keeps `minRouteBand` above the sheet. Both heights are 0 before their
+ * layout. Between the bar, the tooltip and the sheet, the route keeps whatever band is left, the
+ * map zooming out until it fits, its dots overlapping if they must: the user zooms in on them.
+ * Only when nothing is left does the bottom give way to `leastRouteBand`, the sheet then covering
+ * the foot of the route rather than the bar the tooltip.
  */
 export function routeFramePadding({
   viewportHeight,
@@ -42,14 +51,17 @@ export function routeFramePadding({
   tooltipHeight: number;
 }): Padding {
   const side = Math.max(spacing['space-32'], stepDotClearance);
-  const bottom = sheetCover + stepDotClearance;
-  const upperHalf = (viewportHeight - tabBarHeight) / 2;
   const underTopBar = topBarHeight + topBarGap + tooltipHeight;
-  const aboveRouteBand = viewportHeight - bottom - minRouteBand;
+  const aboveSheet = sheetCover + stepDotClearance;
+  const upperHalf = (viewportHeight - tabBarHeight) / 2;
+  const top = Math.max(
+    underTopBar,
+    Math.min(upperHalf, viewportHeight - aboveSheet - minRouteBand),
+  );
   return {
-    top: Math.max(upperHalf, Math.min(underTopBar, aboveRouteBand)),
+    top,
     right: side,
-    bottom,
+    bottom: Math.max(0, Math.min(aboveSheet, viewportHeight - top - leastRouteBand)),
     left: side,
   };
 }

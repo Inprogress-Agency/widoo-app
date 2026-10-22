@@ -345,9 +345,9 @@ export function RouteMap({
     `${route.id}:${sheetCover}:${framePadding(sheetCover).top}`;
 
   /**
-   * The route fills the lower half of the map, its tooltip the upper half under the bar at the
-   * top, above the room kept for the results sheet and its step dots whole; the tooltip slides
-   * sideways to stay on screen.
+   * The route and the tooltip of its start fit whole between the bar at the top and the room
+   * kept for the results sheet, however far the map zooms out (`routeFramePadding`); the tooltip
+   * slides sideways to stay on screen.
    */
   const frameRoute = (route: RouteCard, sheetCover: number) => {
     const frame = selectionFrame(route);
