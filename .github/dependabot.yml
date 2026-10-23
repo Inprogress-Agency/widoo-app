@@ -47,6 +47,10 @@ updates:
         update-types: [version-update:semver-major]
     open-pull-requests-limit: 5
     labels: [type:chore, area:infra]
+  # Les actions de .github/workflows/ sont épinglées par SHA complet, version en commentaire
+  # (`uses: actions/checkout@<sha> # v7.0.1`) : Dependabot lit ce commentaire et propose la montée
+  # du SHA à chaque nouvelle version. Aucune PR ne veut dire que tout est à jour : le journal du
+  # passage du 2026-10-20 dit « No update needed » pour chacune des cinq actions (#372).
   - package-ecosystem: github-actions
     directory: /
     schedule:

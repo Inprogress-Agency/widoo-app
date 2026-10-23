@@ -19,7 +19,9 @@ jobs:
   deploy:
     name: Build, migrate, deploy
     if: github.repository == 'Inprogress-Agency/widoo-app'
-    runs-on: ubuntu-latest
+    # ubuntu-latest passe à Ubuntu 26 (actions/runner-images#14748) : épinglé sur 24.04, à remonter
+    # à ubuntu-26.04 après une CI et un déploiement staging verts dessus.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     environment:
       name: staging
