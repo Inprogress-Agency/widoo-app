@@ -16,6 +16,7 @@ import type { Db } from '../db/client';
 import type { BBox } from '../db/geography';
 import { ratingOf } from '../db/route-stats';
 import { routes } from '../db/schema';
+import { cardCoverWidth, type PhotoUrls } from '../media/urls';
 import type { User } from '../users/repository';
 import { decodeCursor, encodeCursor, type SortKeyValue } from './cursor';
 import { activeFilters, allOf, inZone, titleMatches } from './filters';
@@ -63,14 +64,16 @@ export type CardRow = {
   [key: `k${number}`]: SortKeyValue;
 };
 
-/**
- * Seed photos are stored as their https URL until the storage bucket exists; a storage path
- * has no public URL yet. Anything but https is dropped rather than sent to the app.
- */
+/** An https URL, or null: anything else (a stored path, another scheme) never reaches the app. */
 export const httpsOrNull = (url: string | null) => (url?.startsWith('https://') ? url : null);
 
 /** Card of a search row, for a caller at `now`. Exported for its tests. */
-export function toCard(row: CardRow, viewer: RouteViewer | null, now: Date): RouteCard {
+export function toCard(
+  row: CardRow,
+  viewer: RouteViewer | null,
+  now: Date,
+  photoUrls: PhotoUrls,
+): RouteCard {
   const computed = Computed.parse(row.computed);
   const rating = ratingOf(row.stats);
   const pins = z.array(StepPin).parse(row.steps ?? []);
@@ -91,7 +94,7 @@ export function toCard(row: CardRow, viewer: RouteViewer | null, now: Date): Rou
   return {
     id: row.id,
     title: row.title,
-    coverUrl: httpsOrNull(row.cover),
+    coverUrl: row.cover === null ? null : photoUrls(row.cover, cardCoverWidth),
     isOfficial: row.is_official,
     author,
     access: row.access,
@@ -219,6 +222,7 @@ export async function readCardPage(
   db: Db,
   { where, sort, keys, cursor, limit }: CardPage,
   user: User | null,
+  photoUrls: PhotoUrls,
 ): Promise<{ items: RouteCard[]; nextCursor: string | null }> {
   const position = cursor
     ? decodeCursor(
@@ -235,7 +239,7 @@ export async function readCardPage(
   const nextCursor = hasMore && last ? encodeCursor(sort, keyValuesOf(last, keys.length)) : null;
   const viewer = await routeViewerOf(db, user, pageRows);
   const now = new Date();
-  return { items: pageRows.map((row) => toCard(row, viewer, now)), nextCursor };
+  return { items: pageRows.map((row) => toCard(row, viewer, now, photoUrls)), nextCursor };
 }
 
 /** One page of cards for a caller, anonymous when null, in a keyset sort, after the cursor. */
@@ -243,6 +247,7 @@ export function searchRoutes(
   db: Db,
   query: RouteSearchQuery & { sort: KeysetSort },
   user: User | null,
+  photoUrls: PhotoUrls,
 ): Promise<{ items: RouteCard[]; nextCursor: string | null }> {
   return readCardPage(
     db,
@@ -254,6 +259,7 @@ export function searchRoutes(
       limit: query.limit,
     },
     user,
+    photoUrls,
   );
 }
 

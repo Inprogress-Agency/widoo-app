@@ -189,7 +189,7 @@ export const adminUsersRoutes: FastifyPluginAsyncZod = async (app) => {
       const targetId = request.params.id;
       const now = new Date();
       await assertCanExport(app.db, actor, targetId);
-      const exported = await exportUserData(app.db, targetId, now);
+      const exported = await exportUserData(app.db, targetId, app.photoUrls, now);
       if (!exported) {
         throw httpError(404, 'User not found');
       }

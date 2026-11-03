@@ -25,7 +25,7 @@ export const publicPartnersRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (request) => {
-      const partner = await readPublicPartner(app.db, request.params.slug);
+      const partner = await readPublicPartner(app.db, request.params.slug, app.photoUrls);
       if (!partner) {
         throw httpError(404, 'Partner not found');
       }

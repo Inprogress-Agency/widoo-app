@@ -68,7 +68,7 @@ export const plannedRoutesPlugin: FastifyPluginAsyncZod = async (app) => {
     },
     async (request, reply) => {
       const user = currentUser(request);
-      const snapshot = await snapshotOf(app.db, request.body.routeId);
+      const snapshot = await snapshotOf(app.db, request.body.routeId, app.photoUrls);
       if (!snapshot) {
         throw httpError(404, 'Route not found');
       }

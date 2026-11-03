@@ -215,6 +215,7 @@ async function timeWholeCityRecommended(): Promise<number> {
       query,
       { weights: defaultWeights, now: new Date() },
       null,
+      app.photoUrls,
     );
     if (round >= warmup) samples.push(performance.now() - started);
     candidates = page.items.length;

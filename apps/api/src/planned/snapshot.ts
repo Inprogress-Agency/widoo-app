@@ -15,6 +15,7 @@ import { asc, eq, inArray } from 'drizzle-orm';
 import type { Db, Tx } from '../db/client';
 import { cities, placeHours, places, routes, steps } from '../db/schema';
 import { photosByOwner } from '../media/photos';
+import type { PhotoUrls } from '../media/urls';
 
 /** Statuses of a route that can be planned: published, even when marked « à corriger ». */
 const plannableStatuses: readonly RouteStatus[] = ['published', 'needs_fix'];
@@ -60,6 +61,7 @@ export async function hoursByPlace(
 export async function snapshotOf(
   db: Db,
   routeId: string,
+  photoUrls: PhotoUrls,
 ): Promise<PlannedRouteSnapshot | undefined> {
   const [route] = await db
     .select({
@@ -86,9 +88,11 @@ export async function snapshotOf(
     return undefined;
   }
   const hours = await hoursByPlace(db, [...new Set(rows.map(({ place }) => place.id))]);
-  // Frozen by their URL with the rest: E-07 keeps the whole route on the phone.
+  // Frozen by their URL with the rest, E-07 keeping the whole route on the phone: an https URL
+  // or the public URL of a stored photo, neither of which expires (`media/urls.ts`).
   const photos = await photosByOwner(
     db,
+    photoUrls,
     'step',
     rows.map(({ step }) => step.id),
   );

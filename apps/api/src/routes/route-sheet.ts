@@ -95,7 +95,10 @@ export const routeSheetRoutes: FastifyPluginAsyncZod<RouteSheetOptions> = async 
         app.db,
         request.params.id,
         { user: request.user ?? null, token: request.query.token },
-        { directions: request.query.trips === 'estimated' ? null : directions },
+        {
+          directions: request.query.trips === 'estimated' ? null : directions,
+          photoUrls: app.photoUrls,
+        },
       ),
   );
 
@@ -125,6 +128,7 @@ export const routeSheetRoutes: FastifyPluginAsyncZod<RouteSheetOptions> = async 
         request.params.id,
         { user: request.user ?? null, token: request.query.token },
         new Date(request.query.startsAt),
+        app.photoUrls,
       ),
   );
 };

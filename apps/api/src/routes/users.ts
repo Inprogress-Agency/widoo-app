@@ -37,6 +37,7 @@ export const usersRoutes: FastifyPluginAsyncZod = async (app) => {
         request.query,
         request.user,
         await certificationThresholds(),
+        app.photoUrls,
       );
       if (!profile) throw httpError(404, 'Profile not found');
       return profile;

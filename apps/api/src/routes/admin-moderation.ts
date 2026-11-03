@@ -63,7 +63,7 @@ export const adminModerationRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (request) => {
-      const route = await readModerationRoute(app.db, request.params.id);
+      const route = await readModerationRoute(app.db, request.params.id, app.photoUrls);
       if (!route) {
         throw httpError(404, 'Route not found');
       }

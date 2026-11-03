@@ -3,6 +3,7 @@ import { eq, sql } from 'drizzle-orm';
 import { routeViewerOf } from '../access/route-viewer';
 import type { Db } from '../db/client';
 import { b2bClients } from '../db/schema';
+import type { PhotoUrls } from '../media/urls';
 import { cardColumns, cardJoins, toCard, type CardRow } from '../search/repository';
 
 /**
@@ -14,6 +15,7 @@ import { cardColumns, cardJoins, toCard, type CardRow } from '../search/reposito
 export async function readPublicPartner(
   db: Db,
   slug: string,
+  photoUrls: PhotoUrls,
   now = new Date(),
 ): Promise<PublicPartner | undefined> {
   const [client] = await db.select().from(b2bClients).where(eq(b2bClients.slug, slug));
@@ -33,6 +35,6 @@ export async function readPublicPartner(
     slug: client.slug,
     name: client.name,
     isActive: client.status === 'active',
-    routes: rows.map((row) => toCard(row, viewer, now)),
+    routes: rows.map((row) => toCard(row, viewer, now, photoUrls)),
   };
 }

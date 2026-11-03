@@ -21,6 +21,7 @@ import { routeViewerOf } from '../access/route-viewer';
 import type { Db } from '../db/client';
 import { routes, users } from '../db/schema';
 import { httpError, premiumRequired, routeRemoved } from '../errors';
+import type { PhotoUrls } from '../media/urls';
 import { listRouteRatings } from '../ratings/reviews';
 import { runningRouteReport } from '../reports/repository';
 import { toCard } from '../search/repository';
@@ -42,7 +43,13 @@ const nearOf = ({ lat, lng }: { lat: number; lng: number }) => ({
 });
 
 /** The route the caller may read, its card and whether it is locked; else 404 or 410. */
-async function readableRoute(db: Db, id: string, { user, token }: SheetRequest, now: Date) {
+async function readableRoute(
+  db: Db,
+  id: string,
+  { user, token }: SheetRequest,
+  now: Date,
+  photoUrls: PhotoUrls,
+) {
   const found = await loadSheetRoute(db, id);
   if (!found) throw httpError(404, 'Route not found');
   const access = sheetAccessOf(found.route, { userId: user?.id ?? null, token });
@@ -54,11 +61,11 @@ async function readableRoute(db: Db, id: string, { user, token }: SheetRequest, 
     });
   }
   if (access.kind === 'not_found') throw httpError(404, 'Route not found');
-  const loaded = await loadSheet(db, found);
+  const loaded = await loadSheet(db, found, photoUrls);
   // A route without a step or not computed has no sheet: the same 404.
   if (!loaded.card) throw httpError(404, 'Route not found');
   const viewer = await routeViewerOf(db, user, [found.route]);
-  return { loaded, access, card: toCard(loaded.card, viewer, now) };
+  return { loaded, access, card: toCard(loaded.card, viewer, now, photoUrls) };
 }
 
 /** Our estimates of the trips, in the mode the creator chose (D-088), as the planning stores. */
@@ -111,6 +118,7 @@ const isOnline = (status: RouteStatus) =>
 export interface SheetOptions {
   /** Mapbox Directions for the exact trips of this answer; null: our estimates only. */
   directions: DirectionsProvider | null;
+  photoUrls: PhotoUrls;
   now?: Date;
 }
 
@@ -119,9 +127,9 @@ export async function readSheet(
   db: Db,
   id: string,
   request: SheetRequest,
-  { directions, now = new Date() }: SheetOptions,
+  { directions, photoUrls, now = new Date() }: SheetOptions,
 ): Promise<RouteDetail> {
-  const { loaded, access, card } = await readableRoute(db, id, request, now);
+  const { loaded, access, card } = await readableRoute(db, id, request, now, photoUrls);
   const { route } = loaded;
   // Nothing is asked of Mapbox for steps the caller does not see (Q7).
   const trips: (Transition | null)[] = await estimatedTrips(
@@ -157,8 +165,9 @@ export async function readTimeline(
   id: string,
   request: SheetRequest,
   startsAt: Date,
+  photoUrls: PhotoUrls,
 ): Promise<RouteTimeline> {
-  const { loaded, card } = await readableRoute(db, id, request, new Date());
+  const { loaded, card } = await readableRoute(db, id, request, new Date(), photoUrls);
   if (card.isLocked) throw premiumRequired('premium_route');
   return routeTimelineOf(routeInputOf(loaded, await estimatedTrips(loaded)), startsAt);
 }

@@ -14,6 +14,7 @@ import { and, eq, isNotNull, isNull, sql, type SQL } from 'drizzle-orm';
 import { routeViewerOf } from '../access/route-viewer';
 import type { Db } from '../db/client';
 import { routes, users } from '../db/schema';
+import type { PhotoUrls } from '../media/urls';
 import { activeFilters, allOf, listedRoutes } from '../search/filters';
 import {
   cardColumns,
@@ -71,7 +72,12 @@ function profileSortKeys(sort: ProfileRouteSort): SortKey[] {
 }
 
 /** The featured routes the creator chose, in their order, among their listed routes. */
-async function readFeaturedCards(db: Db, userId: string, user: User | null): Promise<RouteCard[]> {
+async function readFeaturedCards(
+  db: Db,
+  userId: string,
+  user: User | null,
+  photoUrls: PhotoUrls,
+): Promise<RouteCard[]> {
   const rows = await db.execute<CardRow>(sql`
     select r.id, ${cardColumns}
     from user_featured_routes f
@@ -83,7 +89,7 @@ async function readFeaturedCards(db: Db, userId: string, user: User | null): Pro
   `);
   const viewer = await routeViewerOf(db, user, rows);
   const now = new Date();
-  return rows.map((row) => toCard(row, viewer, now));
+  return rows.map((row) => toCard(row, viewer, now, photoUrls));
 }
 
 /** Listed routes of the creator by mood, a route counted under each of its moods. */
@@ -120,6 +126,7 @@ export async function readPublicProfile(
   query: PublicProfileQueryParams,
   caller: User | null,
   thresholds: CertificationThresholds,
+  photoUrls: PhotoUrls,
 ): Promise<PublicProfile | undefined> {
   const user = await findPublicUser(db, id);
   if (!user?.firstName) return undefined;
@@ -128,7 +135,7 @@ export async function readPublicProfile(
   const [anecdotes, values, featuredRoutes, page, moodCounts, published] = await Promise.all([
     readAnecdotes(db, user.id),
     readCertificationValues(db, user.id),
-    readFeaturedCards(db, user.id, caller),
+    readFeaturedCards(db, user.id, caller, photoUrls),
     readCardPage(
       db,
       {
@@ -139,6 +146,7 @@ export async function readPublicProfile(
         limit: query.limit,
       },
       caller,
+      photoUrls,
     ),
     readMoodCounts(db, user.id),
     countListedRoutes(db, user.id),

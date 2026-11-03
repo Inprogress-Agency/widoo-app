@@ -30,7 +30,7 @@ describe('snapshotOf', () => {
       .set({ transition: metro })
       .where(and(eq(steps.routeId, routeId), eq(steps.position, 0)));
 
-    const snapshot = PlannedRouteSnapshot.parse(await snapshotOf(app.db, routeId));
+    const snapshot = PlannedRouteSnapshot.parse(await snapshotOf(app.db, routeId, app.photoUrls));
 
     expect(snapshot).toMatchObject({ id: routeId, access: 'free', timezone: 'Europe/Paris' });
     expect(snapshot.steps.map((step) => step.position)).toEqual([0, 1, 2, 3]);
@@ -52,16 +52,16 @@ describe('snapshotOf', () => {
   });
 
   it('refuses a route that is missing or not published', async () => {
-    expect(await snapshotOf(app.db, uuidv7())).toBeUndefined();
+    expect(await snapshotOf(app.db, uuidv7(), app.photoUrls)).toBeUndefined();
     const draftId = await fixtures.copyDemoRoute({ status: 'draft' });
-    expect(await snapshotOf(app.db, draftId)).toBeUndefined();
+    expect(await snapshotOf(app.db, draftId, app.photoUrls)).toBeUndefined();
   });
 });
 
 describe('timelineOf', () => {
   it('dates the snapshot and reads its hours in the city', async () => {
     const snapshot = PlannedRouteSnapshot.parse(
-      await snapshotOf(app.db, await fixtures.copyDemoRoute()),
+      await snapshotOf(app.db, await fixtures.copyDemoRoute(), app.photoUrls),
     );
     const timeline = timelineOf(snapshot, new Date(saturdayTen));
 
@@ -76,7 +76,7 @@ describe('timelineOf', () => {
     const routeId = await fixtures.copyDemoRoute();
     await fixtures.alwaysOpenFirstStep(routeId);
 
-    const snapshot = PlannedRouteSnapshot.parse(await snapshotOf(app.db, routeId));
+    const snapshot = PlannedRouteSnapshot.parse(await snapshotOf(app.db, routeId, app.photoUrls));
     expect(snapshot.steps[0]?.place).toMatchObject({ alwaysOpen: true, hours: [] });
     const timeline = timelineOf(snapshot, new Date('2026-10-24T23:00:00+02:00'));
 

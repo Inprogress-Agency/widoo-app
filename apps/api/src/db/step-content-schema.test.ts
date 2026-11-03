@@ -86,7 +86,7 @@ describe('steps audio columns', () => {
 
   it('stay out of what the API serves', async () => {
     await setStep({ audioPath: 'test/audio.m4a', audioDurationS: 100 });
-    const served = await snapshotOf(app.db, routeId);
+    const served = await snapshotOf(app.db, routeId, app.photoUrls);
     expect(PlannedRouteSnapshot.parse(served).steps[0]?.id).toBe(stepId);
     expect(JSON.stringify(served)).not.toMatch(/audio/i);
   });

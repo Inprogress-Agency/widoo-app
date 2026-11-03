@@ -8,6 +8,7 @@ import { asc, eq, sql } from 'drizzle-orm';
 import type { Db } from '../db/client';
 import { affiliatePrograms, cities, places, routes, steps } from '../db/schema';
 import { photosByOwner } from '../media/photos';
+import type { PhotoUrls } from '../media/urls';
 import { hoursByPlace } from '../planned/snapshot';
 import { cardColumns, cardJoins, type CardRow } from '../search/repository';
 
@@ -49,6 +50,7 @@ export async function loadSheetRoute(db: Db, id: string) {
 export async function loadSheet(
   db: Db,
   { route, timezone, cityCenter }: NonNullable<Awaited<ReturnType<typeof loadSheetRoute>>>,
+  photoUrls: PhotoUrls,
 ): Promise<LoadedSheet> {
   const [[card], rows, routePhotos] = await Promise.all([
     db.execute<CardRow>(sql`
@@ -65,17 +67,18 @@ export async function loadSheet(
       .leftJoin(affiliatePrograms, eq(affiliatePrograms.id, places.partnerProgramId))
       .where(eq(steps.routeId, route.id))
       .orderBy(asc(steps.position)),
-    photosByOwner(db, 'route', [route.id]),
+    photosByOwner(db, photoUrls, 'route', [route.id]),
   ]);
   const placeIds = [...new Set(rows.map(({ place }) => place.id))];
   const [hours, stepPhotos, placePhotos] = await Promise.all([
     hoursByPlace(db, placeIds),
     photosByOwner(
       db,
+      photoUrls,
       'step',
       rows.map(({ step }) => step.id),
     ),
-    photosByOwner(db, 'place', placeIds),
+    photosByOwner(db, photoUrls, 'place', placeIds),
   ]);
   return {
     route,
