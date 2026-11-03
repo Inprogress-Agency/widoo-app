@@ -4,10 +4,21 @@ import {
   type AdminActionPeriod,
   type AdminActions,
   type AdminActionsQuery,
+  type AdminActionTargetType,
 } from '@widoo/shared';
 import { and, asc, desc, eq, gte, inArray, sql, type SQL } from 'drizzle-orm';
 import type { Db } from '../db/client';
-import { adminActions, places, routes, users } from '../db/schema';
+import {
+  adminActions,
+  affiliatePrograms,
+  b2bClients,
+  places,
+  routeRatings,
+  routeReports,
+  routes,
+  supportMessages,
+  users,
+} from '../db/schema';
 import { neighbourCursors, offsetOfCursor } from './page-cursor';
 
 const periodMs: Record<AdminActionPeriod, number> = {
@@ -24,46 +35,82 @@ const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{1
 
 type TargetRow = { targetType: string; targetId: string };
 
+type TargetName = { id: string; name: string | null };
+
 /**
- * What the targets of a page are called today, by `type:id`: accounts, routes and places, three
- * queries at most for the whole page. A deleted account has no name left, so it has no label.
+ * How each kind of target is named, from the ids of a page: one query per kind. A report and a
+ * rating are named by their route, a support message by its topic. A setting has none here: the
+ * admin labels its key.
+ */
+const targetNamers: Partial<
+  Record<AdminActionTargetType, (db: Db, ids: string[]) => Promise<TargetName[]>>
+> = {
+  user: async (db, ids) =>
+    (
+      await db
+        .select({ id: users.id, firstName: users.firstName, email: users.email })
+        .from(users)
+        .where(inArray(users.id, ids))
+    ).map((row) => ({ id: row.id, name: nameOf(row) })),
+  route: (db, ids) =>
+    db.select({ id: routes.id, name: routes.title }).from(routes).where(inArray(routes.id, ids)),
+  route_report: (db, ids) =>
+    db
+      .select({ id: routeReports.id, name: routes.title })
+      .from(routeReports)
+      .innerJoin(routes, eq(routes.id, routeReports.routeId))
+      .where(inArray(routeReports.id, ids)),
+  rating: (db, ids) =>
+    db
+      .select({ id: routeRatings.id, name: routes.title })
+      .from(routeRatings)
+      .innerJoin(routes, eq(routes.id, routeRatings.routeId))
+      .where(inArray(routeRatings.id, ids)),
+  place: (db, ids) =>
+    db.select({ id: places.id, name: places.name }).from(places).where(inArray(places.id, ids)),
+  affiliate_program: (db, ids) =>
+    db
+      .select({ id: affiliatePrograms.id, name: affiliatePrograms.name })
+      .from(affiliatePrograms)
+      .where(inArray(affiliatePrograms.id, ids)),
+  b2b_client: (db, ids) =>
+    db
+      .select({ id: b2bClients.id, name: b2bClients.name })
+      .from(b2bClients)
+      .where(inArray(b2bClients.id, ids)),
+  support_message: (db, ids) =>
+    db
+      .select({ id: supportMessages.id, name: supportMessages.topic })
+      .from(supportMessages)
+      .where(inArray(supportMessages.id, ids)),
+};
+
+const hasNamer = (type: string): type is keyof typeof targetNamers =>
+  Object.hasOwn(targetNamers, type);
+
+/**
+ * What the targets of a page are called today, by `type:id`, one query per kind of target on the
+ * page. An object deleted since, or an account with no name left, has no label.
  */
 async function targetLabelsOf(db: Db, rows: TargetRow[]): Promise<Map<string, string>> {
-  const idsOf = (type: string) => [
-    ...new Set(
-      rows
-        .filter((row) => row.targetType === type && uuidPattern.test(row.targetId))
-        .map((row) => row.targetId),
-    ),
-  ];
-  const [userIds, routeIds, placeIds] = [idsOf('user'), idsOf('route'), idsOf('place')];
-  const [userRows, routeRows, placeRows] = await Promise.all([
-    userIds.length
-      ? db
-          .select({ id: users.id, firstName: users.firstName, email: users.email })
-          .from(users)
-          .where(inArray(users.id, userIds))
-      : [],
-    routeIds.length
-      ? db
-          .select({ id: routes.id, name: routes.title })
-          .from(routes)
-          .where(inArray(routes.id, routeIds))
-      : [],
-    placeIds.length
-      ? db
-          .select({ id: places.id, name: places.name })
-          .from(places)
-          .where(inArray(places.id, placeIds))
-      : [],
-  ]);
-  const labels = new Map<string, string>();
-  for (const row of userRows) {
-    const name = row.firstName ?? row.email;
-    if (name) labels.set(`user:${row.id}`, name);
+  const idsByType = new Map<keyof typeof targetNamers, Set<string>>();
+  for (const row of rows) {
+    if (hasNamer(row.targetType) && uuidPattern.test(row.targetId)) {
+      const ids = idsByType.get(row.targetType) ?? new Set<string>();
+      ids.add(row.targetId);
+      idsByType.set(row.targetType, ids);
+    }
   }
-  for (const row of routeRows) labels.set(`route:${row.id}`, row.name);
-  for (const row of placeRows) labels.set(`place:${row.id}`, row.name);
+  const named = await Promise.all(
+    [...idsByType].map(async ([type, ids]) => {
+      const names = (await targetNamers[type]?.(db, [...ids])) ?? [];
+      return names.map((target) => ({ type, ...target }));
+    }),
+  );
+  const labels = new Map<string, string>();
+  for (const target of named.flat()) {
+    if (target.name) labels.set(`${target.type}:${target.id}`, target.name);
+  }
   return labels;
 }
 

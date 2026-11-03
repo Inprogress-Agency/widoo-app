@@ -3,13 +3,23 @@ import { eq, inArray } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
-import { adminActions, users } from '../db/schema';
+import {
+  adminActions,
+  affiliatePrograms,
+  b2bClients,
+  routeRatings,
+  routeReports,
+  supportMessages,
+  users,
+} from '../db/schema';
 import { uuidv7 } from '../db/uuid';
+import { plannedFixtures } from '../planned/test-fixtures';
 import { testConfig } from '../test-config';
 
 // Shared database, parallel files: the lines of this file carry their own kind of target, and
 // every query narrows to it.
 const verifier = new TestTokenVerifier();
+const fixtures = plannedFixtures(() => app, verifier);
 const createdUids: string[] = [];
 const targetType = `journal-test-${uuidv7().slice(-12)}`;
 const hour = 60 * 60 * 1000;
@@ -57,6 +67,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await app.db.delete(adminActions).where(eq(adminActions.targetType, targetType));
   await app.db.delete(users).where(inArray(users.firebaseUid, createdUids));
+  await fixtures.cleanUp();
   await app.close();
 });
 
@@ -138,6 +149,81 @@ describe('the name of the target', () => {
       expect((await list('')).items.every((item) => item.targetLabel === null)).toBe(true);
     } finally {
       if (named) await app.db.delete(adminActions).where(eq(adminActions.id, named.id));
+    }
+  });
+
+  it('names the route of a report or a rating, a program, a partner, the topic of a message', async () => {
+    const suffix = uuidv7().slice(-12);
+    const routeId = await fixtures.copyDemoRoute({ title: `Parcours fictif ${suffix}` });
+    const raterUid = `test-${uuidv7()}`;
+    createdUids.push(raterUid);
+    const [rater] = await app.db
+      .insert(users)
+      .values({ firebaseUid: raterUid })
+      .returning({ id: users.id });
+    if (!rater) throw new Error('Rater not created');
+    const [report] = await app.db
+      .insert(routeReports)
+      .values({ routeId, reason: 'low_rating' })
+      .returning({ id: routeReports.id });
+    const [rating] = await app.db
+      .insert(routeRatings)
+      .values({ routeId, userId: rater.id, rating: 2 })
+      .returning({ id: routeRatings.id });
+    const [program] = await app.db
+      .insert(affiliatePrograms)
+      .values({ name: `Programme fictif ${suffix}`, network: 'Awin', cookieDays: 30 })
+      .returning({ id: affiliatePrograms.id });
+    const [partner] = await app.db
+      .insert(b2bClients)
+      .values({ name: `Hôtel fictif ${suffix}`, slug: `hotel-fictif-${suffix}`, type: 'hotel' })
+      .returning({ id: b2bClients.id });
+    const [message] = await app.db
+      .insert(supportMessages)
+      .values({
+        replyEmail: 'fictitious@example.com',
+        topic: 'problem',
+        message: 'Message fictif',
+        appVersion: '1.0.0',
+        device: 'Test',
+        locale: 'fr',
+      })
+      .returning({ id: supportMessages.id });
+    if (!report || !rating || !program || !partner || !message) throw new Error('Not created');
+    const targets = [
+      ['route_report', report.id, `Parcours fictif ${suffix}`],
+      ['rating', rating.id, `Parcours fictif ${suffix}`],
+      ['affiliate_program', program.id, `Programme fictif ${suffix}`],
+      ['b2b_client', partner.id, `Hôtel fictif ${suffix}`],
+      ['support_message', message.id, 'problem'],
+    ] as const;
+    const lines = await app.db
+      .insert(adminActions)
+      .values(
+        targets.map(([type, id]) => ({ actorId, action: 'test', targetType: type, targetId: id })),
+      )
+      .returning({ id: adminActions.id });
+    const headers = await signIn('admin');
+    const labelOf = async (type: string, id: string) => {
+      const response = await app.inject({
+        url: `/v1/admin/actions?targetType=${type}&targetId=${id}`,
+        headers,
+      });
+      return AdminActions.parse(response.json()).items[0]?.targetLabel;
+    };
+    try {
+      for (const [type, id, name] of targets) {
+        expect(await labelOf(type, id)).toBe(name);
+      }
+      // Once the object is gone, the line has no name left.
+      await app.db.delete(affiliatePrograms).where(eq(affiliatePrograms.id, program.id));
+      expect(await labelOf('affiliate_program', program.id)).toBeNull();
+    } finally {
+      const ids = lines.map((line) => line.id);
+      await app.db.delete(adminActions).where(inArray(adminActions.id, ids));
+      await app.db.delete(affiliatePrograms).where(eq(affiliatePrograms.id, program.id));
+      await app.db.delete(b2bClients).where(eq(b2bClients.id, partner.id));
+      await app.db.delete(supportMessages).where(eq(supportMessages.id, message.id));
     }
   });
 });

@@ -1,3 +1,4 @@
+import type { AdminActionName, AdminActionTargetType } from '@widoo/shared';
 import type { Db } from '../db/client';
 import { adminActions } from '../db/schema';
 
@@ -5,9 +6,12 @@ import { adminActions } from '../db/schema';
 export type AdminActionEntry = {
   /** The member of the team who acts. */
   actorId: string;
-  /** Stable name of the action: `route.publish`, `place.close`, `user.suspend`... */
-  action: string;
-  targetType: string;
+  /**
+   * Stable name of the action: `route.publish`, `place.close`, `user.suspend`... One of
+   * `adminActionNames`, which the admin labels: a new action is added there first.
+   */
+  action: AdminActionName;
+  targetType: AdminActionTargetType;
   targetId: string;
   /** State of the target before and after, limited to what the action changes. */
   before?: unknown;
