@@ -11,6 +11,15 @@ const Origin = z
 /** IP, CIDR or proxy-addr range name (`loopback`, `linklocal`, `uniquelocal`). */
 const Proxy = z.string().regex(/^(loopback|linklocal|uniquelocal|[\da-fA-F.:]+(\/\d{1,3})?)$/);
 
+/** An https URL photo paths are appended to: no query nor fragment, its trailing slash dropped. */
+const PublicBaseUrl = z
+  .url({ protocol: /^https$/ })
+  .refine(
+    (value) => URL.canParse(value) && !new URL(value).search && !new URL(value).hash,
+    'Expected an https URL without query nor fragment',
+  )
+  .transform((value) => value.replace(/\/+$/, ''));
+
 /** Environment variables of the API, validated once at startup. See `.env.example`. */
 const Env = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -111,6 +120,16 @@ const Env = z.object({
    */
   MAPBOX_DIRECTIONS_CACHE_DAYS: z.coerce.number().int().min(0).max(30).default(0),
   /**
+   * Public URL of the bucket of the processed photos (`https://storage.googleapis.com/<bucket>`):
+   * a photo stored by path is served under it. Empty or absent: such a photo is not served, only
+   * the photos stored by their https URL (the demo dataset).
+   */
+  MEDIA_PUBLIC_BASE_URL: z
+    .string()
+    .optional()
+    .transform((value) => value || undefined)
+    .pipe(PublicBaseUrl.optional()),
+  /**
    * `staging` or `production` on Cloud Run, where NODE_ENV is `production` for both; empty or
    * absent, the reports carry NODE_ENV.
    */
@@ -190,6 +209,7 @@ export const Config = ProductionEnv.transform((env) => ({
   isMapboxGeocodingPermanent: env.MAPBOX_GEOCODING_PERMANENT === 'true',
   mapboxDirectionsToken: env.MAPBOX_DIRECTIONS_TOKEN,
   directionsCacheDays: env.MAPBOX_DIRECTIONS_CACHE_DAYS,
+  mediaPublicBaseUrl: env.MEDIA_PUBLIC_BASE_URL,
 }));
 export type Config = z.output<typeof Config>;
 

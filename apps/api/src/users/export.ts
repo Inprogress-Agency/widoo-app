@@ -13,15 +13,12 @@ import {
   userFeaturedRoutes,
   users,
 } from '../db/schema';
+import { fullPhotoWidth, type PhotoUrls } from '../media/urls';
 import { activityOf } from './export-activity';
 import { readNotificationPrefs } from './notification-prefs';
 import type { User } from './repository';
 
 import { iso, isoOrNull } from './export-dates';
-
-/** Photo links: only https ones are links the user can open (wiki Securite-et-RGPD). */
-const linksOf = (paths: { storagePath: string }[]) =>
-  paths.map((photo) => photo.storagePath).filter((path) => path.startsWith('https://'));
 
 function accountOf(user: User): MyDataExport['account'] {
   const isCertified = isCertifiedWith(user.isCertified, user.certifiedOverride);
@@ -42,17 +39,28 @@ function accountOf(user: User): MyDataExport['account'] {
   };
 }
 
-/** Photos of routes or steps by owner, in their order. */
-async function photosByOwner(tx: Tx, ownerType: 'route' | 'step', ownerIds: string[]) {
-  if (ownerIds.length === 0) return new Map<string, string[]>();
+/**
+ * Links of the photos of routes or steps by owner, in their order: URLs the user can open, at
+ * the full width of a stored photo, never a path of the bucket (wiki Securite-et-RGPD).
+ */
+async function photoLinksByOwner(
+  tx: Tx,
+  photoUrls: PhotoUrls,
+  ownerType: 'route' | 'step',
+  ownerIds: string[],
+) {
+  const byOwner = new Map<string, string[]>();
+  if (ownerIds.length === 0) return byOwner;
   const rows = await tx
     .select({ ownerId: media.ownerId, storagePath: media.storagePath })
     .from(media)
     .where(and(eq(media.ownerType, ownerType), inArray(media.ownerId, ownerIds)))
     .orderBy(asc(media.position));
-  const byOwner = new Map<string, { storagePath: string }[]>();
-  for (const row of rows) byOwner.set(row.ownerId, [...(byOwner.get(row.ownerId) ?? []), row]);
-  return new Map([...byOwner].map(([ownerId, photos]) => [ownerId, linksOf(photos)]));
+  for (const { ownerId, storagePath } of rows) {
+    const url = photoUrls(storagePath, fullPhotoWidth);
+    if (url) byOwner.set(ownerId, [...(byOwner.get(ownerId) ?? []), url]);
+  }
+  return byOwner;
 }
 
 async function plannedRoutesOf(tx: Tx, userId: string): Promise<MyDataExport['plannedRoutes']> {
@@ -98,7 +106,11 @@ async function plannedRoutesOf(tx: Tx, userId: string): Promise<MyDataExport['pl
   }));
 }
 
-async function createdRoutesOf(tx: Tx, userId: string): Promise<MyDataExport['createdRoutes']> {
+async function createdRoutesOf(
+  tx: Tx,
+  userId: string,
+  photoUrls: PhotoUrls,
+): Promise<MyDataExport['createdRoutes']> {
   const created = await tx
     .select()
     .from(routes)
@@ -113,9 +125,10 @@ async function createdRoutesOf(tx: Tx, userId: string): Promise<MyDataExport['cr
         .where(inArray(steps.routeId, routeIds))
         .orderBy(asc(steps.position))
     : [];
-  const routePhotos = await photosByOwner(tx, 'route', routeIds);
-  const stepPhotos = await photosByOwner(
+  const routePhotos = await photoLinksByOwner(tx, photoUrls, 'route', routeIds);
+  const stepPhotos = await photoLinksByOwner(
     tx,
+    photoUrls,
     'step',
     stepRows.map(({ step }) => step.id),
   );
@@ -185,6 +198,7 @@ async function profileListsOf(tx: Tx, userId: string) {
 export async function exportUserData(
   db: Db,
   userId: string,
+  photoUrls: PhotoUrls,
   now: Date = new Date(),
 ): Promise<MyDataExport | null> {
   return db.transaction(
@@ -192,7 +206,7 @@ export async function exportUserData(
       const [user] = await tx.select().from(users).where(eq(users.id, userId));
       if (!user || user.deletedAt) return null;
       const planned = await plannedRoutesOf(tx, userId);
-      const createdRoutes = await createdRoutesOf(tx, userId);
+      const createdRoutes = await createdRoutesOf(tx, userId, photoUrls);
       const profileLists = await profileListsOf(tx, userId);
       const activity = await activityOf(tx, userId);
       return {

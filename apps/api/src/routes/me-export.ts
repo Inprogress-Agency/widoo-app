@@ -44,7 +44,7 @@ export const meExportRoutes: FastifyPluginAsyncZod = async (app) => {
     },
     async (request, reply) => {
       const now = new Date();
-      const exported = await exportUserData(app.db, currentUser(request).id, now);
+      const exported = await exportUserData(app.db, currentUser(request).id, app.photoUrls, now);
       if (!exported) {
         throw httpError(401, 'Account deleted');
       }

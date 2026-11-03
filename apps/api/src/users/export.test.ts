@@ -122,7 +122,7 @@ describe('exportUserData', () => {
   it('exports every personal data of the account', async () => {
     const { userId, route } = filled;
 
-    const exported = MyDataExport.parse(await exportUserData(app.db, userId));
+    const exported = MyDataExport.parse(await exportUserData(app.db, userId, app.photoUrls));
     expect(exported.account).toMatchObject({ id: userId, bio: `Bio ${marker}` });
     expect(exported.preferences).toMatchObject({ locale: 'en' });
     expect(exported.anecdotes).toMatchObject([{ answer: `Un bon plan ${marker}` }]);
@@ -148,7 +148,7 @@ describe('exportUserData', () => {
   it('exports the data of the caller only', async () => {
     const userId = await accountOf(plainAccount());
 
-    const exported = MyDataExport.parse(await exportUserData(app.db, userId));
+    const exported = MyDataExport.parse(await exportUserData(app.db, userId, app.photoUrls));
     expect(JSON.stringify(exported)).not.toContain(marker);
     expect(exported.createdRoutes).toEqual([]);
     expect(exported.supportMessages).toEqual([]);
@@ -204,6 +204,6 @@ describe('exportUserData', () => {
     const headers = plainAccount();
     const userId = await accountOf(headers);
     await app.inject({ method: 'DELETE', url: '/v1/me', headers });
-    expect(await exportUserData(app.db, userId)).toBeNull();
+    expect(await exportUserData(app.db, userId, app.photoUrls)).toBeNull();
   });
 });

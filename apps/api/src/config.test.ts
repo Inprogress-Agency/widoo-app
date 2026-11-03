@@ -27,7 +27,22 @@ describe('loadConfig', () => {
       isMapboxGeocodingPermanent: false,
       mapboxDirectionsToken: undefined,
       directionsCacheDays: 0,
+      mediaPublicBaseUrl: undefined,
     });
+  });
+
+  it('reads the public URL of the photos, https only, without its trailing slash', () => {
+    const load = (base: string) =>
+      loadConfig({ DATABASE_URL: databaseUrl, MEDIA_PUBLIC_BASE_URL: base });
+    const base = 'https://storage.googleapis.com/widoo-test-media';
+    expect(load(base).mediaPublicBaseUrl).toBe(base);
+    expect(load(`${base}/`).mediaPublicBaseUrl).toBe(base);
+    expect(load('').mediaPublicBaseUrl).toBeUndefined();
+    expect(() => load('http://storage.googleapis.com/widoo-test-media')).toThrow(
+      /MEDIA_PUBLIC_BASE_URL/,
+    );
+    expect(() => load(`${base}?version=2`)).toThrow(/MEDIA_PUBLIC_BASE_URL/);
+    expect(() => load('storage.googleapis.com/widoo-test-media')).toThrow(/MEDIA_PUBLIC_BASE_URL/);
   });
 
   it('reads the Mapbox directions token and the days of its cache, 30 at most', () => {

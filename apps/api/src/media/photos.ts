@@ -6,29 +6,26 @@ import type { Photo } from '@widoo/shared';
 import { and, asc, eq, inArray } from 'drizzle-orm';
 import type { Db } from '../db/client';
 import { media } from '../db/schema';
+import { fullPhotoWidth, type PhotoUrls } from './urls';
 
 type MediaRow = Pick<
   typeof media.$inferSelect,
   'storagePath' | 'source' | 'author' | 'license' | 'sourceUrl'
 >;
 
-/**
- * The served photo of a row; undefined until it has an https URL: `storage_path` holds the URL
- * of the photo until the storage bucket serves the uploads.
- */
-export function photoOf(row: MediaRow): Photo | undefined {
-  if (!row.storagePath.startsWith('https://')) return undefined;
+/** The served photo of a row, at its full width; undefined when it cannot be served (`PhotoUrls`). */
+export function photoOf(row: MediaRow, photoUrls: PhotoUrls): Photo | undefined {
+  const url = photoUrls(row.storagePath, fullPhotoWidth);
+  if (!url) return undefined;
   const { author, license, sourceUrl } = row;
   const isCredited = row.source === 'commons' && author && license && sourceUrl;
-  return {
-    url: row.storagePath,
-    credit: isCredited ? { author, license, sourceUrl } : null,
-  };
+  return { url, credit: isCredited ? { author, license, sourceUrl } : null };
 }
 
 /** The photos of each owner of a type, in their order; an owner without any is absent. */
 export async function photosByOwner(
   db: Db,
+  photoUrls: PhotoUrls,
   ownerType: (typeof media.$inferSelect)['ownerType'],
   ownerIds: string[],
 ): Promise<Map<string, Photo[]>> {
@@ -47,7 +44,7 @@ export async function photosByOwner(
     .where(and(eq(media.ownerType, ownerType), inArray(media.ownerId, ownerIds)))
     .orderBy(asc(media.ownerId), asc(media.position));
   for (const { ownerId, ...row } of rows) {
-    const photo = photoOf(row);
+    const photo = photoOf(row, photoUrls);
     if (photo) byOwner.set(ownerId, [...(byOwner.get(ownerId) ?? []), photo]);
   }
   return byOwner;

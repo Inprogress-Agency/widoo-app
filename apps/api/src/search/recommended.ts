@@ -16,6 +16,7 @@ import { rankCandidates, type Candidate, type Ranked } from '../recommendation/r
 import { stableComponentsOf } from '../recommendation/stable';
 import type { RecommendationWeights } from '../recommendation/weights';
 import { httpError } from '../errors';
+import type { PhotoUrls } from '../media/urls';
 import type { User } from '../users/repository';
 import { decodeCursor, encodeCursor } from './cursor';
 import { cardColumns, cardJoins, searchWhere, toCard, type CardRow } from './repository';
@@ -87,6 +88,7 @@ export async function searchRecommended(
   query: RouteSearchQuery,
   settings: RecommendationSettings,
   user: User | null,
+  photoUrls: PhotoUrls,
 ): Promise<{ items: RouteCard[]; nextCursor: string | null }> {
   const [offset, at] = query.cursor
     ? decodeCursor(query.cursor, 'recommended', ['int', 'bigint'])
@@ -129,7 +131,7 @@ export async function searchRecommended(
   const viewer = await routeViewerOf(db, user, rows);
   return {
     items: rows.map((row) => ({
-      ...toCard(row, viewer, settings.now),
+      ...toCard(row, viewer, settings.now, photoUrls),
       reason: reasons.get(row.id) ?? null,
     })),
     nextCursor,

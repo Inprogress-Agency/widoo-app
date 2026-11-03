@@ -7,6 +7,7 @@ import {
 } from '@widoo/shared';
 import { sql } from 'drizzle-orm';
 import type { Db } from '../db/client';
+import { fullPhotoWidth, type PhotoUrls } from '../media/urls';
 import { readSetting } from '../search/settings';
 
 export const premiumMinStepsKey = 'premium.min_steps';
@@ -59,7 +60,6 @@ type QueueRow = {
   next_id: string | null;
 };
 
-const httpsOnly = (urls: readonly string[]) => urls.filter((url) => url.startsWith('https://'));
 const numberOrNull = (value: unknown) => (typeof value === 'number' ? value : null);
 const stringsOf = (value: unknown) =>
   Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
@@ -107,6 +107,7 @@ async function readPremiumMinSteps(db: Db): Promise<number> {
 export async function readModerationRoute(
   db: Db,
   routeId: string,
+  photoUrls: PhotoUrls,
 ): Promise<ModerationRouteDetail | undefined> {
   const [route] = await db.execute<RouteRow>(sql`
     select r.id, r.title, r.description, r.status, r.moods, r.computed,
@@ -170,7 +171,8 @@ export async function readModerationRoute(
     cityName: route.city_name,
     waitingSince: new Date(route.waiting_since).toISOString(),
     warnings: stringsOf(computed.warnings),
-    photoUrls: httpsOnly(route.photos ?? []),
+    // At full width, for the moderator to judge them (charter, rule 4).
+    photoUrls: (route.photos ?? []).flatMap((path) => photoUrls(path, fullPhotoWidth) ?? []),
     durationMin: numberOrNull(computed.duration_min),
     budgetPerPersonEur: numberOrNull(computed.budget_per_person_eur),
     distanceM: numberOrNull(computed.distance_m),

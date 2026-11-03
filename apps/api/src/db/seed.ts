@@ -176,7 +176,7 @@ async function seedRoutes(tx: Tx, cityId: string) {
     ),
   );
 
-  // Unsplash photos are served from their URL: `storage_path` holds it until the storage bucket.
+  // Unsplash photos are external: `storage_path` holds their URL, served as it is (`media/urls.ts`).
   await tx
     .delete(media)
     .where(and(eq(media.ownerType, 'route'), inArray(media.ownerId, demoRouteIds)));

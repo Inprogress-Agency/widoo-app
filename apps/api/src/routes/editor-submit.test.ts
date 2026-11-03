@@ -131,7 +131,7 @@ describe('the revision of a published route', () => {
       status: 'published',
       title: 'Les musées du Marais',
     });
-    expect((await snapshotOf(app.db, route.id))?.title).toBe('Les musées du Marais');
+    expect((await snapshotOf(app.db, route.id, app.photoUrls))?.title).toBe('Les musées du Marais');
 
     expect((await submit(headers, route.id)).statusCode).toBe(409);
     const edit = await patch(headers, route.id, { title: 'Encore' });

@@ -50,8 +50,9 @@ export const searchRoutesPlugin: FastifyPluginAsyncZod = async (app) => {
               query,
               { weights: await recommendationWeights(), now: new Date() },
               request.user,
+              app.photoUrls,
             )
-          : await searchRoutes(app.db, { ...query, sort: query.sort }, request.user);
+          : await searchRoutes(app.db, { ...query, sort: query.sort }, request.user, app.photoUrls);
       return { ...page, clusters: null };
     },
   );

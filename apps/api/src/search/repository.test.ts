@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { photoUrlsFrom } from '../media/urls';
 import { toCard, type CardRow } from './repository';
 
 const pin = (name: string, durationMin: number, category: string, lat: number, lng: number) => ({
@@ -37,6 +38,7 @@ const row = (access: CardRow['access']): CardRow => ({
 });
 
 const now = new Date('2026-09-29T12:00:00Z');
+const photoUrls = photoUrlsFrom(undefined);
 const none = new Set<string>();
 const premiumPlan = {
   plan: 'premium',
@@ -76,7 +78,7 @@ const everyStep = [
 describe('toCard', () => {
   it('carries every step of a free route, named, with its time on the spot', () => {
     for (const viewer of [null, freePlan, premiumPlan]) {
-      const card = toCard(row('free'), viewer, now);
+      const card = toCard(row('free'), viewer, now, photoUrls);
       expect(card).toMatchObject({ isLocked: false, stepCount: 3, steps: everyStep });
     }
   });
@@ -88,7 +90,7 @@ describe('toCard', () => {
   ])(
     'keeps the start alone of a Premium route for %s, unnamed, and counts every step (D-014)',
     (_, viewer) => {
-      const card = toCard(row('premium'), viewer, now);
+      const card = toCard(row('premium'), viewer, now, photoUrls);
       expect(card).toMatchObject({ isLocked: true, stepCount: 3 });
       expect(card.steps).toEqual([
         {
@@ -114,8 +116,21 @@ describe('toCard', () => {
     },
   );
 
+  it('serves a stored cover at the width of a card, an external one as it is (#530)', () => {
+    const bucket = photoUrlsFrom('https://storage.googleapis.com/widoo-test-media');
+    const stored = toCard({ ...row('free'), cover: 'photos/0192f0c4' }, null, now, bucket);
+    expect(stored.coverUrl).toBe(
+      'https://storage.googleapis.com/widoo-test-media/photos/0192f0c4/800.jpg',
+    );
+    const external = 'https://images.example.com/couverture.jpg';
+    expect(toCard({ ...row('free'), cover: external }, null, now, bucket).coverUrl).toBe(external);
+    expect(
+      toCard({ ...row('free'), cover: 'photos/0192f0c4' }, null, now, photoUrls).coverUrl,
+    ).toBe(null);
+  });
+
   it('carries every step of a Premium route to a Premium plan, as a free one (D-075)', () => {
-    const card = toCard(row('premium'), premiumPlan, now);
+    const card = toCard(row('premium'), premiumPlan, now, photoUrls);
     expect(card).toMatchObject({ access: 'premium', isLocked: false, stepCount: 3 });
     expect(card.steps).toEqual(everyStep);
   });

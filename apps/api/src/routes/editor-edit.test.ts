@@ -203,7 +203,7 @@ describe('a published route edited by its author', () => {
     expect(OwnRoute.parse(reordered.json()).steps).toHaveLength(1);
 
     expect((await rowOf(draft.id))?.title).toBe('Les musées du Marais');
-    const published = await snapshotOf(app.db, draft.id);
+    const published = await snapshotOf(app.db, draft.id, app.photoUrls);
     expect(published?.title).toBe('Les musées du Marais');
     expect(published?.steps.map((step) => step.id)).toEqual(draft.steps.map((step) => step.id));
     expect(OwnRoute.parse((await read(headers, draft.id)).json()).title).toBe('Nouveau titre');
