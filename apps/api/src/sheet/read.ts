@@ -15,6 +15,7 @@ import {
   type RouteDetail,
   type RouteStatus,
   type RouteTimeline,
+  type VerificationRules,
 } from '@widoo/shared';
 import { and, eq, sql } from 'drizzle-orm';
 import { routeViewerOf } from '../access/route-viewer';
@@ -25,6 +26,7 @@ import { listRouteRatings } from '../ratings/reviews';
 import { runningRouteReport } from '../reports/repository';
 import { toCard } from '../search/repository';
 import type { User } from '../users/repository';
+import { placeSignalSummaries } from '../verification/summary';
 import { sheetAccessOf } from './access';
 import { buildSheet, routeInputOf } from './build';
 import { loadSheet, loadSheetRoute, type LoadedSheet } from './load';
@@ -111,6 +113,8 @@ const isOnline = (status: RouteStatus) =>
 export interface SheetOptions {
   /** Mapbox Directions for the exact trips of this answer; null: our estimates only. */
   directions: DirectionsProvider | null;
+  /** Rules of the place verification, for what the visitors said of each place. */
+  verificationRules: VerificationRules;
   now?: Date;
 }
 
@@ -119,7 +123,7 @@ export async function readSheet(
   db: Db,
   id: string,
   request: SheetRequest,
-  { directions, now = new Date() }: SheetOptions,
+  { directions, verificationRules, now = new Date() }: SheetOptions,
 ): Promise<RouteDetail> {
   const { loaded, access, card } = await readableRoute(db, id, request, now);
   const { route } = loaded;
@@ -128,13 +132,15 @@ export async function readSheet(
     loaded,
     card.isLocked ? null : directions,
   );
-  const [reviews, creator, sharedBy, report] = await Promise.all([
+  const placeIds = loaded.steps.map(({ place }) => place.id);
+  const [reviews, creator, sharedBy, report, signals] = await Promise.all([
     isOnline(route.status)
       ? listRouteRatings(db, route.id, { limit: 3 }).then((list) => list.items)
       : [],
     creatorOf(db, route),
     access.viaLink ? sharedByOf(db, route) : null,
     request.user ? runningRouteReport(db, route.id, request.user.id, now) : null,
+    placeSignalSummaries(db, placeIds, { now, rules: verificationRules }),
   ]);
   return buildSheet(loaded, {
     card,
@@ -143,6 +149,7 @@ export async function readSheet(
     creator,
     sharedBy,
     myReport: report && { reportedAt: report.createdAt.toISOString(), status: report.status },
+    signals,
     now,
   });
 }

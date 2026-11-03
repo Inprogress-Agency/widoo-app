@@ -11,6 +11,7 @@ import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { cacheHook } from '../http-cache';
 import { readSheet, readTimeline } from '../sheet/read';
+import { createVerificationRules } from '../verification/rules';
 
 /**
  * Requests per minute and per client IP on the sheet (Q8): each opening asks Mapbox a trip per
@@ -65,6 +66,7 @@ export const routeSheetRoutes: FastifyPluginAsyncZod<RouteSheetOptions> = async 
   { directions },
 ) => {
   const cacheEstimated = estimatedCacheHook(60);
+  const verificationRules = createVerificationRules(app.db);
 
   app.get(
     '/routes/:id',
@@ -95,7 +97,10 @@ export const routeSheetRoutes: FastifyPluginAsyncZod<RouteSheetOptions> = async 
         app.db,
         request.params.id,
         { user: request.user ?? null, token: request.query.token },
-        { directions: request.query.trips === 'estimated' ? null : directions },
+        {
+          directions: request.query.trips === 'estimated' ? null : directions,
+          verificationRules: await verificationRules(),
+        },
       ),
   );
 
