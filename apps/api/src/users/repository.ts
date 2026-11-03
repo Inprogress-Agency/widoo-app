@@ -6,6 +6,7 @@ import {
   devices,
   media,
   notifications,
+  placeSignals,
   plannedRoutes,
   routeReports,
   routeRevisions,
@@ -162,6 +163,8 @@ export async function softDeleteUser(db: Db, userId: string): Promise<void> {
 async function eraseAccountRows(tx: Tx, userId: string): Promise<void> {
   await tx.delete(userAnecdotes).where(eq(userAnecdotes.userId, userId));
   await tx.delete(userFeaturedRoutes).where(eq(userFeaturedRoutes.userId, userId));
+  // Its confirmations and reports of places (D-056), before the outings they come from.
+  await tx.delete(placeSignals).where(eq(placeSignals.userId, userId));
   // Their progress rows go with them (cascade).
   await tx.delete(plannedRoutes).where(eq(plannedRoutes.userId, userId));
   // A route bought alone belongs to the account: nothing is left to unlock (D-073).

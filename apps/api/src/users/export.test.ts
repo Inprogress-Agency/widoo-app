@@ -8,6 +8,7 @@ import {
   devices,
   media,
   notifications,
+  placeSignals,
   plannedRoutes,
   plannedSteps,
   routeRatings,
@@ -87,6 +88,16 @@ async function fillAccount(headers: Record<string, string>, marker: string) {
   await db
     .insert(routeReports)
     .values({ userId, routeId: route.id, reason: 'other', comment: `Signalement ${marker}` });
+  // A row alone, which changes nothing of the shared place of the demo.
+  await db.insert(placeSignals).values({
+    userId,
+    placeId: route.steps[0]?.place.id ?? '',
+    kind: 'report',
+    reason: 'other',
+    comment: `Lieu ${marker}`,
+    weight: 2,
+    contextPlannedRouteId: planned?.id ?? '',
+  });
   await db.insert(supportMessages).values({
     userId,
     replyEmail: 'camille.fictive@example.com',
@@ -138,6 +149,14 @@ describe('exportUserData', () => {
       { routeId: route.id, rating: 4, comment: `Avis ${marker}`, status: 'visible' },
     ]);
     expect(exported.routeReports).toMatchObject([{ comment: `Signalement ${marker}` }]);
+    expect(exported.placeSignals).toMatchObject([
+      {
+        placeId: route.steps[0]?.place.id,
+        kind: 'report',
+        reason: 'other',
+        comment: `Lieu ${marker}`,
+      },
+    ]);
     expect(exported.supportMessages).toMatchObject([{ message: `Message ${marker}` }]);
     expect(exported.devices).toMatchObject([{ locale: 'en' }]);
     expect(exported.notifications).toMatchObject([{ kind: 'go_closed' }]);
@@ -170,6 +189,7 @@ describe('exportUserData', () => {
     const exported = [
       'devices.user_id',
       'notifications.user_id',
+      'place_signals.user_id',
       'planned_routes.user_id',
       'route_ratings.user_id',
       'route_reports.user_id',
@@ -192,6 +212,8 @@ describe('exportUserData', () => {
       'media.uploaded_by',
       // Places belong to the shared catalog, not to the person who added them.
       'places.created_by',
+      // Decisions of a member of the team on a signal, part of their work.
+      'place_signals.reviewed_by',
       // Decisions of a member of the team, part of their work.
       'route_reports.reviewed_by',
       // Working copy of a created route, whose content is exported with the route.

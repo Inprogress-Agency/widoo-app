@@ -4,6 +4,8 @@ import type { Tx } from '../db/client';
 import {
   devices,
   notifications,
+  placeSignals,
+  places,
   routeRatings,
   routeReports,
   routes,
@@ -17,6 +19,7 @@ type Activity = Pick<
   | 'unlockedRoutes'
   | 'routeRatings'
   | 'routeReports'
+  | 'placeSignals'
   | 'supportMessages'
   | 'devices'
   | 'notifications'
@@ -24,7 +27,8 @@ type Activity = Pick<
 
 /**
  * What the account did or received beyond its profile, outings and routes: purchases, ratings,
- * reports, messages to the support, phones and notifications, oldest first.
+ * reports of routes and signals of places, messages to the support, phones and notifications,
+ * oldest first.
  */
 export async function activityOf(tx: Tx, userId: string): Promise<Activity> {
   const unlocks = await tx
@@ -44,6 +48,12 @@ export async function activityOf(tx: Tx, userId: string): Promise<Activity> {
     .from(routeReports)
     .where(eq(routeReports.userId, userId))
     .orderBy(asc(routeReports.createdAt));
+  const signals = await tx
+    .select({ signal: placeSignals, placeName: places.name })
+    .from(placeSignals)
+    .innerJoin(places, eq(places.id, placeSignals.placeId))
+    .where(eq(placeSignals.userId, userId))
+    .orderBy(asc(placeSignals.createdAt));
   const messages = await tx
     .select()
     .from(supportMessages)
@@ -76,6 +86,15 @@ export async function activityOf(tx: Tx, userId: string): Promise<Activity> {
       comment: report.comment,
       status: report.status,
       createdAt: iso(report.createdAt),
+    })),
+    placeSignals: signals.map(({ signal, placeName }) => ({
+      placeId: signal.placeId,
+      placeName,
+      kind: signal.kind,
+      reason: signal.reason,
+      comment: signal.comment,
+      status: signal.status,
+      createdAt: iso(signal.createdAt),
     })),
     supportMessages: messages.map((message) => ({
       topic: message.topic,
