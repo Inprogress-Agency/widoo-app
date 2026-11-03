@@ -25,9 +25,15 @@ export function signalFixtures(app: () => App, verifier: TestTokenVerifier) {
     return { headers, id: me.json<{ id: string }>().id };
   }
 
-  /** A copy of the demo route on fictitious places: its id and its places, in step order. */
+  /**
+   * A copy of the demo route on fictitious places, in a zone of its own, far from the searches of
+   * other files: its id and its places, in step order.
+   */
   async function route() {
-    const routeId = await planned.copyDemoRoute();
+    const routeId = await planned.copyDemoRoute({
+      startLocation: { lat: -45, lng: -45 },
+      bounds: { west: -45, south: -45, east: -44.99, north: -44.99 },
+    });
     return { routeId, placeIds: await planned.ownPlaces(routeId) };
   }
 
