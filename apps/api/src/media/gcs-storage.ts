@@ -6,8 +6,11 @@
 import { Storage } from '@google-cloud/storage';
 import { metadataHeaders, UploadTooLarge, type PhotoStorage, type ReceivedUpload } from './storage';
 
-/** A processed photo never changes under its name: a year in every cache. */
-const photoCacheControl = 'public, max-age=31536000, immutable';
+/**
+ * An hour in the caches, never more: Cloud Storage cannot expire a cached object, so a photo
+ * deleted (Securite-et-RGPD, deletion on demand) may still be served by a cache for an hour.
+ */
+const photoCacheControl = 'public, max-age=3600';
 
 const isNotFound = (error: unknown) =>
   typeof error === 'object' && error !== null && 'code' in error && error.code === 404;

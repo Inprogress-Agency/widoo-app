@@ -1,6 +1,6 @@
-import { Storage } from '@google-cloud/storage';
+import { File, Storage } from '@google-cloud/storage';
 import { generateKeyPairSync } from 'node:crypto';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { gcsPhotoStorage } from './gcs-storage';
 
 // A key made for this test, of a fictitious account: the library signs locally, without network.
@@ -47,6 +47,24 @@ describe('gcsPhotoStorage.signUpload', () => {
       'x-goog-content-length-range': '0,10485760',
       'x-goog-meta-owner-type': 'step',
       'x-goog-meta-owner-id': '0192f0c6',
+    });
+  });
+});
+
+describe('gcsPhotoStorage.writePhoto', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('writes a width with an hour of public cache, never immutable', async () => {
+    // The request itself is stubbed: no network, only what the API asks Cloud Storage to keep.
+    const save = vi.spyOn(File.prototype, 'save').mockResolvedValue(undefined);
+    const data = Buffer.from('fictitious jpeg');
+    await photos.writePhoto('photos/0192f0c5/400.jpg', data);
+    expect(save).toHaveBeenCalledWith(data, {
+      resumable: false,
+      contentType: 'image/jpeg',
+      metadata: { cacheControl: 'public, max-age=3600' },
     });
   });
 });

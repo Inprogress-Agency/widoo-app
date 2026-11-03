@@ -195,7 +195,7 @@ Retour arrière avant l'étape 5 : `gcloud secrets versions enable` sur l'ancien
 | Bucket | Contenu | Réglages |
 |---|---|---|
 | `widoo-staging-media-uploads` | originaux envoyés par l'app, avec leur EXIF (position GPS comprise) | privé : accès public empêché ; cycle de vie qui supprime tout objet au bout d'un jour (`upload-lifecycle.json`) ; un envoi jamais confirmé n'a pas de ligne en base et disparaît ainsi |
-| `widoo-staging-media` | photos traitées : trois largeurs (400, 800, 1600 px) en JPEG, sans aucune métadonnée, `photos/<id>/<largeur>.jpg` | lisible par quiconque a l'URL d'une photo (`allUsers`, rôle `legacyObjectReader`), jamais listable ; servi sous `MEDIA_PUBLIC_BASE_URL` ; cache d'un an, le nom d'un objet ne changeant jamais de contenu |
+| `widoo-staging-media` | photos traitées : trois largeurs (400, 800, 1600 px) en JPEG, sans aucune métadonnée, `photos/<id>/<largeur>.jpg` | lisible par quiconque a l'URL d'une photo (`allUsers`, rôle `legacyObjectReader`), jamais listable ; servi sous `MEDIA_PUBLIC_BASE_URL` ; cache public d'une heure (`public, max-age=3600`), pas plus : Cloud Storage ne sait pas expirer un objet déjà en cache, et une photo supprimée peut rester servie par un cache jusqu'à une heure |
 
 Réglages communs : accès uniforme au niveau du bucket (IAM seul, pas d'ACL) et pas de suppression réversible (`--soft-delete-duration=0`) : une photo supprimée l'est tout de suite, comme le veut la suppression immédiate d'une photo ([Securite-et-RGPD](https://github.com/Inprogress-Agency/widoo-app/wiki/Securite-et-RGPD#donn%C3%A9es-personnelles)).
 
