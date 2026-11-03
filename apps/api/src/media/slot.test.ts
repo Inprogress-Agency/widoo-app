@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { inPhotoSlot } from './slot';
+import { inPhotoSlot, withinDeadline } from './slot';
 
 const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -24,5 +24,17 @@ describe('inPhotoSlot', () => {
     expect(most).toBe(1);
     expect(order).toEqual(['a', 'b', 'c']);
     expect(results.map((result) => result.status)).toEqual(['fulfilled', 'rejected', 'fulfilled']);
+  });
+
+  it('frees the slot at the deadline of a work that never settles', async () => {
+    const never = new Promise<string>(() => {});
+    const stuck = inPhotoSlot(() => withinDeadline(never, 20, () => new Error('Too late')));
+    const next = inPhotoSlot(async () => 'next');
+
+    await expect(stuck).rejects.toThrow('Too late');
+    await expect(next).resolves.toBe('next');
+    await expect(withinDeadline(Promise.resolve('on time'), 20, () => new Error())).resolves.toBe(
+      'on time',
+    );
   });
 });

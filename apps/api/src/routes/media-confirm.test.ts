@@ -10,9 +10,10 @@ import sharp from 'sharp';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
-import { media, routes } from '../db/schema';
+import { media, photoUploads, routes } from '../db/schema';
 import { uuidv7 } from '../db/uuid';
 import { editorFixtures } from '../editor/test-fixtures';
+import { confirmUpload } from '../media/confirm';
 import { mediaFixtures, testPhotoBase } from '../media/test-fixtures';
 import { hasGpsExif, jpegWithMetadata } from '../media/test-photos';
 import { testConfig } from '../test-config';
@@ -236,6 +237,66 @@ describe('POST /media/:id/confirm', () => {
     }
     expect(widthsOf(ticket.mediaId)).toEqual([undefined, undefined, undefined]);
     expect(await app.db.select().from(media).where(eq(media.id, ticket.mediaId))).toEqual([]);
+  });
+
+  it('answers 404 to a confirmation replayed while the photo is deleted, not a 500', async () => {
+    const headers = await fixtures.signIn();
+    const userId = await accountOf(headers);
+    const { stepId } = await draftOf(headers);
+    const ticket = await photos.upload(headers, { ownerType: 'step', ownerId: stepId });
+    // Between its first checks and its row: another confirmation of the same upload stored the
+    // photo, then a DELETE removed it, its confirmation left in photo_uploads.
+    photos.storage.beforeDownload = async () => {
+      await app.db.insert(photoUploads).values({ id: ticket.mediaId, userId });
+    };
+    try {
+      expect((await photos.confirm(headers, ticket.mediaId)).statusCode).toBe(404);
+    } finally {
+      photos.storage.beforeDownload = async () => {};
+    }
+    expect(await app.db.select().from(media).where(eq(media.id, ticket.mediaId))).toEqual([]);
+    expect(widthsOf(ticket.mediaId)).toEqual([undefined, undefined, undefined]);
+    expect(photos.storage.uploads.has(`uploads/${userId}/${ticket.mediaId}`)).toBe(false);
+  });
+
+  it('frees the slot when the storage does not give the original back in time', async () => {
+    const headers = await fixtures.signIn();
+    const userId = await accountOf(headers);
+    const { stepId } = await draftOf(headers);
+    const stuck = await photos.upload(headers, { ownerType: 'step', ownerId: stepId });
+    photos.storage.stallDownloads = true;
+    try {
+      const confirming = confirmUpload(
+        app.db,
+        photos.storage,
+        app.photoUrls,
+        { id: userId, role: 'user' },
+        stuck.mediaId,
+        { now: new Date(), log: app.log, readDeadlineMs: 50 },
+      );
+      await expect(confirming).rejects.toMatchObject({
+        statusCode: 503,
+        apiCode: 'media_unavailable',
+      });
+    } finally {
+      photos.storage.stallDownloads = false;
+    }
+    // The next confirmation of the instance gets the slot.
+    const next = await photos.sendPhoto(headers, { ownerType: 'step', ownerId: stepId });
+    expect(next.confirmed.statusCode).toBe(201);
+  });
+
+  it('forgets the confirmations of the account with it', async () => {
+    const headers = await fixtures.signIn();
+    const userId = await accountOf(headers);
+    const { stepId } = await draftOf(headers);
+    const { confirmed } = await photos.sendPhoto(headers, { ownerType: 'step', ownerId: stepId });
+    expect(confirmed.statusCode).toBe(201);
+    const confirmations = () =>
+      app.db.select().from(photoUploads).where(eq(photoUploads.userId, userId));
+    expect(await confirmations()).toHaveLength(1);
+    expect((await app.inject({ method: 'DELETE', url: '/v1/me', headers })).statusCode).toBe(204);
+    expect(await confirmations()).toEqual([]);
   });
 
   it('lists the photo sent in the export, by its public URL, never its path', async () => {

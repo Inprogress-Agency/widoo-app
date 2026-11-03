@@ -23,6 +23,10 @@ export class MemoryPhotoStorage implements PhotoStorage {
   downloads = 0;
   /** A test sets it to fail the writing of the widths it names. */
   failWrite: (objectName: string) => boolean = () => false;
+  /** A test sets it to run something just before an original is read. */
+  beforeDownload: () => Promise<void> = async () => {};
+  /** A test sets it to make every read of an original hang, never answered. */
+  stallDownloads = false;
 
   async signUpload(upload: UploadToSign): Promise<SignedUpload> {
     const headers = {
@@ -67,6 +71,8 @@ export class MemoryPhotoStorage implements PhotoStorage {
 
   async downloadUpload(objectName: string): Promise<Buffer | null> {
     this.downloads += 1;
+    await this.beforeDownload();
+    if (this.stallDownloads) return new Promise<never>(() => {});
     return this.uploads.get(objectName)?.data ?? null;
   }
 

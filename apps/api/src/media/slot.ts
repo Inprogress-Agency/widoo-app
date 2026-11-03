@@ -14,3 +14,15 @@ export function inPhotoSlot<T>(task: () => Promise<T>): Promise<T> {
   );
   return run;
 }
+
+/**
+ * `work`, or the rejection `timedOut()` once `ms` have passed: a task of the slot that waits on
+ * it is over at the deadline, and frees the slot, even if `work` never settles.
+ */
+export function withinDeadline<T>(work: Promise<T>, ms: number, timedOut: () => Error) {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(timedOut()), ms);
+  });
+  return Promise.race([work, deadline]).finally(() => clearTimeout(timer));
+}

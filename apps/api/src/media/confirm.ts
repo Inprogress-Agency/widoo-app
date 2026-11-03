@@ -9,18 +9,24 @@ import type { FastifyBaseLogger } from 'fastify';
 import { z } from 'zod';
 import type { Db, Tx } from '../db/client';
 import { media, photoUploads } from '../db/schema';
-import { bodyValidationError, httpError } from '../errors';
+import { bodyValidationError, httpError, mediaUnavailable } from '../errors';
 import type { PlaceEditor } from '../places/update';
 import { lockPhotoOwner, nextPhotoPosition } from './owners';
 import { photoOf } from './photos';
 import { InvalidPhoto, processPhoto } from './process';
-import { inPhotoSlot } from './slot';
+import { inPhotoSlot, withinDeadline } from './slot';
 import type { PhotoStorage } from './storage';
 import { assertUploadRoom, lockSender, uploadObjectName } from './upload';
 import { variantObjectName, type PhotoUrls } from './urls';
 
 /** Confirmations older than this serve nothing, the originals they name being long gone. */
 const keptConfirmationsMs = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * Time the storage has to give an original back. Past it, the confirmation answers 503 and frees
+ * the slot of the instance, which a read that never ends would otherwise hold for every other.
+ */
+export const originalReadDeadlineMs = 30_000;
 
 /** `media.storage_path` of a photo the API stored: its widths lie under it (`media/urls.ts`). */
 export const storedPhotoPath = (mediaId: string) => `photos/${mediaId}`;
@@ -56,10 +62,11 @@ async function refuseOriginal(storage: PhotoStorage, objectName: string): Promis
  *   from its original, nor from a new `PUT` on its URL;
  * - the head of the original: 404 without one, 422 over 10 MiB, the original deleted;
  * - rights on its owner, room and quota of the day, before the original is read or decoded;
- * - read and processed one at a time on the instance (`inPhotoSlot`): refused (422, the
- *   original deleted) unless it is a photo as the app sends it;
- * - its three widths written, then its row and its confirmation (`photo_uploads`), rights, room
- *   and quota checked again under lock; any failure there deletes the widths written.
+ * - read within `readDeadlineMs` (503 past it) and processed one at a time on the instance
+ *   (`inPhotoSlot`): refused (422, the original deleted) unless it is a photo as the app sends;
+ * - its three widths written, then its row and its confirmation (`photo_uploads`), rights, room,
+ *   quota and confirmations checked again under lock: a photo confirmed and deleted meanwhile
+ *   answers 404, its original deleted; any failure there deletes the widths written.
  * The original is deleted last. Storage that fails to delete is logged with the id of the photo
  * alone: the lifecycle rule, or the cleaning of #465, takes over.
  */
@@ -69,7 +76,11 @@ export async function confirmUpload(
   photoUrls: PhotoUrls,
   user: PlaceEditor,
   mediaId: string,
-  { now, log }: { now: Date; log: FastifyBaseLogger },
+  {
+    now,
+    log,
+    readDeadlineMs = originalReadDeadlineMs,
+  }: { now: Date; log: FastifyBaseLogger; readDeadlineMs?: number },
 ): Promise<Confirmed> {
   const storedIn = async (tx: Db | Tx): Promise<Confirmed | null> => {
     const [row] = await tx.select().from(media).where(eq(media.id, mediaId));
@@ -108,7 +119,9 @@ export async function confirmUpload(
   if (checked) return checked;
 
   const processed = await inPhotoSlot(async () => {
-    const original = await storage.downloadUpload(objectName);
+    const original = await withinDeadline(storage.downloadUpload(objectName), readDeadlineMs, () =>
+      mediaUnavailable('Photo storage did not answer in time'),
+    );
     if (!original) return null;
     return processPhoto(original).catch(() => refuseOriginal(storage, objectName));
   });
@@ -136,6 +149,12 @@ export async function confirmUpload(
       await lockSender(tx, user.id);
       const [won] = await tx.select().from(media).where(eq(media.id, mediaId));
       if (won) return { row: won, created: false };
+      // Confirmed by another request, then deleted, since the checks above: never again.
+      const [again] = await tx
+        .select({ id: photoUploads.id })
+        .from(photoUploads)
+        .where(eq(photoUploads.id, mediaId));
+      if (again) throw uploadNotFound();
       await assertUploadRoom(tx, user.id, now);
       await lockPhotoOwner(tx, user, ownerType, ownerId);
       const position = await nextPhotoPosition(tx, ownerType, ownerId);
@@ -169,6 +188,12 @@ export async function confirmUpload(
     await storage
       .deletePhotos(widths.map(({ name }) => name))
       .catch((cleanup: unknown) => log.warn({ err: cleanup, mediaId }, 'photo widths left'));
+    // Never to be stored (owner gone, photo confirmed and deleted): its original goes too.
+    if ((error as { statusCode?: unknown }).statusCode === 404) {
+      await storage
+        .deleteUpload(objectName)
+        .catch((cleanup: unknown) => log.warn({ err: cleanup, mediaId }, 'photo original left'));
+    }
     throw error;
   }
   await storage

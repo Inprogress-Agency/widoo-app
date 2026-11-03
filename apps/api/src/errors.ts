@@ -78,10 +78,10 @@ export function photoUploadLimitReached(limit: number) {
 
 /**
  * 503 `media_unavailable` of the photo routes where no photo storage is configured (#47): the
- * environment lacks it, nothing failed.
+ * environment lacks it, nothing failed. Also when the storage does not answer in time.
  */
-export function mediaUnavailable() {
-  return Object.assign(new Error('Photo storage is not configured'), {
+export function mediaUnavailable(message = 'Photo storage is not configured') {
+  return Object.assign(new Error(message), {
     statusCode: 503,
     apiCode: 'media_unavailable' as const,
   });
