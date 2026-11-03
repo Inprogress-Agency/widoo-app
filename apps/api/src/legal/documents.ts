@@ -15,8 +15,8 @@ type LegalSource = {
 const sources: Record<LegalDoc, LegalSource> = {
   terms: { version: '2026-10-21', updatedAt: '2026-10-21T00:00:00.000Z', texts: { fr: termsFr } },
   privacy: {
-    version: '2026-10-21',
-    updatedAt: '2026-10-21T00:00:00.000Z',
+    version: '2026-11-03',
+    updatedAt: '2026-11-03T00:00:00.000Z',
     texts: { fr: privacyFr },
   },
 };
