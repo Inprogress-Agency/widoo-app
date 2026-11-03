@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="fr" className={jakarta.variable} suppressHydrationWarning>
       <body className="bg-background font-sans text-body-s text-foreground antialiased">
         <SessionProvider>{children}</SessionProvider>
-        <Toaster />
+        <Toaster closeLabel={messages.toast.close} />
       </body>
     </html>
   );

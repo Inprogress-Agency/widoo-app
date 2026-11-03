@@ -88,6 +88,7 @@ const routeStatuses: Record<RouteStatus, string> = {
 /** Texts of the admin. French only (wiki Admin-Web › Principes). */
 export const messages = {
   app: { name: 'Widoo', product: 'Admin', title: 'Admin Widoo' },
+  toast: { close: 'Fermer la notification' },
   sections,
   pageTitles,
   roles,
