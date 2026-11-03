@@ -2,6 +2,7 @@ import { PlannedRoute } from '@widoo/shared';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
+import { placeSignals } from '../db/schema';
 import { testConfig } from '../test-config';
 import { signalFixtures } from '../verification/test-fixtures';
 
@@ -61,6 +62,44 @@ describe('POST /v1/me/planned/:id/steps/:stepId/done with the signal of the step
     expect((await done(headers, go.id, go.stepIds[0], payload)).statusCode).toBe(200);
 
     expect(await signalsOn(placeIds[0])).toHaveLength(1);
+  });
+
+  it('marks the step done all the same past the daily limit, or for an ignored account', async () => {
+    const { routeId, placeIds } = await route();
+    const limited = await visitor();
+    const limitedGo = await outing(limited.headers, routeId, 'on_site');
+    const ignored = await visitor();
+    const ignoredGo = await outing(ignored.headers, routeId, 'on_site');
+    const elsewhere = { placeId: placeIds[3] ?? '', weight: 2 };
+    await app.db.insert(placeSignals).values([
+      ...Array.from({ length: 30 }, () => ({
+        ...elsewhere,
+        userId: limited.id,
+        kind: 'confirm' as const,
+        contextPlannedRouteId: limitedGo.id,
+      })),
+      // Three reports rejected by the team, the last one yesterday.
+      ...Array.from({ length: 3 }, () => ({
+        ...elsewhere,
+        userId: ignored.id,
+        kind: 'report' as const,
+        reason: 'wrong_hours' as const,
+        contextPlannedRouteId: ignoredGo.id,
+        status: 'rejected' as const,
+        reviewedAt: new Date(Date.now() - 24 * 3_600_000),
+        createdAt: new Date(Date.now() - 20 * 24 * 3_600_000),
+      })),
+    ]);
+
+    for (const [{ headers }, go] of [
+      [limited, limitedGo],
+      [ignored, ignoredGo],
+    ] as const) {
+      const response = await done(headers, go.id, go.stepIds[0], { signal: { kind: 'confirm' } });
+      expect(response.statusCode, response.body).toBe(200);
+      expect(PlannedRoute.parse(response.json()).steps[0]?.doneAt).toEqual(expect.any(String));
+    }
+    expect(await signalsOn(placeIds[0])).toEqual([]);
   });
 
   it('refuses a wrong signal with 422, the step left as it was', async () => {

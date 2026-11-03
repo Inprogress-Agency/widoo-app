@@ -92,6 +92,42 @@ describe('the effect of a report on its place', () => {
     expect((await placeOf(placeIds[0])).verificationStatus).toBe('flagged');
   });
 
+  it('counts the accounts of the last 30 days only', async () => {
+    const { routeId, placeIds } = await route();
+    // Verified long ago: the window alone bounds the reports.
+    await placeOf(placeIds[0], { verificationStatus: 'verified', verifiedAt: daysAgo(120) });
+    const old = await returned(routeId);
+    await signal(old.headers, placeIds[0], report(old.outingId, 'wrong_hours'));
+    await app.db
+      .update(placeSignals)
+      .set({ createdAt: daysAgo(31) })
+      .where(eq(placeSignals.placeId, placeIds[0] ?? ''));
+    const recent = await returned(routeId);
+    await signal(recent.headers, placeIds[0], report(recent.outingId, 'wrong_hours'));
+    expect((await placeOf(placeIds[0])).verificationStatus).toBe('verified');
+
+    const third = await returned(routeId);
+    await signal(third.headers, placeIds[0], report(third.outingId, 'wrong_hours'));
+    expect((await placeOf(placeIds[0])).verificationStatus).toBe('flagged');
+  });
+
+  it('counts an account once, whatever the number of its reports', async () => {
+    const { routeId, placeIds } = await route();
+    await placeOf(placeIds[0], { verificationStatus: 'verified', verifiedAt: daysAgo(20) });
+    const { headers, outingId } = await returned(routeId);
+    await signal(headers, placeIds[0], report(outingId, 'wrong_hours'));
+    // Counted again once the 7 days are over, by the same account.
+    await app.db
+      .update(placeSignals)
+      .set({ createdAt: daysAgo(8) })
+      .where(eq(placeSignals.placeId, placeIds[0] ?? ''));
+
+    expect((await signal(headers, placeIds[0], report(outingId, 'wrong_hours'))).statusCode).toBe(
+      201,
+    );
+    expect((await placeOf(placeIds[0])).verificationStatus).toBe('verified');
+  });
+
   it('never flags it on field alerts, nor on reports answered by a later verification', async () => {
     const { routeId, placeIds } = await route();
     await placeOf(placeIds[0], { verificationStatus: 'verified', verifiedAt: daysAgo(10) });
