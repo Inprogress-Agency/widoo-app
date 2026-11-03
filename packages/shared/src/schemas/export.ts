@@ -141,5 +141,9 @@ export const MyDataExport = z.object({
   notifications: z.array(
     z.object({ kind: z.enum(notificationKinds), createdAt: DateTime, readAt: DateTime.nullable() }),
   ),
+  /** Photos the account sent for places (#47), by their link; they stay with the place. */
+  placePhotos: z.array(
+    z.object({ placeId: z.uuid(), placeName: z.string(), url: z.string(), sentAt: DateTime }),
+  ),
 });
 export type MyDataExport = z.infer<typeof MyDataExport>;

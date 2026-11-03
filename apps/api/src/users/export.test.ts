@@ -17,7 +17,7 @@ import {
   userAnecdotes,
   users,
 } from '../db/schema';
-import { editorFixtures } from '../editor/test-fixtures';
+import { demoPlaceIds, editorFixtures } from '../editor/test-fixtures';
 import { testConfig } from '../test-config';
 import { exportUserData } from './export';
 
@@ -62,6 +62,18 @@ async function fillAccount(headers: Record<string, string>, marker: string) {
     })
     .returning({ id: media.id });
   if (photo) photoIds.push(photo.id);
+  const [placePhoto] = await db
+    .insert(media)
+    .values({
+      ownerType: 'place',
+      ownerId: demoPlaceIds[0] ?? '',
+      storagePath: `https://images.example.com/lieu-${marker}.jpg`,
+      width: 1200,
+      height: 800,
+      uploadedBy: userId,
+    })
+    .returning({ id: media.id });
+  if (placePhoto) photoIds.push(placePhoto.id);
   const [planned] = await db
     .insert(plannedRoutes)
     .values({
@@ -141,6 +153,9 @@ describe('exportUserData', () => {
     expect(exported.supportMessages).toMatchObject([{ message: `Message ${marker}` }]);
     expect(exported.devices).toMatchObject([{ locale: 'en' }]);
     expect(exported.notifications).toMatchObject([{ kind: 'go_closed' }]);
+    expect(exported.placePhotos).toMatchObject([
+      { placeId: demoPlaceIds[0], url: `https://images.example.com/lieu-${marker}.jpg` },
+    ]);
     // The push token is a credential of the push service, never returned.
     expect(JSON.stringify(exported)).not.toContain('ExponentPushToken');
   });
@@ -169,6 +184,8 @@ describe('exportUserData', () => {
       order by 1`);
     const exported = [
       'devices.user_id',
+      // Photos of the caller's routes and steps come with them, those sent for places apart.
+      'media.uploaded_by',
       'notifications.user_id',
       'planned_routes.user_id',
       'route_ratings.user_id',
@@ -188,8 +205,6 @@ describe('exportUserData', () => {
       'admin_actions.actor_id',
       // Decisions of a member of the team on a route: their work, not data of the person.
       'moderation_actions.actor_id',
-      // Photos of the caller's routes and steps are exported with them.
-      'media.uploaded_by',
       // Places belong to the shared catalog, not to the person who added them.
       'places.created_by',
       // Decisions of a member of the team, part of their work.

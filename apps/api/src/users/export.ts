@@ -208,7 +208,7 @@ export async function exportUserData(
       const planned = await plannedRoutesOf(tx, userId);
       const createdRoutes = await createdRoutesOf(tx, userId, photoUrls);
       const profileLists = await profileListsOf(tx, userId);
-      const activity = await activityOf(tx, userId);
+      const activity = await activityOf(tx, userId, photoUrls);
       return {
         exportedAt: iso(now),
         account: accountOf(user),
