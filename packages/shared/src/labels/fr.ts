@@ -79,10 +79,14 @@ export const fr = {
     closed: 'Fermé',
   },
   signalReasons: {
-    closed_permanently: 'Fermé définitivement',
+    closed_today: "Fermé aujourd'hui",
     closed_temporarily: 'Fermé temporairement',
+    closed_permanently: 'Fermé définitivement',
     wrong_hours: 'Horaires erronés',
     wrong_address: 'Adresse erronée',
+    works: 'Travaux ou accès difficile',
+    crowded: 'Complet ou longue attente',
+    not_as_described: 'Plus comme décrit',
     other: 'Autre',
   },
   userRoles: {

@@ -164,7 +164,7 @@ describe('POST /v1/me/planned/:id/steps/:stepId/done', () => {
     expect(unskipped.steps[1]?.doneAt).not.toBeNull();
   });
 
-  it('answers 409 outside a Go, 404 for an unknown step, 422 for a body', async () => {
+  it('answers 409 outside a Go, 404 for an unknown step, 422 for a wrong body', async () => {
     const headers = await fixtures.signIn();
     const planned = await go(headers, false);
     const stepId = planned.route.steps[0]?.id;
@@ -282,7 +282,7 @@ describe('POST and DELETE /v1/me/planned/:id/steps/:stepId/(arrived|skip)', () =
     expect((await arrived(headers, started.id, uuidv7())).statusCode).toBe(404);
     expect((await skip(headers, started.id, uuidv7())).statusCode).toBe(404);
     expect((await unskip(headers, started.id, uuidv7())).statusCode).toBe(404);
-    // Like `done`, a body waits for `place_signals` (#49).
+    // Only `done` takes the signal of the step (D-095).
     expect(
       (await arrived(headers, started.id, started.route.steps[0]?.id, { signal: {} })).statusCode,
     ).toBe(422);

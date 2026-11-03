@@ -10,7 +10,7 @@ import { and, eq, isNull } from 'drizzle-orm';
 import type { Db, Tx } from '../db/client';
 import { routeUnlocks, routes, users } from '../db/schema';
 import { httpError } from '../errors';
-import { softDeleteUser } from '../users/repository';
+import { lockOutingsOf, softDeleteUser } from '../users/repository';
 import { recordAdminAction } from './actions';
 import { readUserDetail } from './users-read';
 
@@ -263,6 +263,8 @@ export async function setCertification(
  */
 export async function deleteUser(db: Db, actor: Actor, targetId: string): Promise<void> {
   await db.transaction(async (tx) => {
+    // Its outings before the account, like the deletion from the app.
+    await lockOutingsOf(tx, targetId);
     const target = await lockTarget(tx, actor, targetId, 'delete');
     await softDeleteUser(tx, targetId);
     await recordAdminAction(tx, {

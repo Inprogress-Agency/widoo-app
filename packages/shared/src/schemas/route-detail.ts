@@ -54,15 +54,19 @@ export const RouteTimeline = z.object({
 export type RouteTimeline = z.infer<typeof RouteTimeline>;
 
 /**
- * What the visitors said of the place of a step (D-013, D-056), read only in the sheet: the
- * confirmations since its last verification, and its open reports.
+ * What the visitors said of the place of a step (D-013, D-056), read only in the sheet: who
+ * confirmed it lately, its last verification, and who reports it closed.
  */
 export const PlaceVerification = z.object({
-  /** Visitors who confirmed the place since it was last verified. */
+  /** Distinct visitors who confirmed the place within the validity of a verification (90 days). */
   confirmations: count,
-  /** Last visit without a problem; null for a place never verified (« Pas encore vérifié »). */
+  /** Its last verification (`verified_at`); null for a place never verified (« Pas encore vérifié »). */
   lastConfirmedAt: z.iso.datetime().nullable(),
-  /** Open reports that the place is closed; null without one. */
+  /**
+   * Distinct visitors who report it closed, while it holds: « fermé aujourd'hui » until midnight in
+   * its city (D-036), « fermé temporairement » or « définitivement » while the place is flagged;
+   * the last report at `lastAt`. Null without one.
+   */
   reports: z.object({ count: z.number().int().positive(), lastAt: z.iso.datetime() }).nullable(),
 });
 export type PlaceVerification = z.infer<typeof PlaceVerification>;

@@ -155,6 +155,13 @@
       "when": 1792475741279,
       "tag": "0021_add_b2b_clients",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1793708690913,
+      "tag": "0022_add_place_signals",
+      "breakpoints": true
     }
   ]
 }

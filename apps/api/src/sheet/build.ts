@@ -15,6 +15,7 @@ import {
 } from '@widoo/shared';
 import { z } from 'zod';
 import { httpsOrNull } from '../search/repository';
+import type { PlaceSignalSummary } from '../verification/summary';
 import type { LoadedSheet } from './load';
 
 /** What `computed.access` holds (Orchestration › Accès, D-050); anything else reads as none. */
@@ -97,6 +98,8 @@ export interface SheetParts {
   creator: RouteDetail['creator'];
   sharedBy: RouteDetail['sharedBy'];
   myReport: MyRouteReport | null;
+  /** What the visitors said of each place, by place id; a place without signal is absent. */
+  signals: ReadonlyMap<string, PlaceSignalSummary>;
   now: Date;
 }
 
@@ -157,11 +160,10 @@ export function buildSheet(loaded: LoadedSheet, parts: SheetParts): RouteDetail 
           verifiedAt: place.verifiedAt?.toISOString() ?? null,
           hours,
         },
-        // No place signal is stored yet: the confirmations since the last verification only.
         verification: {
-          confirmations: Math.floor(place.confirmationsSinceVerified),
+          confirmations: parts.signals.get(place.id)?.confirmations ?? 0,
           lastConfirmedAt: place.verifiedAt?.toISOString() ?? null,
-          reports: null,
+          reports: parts.signals.get(place.id)?.reports ?? null,
         },
         highlights: step.highlights ?? [],
         photos,

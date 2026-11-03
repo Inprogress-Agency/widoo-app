@@ -1,11 +1,12 @@
 import { FirstName, onlineRouteStatuses, type UpdateMe } from '@widoo/shared';
-import { and, eq, gte, inArray, isNull, ne, notInArray, or, sql } from 'drizzle-orm';
+import { and, asc, eq, gte, inArray, isNull, ne, notInArray, or, sql } from 'drizzle-orm';
 import type { VerifiedIdentity } from '../auth/verifier';
 import type { Db, Tx } from '../db/client';
 import {
   devices,
   media,
   notifications,
+  placeSignals,
   plannedRoutes,
   routeReports,
   routeRevisions,
@@ -127,6 +128,21 @@ export async function updateUser(db: Db, userId: string, update: UpdateMe): Prom
 }
 
 /**
+ * Locks the outings of the account before the account itself, in the order of every transaction
+ * that locks both (« Étape suivante », the place signals: outing, account, place): a deletion and
+ * a step done at once wait for each other instead of deadlocking. By id, so that two deletions of
+ * the same account lock them in the same order.
+ */
+export async function lockOutingsOf(tx: Tx, userId: string): Promise<void> {
+  await tx
+    .select({ id: plannedRoutes.id })
+    .from(plannedRoutes)
+    .where(eq(plannedRoutes.userId, userId))
+    .orderBy(asc(plannedRoutes.id))
+    .for('update');
+}
+
+/**
  * Account deletion (wiki Compte-et-Monetisation, D-025): `deleted_at` set, e-mail, first name,
  * avatar, bio, neighborhood, language, preferences and store identifier erased, profile no longer
  * public, and every row of the account deleted (`eraseAccountRows`). Its routes online stay,
@@ -136,6 +152,7 @@ export async function updateUser(db: Db, userId: string, update: UpdateMe): Prom
  */
 export async function softDeleteUser(db: Db, userId: string): Promise<void> {
   await db.transaction(async (tx) => {
+    await lockOutingsOf(tx, userId);
     const deleted = await tx
       .update(users)
       .set({
@@ -162,6 +179,8 @@ export async function softDeleteUser(db: Db, userId: string): Promise<void> {
 async function eraseAccountRows(tx: Tx, userId: string): Promise<void> {
   await tx.delete(userAnecdotes).where(eq(userAnecdotes.userId, userId));
   await tx.delete(userFeaturedRoutes).where(eq(userFeaturedRoutes.userId, userId));
+  // Its confirmations and reports of places (D-056), before the outings they come from.
+  await tx.delete(placeSignals).where(eq(placeSignals.userId, userId));
   // Their progress rows go with them (cascade).
   await tx.delete(plannedRoutes).where(eq(plannedRoutes.userId, userId));
   // A route bought alone belongs to the account: nothing is left to unlock (D-073).

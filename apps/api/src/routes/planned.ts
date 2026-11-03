@@ -6,6 +6,7 @@ import {
   PlannedRouteQuery,
   RateRoute,
   RateRouteResult,
+  StepPlaceSignal,
   UpdatePlannedRoute,
 } from '@widoo/shared';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
@@ -24,6 +25,7 @@ import { createPlanned, listPlanned, ownedPlanned, readPlanned } from '../planne
 import { snapshotOf } from '../planned/snapshot';
 import { updatePlanned } from '../planned/update';
 import { rateOuting } from '../ratings/repository';
+import { createVerificationRules } from '../verification/rules';
 import { currentUser } from './me';
 
 const security = [{ firebaseIdToken: [] }];
@@ -36,6 +38,7 @@ const PlannedStepParams = z.strictObject({ id: z.uuid(), stepId: z.uuid() });
  * a planning reads or changes it, any other id answering 404.
  */
 export const plannedRoutesPlugin: FastifyPluginAsyncZod = async (app) => {
+  const verificationRules = createVerificationRules(app.db);
   app.addHook('onRequest', app.requireAuth);
   app.addHook('onSend', async (_request, reply) => {
     reply.header('cache-control', 'no-store');
@@ -122,22 +125,34 @@ export const plannedRoutesPlugin: FastifyPluginAsyncZod = async (app) => {
     {
       schema: {
         tags,
-        summary: 'Mark a step of my Go done (« Étape suivante »)',
+        summary: 'Mark a step of my Go done (« Étape suivante »), with the signal of its place',
         security,
         params: PlannedStepParams,
-        // The on-site signal of the wiki waits for `place_signals`: no body until then.
-        body: z.strictObject({}).nullish(),
+        // « Tout allait bien ici ? » answered on site (E-07, D-095).
+        body: z.strictObject({ signal: StepPlaceSignal.optional() }).nullish(),
         response: { 200: PlannedRoute },
       },
     },
-    async (request) =>
-      markStepDone(
+    async (request) => {
+      const userId = currentUser(request).id;
+      const { id, stepId } = request.params;
+      const signal = request.body?.signal;
+      return markStepDone(
         app.db,
-        currentUser(request).id,
-        request.params.id,
-        request.params.stepId,
+        userId,
+        id,
+        stepId,
         new Date(),
-      ),
+        signal && {
+          signal,
+          rules: await verificationRules(),
+          onRecorded: (outcome) => {
+            // Journalised, never told to the account (Creation-et-Moderation › Anti-abus).
+            if (outcome === 'ignored') request.log.info({ userId, stepId }, 'place signal ignored');
+          },
+        },
+      );
+    },
   );
 
   app.post(
@@ -148,7 +163,7 @@ export const plannedRoutesPlugin: FastifyPluginAsyncZod = async (app) => {
         summary: "Mark a step of my Go arrived (« J'y suis »)",
         security,
         params: PlannedStepParams,
-        // Like `done`: no body until `place_signals` (#49).
+        // No body: the signal of the step goes with `done` (D-095).
         body: z.strictObject({}).nullish(),
         response: { 200: PlannedRoute },
       },
@@ -171,7 +186,7 @@ export const plannedRoutesPlugin: FastifyPluginAsyncZod = async (app) => {
         summary: 'Mark a step of my Go skipped (« Passer cette étape »); 409 once it is done',
         security,
         params: PlannedStepParams,
-        // Like `done`: no body until `place_signals` (#49).
+        // No body: the signal of the step goes with `done` (D-095).
         body: z.strictObject({}).nullish(),
         response: { 200: PlannedRoute },
       },

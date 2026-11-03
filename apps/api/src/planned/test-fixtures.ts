@@ -110,6 +110,40 @@ export function plannedFixtures(app: () => App, verifier: TestTokenVerifier) {
     return first.id;
   }
 
+  /**
+   * Moves every step of the route `routeId` to a fictitious place of its own, « Accessible à
+   * toute heure », close to each other and far from the demo, so that the signals of a test leave
+   * the demo places alone; deleted by `cleanUp`. Returns their ids, in step order.
+   */
+  async function ownPlaces(routeId: string) {
+    const rows = await app()
+      .db.select({ stepId: steps.id, cityId: places.cityId, category: places.category })
+      .from(steps)
+      .innerJoin(places, eq(places.id, steps.placeId))
+      .where(eq(steps.routeId, routeId))
+      .orderBy(asc(steps.position));
+    const ids: string[] = [];
+    for (const [index, row] of rows.entries()) {
+      const placeId = uuidv7();
+      placeIds.push(placeId);
+      ids.push(placeId);
+      await app()
+        .db.insert(places)
+        .values({
+          id: placeId,
+          cityId: row.cityId,
+          name: `Lieu fictif ${index + 1}`,
+          category: row.category,
+          location: { lat: -45 + index * 0.002, lng: -45 },
+          address: 'Adresse fictive',
+          verificationStatus: 'unverified',
+          alwaysOpen: true,
+        });
+      await app().db.update(steps).set({ placeId }).where(eq(steps.id, row.stepId));
+    }
+    return ids;
+  }
+
   /** A signed-in account of the given plan, created on its first request. */
   async function signIn(values: Partial<typeof users.$inferInsert> = {}) {
     const { token, uid } = verifier.issue();
@@ -144,5 +178,5 @@ export function plannedFixtures(app: () => App, verifier: TestTokenVerifier) {
     if (placeIds.length > 0) await app().db.delete(places).where(inArray(places.id, placeIds));
   }
 
-  return { copyDemoRoute, alwaysOpenFirstStep, signIn, unlock, cleanUp };
+  return { copyDemoRoute, alwaysOpenFirstStep, ownPlaces, signIn, unlock, cleanUp };
 }

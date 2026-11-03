@@ -6,6 +6,7 @@ import { TestTokenVerifier } from '../auth/test-verifier';
 import {
   media,
   notifications,
+  placeSignals,
   plannedRoutes,
   routeReports,
   routeRevisions,
@@ -118,6 +119,22 @@ describe('DELETE /v1/me and the routes of the account (D-025)', () => {
         .insert(routeReports)
         .values({ routeId: otherDraft.id, userId: authorId, reason: 'hidden_ad' });
       await app.db.insert(notifications).values({ userId: authorId, kind: 'report_resolved' });
+      // The author confirmed a fictitious place during an outing of their own (D-056).
+      const [outing] = await app.db
+        .insert(plannedRoutes)
+        .values({ userId: authorId, routeRevisionSnapshot: {}, startsAt: new Date(), timeline: {} })
+        .returning({ id: plannedRoutes.id });
+      const [signaled] = await app.db
+        .select({ placeId: steps.placeId })
+        .from(steps)
+        .where(eq(steps.id, await fixtures.alwaysOpenFirstStep(otherDraft.id)));
+      await app.db.insert(placeSignals).values({
+        userId: authorId,
+        placeId: signaled?.placeId ?? '',
+        kind: 'confirm',
+        weight: 2,
+        contextPlannedRouteId: outing?.id ?? '',
+      });
 
       const response = await app.inject({ method: 'DELETE', url: '/v1/me', headers: author });
       expect(response.statusCode).toBe(204);
@@ -133,7 +150,7 @@ describe('DELETE /v1/me and the routes of the account (D-025)', () => {
       expect(
         await app.db.select().from(routeRevisions).where(eq(routeRevisions.authorId, authorId)),
       ).toEqual([]);
-      for (const table of [routeReports, notifications]) {
+      for (const table of [routeReports, notifications, placeSignals]) {
         expect(await app.db.select().from(table).where(eq(table.userId, authorId))).toEqual([]);
       }
 

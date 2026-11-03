@@ -13,7 +13,7 @@ import {
 import { and, eq, isNotNull, isNull, sql, type SQL } from 'drizzle-orm';
 import { routeViewerOf } from '../access/route-viewer';
 import type { Db } from '../db/client';
-import { routes, users } from '../db/schema';
+import { placeSignals, routes, users } from '../db/schema';
 import { activeFilters, allOf, listedRoutes } from '../search/filters';
 import {
   cardColumns,
@@ -108,11 +108,23 @@ async function countListedRoutes(db: Db, userId: string): Promise<number> {
 }
 
 /**
+ * « Lieux vérifiés » (Creation-et-Moderation › Lieux vérifiés sur le profil, D-056): the distinct
+ * places the account confirmed on site or after an outing; its reports do not count.
+ */
+async function countVerifiedPlaces(db: Db, userId: string): Promise<number> {
+  const [row] = await db
+    .select({ count: sql<number>`count(distinct ${placeSignals.placeId})::int` })
+    .from(placeSignals)
+    .where(and(eq(placeSignals.userId, userId), eq(placeSignals.kind, 'confirm')));
+  return row?.count ?? 0;
+}
+
+/**
  * The public profile of `id` for a caller, anonymous when null, its listed routes sorted,
  * filtered and paged by the query; `undefined` when there is none to show (404). Each figure is
- * null when it does not exist (E-16 shows only those): no published route, no rating.
- * `routesCompleted` stays null until the completed Gos on their routes are counted (#423,
- * D-091). `verifiedPlaces` is null at zero (D-056), and zero while no place signal is stored.
+ * null when it does not exist (E-16 shows only those): no published route, no rating, no place
+ * verified (D-056). `routesCompleted` stays null until the completed Gos on their routes are
+ * counted (#423, D-091).
  */
 export async function readPublicProfile(
   db: Db,
@@ -125,24 +137,26 @@ export async function readPublicProfile(
   if (!user?.firstName) return undefined;
 
   const filters = Object.values(activeFilters({ moods: query.moods }));
-  const [anecdotes, values, featuredRoutes, page, moodCounts, published] = await Promise.all([
-    readAnecdotes(db, user.id),
-    readCertificationValues(db, user.id),
-    readFeaturedCards(db, user.id, caller),
-    readCardPage(
-      db,
-      {
-        where: allOf([routesOf(user.id), ...filters]),
-        sort: `profile:${query.sort}`,
-        keys: profileSortKeys(query.sort),
-        cursor: query.cursor,
-        limit: query.limit,
-      },
-      caller,
-    ),
-    readMoodCounts(db, user.id),
-    countListedRoutes(db, user.id),
-  ]);
+  const [anecdotes, values, featuredRoutes, page, moodCounts, published, verified] =
+    await Promise.all([
+      readAnecdotes(db, user.id),
+      readCertificationValues(db, user.id),
+      readFeaturedCards(db, user.id, caller),
+      readCardPage(
+        db,
+        {
+          where: allOf([routesOf(user.id), ...filters]),
+          sort: `profile:${query.sort}`,
+          keys: profileSortKeys(query.sort),
+          cursor: query.cursor,
+          limit: query.limit,
+        },
+        caller,
+      ),
+      readMoodCounts(db, user.id),
+      countListedRoutes(db, user.id),
+      countVerifiedPlaces(db, user.id),
+    ]);
   return {
     id: user.id,
     firstName: user.firstName,
@@ -155,7 +169,7 @@ export async function readPublicProfile(
     routesPublished: published > 0 ? published : null,
     routesCompleted: null,
     ratingAvg: values.averageRating,
-    verifiedPlaces: null,
+    verifiedPlaces: verified > 0 ? verified : null,
     anecdotes,
     featuredRoutes,
     routes: page,

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { placeSignalKinds } from '../place-signals';
 import { routeRatingStatuses } from '../ratings';
 import { notificationKinds, reportStatuses, routeReportReasons } from '../reports';
 import { taxonomies } from '../taxonomies';
@@ -119,6 +120,18 @@ export const MyDataExport = z.object({
     z.object({
       routeId: z.uuid(),
       reason: z.enum(routeReportReasons),
+      comment: z.string().nullable(),
+      status: z.enum(reportStatuses),
+      createdAt: DateTime,
+    }),
+  ),
+  /** Confirmations and reports of places, during or after an outing (D-056). */
+  placeSignals: z.array(
+    z.object({
+      placeId: z.uuid(),
+      placeName: z.string(),
+      kind: z.enum(placeSignalKinds),
+      reason: z.enum(taxonomies.signalReasons).nullable(),
       comment: z.string().nullable(),
       status: z.enum(reportStatuses),
       createdAt: DateTime,
