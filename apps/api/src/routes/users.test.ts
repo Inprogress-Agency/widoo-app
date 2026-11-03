@@ -2,7 +2,13 @@ import { PublicProfile, RouteSearchResult } from '@widoo/shared';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
-import { routes, userAnecdotes, userFeaturedRoutes } from '../db/schema';
+import {
+  placeSignals,
+  plannedRoutes,
+  routes,
+  userAnecdotes,
+  userFeaturedRoutes,
+} from '../db/schema';
 import { uuidv7 } from '../db/uuid';
 import { plannedFixtures } from '../planned/test-fixtures';
 import { testConfig } from '../test-config';
@@ -180,7 +186,35 @@ describe('GET /v1/users/:id/profile', () => {
       anecdotes: [],
       routes: { items: [], nextCursor: null },
       moodCounts: {},
+      verifiedPlaces: null,
     });
+  });
+
+  it('counts the distinct places the creator confirmed, without their reports (D-056)', async () => {
+    const userId = await meOf(await fixtures.signIn({ firstName: 'Inès' }));
+    const [first, second, reported] = await fixtures.ownPlaces(
+      await routeOf(userId, { status: 'draft' }),
+    );
+    const [outing] = await app.db
+      .insert(plannedRoutes)
+      .values({ userId, routeRevisionSnapshot: {}, startsAt: new Date(), timeline: {} })
+      .returning({ id: plannedRoutes.id });
+    const signal = (placeId = '', kind: 'confirm' | 'report' = 'confirm') => ({
+      userId,
+      placeId,
+      kind,
+      reason: kind === 'report' ? ('closed_today' as const) : null,
+      weight: 2,
+      contextPlannedRouteId: outing?.id ?? '',
+    });
+    await app.db
+      .insert(placeSignals)
+      .values([signal(first), signal(first), signal(second), signal(reported, 'report')]);
+
+    const response = await profileOf(userId);
+
+    expect(response.statusCode, response.body).toBe(200);
+    expect(PublicProfile.parse(response.json()).verifiedPlaces).toBe(2);
   });
 
   it.each([
