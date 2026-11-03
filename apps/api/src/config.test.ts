@@ -28,7 +28,27 @@ describe('loadConfig', () => {
       mapboxDirectionsToken: undefined,
       directionsCacheDays: 0,
       mediaPublicBaseUrl: undefined,
+      mediaBuckets: undefined,
     });
+  });
+
+  it('reads the buckets of the photos, all three settings together or none', () => {
+    const load = (env: Record<string, string>) => loadConfig({ DATABASE_URL: databaseUrl, ...env });
+    const storage = {
+      MEDIA_UPLOAD_BUCKET: 'widoo-test-media-uploads',
+      MEDIA_BUCKET: 'widoo-test-media',
+      MEDIA_PUBLIC_BASE_URL: 'https://storage.googleapis.com/widoo-test-media',
+    };
+    expect(load(storage).mediaBuckets).toEqual({
+      uploads: 'widoo-test-media-uploads',
+      photos: 'widoo-test-media',
+    });
+    expect(load({ ...storage, MEDIA_UPLOAD_BUCKET: '', MEDIA_BUCKET: '' }).mediaBuckets).toBe(
+      undefined,
+    );
+    expect(() => load({ ...storage, MEDIA_BUCKET: '' })).toThrow(/go together/);
+    expect(() => load({ ...storage, MEDIA_PUBLIC_BASE_URL: '' })).toThrow(/go together/);
+    expect(() => load({ ...storage, MEDIA_BUCKET: 'Widoo Media' })).toThrow(/MEDIA_BUCKET/);
   });
 
   it('reads the public URL of the photos, https only, without its trailing slash', () => {

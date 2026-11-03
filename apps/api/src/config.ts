@@ -20,6 +20,11 @@ const PublicBaseUrl = z
   )
   .transform((value) => value.replace(/\/+$/, ''));
 
+/** Name of a Cloud Storage bucket: 3 to 63 lowercase letters, digits, `-`, `_` or `.`. */
+const BucketName = z
+  .string()
+  .regex(/^[a-z0-9][a-z0-9._-]{1,61}[a-z0-9]$/, 'Expected a bucket name');
+
 /** Environment variables of the API, validated once at startup. See `.env.example`. */
 const Env = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -130,6 +135,23 @@ const Env = z.object({
     .transform((value) => value || undefined)
     .pipe(PublicBaseUrl.optional()),
   /**
+   * Private bucket the app sends the originals of its photos to, by signed URL (#47). They keep
+   * their metadata, EXIF included, and a lifecycle rule of the bucket deletes them after a day.
+   * With MEDIA_BUCKET and MEDIA_PUBLIC_BASE_URL, or not at all: without them, the photo routes
+   * answer 503 `media_unavailable` and the rest of the API works.
+   */
+  MEDIA_UPLOAD_BUCKET: z
+    .string()
+    .optional()
+    .transform((value) => value || undefined)
+    .pipe(BucketName.optional()),
+  /** Public bucket of the processed photos, read under MEDIA_PUBLIC_BASE_URL. */
+  MEDIA_BUCKET: z
+    .string()
+    .optional()
+    .transform((value) => value || undefined)
+    .pipe(BucketName.optional()),
+  /**
    * `staging` or `production` on Cloud Run, where NODE_ENV is `production` for both; empty or
    * absent, the reports carry NODE_ENV.
    */
@@ -147,6 +169,16 @@ const Env = z.object({
 
 /** Guards against local settings that would weaken production: token checks, report transport. */
 const ProductionEnv = Env.superRefine((env, context) => {
+  // The photo storage takes its three settings or none: half of it would sign uploads that no
+  // confirmation can serve.
+  const media = [env.MEDIA_UPLOAD_BUCKET, env.MEDIA_BUCKET];
+  if (media.some(Boolean) && (!media.every(Boolean) || !env.MEDIA_PUBLIC_BASE_URL)) {
+    context.addIssue({
+      code: 'custom',
+      path: ['MEDIA_UPLOAD_BUCKET'],
+      message: 'MEDIA_UPLOAD_BUCKET, MEDIA_BUCKET and MEDIA_PUBLIC_BASE_URL go together',
+    });
+  }
   // The emulator accepts unsigned tokens: with a demo project only, which exists nowhere else.
   // The admin applies the same rule on its side.
   if (
@@ -210,6 +242,11 @@ export const Config = ProductionEnv.transform((env) => ({
   mapboxDirectionsToken: env.MAPBOX_DIRECTIONS_TOKEN,
   directionsCacheDays: env.MAPBOX_DIRECTIONS_CACHE_DAYS,
   mediaPublicBaseUrl: env.MEDIA_PUBLIC_BASE_URL,
+  /** Buckets of the photos; undefined where they are not configured (photo routes: 503). */
+  mediaBuckets:
+    env.MEDIA_UPLOAD_BUCKET && env.MEDIA_BUCKET
+      ? { uploads: env.MEDIA_UPLOAD_BUCKET, photos: env.MEDIA_BUCKET }
+      : undefined,
 }));
 export type Config = z.output<typeof Config>;
 
