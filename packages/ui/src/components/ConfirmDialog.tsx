@@ -36,6 +36,10 @@ type ConfirmDialogProps = {
  * Confirmation of an action that needs a reason or a message (wiki Ecrans › Admin web,
  * « Confirmation »): a window on a veil, the only place where a button is red. Its fields are a form: required ones block the
  * confirmation by themselves.
+ *
+ * The window never grows past the browser window: a long form (a B2B partner, the weights of a
+ * setting) scrolls between the title and the buttons, which stay in view. A short one is laid out
+ * as before, its height fitted to its content.
  */
 export function ConfirmDialog({
   isOpen,
@@ -60,8 +64,8 @@ export function ConfirmDialog({
     <DialogPrimitive.Root open={isOpen} onOpenChange={(isNowOpen) => !isNowOpen && onCancel()}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-scrim" />
-        <DialogPrimitive.Content className="fixed inset-0 z-50 m-auto flex h-fit max-h-full w-full max-w-dialog flex-col gap-16 overflow-y-auto rounded-block bg-popover p-24 shadow-floating">
-          <div className="flex items-start justify-between gap-12">
+        <DialogPrimitive.Content className="fixed inset-0 z-50 m-auto flex h-fit max-h-dialog w-full max-w-dialog flex-col rounded-block bg-popover shadow-floating">
+          <div className="flex shrink-0 items-start justify-between gap-12 px-24 pt-24">
             <DialogPrimitive.Title className="text-title-m">{title}</DialogPrimitive.Title>
             <DialogPrimitive.Close
               aria-label={closeLabel}
@@ -70,12 +74,16 @@ export function ConfirmDialog({
               <XIcon aria-hidden className="size-16" />
             </DialogPrimitive.Close>
           </div>
-          <DialogPrimitive.Description className="text-body">
-            {description}
-          </DialogPrimitive.Description>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-16">
-            {children}
-            <div className="flex justify-end gap-8">
+          {/* The form holds the buttons, so that Enter in a field confirms; only its body scrolls,
+              and brings a field reached with Tab fully into view, its focus ring included. */}
+          <form onSubmit={handleSubmit} className="flex min-h-0 flex-col">
+            <div className="flex min-h-0 scroll-py-16 flex-col gap-16 overflow-y-auto px-24 py-16">
+              <DialogPrimitive.Description className="text-body">
+                {description}
+              </DialogPrimitive.Description>
+              {children}
+            </div>
+            <div className="flex shrink-0 justify-end gap-8 px-24 pb-24">
               <Button variant="secondary" onClick={onCancel}>
                 {cancelLabel}
               </Button>
