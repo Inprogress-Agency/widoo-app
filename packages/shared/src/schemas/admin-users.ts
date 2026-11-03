@@ -4,7 +4,7 @@ import { SupportTopic } from './support';
 import { taxonomies } from '../taxonomies';
 import type { UserRole } from '../taxonomies';
 import { plainText } from './common';
-import { CertifiedOverride, PlanSource } from './profile';
+import { CertifiedOverride, PlanProduct, PlanSource } from './profile';
 
 /** Rows of a page of the users of the admin. */
 export const adminUsersPageSize = 50;
@@ -17,11 +17,15 @@ export const AdminUsersQuery = z.strictObject({
 });
 export type AdminUsersQuery = z.infer<typeof AdminUsersQuery>;
 
-/** The plan of an account and where it comes from (store or gift of the team). */
+/** The plan of an account, where it comes from (store or gift of the team), and its product. */
 export const AdminUserPlan = z.object({
   plan: z.enum(taxonomies.plans),
   source: PlanSource,
-  /** End of the Premium plan; null without an end (or while the plan is free). */
+  /** Subscription or pass bought in the store (D-116); null while free and for a gift. */
+  product: PlanProduct.nullable(),
+  /** The subscription renews at `expiresAt`; false once cancelled, and for a pass or a gift. */
+  willRenew: z.boolean(),
+  /** Renewal or end of the Premium plan; null without an end (or while the plan is free). */
   expiresAt: z.iso.datetime().nullable(),
 });
 export type AdminUserPlan = z.infer<typeof AdminUserPlan>;

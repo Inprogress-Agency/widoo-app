@@ -45,7 +45,14 @@ async function fillAccount(headers: Record<string, string>, marker: string) {
   const db = app.db;
   await db
     .update(users)
-    .set({ bio: `Bio ${marker}`, locale: 'en' })
+    .set({
+      bio: `Bio ${marker}`,
+      locale: 'en',
+      plan: 'premium',
+      planProduct: 'annual',
+      planWillRenew: true,
+      planExpiresAt: new Date('2027-10-12T08:00:00Z'),
+    })
     .where(eq(users.id, userId));
   await db
     .insert(userAnecdotes)
@@ -123,7 +130,14 @@ describe('exportUserData', () => {
     const { userId, route } = filled;
 
     const exported = MyDataExport.parse(await exportUserData(app.db, userId));
-    expect(exported.account).toMatchObject({ id: userId, bio: `Bio ${marker}` });
+    expect(exported.account).toMatchObject({
+      id: userId,
+      bio: `Bio ${marker}`,
+      plan: 'premium',
+      planProduct: 'annual',
+      planWillRenew: true,
+      planExpiresAt: '2027-10-12T08:00:00.000Z',
+    });
     expect(exported.preferences).toMatchObject({ locale: 'en' });
     expect(exported.anecdotes).toMatchObject([{ answer: `Un bon plan ${marker}` }]);
     expect(exported.plannedRoutes).toMatchObject([

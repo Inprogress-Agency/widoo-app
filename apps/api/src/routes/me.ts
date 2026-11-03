@@ -32,6 +32,8 @@ async function toMe(db: Db, user: User, thresholds: CertificationThresholds): Pr
     avatarUrl: user.avatarUrl,
     role: user.role,
     plan: user.plan,
+    planProduct: user.planProduct,
+    planWillRenew: user.planWillRenew,
     planExpiresAt: user.planExpiresAt?.toISOString() ?? null,
     isPublic: user.isPublic,
     locale: user.locale,

@@ -16,6 +16,7 @@ import {
   plannedRouteClosers,
   notificationKinds,
   plannedRouteStatuses,
+  planProducts,
   planSources,
   profileSlots,
   b2bClientStatuses,
@@ -23,6 +24,7 @@ import {
   maxMonthlyPriceCents,
   maxPartnerRoutes,
   ratingCommentMaxLength,
+  renewablePlanProducts,
   reportStatuses,
   routeTipsMax,
   routeTitleMaxLength,
@@ -94,6 +96,8 @@ export const directionsProfile = pgEnum('directions_profile', directionsProfiles
 export const certifiedOverride = pgEnum('certified_override', certifiedOverrides);
 /** Origin of a right to Premium: the store, or a gift of the team (A-06). */
 export const planSource = pgEnum('plan_source', planSources);
+/** Store product of a Premium plan (D-116): monthly or annual subscription, or 7-day pass. */
+export const planProduct = pgEnum('plan_product', planProducts);
 /** Where the booking link of a step comes from (D-048); the admin names each origin. */
 export const linkOrigin = pgEnum('link_origin', linkOrigins);
 /** Status of a planned route (D-029, D-033, D-038); its labels belong to the app. */
@@ -189,6 +193,16 @@ export const users = pgTable(
     planExpiresAt: timestamp('plan_expires_at', { withTimezone: true }),
     /** `gift` when the team offered the Premium plan (A-06): the store webhooks leave it alone. */
     planSource: planSource('plan_source').notNull().default('store'),
+    /**
+     * Subscription or pass of the plan, written by the RevenueCat webhook (#67, D-116); null while
+     * free and for a gift of the team.
+     */
+    planProduct: planProduct('plan_product'),
+    /**
+     * True while the subscription renews; false once cancelled in the store, Premium staying until
+     * `plan_expires_at`, and always for the pass (D-116).
+     */
+    planWillRenew: boolean('plan_will_renew').notNull().default(false),
     revenuecatAppUserId: text('revenuecat_app_user_id'),
     isPublic: boolean('is_public').notNull().default(true),
     bio: text('bio'),
@@ -222,6 +236,17 @@ export const users = pgTable(
     index('users_firebase_uid_deleted_idx').on(t.firebaseUid, t.deletedAt),
     check('users_bio_length_check', isAtMost(t.bio, bioMaxLength)),
     check('users_locale_check', sql`${t.locale} is null or ${isOneOf(t.locale, appLocales)}`),
+    // A product is a Premium of the store: none while free, none for a gift (D-116).
+    check(
+      'users_plan_product_check',
+      sql`${t.planProduct} is null or (${t.plan} = 'premium' and ${t.planSource} = 'store')`,
+    ),
+    // Only a subscription renews: never the pass, never without a product.
+    check(
+      'users_plan_will_renew_check',
+      sql`not ${t.planWillRenew} or (${t.planProduct} is not null
+        and ${isOneOf(t.planProduct, renewablePlanProducts)})`,
+    ),
   ],
 );
 

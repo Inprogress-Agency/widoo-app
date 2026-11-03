@@ -25,6 +25,8 @@ type UserRow = {
   role: AdminUserListItem['role'];
   plan: AdminUserListItem['plan']['plan'];
   plan_source: AdminUserListItem['plan']['source'];
+  plan_product: AdminUserListItem['plan']['product'];
+  plan_will_renew: boolean;
   plan_expires_at: Date | null;
   created_at: Date;
   suspended_at: Date | null;
@@ -46,6 +48,8 @@ const toListItem = (row: UserRow): AdminUserListItem => ({
   plan: {
     plan: row.plan,
     source: row.plan_source,
+    product: row.plan_product,
+    willRenew: row.plan_will_renew,
     expiresAt: isoOrNull(row.plan_expires_at),
   },
   createdRouteCount: row.created_route_count,
@@ -67,8 +71,8 @@ export async function readUsers(db: Db, query: AdminUsersQuery): Promise<AdminUs
     : sql`u.deleted_at is null`;
 
   const rows = await db.execute<UserRow>(sql`
-    select u.id, u.first_name, u.email, u.role, u.plan, u.plan_source, u.plan_expires_at,
-      u.created_at, u.suspended_at,
+    select u.id, u.first_name, u.email, u.role, u.plan, u.plan_source, u.plan_product,
+      u.plan_will_renew, u.plan_expires_at, u.created_at, u.suspended_at,
       (select count(*)::int from routes r where r.author_id = u.id) as created_route_count
     from users u
     where ${where}
@@ -215,6 +219,8 @@ export async function readUserDetail(db: Db, userId: string): Promise<AdminUserD
       role: user.role,
       plan: user.plan,
       plan_source: user.planSource,
+      plan_product: user.planProduct,
+      plan_will_renew: user.planWillRenew,
       plan_expires_at: user.planExpiresAt,
       created_at: user.createdAt,
       suspended_at: user.suspendedAt,

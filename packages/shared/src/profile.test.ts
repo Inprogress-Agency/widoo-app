@@ -9,7 +9,9 @@ import {
   defaultCertificationThresholds,
   FeaturedRouteIds,
   isCertifiedWith,
+  PlanProduct,
   ProfileSlot,
+  renewablePlanProducts,
 } from '.';
 
 const routeIds = [
@@ -82,6 +84,17 @@ describe('FeaturedRouteIds', () => {
 describe('CertifiedOverride', () => {
   it('holds the three choices of the admin, none by default in the database', () => {
     expect(CertifiedOverride.options).toEqual(['none', 'granted', 'revoked']);
+  });
+});
+
+describe('PlanProduct', () => {
+  it('holds the two subscriptions and the 7-day pass, the only one that never renews', () => {
+    expect(PlanProduct.options).toEqual(['monthly', 'annual', 'pass_7d']);
+    expect(renewablePlanProducts).toEqual(['monthly', 'annual']);
+  });
+
+  it.each(['route_unlock', 'Annuel', ''])('rejects %j', (product) => {
+    expect(PlanProduct.safeParse(product).success).toBe(false);
   });
 });
 

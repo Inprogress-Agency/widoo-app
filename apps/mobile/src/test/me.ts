@@ -9,6 +9,8 @@ export function testMe(overrides: Partial<Me> = {}): Me {
     avatarUrl: null,
     role: 'user',
     plan: 'free',
+    planProduct: null,
+    planWillRenew: false,
     planExpiresAt: null,
     isPublic: true,
     locale: null,

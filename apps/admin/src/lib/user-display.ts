@@ -13,7 +13,10 @@ export function userNameOf(user: Pick<AdminUserListItem, 'firstName' | 'email'>)
  * The formula of an account as the list reads it: « Gratuit », « Abonnement ou pass, jusqu'au
  * 2 octobre », « Offert, jusqu'au 2 octobre ». An end date in the past reads as ended.
  */
-export function planLabelOf(plan: AdminUserPlan, now = new Date()): string {
+export function planLabelOf(
+  plan: Pick<AdminUserPlan, 'plan' | 'source' | 'expiresAt'>,
+  now = new Date(),
+): string {
   if (plan.plan === 'free') {
     return texts.plan.free;
   }

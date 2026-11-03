@@ -32,6 +32,8 @@ function accountOf(user: User): MyDataExport['account'] {
     avatarUrl: user.avatarUrl,
     role: user.role,
     plan: user.plan,
+    planProduct: user.planProduct,
+    planWillRenew: user.planWillRenew,
     planExpiresAt: isoOrNull(user.planExpiresAt),
     isPublic: user.isPublic,
     bio: user.bio,
