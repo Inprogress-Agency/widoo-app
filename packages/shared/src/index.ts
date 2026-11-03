@@ -39,6 +39,7 @@ export * from './schemas/export';
 export * from './schemas/geocode';
 export * from './schemas/legal';
 export * from './schemas/me';
+export * from './schemas/media';
 export * from './schemas/moderation';
 export * from './schemas/place';
 export * from './schemas/place-write';

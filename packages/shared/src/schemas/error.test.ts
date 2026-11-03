@@ -28,9 +28,17 @@ const adminCodes = [
   'already_decided',
 ];
 
+/**
+ * Codes decided in a PR, not yet in API › Conventions: `media_unavailable`, 503 of the photo
+ * routes without photo storage (#47). Until the wiki lists it, the test names it here.
+ */
+const pendingCodes = ['media_unavailable'];
+
 describe('apiErrorCodes', () => {
   it('holds the stable codes of the wiki, those of the admin, `internal_error`, and no other', () => {
-    expect([...apiErrorCodes].toSorted()).toEqual([...wikiCodes, ...adminCodes].toSorted());
+    expect([...apiErrorCodes].toSorted()).toEqual(
+      [...wikiCodes, ...adminCodes, ...pendingCodes].toSorted(),
+    );
   });
 });
 
