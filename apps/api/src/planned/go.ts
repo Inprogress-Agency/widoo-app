@@ -4,21 +4,35 @@
  * the mode of the trip that leads to it, never the whole route (D-029, D-032, D-033, #510).
  */
 import { stepMapsUrl } from '@widoo/orchestration';
-import type { PlannedMapsUrl, PlannedRoute } from '@widoo/shared';
+import type {
+  PlannedMapsUrl,
+  PlannedRoute,
+  StepPlaceSignal,
+  VerificationRules,
+} from '@widoo/shared';
 import { and, asc, eq, isNull } from 'drizzle-orm';
-import type { Db } from '../db/client';
+import type { Db, Tx } from '../db/client';
 import { plannedSteps } from '../db/schema';
 import { httpError } from '../errors';
-import { ownedPlanned, readPlanned, snapshotOfRow } from './repository';
+import { recordPlaceSignal, type SignalOutcome } from '../verification/signals';
+import { ownedPlanned, readPlanned, snapshotOfRow, type PlannedRow } from './repository';
 
 /** New values of a step of the Go, or nothing to leave it as it was. */
 type StepChange = Partial<typeof plannedSteps.$inferInsert> | null;
 
+/** The signal sent with « Étape suivante » (D-095), on site, and the rules it is recorded by. */
+export interface StepSignal {
+  signal: StepPlaceSignal;
+  rules: VerificationRules;
+  /** Told the outcome, for the log of the signals ignored (Creation-et-Moderation › Anti-abus). */
+  onRecorded: (outcome: SignalOutcome) => void;
+}
+
 /**
  * Changes one step of the caller's Go under lock: loads its planning `in_progress` (409 outside a
- * Go, 404 for another user's planning) and its step (404 when unknown), applies `change` to it and
- * answers the updated `PlannedRoute`. Idempotent: `change` returns nothing once the step is
- * already in the asked state, keeping its first time.
+ * Go, 404 for another user's planning) and its step (404 when unknown), applies `change` to it,
+ * then `afterChange` in the same transaction, and answers the updated `PlannedRoute`. Idempotent:
+ * `change` returns nothing once the step is already in the asked state, keeping its first time.
  */
 async function changeStepOfGo(
   db: Db,
@@ -26,6 +40,7 @@ async function changeStepOfGo(
   id: string,
   stepId: string,
   change: (step: typeof plannedSteps.$inferSelect) => StepChange,
+  afterChange?: (tx: Tx, row: PlannedRow) => Promise<void>,
 ): Promise<PlannedRoute> {
   return db.transaction(async (tx) => {
     const row = await ownedPlanned(tx, userId, id, true);
@@ -41,20 +56,39 @@ async function changeStepOfGo(
     if (set) {
       await tx.update(plannedSteps).set(set).where(ofStep);
     }
+    await afterChange?.(tx, row);
     return readPlanned(tx, row);
   });
 }
 
-/** Marks a step of the caller's Go done, once: a skipped step becomes done. 409 outside a Go. */
+/**
+ * Marks a step of the caller's Go done, once: a skipped step becomes done. 409 outside a Go. With
+ * `stepSignal`, the confirmation or the report of its place, on site, in the same transaction:
+ * counted or not by the rules of `recordPlaceSignal`, never an error (D-057).
+ */
 export async function markStepDone(
   db: Db,
   userId: string,
   id: string,
   stepId: string,
   now: Date,
+  stepSignal?: StepSignal,
 ): Promise<PlannedRoute> {
-  return changeStepOfGo(db, userId, id, stepId, (step) =>
-    step.doneAt ? null : { doneAt: now, skippedAt: null },
+  return changeStepOfGo(
+    db,
+    userId,
+    id,
+    stepId,
+    (step) => (step.doneAt ? null : { doneAt: now, skippedAt: null }),
+    stepSignal &&
+      (async (tx, row) => {
+        const placeId = snapshotOfRow(row).steps.find((step) => step.id === stepId)?.place.id;
+        if (!placeId) return;
+        const signal = { userId, placeId, plannedRouteId: row.id, signal: stepSignal.signal };
+        stepSignal.onRecorded(
+          await recordPlaceSignal(tx, { ...signal, context: 'on_site' }, stepSignal.rules, now),
+        );
+      }),
   );
 }
 
