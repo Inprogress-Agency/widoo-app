@@ -11,6 +11,7 @@ import {
   bioMaxLength,
   bookingNoteMaxLength,
   certifiedOverrides,
+  mediaOwnerTypes,
   mediaSources,
   openRevisionStatuses,
   plannedRouteClosers,
@@ -82,10 +83,10 @@ export const durationBucket = pgEnum('duration_bucket', taxonomies.durations);
 export const budgetBucket = pgEnum('budget_bucket', taxonomies.budgets);
 export const bookingProvider = pgEnum('booking_provider', taxonomies.bookingProviders);
 /**
- * Technical only, never displayed: no label in `shared`. `step`: photos of a step in E-07
- * (D-029). Only ever appended: the constraints of `media` name `route` and `place`, never `step`.
+ * Technical only, never displayed: no label in `shared` (wiki Modele-de-Donnees › media). Only
+ * ever appended; the constraints of `media` name only `route` and `place` (see `isStepMedia`).
  */
-export const mediaOwnerType = pgEnum('media_owner_type', ['route', 'place', 'step']);
+export const mediaOwnerType = pgEnum('media_owner_type', mediaOwnerTypes);
 /** Photo sent by its author, or free photo of Wikimedia Commons with its credit (D-050). */
 export const mediaSource = pgEnum('media_source', mediaSources);
 /** Mapbox Directions profile of a cached trip; technical only, never displayed. */
@@ -490,9 +491,11 @@ export const steps = pgTable(
 );
 
 /**
- * Photos of a step, 5 at most: positions 0 to 4, each once. A new enum value cannot be named in
- * the transaction that adds it (Postgres), and the migrations run in one: the step is written as
- * « not a route nor a place ». Another owner type changes these constraints in its migration.
+ * Photos of a step, 5 at most: positions 0 to 4, each once. A value added to an enum cannot be
+ * named in the transaction that adds it, and on a new database every migration runs in one: the
+ * step is written as « not a route nor a place », the only values the type was created with. The
+ * revision and the account, added later, are held to the same ranks until a migration recreates
+ * the type to name them (#434, #426); an account keeps a single photo, at rank 0 (D-119).
  */
 const isStepMedia = (ownerType: AnyPgColumn): SQL => sql`${ownerType} not in ('route', 'place')`;
 
@@ -501,7 +504,7 @@ export const media = pgTable(
   {
     id: id(),
     ownerType: mediaOwnerType('owner_type').notNull(),
-    /** Route, place or step id, depending on `owner_type`. */
+    /** Route, place, step, revision or account id, depending on `owner_type`. */
     ownerId: uuid('owner_id').notNull(),
     storagePath: text('storage_path').notNull(),
     width: integer('width').notNull(),
