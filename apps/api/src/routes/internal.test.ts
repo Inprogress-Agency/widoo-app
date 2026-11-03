@@ -17,6 +17,7 @@ describe('POST /v1/internal/recommendation', () => {
       calls.push(now);
       return { updated: 3 };
     },
+    verificationDecay: async () => ({ updated: 0 }),
   };
   beforeAll(async () => {
     app = await buildApp(testConfig({ INTERNAL_TOKEN: token }), { internalJobs: jobs });
@@ -54,6 +55,32 @@ describe('POST /v1/internal/recommendation', () => {
   });
 });
 
+describe('POST /v1/internal/verification-decay', () => {
+  it('runs the decay with the service token only, never cached', async () => {
+    const calls: Date[] = [];
+    const jobs: InternalJobs = {
+      recommendation: async () => ({ updated: 0 }),
+      verificationDecay: async (_db, now) => {
+        calls.push(now);
+        return { updated: 2 };
+      },
+    };
+    const app = await buildApp(testConfig({ INTERNAL_TOKEN: token }), { internalJobs: jobs });
+    try {
+      const url = '/v1/internal/verification-decay';
+      expect((await app.inject({ method: 'POST', url })).statusCode).toBe(401);
+      const headers = { authorization: `Bearer ${token}` };
+      const response = await app.inject({ method: 'POST', url, headers });
+      expect(response.statusCode, response.body).toBe(200);
+      expect(response.json()).toEqual({ updated: 2 });
+      expect(response.headers['cache-control']).toBe('no-store');
+      expect(calls).toHaveLength(1);
+    } finally {
+      await app.close();
+    }
+  });
+});
+
 describe('internal routes without a service token', () => {
   it('do not exist', async () => {
     const app = await buildApp(testConfig());
@@ -79,7 +106,10 @@ describe('injected internal jobs', () => {
     });
     await expect(
       buildApp(production, {
-        internalJobs: { recommendation: async () => ({ updated: 0 }) },
+        internalJobs: {
+          recommendation: async () => ({ updated: 0 }),
+          verificationDecay: async () => ({ updated: 0 }),
+        },
       }),
     ).rejects.toThrow(/refused in production/);
   });

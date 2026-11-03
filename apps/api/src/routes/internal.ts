@@ -5,14 +5,17 @@ import { z } from 'zod';
 import type { Db } from '../db/client';
 import { httpError } from '../errors';
 import { recomputeRecommendations } from '../recommendation/job';
+import { decayAllVerifications } from '../verification/decay';
 
 /** Jobs of the internal routes; the tests replace them to leave the shared database alone. */
 export type InternalJobs = {
   recommendation: (db: Db, now: Date) => Promise<{ updated: number }>;
+  verificationDecay: (db: Db, now: Date) => Promise<{ updated: number }>;
 };
 
 export const defaultInternalJobs: InternalJobs = {
   recommendation: (db, now) => recomputeRecommendations(db, { now }),
+  verificationDecay: decayAllVerifications,
 };
 
 const BEARER = /^Bearer ([^\s]{1,512})$/i;
@@ -56,6 +59,22 @@ export const internalRoutes: FastifyPluginAsyncZod<{ token: string; jobs: Intern
     async (request) => {
       const result = await jobs.recommendation(app.db, new Date());
       request.log.info(result, 'recommendation components recomputed');
+      return result;
+    },
+  );
+
+  app.post(
+    '/internal/verification-decay',
+    {
+      schema: {
+        hide: true,
+        summary: 'Turn stale the places whose last verification is too old',
+        response: { 200: JobResult },
+      },
+    },
+    async (request) => {
+      const result = await jobs.verificationDecay(app.db, new Date());
+      request.log.info(result, 'place verifications decayed');
       return result;
     },
   );
