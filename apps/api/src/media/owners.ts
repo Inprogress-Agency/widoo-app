@@ -4,16 +4,22 @@
  * of the transaction: two photos of the same owner never take the same rank.
  */
 import {
+  hasRole,
+  onlineRouteStatuses,
   routeEditModeOf,
   routePhotosMax,
   stepPhotosMax,
+  type RouteStatus,
   type UploadOwnerType,
 } from '@widoo/shared';
-import { and, count, eq, max } from 'drizzle-orm';
+import { and, count, eq, inArray, max } from 'drizzle-orm';
 import type { Tx } from '../db/client';
 import { media, routes, steps } from '../db/schema';
 import { conflict, httpError } from '../errors';
 import { lockEditablePlace, type PlaceEditor } from '../places/update';
+
+const isOnline = (status: RouteStatus) =>
+  (onlineRouteStatuses as readonly RouteStatus[]).includes(status);
 
 /** Photos an owner holds, at most; none for a place, which the spec does not bound. */
 const photosMaxOf: Record<UploadOwnerType, number | null> = {
@@ -24,8 +30,9 @@ const photosMaxOf: Record<UploadOwnerType, number | null> = {
 
 /**
  * Locks a route of `user` whose photos may change: 404 for the route of anyone else, as the
- * editor answers; 409 unless it is edited in place. A published route changes through its
- * revision, whose photos are its own (D-115, #434), never those of the version online.
+ * editor answers; 409 for a route online, published or to fix, and for one edited in no way. A
+ * route online changes through its revision, whose photos are its own (D-115, #434): a photo
+ * added or removed in place would reach the sheet and the snapshots before any review.
  */
 async function lockEditableRoute(tx: Tx, user: PlaceEditor, routeId: string) {
   const [route] = await tx
@@ -34,7 +41,7 @@ async function lockEditableRoute(tx: Tx, user: PlaceEditor, routeId: string) {
     .where(and(eq(routes.id, routeId), eq(routes.authorId, user.id)))
     .for('update');
   if (!route) throw httpError(404, 'Route not found');
-  if (routeEditModeOf(route.status) !== 'in_place') {
+  if (isOnline(route.status) || routeEditModeOf(route.status) !== 'in_place') {
     throw conflict(`The photos of a ${route.status} route cannot change`, {
       status: route.status,
     });
@@ -52,8 +59,27 @@ async function routeOfStep(tx: Tx, stepId: string): Promise<string> {
 }
 
 /**
+ * Locks a place whose photos `user` may change: its editor (`PATCH /places/:id`), and while no
+ * route online shows it, unless `user` is of the team. The photo of a place is the one of its
+ * steps on the sheet: online, it changes through a revision (#434) or the team, never directly.
+ */
+async function lockPhotoPlace(tx: Tx, user: PlaceEditor, placeId: string) {
+  await lockEditablePlace(tx, user, placeId);
+  if (hasRole(user.role, 'moderator')) return;
+  const [online] = await tx
+    .select({ routeId: steps.routeId })
+    .from(steps)
+    .innerJoin(routes, eq(routes.id, steps.routeId))
+    .where(and(eq(steps.placeId, placeId), inArray(routes.status, onlineRouteStatuses)))
+    .limit(1);
+  if (online) {
+    throw conflict('The photos of a place shown online cannot change', { reason: 'online_route' });
+  }
+}
+
+/**
  * Locks an owner whose photos `user` may change: the author of a route, for the route and its
- * steps, while it is edited in place; the editor of a place (`PATCH /places/:id`), for a place.
+ * steps, while it is offline and edited in place; for a place, see `lockPhotoPlace`.
  */
 export async function lockPhotoOwner(
   tx: Tx,
@@ -61,7 +87,7 @@ export async function lockPhotoOwner(
   ownerType: UploadOwnerType,
   ownerId: string,
 ): Promise<void> {
-  if (ownerType === 'place') return lockEditablePlace(tx, user, ownerId);
+  if (ownerType === 'place') return lockPhotoPlace(tx, user, ownerId);
   const routeId = ownerType === 'route' ? ownerId : await routeOfStep(tx, ownerId);
   await lockEditableRoute(tx, user, routeId);
   // A save of the editor may have removed the step meanwhile: read again under the lock.

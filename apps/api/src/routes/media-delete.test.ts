@@ -3,7 +3,7 @@ import { and, asc, eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
-import { media } from '../db/schema';
+import { media, routes } from '../db/schema';
 import { editorFixtures } from '../editor/test-fixtures';
 import { mediaFixtures, testPhotoBase } from '../media/test-fixtures';
 import { testConfig } from '../test-config';
@@ -71,6 +71,19 @@ describe('DELETE /media/:id', () => {
     expect(widthsOf(first.id)).toEqual([false, false, false]);
     expect(widthsOf(second.id)).toEqual([true, true, true]);
     expect((await remove(headers, first.id)).statusCode).toBe(404);
+  });
+
+  it('answers 409 for a photo of a route to fix, online, and keeps it (D-115)', async () => {
+    const headers = await fixtures.signIn();
+    const { routeId, stepId, sent } = await stepWithPhotos(headers);
+    const photo = sent[0];
+    if (!photo) throw new Error('A photo was sent');
+    await app.db.update(routes).set({ status: 'needs_fix' }).where(eq(routes.id, routeId));
+    const refused = await remove(headers, photo.id);
+    expect(refused.statusCode).toBe(409);
+    expect(refused.json()).toMatchObject({ code: 'conflict', details: { status: 'needs_fix' } });
+    expect((await ranksOf(stepId)).map((row) => row.id)).toContain(photo.id);
+    expect(widthsOf(photo.id)).toEqual([true, true, true]);
   });
 
   it('answers 404 to anyone but the author, and keeps the photo', async () => {

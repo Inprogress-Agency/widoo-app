@@ -3,7 +3,7 @@
  * routes use it; a moderator, or an admin, always can.
  */
 import { hasRole, type Place, type UpdatePlace } from '@widoo/shared';
-import { and, eq, ne } from 'drizzle-orm';
+import { and, eq, isNull, ne, or } from 'drizzle-orm';
 import type { Db, Tx } from '../db/client';
 import { placeHours, places, routes, steps } from '../db/schema';
 import { httpError } from '../errors';
@@ -29,7 +29,10 @@ export async function lockEditablePlace(tx: Tx, user: PlaceEditor, placeId: stri
     .select({ routeId: steps.routeId })
     .from(steps)
     .innerJoin(routes, eq(routes.id, steps.routeId))
-    .where(and(eq(steps.placeId, placeId), ne(routes.authorId, user.id)))
+    // A route of a purged account (« Membre Widoo », no author) is not the creator's either.
+    .where(
+      and(eq(steps.placeId, placeId), or(isNull(routes.authorId), ne(routes.authorId, user.id))),
+    )
     .limit(1);
   if (usedByOthers) throw httpError(403, 'Used by the routes of others');
 }
