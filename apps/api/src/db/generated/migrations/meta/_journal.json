@@ -155,6 +155,20 @@
       "when": 1792475741279,
       "tag": "0021_add_b2b_clients",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1793720677012,
+      "tag": "0022_add_media_owner_types",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1793723952620,
+      "tag": "0023_add_photo_uploads",
+      "breakpoints": true
     }
   ]
 }

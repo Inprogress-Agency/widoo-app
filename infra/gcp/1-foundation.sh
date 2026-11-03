@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Step 1 of 4: APIs, Artifact Registry, service accounts, Workload Identity Federation for GitHub.
+# Step 1 of 5: APIs, Artifact Registry, service accounts, Workload Identity Federation for GitHub.
 # Idempotent: creates what is missing and leaves the rest. Usage: ./1-foundation.sh [--dry-run] [--yes]
 set -euo pipefail
 cd "$(dirname "$0")"

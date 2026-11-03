@@ -1,5 +1,5 @@
 import { PlannedRouteSnapshot, stepHighlightsMax, stepPhotosMax } from '@widoo/shared';
-import { asc, eq } from 'drizzle-orm';
+import { asc, eq, inArray } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
@@ -7,6 +7,7 @@ import { snapshotOf } from '../planned/snapshot';
 import { plannedFixtures } from '../planned/test-fixtures';
 import { testConfig } from '../test-config';
 import { media, steps } from './schema';
+import { uuidv7 } from './uuid';
 
 // The content of a step in E-07 (D-029, #129), on a copy of a demo route deleted afterwards.
 let app: Awaited<ReturnType<typeof buildApp>>;
@@ -74,6 +75,25 @@ describe('step photos', () => {
     await expect(stepPhoto(0)).rejects.toThrow();
     const rows = await app.db.select().from(media).where(eq(media.ownerId, stepId));
     expect(rows).toHaveLength(stepPhotosMax);
+  });
+
+  it('take the photos of a revision and of an account, held to these ranks for now', async () => {
+    const ownerId = uuidv7();
+    const owned = (ownerType: 'revision' | 'user', position: number) =>
+      app.db
+        .insert(media)
+        .values({ ownerType, ownerId, storagePath: 'photos/test', width: 1, height: 1, position })
+        .returning({ id: media.id });
+    const rows = [...(await owned('revision', 0)), ...(await owned('user', 1))];
+    expect(rows).toHaveLength(2);
+    // Until a migration recreates the type to name them (see `isStepMedia` in the schema).
+    await expect(owned('revision', stepPhotosMax)).rejects.toThrow();
+    await app.db.delete(media).where(
+      inArray(
+        media.id,
+        rows.map((row) => row.id),
+      ),
+    );
   });
 });
 

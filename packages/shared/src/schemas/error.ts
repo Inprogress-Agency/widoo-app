@@ -24,6 +24,8 @@ export const apiErrorCodes = [
   'already_decided',
   /** 403 of a route that needs an account, called with the token of an anonymous account (D-099). */
   'account_required',
+  /** 503 of the photo routes where no photo storage is configured (#47). */
+  'media_unavailable',
   'internal_error',
 ] as const;
 

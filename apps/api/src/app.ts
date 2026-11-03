@@ -17,6 +17,8 @@ import type { Geocoder } from './geocode/geocoder';
 import { localGeocoder } from './geocode/local';
 import { createMapboxGeocoder } from './geocode/mapbox';
 import { loggerOptions, requestIdOf, type LogStream } from './logger';
+import { gcsPhotoStorage } from './media/gcs-storage';
+import type { PhotoStorage } from './media/storage';
 import { photoUrlsFrom } from './media/urls';
 import { parseQueryString } from './query-string';
 import { adminRoutes } from './routes/admin';
@@ -39,6 +41,7 @@ import { defaultInternalJobs, internalRoutes, type InternalJobs } from './routes
 import { legalRoutes } from './routes/legal';
 import { meRoutes } from './routes/me';
 import { meExportRoutes } from './routes/me-export';
+import { mediaRoutes } from './routes/media';
 import { placesRoutes } from './routes/places';
 import { plannedRoutesPlugin } from './routes/planned';
 import { routeRatingsPlugin } from './routes/ratings';
@@ -59,6 +62,8 @@ export type BuildAppOptions = {
   geocoder?: Geocoder;
   /** Tests only: replaces Mapbox Directions on the route sheet. Refused in production. */
   directions?: DirectionsProvider | null;
+  /** Tests only: replaces Cloud Storage (`MemoryPhotoStorage`), null for none. Refused in production. */
+  photoStorage?: PhotoStorage | null;
 };
 
 /** Firebase unless a verifier is injected; fails at startup rather than on the first request. */
@@ -112,6 +117,18 @@ function directionsOf(config: Config, log: FastifyBaseLogger): DirectionsProvide
   });
 }
 
+/**
+ * Cloud Storage with the buckets of the environment; without them, no photo storage, and the
+ * photo routes answer 503 `media_unavailable` (#47) while the rest of the API works.
+ */
+function photoStorageOf(config: Config, log: FastifyBaseLogger): PhotoStorage | null {
+  if (!config.mediaBuckets) {
+    log.warn('MEDIA_UPLOAD_BUCKET and MEDIA_BUCKET are not set: /v1/media/* answers 503');
+    return null;
+  }
+  return gcsPhotoStorage(config.mediaBuckets);
+}
+
 /** Builds the API without listening, so that tests drive it with `app.inject()`. */
 export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   const tokenVerifier = tokenVerifierOf(config, options.tokenVerifier);
@@ -123,6 +140,12 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   }
   if (options.directions !== undefined && config.isProduction) {
     throw new Error('Injected directions are refused in production');
+  }
+  if (options.photoStorage !== undefined && config.isProduction) {
+    throw new Error('An injected photo storage is refused in production');
+  }
+  if (options.photoStorage && !config.mediaPublicBaseUrl) {
+    throw new Error('A photo storage needs MEDIA_PUBLIC_BASE_URL to serve the photos it keeps');
   }
   const app = Fastify({
     logger: loggerOptions(config.logLevel, options.logStream),
@@ -186,6 +209,11 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   await app.register(usersRoutes, { prefix: '/v1' });
   await app.register(editorRoutes, { prefix: '/v1' });
   await app.register(placesRoutes, { prefix: '/v1' });
+  await app.register(mediaRoutes, {
+    prefix: '/v1',
+    storage:
+      options.photoStorage !== undefined ? options.photoStorage : photoStorageOf(config, app.log),
+  });
   await app.register(geocodeRoutes, {
     prefix: '/v1',
     geocoder: options.geocoder ?? geocoderOf(config, app.log),

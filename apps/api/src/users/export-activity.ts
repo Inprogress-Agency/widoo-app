@@ -1,15 +1,18 @@
 import type { MyDataExport } from '@widoo/shared';
-import { asc, eq } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
 import type { Tx } from '../db/client';
 import {
   devices,
+  media,
   notifications,
+  places,
   routeRatings,
   routeReports,
   routes,
   routeUnlocks,
   supportMessages,
 } from '../db/schema';
+import { fullPhotoWidth, type PhotoUrls } from '../media/urls';
 import { iso, isoOrNull } from './export-dates';
 
 type Activity = Pick<
@@ -20,13 +23,15 @@ type Activity = Pick<
   | 'supportMessages'
   | 'devices'
   | 'notifications'
+  | 'placePhotos'
 >;
 
 /**
  * What the account did or received beyond its profile, outings and routes: purchases, ratings,
- * reports, messages to the support, phones and notifications, oldest first.
+ * reports, messages to the support, phones, notifications and the photos it sent for places,
+ * oldest first.
  */
-export async function activityOf(tx: Tx, userId: string): Promise<Activity> {
+export async function activityOf(tx: Tx, userId: string, photoUrls: PhotoUrls): Promise<Activity> {
   const unlocks = await tx
     .select({ routeId: routeUnlocks.routeId, title: routes.title, at: routeUnlocks.createdAt })
     .from(routeUnlocks)
@@ -59,6 +64,18 @@ export async function activityOf(tx: Tx, userId: string): Promise<Activity> {
     .from(notifications)
     .where(eq(notifications.userId, userId))
     .orderBy(asc(notifications.createdAt));
+  // The photos of its own routes and steps come with them (`createdRoutes`).
+  const placePhotos = await tx
+    .select({
+      placeId: places.id,
+      placeName: places.name,
+      storagePath: media.storagePath,
+      sentAt: media.createdAt,
+    })
+    .from(media)
+    .innerJoin(places, eq(places.id, media.ownerId))
+    .where(and(eq(media.uploadedBy, userId), eq(media.ownerType, 'place')))
+    .orderBy(asc(media.createdAt));
   return {
     unlockedRoutes: unlocks.map(({ at, ...unlock }) => ({ ...unlock, unlockedAt: iso(at) })),
     routeRatings: ratings.map(({ rating, title }) => ({
@@ -98,5 +115,9 @@ export async function activityOf(tx: Tx, userId: string): Promise<Activity> {
       createdAt: iso(notification.createdAt),
       readAt: isoOrNull(notification.readAt),
     })),
+    placePhotos: placePhotos.flatMap(({ storagePath, sentAt, ...place }) => {
+      const url = photoUrls(storagePath, fullPhotoWidth);
+      return url ? [{ ...place, url, sentAt: iso(sentAt) }] : [];
+    }),
   };
 }

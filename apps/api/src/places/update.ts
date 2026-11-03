@@ -3,39 +3,48 @@
  * routes use it; a moderator, or an admin, always can.
  */
 import { hasRole, type Place, type UpdatePlace } from '@widoo/shared';
-import { and, eq, ne } from 'drizzle-orm';
-import type { Db } from '../db/client';
+import { and, eq, isNull, ne, or } from 'drizzle-orm';
+import type { Db, Tx } from '../db/client';
 import { placeHours, places, routes, steps } from '../db/schema';
 import { httpError } from '../errors';
 import { cityHolding, outsideAnyCity } from './create';
 import { readPlace } from './read';
 
-type Editor = { id: string; role: Parameters<typeof hasRole>[0] };
+export type PlaceEditor = { id: string; role: Parameters<typeof hasRole>[0] };
+
+/**
+ * Locks a place `user` may edit, its photos included (#47): 404 for an unknown place, 403 unless
+ * they created it and only their routes use it, or they are a moderator.
+ */
+export async function lockEditablePlace(tx: Tx, user: PlaceEditor, placeId: string) {
+  const [current] = await tx
+    .select({ createdBy: places.createdBy })
+    .from(places)
+    .where(eq(places.id, placeId))
+    .for('update');
+  if (!current) throw httpError(404, 'Place not found');
+  if (hasRole(user.role, 'moderator')) return;
+  if (current.createdBy !== user.id) throw httpError(403, 'Not the creator of this place');
+  const [usedByOthers] = await tx
+    .select({ routeId: steps.routeId })
+    .from(steps)
+    .innerJoin(routes, eq(routes.id, steps.routeId))
+    // A route of a purged account (« Membre Widoo », no author) is not the creator's either.
+    .where(
+      and(eq(steps.placeId, placeId), or(isNull(routes.authorId), ne(routes.authorId, user.id))),
+    )
+    .limit(1);
+  if (usedByOthers) throw httpError(403, 'Used by the routes of others');
+}
 
 export async function updatePlace(
   db: Db,
-  user: Editor,
+  user: PlaceEditor,
   placeId: string,
   { hours, location, ...fields }: UpdatePlace,
 ): Promise<Place> {
   return db.transaction(async (tx) => {
-    const [current] = await tx
-      .select({ createdBy: places.createdBy })
-      .from(places)
-      .where(eq(places.id, placeId))
-      .for('update');
-    if (!current) throw httpError(404, 'Place not found');
-
-    if (!hasRole(user.role, 'moderator')) {
-      if (current.createdBy !== user.id) throw httpError(403, 'Not the creator of this place');
-      const [usedByOthers] = await tx
-        .select({ routeId: steps.routeId })
-        .from(steps)
-        .innerJoin(routes, eq(routes.id, steps.routeId))
-        .where(and(eq(steps.placeId, placeId), ne(routes.authorId, user.id)))
-        .limit(1);
-      if (usedByOthers) throw httpError(403, 'Used by the routes of others');
-    }
+    await lockEditablePlace(tx, user, placeId);
 
     let cityId: string | undefined;
     if (location) {
