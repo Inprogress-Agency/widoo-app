@@ -8,7 +8,7 @@ import { media } from '../db/schema';
 import { uuidv7 } from '../db/uuid';
 import { editorFixtures } from '../editor/test-fixtures';
 import { mediaFixtures, testPhotoBase } from '../media/test-fixtures';
-import { hasGpsExif, jpegWithGps } from '../media/test-photos';
+import { hasGpsExif, jpegWithMetadata } from '../media/test-photos';
 import { testConfig } from '../test-config';
 
 // Shared database, parallel files: accounts, routes, places and photos of this file only.
@@ -48,7 +48,7 @@ describe('POST /media/:id/confirm', () => {
     const headers = await fixtures.signIn();
     const userId = await accountOf(headers);
     const { stepId } = await draftOf(headers);
-    const original = await jpegWithGps(2400, 1600);
+    const original = await jpegWithMetadata(2400, 1600);
     expect(await hasGpsExif(original)).toBe(true);
 
     const { ticket, confirmed } = await photos.sendPhoto(

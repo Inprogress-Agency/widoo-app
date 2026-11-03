@@ -6,7 +6,7 @@ import { PhotoUploadTicket, type PhotoUploadRequest } from '@widoo/shared';
 import { inArray } from 'drizzle-orm';
 import type { buildApp } from '../app';
 import { media, places } from '../db/schema';
-import { jpegWithGps } from './test-photos';
+import { jpegWithMetadata } from './test-photos';
 import { MemoryPhotoStorage } from './test-storage';
 
 type App = Awaited<ReturnType<typeof buildApp>>;
@@ -38,7 +38,7 @@ export function mediaFixtures(app: () => App) {
     const sent = storage.put(
       ticket.uploadUrl,
       ticket.headers,
-      file ?? (await jpegWithGps(800, 600)),
+      file ?? (await jpegWithMetadata(800, 600)),
     );
     if (sent !== 200) throw new Error(`The storage refused the PUT: ${sent}`);
     mediaIds.push(ticket.mediaId);
