@@ -89,8 +89,13 @@ module.exports = {
       minHeight: { 0: '0px', field: '40px', screen: '100dvh', textarea: '72px' },
       // A menu of many choices (the route filter of A-03) scrolls past `menu`; to size with DESIGN
       // (à reporter dans tokens.json). The detail panel stays in view while the list scrolls: the
-      // window less the header (64 px) and the padding of the page (2 × 24 px).
-      maxHeight: { menu: '320px', 'detail-panel': 'calc(100dvh - 112px)' },
+      // window less the header (64 px) and the padding of the page (2 × 24 px). A dialog stays 24 px
+      // from the top and the bottom of the window, which holds it (`fixed`, so `100%` is the window).
+      maxHeight: {
+        menu: '320px',
+        'detail-panel': 'calc(100dvh - 112px)',
+        dialog: 'calc(100% - 48px)',
+      },
       // Zero, for what is pinned to an edge (`inset-0`): tokens.json starts at 4 px.
       spacing: { 0: '0px' },
       minWidth: { 0: '0px' },
