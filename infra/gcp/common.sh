@@ -29,6 +29,9 @@ SERVICE=widoo-api
 MIGRATION_JOB=widoo-api-migrate
 WIF_POOL=github
 WIF_PROVIDER=widoo-app
+# Photos (#47), names unique across Cloud Storage: originals sent by the app, processed photos.
+: "${MEDIA_UPLOAD_BUCKET:=$PROJECT_ID-media-uploads}"
+: "${MEDIA_BUCKET:=$PROJECT_ID-media}"
 RUNTIME_SA="widoo-api-run@$PROJECT_ID.iam.gserviceaccount.com"
 MIGRATION_SA="widoo-api-migrate@$PROJECT_ID.iam.gserviceaccount.com"
 DEPLOYER_SA="widoo-deployer@$PROJECT_ID.iam.gserviceaccount.com"

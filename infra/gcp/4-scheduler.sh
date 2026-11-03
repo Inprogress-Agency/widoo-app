@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Step 4 of 4: Cloud Scheduler jobs that call the internal routes of the API with the service token.
+# Step 4 of 5: Cloud Scheduler jobs that call the internal routes of the API with the service token.
 # Run it after 3-run.sh, and again after each rotation of internal-token (infra/README.md).
 # Idempotent: creates a missing job, realigns an existing one. Usage: ./4-scheduler.sh [--dry-run] [--yes]
 set -euo pipefail

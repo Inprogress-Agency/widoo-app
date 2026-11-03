@@ -10,6 +10,8 @@ API de staging sur Google Cloud ([#24](https://github.com/Inprogress-Agency/wido
 | `gcp/2-database.sh` | réseau, Cloud SQL, base, utilisateur, secrets (dont le jeton de service `internal-token`, généré) |
 | `gcp/3-run.sh` | service Cloud Run `widoo-api` et job de migration `widoo-api-migrate` |
 | `gcp/4-scheduler.sh` | jobs Cloud Scheduler des routes internes de l'API (recalcul nocturne de la recommandation) |
+| `gcp/5-media.sh` | buckets Cloud Storage des photos ([#47](https://github.com/Inprogress-Agency/widoo-app/issues/47)), leurs droits et les variables de l'API qui les nomment |
+| `gcp/upload-lifecycle.json` | cycle de vie du bucket d'arrivée des photos : un original est supprimé au bout d'un jour |
 | `gcp/demo-seed.sh` | chargement ou retrait du jeu de démonstration dans la base de staging, par une exécution du job de migration |
 | `gcp/artifact-cleanup.json` | nettoyage des images : les 10 plus récentes gardées, les autres supprimées après 30 jours |
 | `../.github/workflows/deploy-staging.yml` | build, migration et déploiement à chaque push sur `main` |
@@ -44,6 +46,8 @@ read -rs token && printf '%s' "$token" | gcloud secrets versions add mapbox-dire
 ./3-run.sh                 # 2 minutes environ
 ./4-scheduler.sh --dry-run
 ./4-scheduler.sh           # quelques secondes
+./5-media.sh --dry-run
+./5-media.sh               # une minute environ : buckets des photos, droits, variables du service
 ```
 
 Sans valeur dans `sentry-dsn`, le service démarre sans envoyer de rapports d'erreur. Relancer `3-run.sh` une fois le DSN ajouté.
@@ -91,6 +95,7 @@ Rotation du mot de passe : désactiver la version active de `database-url` (`gcl
 | `CORS_ORIGINS` | vide | pas d'admin web en staging pour l'instant |
 | `MAPBOX_GEOCODING_PERMANENT` | `false` | valeur par défaut de l'API : résultats temporaires, que Mapbox interdit de garder, donc pas de cache ; variable ordinaire, pas un secret ; la valeur attend la décision sur le cache ([#306](https://github.com/Inprogress-Agency/widoo-app/issues/306)) |
 | `MAPBOX_DIRECTIONS_CACHE_DAYS` | `0` | valeur par défaut de l'API : pas de cache des réponses Directions, que les conditions de Mapbox interdisent de stocker (Product Terms, 2.10.1) ; 30 au plus (D-032), seulement si un contrat avec Mapbox l'autorise ; variable ordinaire, pas un secret |
+| `MEDIA_UPLOAD_BUCKET`, `MEDIA_BUCKET`, `MEDIA_PUBLIC_BASE_URL` | `widoo-staging-media-uploads`, `widoo-staging-media`, `https://storage.googleapis.com/widoo-staging-media` | posées par `5-media.sh` (section Photos) ; variables ordinaires, pas des secrets ; toutes les trois ou aucune, sinon l'API refuse de démarrer |
 | Secrets | `DATABASE_URL`, `SENTRY_DSN`, `MAPBOX_GEOCODING_TOKEN`, `MAPBOX_DIRECTIONS_TOKEN`, `INTERNAL_TOKEN` depuis Secret Manager | jamais en clair dans la configuration ; tous sauf `DATABASE_URL` passés seulement si leur secret a une valeur |
 
 Le job `widoo-api-migrate` lance `node --enable-source-maps dist/migrate.js` sur la même image, dans le même réseau, sans nouvelle tentative et avec 10 minutes au plus.
@@ -118,6 +123,9 @@ Aucun rôle au niveau du projet, aucune clé de compte de service : chaque rôle
 | Compte | Rôle | Sur | Pour |
 |---|---|---|---|
 | `widoo-api-run` (service) | Secret Manager Secret Accessor | secrets `database-url`, `sentry-dsn`, `mapbox-geocoding-token`, `mapbox-directions-token`, `internal-token`, un droit par secret | lire sa configuration |
+| | Storage Object User | buckets `widoo-staging-media-uploads` et `widoo-staging-media` | lire, écrire et supprimer les photos, rien d'autre des buckets |
+| | Service Account Token Creator | lui-même | signer les URL d'envoi des photos par `signBlob`, sans clé |
+| `allUsers` | Storage Legacy Object Reader | bucket `widoo-staging-media` | lire une photo traitée dont on a l'URL, sans pouvoir lister le bucket |
 | `widoo-api-migrate` (job) | Secret Manager Secret Accessor | secret `database-url` | appliquer les migrations |
 | `widoo-deployer` (GitHub) | Artifact Registry Writer | dépôt `widoo` | pousser l'image |
 | | Cloud Run Developer | service `widoo-api`, job `widoo-api-migrate` | déployer, lancer la migration |
@@ -142,7 +150,8 @@ Ordre de grandeur mensuel en `europe-west9`, à confirmer dans le simulateur de 
 | Secret Manager (5 secrets, une version active chacun ; 6 versions et 10 000 accès gratuits par mois et par compte de facturation, puis 0,06 $ par version et par mois) | 0 € environ |
 | Cloud Scheduler (1 job ; 3 jobs gratuits par compte de facturation, puis 0,10 $ par job et par mois) | 0 € |
 | Fédération d'identité, réseau VPC | 0 € environ |
-| **Total** | **13 à 16 € environ** |
+| Cloud Storage des photos (classe Standard ; quelques Go en staging, 0,02 € environ par Go et par mois ; sortie vers l'app, 0,12 € environ par Go servi) | moins de 1 € en staging |
+| **Total** | **13 à 17 € environ** |
 
 ## Tâches planifiées (Cloud Scheduler)
 
@@ -178,6 +187,31 @@ Sans fenêtre de double jeton : l'API n'accepte qu'un jeton. Le faire hors de 03
 5. désactiver l'ancienne version (`gcloud secrets versions disable <ancienne version> --secret=internal-token --project=widoo-staging`), puis la détruire une fois la rotation vérifiée (`gcloud secrets versions destroy`) : une version désactivée reste facturée.
 
 Retour arrière avant l'étape 5 : `gcloud secrets versions enable` sur l'ancienne version, `disable` sur la nouvelle, puis les étapes 2 et 3. En cas de fuite, faire la rotation tout de suite.
+
+## Photos (Cloud Storage)
+
+`5-media.sh` crée les deux buckets des photos des créateurs ([#47](https://github.com/Inprogress-Agency/widoo-app/issues/47)), dans la région de l'API, puis pose sur le service les trois variables qui les nomment. Sans ces variables (le cas de staging avant ce script), les routes `/v1/media/*` répondent 503 `media_unavailable` et tout le reste de l'API marche : le script peut passer après le déploiement du code, jamais avant n'est nécessaire.
+
+| Bucket | Contenu | Réglages |
+|---|---|---|
+| `widoo-staging-media-uploads` | originaux envoyés par l'app, avec leur EXIF (position GPS comprise) | privé : accès public empêché ; cycle de vie qui supprime tout objet au bout d'un jour (`upload-lifecycle.json`) ; un envoi jamais confirmé n'a pas de ligne en base et disparaît ainsi |
+| `widoo-staging-media` | photos traitées : trois largeurs (400, 800, 1600 px) en JPEG, sans aucune métadonnée, `photos/<id>/<largeur>.jpg` | lisible par quiconque a l'URL d'une photo (`allUsers`, rôle `legacyObjectReader`), jamais listable ; servi sous `MEDIA_PUBLIC_BASE_URL` ; cache d'un an, le nom d'un objet ne changeant jamais de contenu |
+
+Réglages communs : accès uniforme au niveau du bucket (IAM seul, pas d'ACL) et pas de suppression réversible (`--soft-delete-duration=0`) : une photo supprimée l'est tout de suite, comme le veut la suppression immédiate d'une photo ([Securite-et-RGPD](https://github.com/Inprogress-Agency/widoo-app/wiki/Securite-et-RGPD#donn%C3%A9es-personnelles)).
+
+Parcours d'une photo : l'API signe une URL V4 pour un seul `PUT` de l'original, valable 15 minutes, dont le type, la taille (10 Mio au plus, `x-goog-content-length-range`) et le propriétaire font partie de la signature ; l'app envoie le fichier, puis confirme ; l'API lit l'original, le réencode en trois largeurs dans le bucket public, crée la ligne `media`, supprime l'original. Le compte `widoo-api-run` n'a pas de clé : il signe par `signBlob` de l'API IAM Credentials, sur lui-même (rôle Service Account Token Creator sur son propre compte). Les noms des buckets se changent par l'environnement (`MEDIA_UPLOAD_BUCKET=… MEDIA_BUCKET=… ./5-media.sh`), s'ils sont déjà pris ailleurs dans Cloud Storage.
+
+Relancé, le script réaligne les réglages des buckets, les droits et les variables, sans toucher aux photos. Une règle d'organisation qui impose la prévention de l'accès public refuserait `allUsers` sur le bucket public : ajouter une exception pour `widoo-staging`, comme pour `allUsers` sur le service (Dépannage).
+
+### Vérifier les critères de #47 en staging
+
+Après `5-media.sh` et le déploiement de la PR, avec un compte de test et des photos fictives :
+
+1. dans l'app (ou par `curl` avec un jeton Firebase de test), demander une URL (`POST /v1/media/upload-url`) pour une étape d'un brouillon, envoyer une photo prise avec la localisation activée par le `PUT` et les en-têtes reçus, puis confirmer (`POST /v1/media/<mediaId>/confirm`) : 201 ;
+2. télécharger `https://storage.googleapis.com/widoo-staging-media/photos/<mediaId>/1600.jpg` et vérifier qu'il n'a aucune métadonnée (`exiftool` n'affiche ni `GPS`, ni appareil) ;
+3. `gcloud storage ls gs://widoo-staging-media-uploads/uploads/` ne montre plus l'original ;
+4. `gcloud storage ls gs://widoo-staging-media/` répond 403 sans droit sur le projet (pas de liste publique) ;
+5. un fichier PDF déclaré `application/pdf` est refusé dès la demande d'URL (422).
 
 ## Déploiement
 
@@ -264,6 +298,8 @@ gcloud run services update-traffic widoo-api --region=europe-west9 --project=wid
 **Données** : un retour arrière applicatif ne restaure aucune donnée. Pour restaurer : cloner l'instance à un instant donné, par exemple `gcloud sql instances clone widoo-db widoo-db-restore --point-in-time=2026-09-23T10:00:00Z`, vérifier le clone, puis pointer `database-url` dessus. C'est une action manuelle, à annoncer.
 
 **Tâches planifiées** : `gcloud scheduler jobs pause widoo-recommendation-nightly --location=europe-west9 --project=widoo-staging` (puis `resume`), ou `delete`. L'API garde les dernières composantes calculées. Pour couper les routes internes : retirer la variable (`gcloud run services update widoo-api --region=europe-west9 --project=widoo-staging --remove-secrets=INTERNAL_TOKEN`), elles répondent alors 404.
+
+**Photos** : `gcloud run services update widoo-api --region=europe-west9 --project=widoo-staging --remove-env-vars=MEDIA_UPLOAD_BUCKET,MEDIA_BUCKET,MEDIA_PUBLIC_BASE_URL` : les routes `/v1/media/*` répondent 503, les photos stockées ne sont plus servies (les URL https du jeu de démonstration le restent). Les buckets et leurs photos restent ; les supprimer (`gcloud storage rm --recursive gs://<bucket>`, puis `gcloud storage buckets delete`) perd les photos pour de bon, sans suppression réversible.
 
 **Accès de GitHub** : coupé immédiatement par `gcloud iam workload-identity-pools providers disable widoo-app --location=global --workload-identity-pool=github --project=widoo-staging`.
 
