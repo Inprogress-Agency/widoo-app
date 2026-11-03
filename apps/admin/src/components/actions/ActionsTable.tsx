@@ -1,4 +1,4 @@
-import { actionLabelOf, targetNameOf, targetTypeLabelOf } from '@/lib/action-display';
+import { actionLabelOf, reasonOf, targetNameOf, targetTypeLabelOf } from '@/lib/action-display';
 import { formatRelativeDate } from '@/lib/dates';
 import { messages } from '@/messages/fr';
 import type { AdminActionItem } from '@widoo/shared';
@@ -50,7 +50,7 @@ export function ActionsTable({ items, isLoading, openId, onOpen }: ActionsTableP
                   </span>
                 </span>
               </TableCell>
-              <TableCell className="max-w-dialog truncate">{action.reason ?? ''}</TableCell>
+              <TableCell className="max-w-dialog truncate">{reasonOf(action) ?? ''}</TableCell>
             </TableRow>
           ))
         )}

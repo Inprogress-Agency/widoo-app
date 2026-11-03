@@ -1,4 +1,11 @@
-import type { AdminSection, CountedAdminSection, RouteStatus, TeamRole } from '@widoo/shared';
+import type {
+  AdminActionName,
+  AdminActionTargetType,
+  AdminSection,
+  CountedAdminSection,
+  RouteStatus,
+  TeamRole,
+} from '@widoo/shared';
 import type { NavigationGroupId } from '@/config/navigation';
 
 const sections: Record<AdminSection, string> = {
@@ -962,12 +969,19 @@ export const messages = {
       mois: '30 derniers jours',
     },
     columns: { date: 'Date', actor: 'Auteur', action: 'Action', target: 'Cible', reason: 'Motif' },
-    /** The journal keeps the stable name of each action; an unknown one is shown as it is. */
+    /**
+     * The journal keeps the stable name of each action: every name the API writes has its label
+     * here (`adminActionNames`). A name the admin does not know yet is shown as it is.
+     */
     actions: {
+      'place.create': 'Lieu créé',
+      'place.import': 'Lieu importé',
       'place.close': 'Lieu fermé',
       'place.update': 'Lieu modifié',
       'place.verify': 'Lieu vérifié',
       'report.resolve': 'Signalement traité',
+      'rating.hide': 'Avis masqué',
+      'rating.unhide': 'Avis rétabli',
       'route.publish': 'Parcours publié',
       'route.request_changes': 'Modifications demandées',
       'route.reject': 'Parcours refusé',
@@ -983,14 +997,24 @@ export const messages = {
       'user.certification': 'Badge Créateur certifié',
       'user.export': 'Données exportées',
       'user.delete': 'Compte supprimé',
-    } as Record<string, string>,
+      'affiliate_program.create': 'Programme ajouté',
+      'affiliate_program.update': 'Programme modifié',
+      'b2b_client.create': 'Partenaire ajouté',
+      'b2b_client.update': 'Partenaire modifié',
+      'b2b_client.set_routes': 'Parcours du partenaire choisis',
+      'support_message.handle': 'Message traité',
+    } satisfies Record<AdminActionName, string>,
     targetTypes: {
       route: 'Parcours',
-      place: 'Lieu',
       route_report: 'Signalement',
+      rating: 'Avis',
+      place: 'Lieu',
       user: 'Compte',
       setting: 'Réglage',
-    } as Record<string, string>,
+      affiliate_program: "Programme d'affiliation",
+      b2b_client: 'Partenaire',
+      support_message: 'Message de support',
+    } satisfies Record<AdminActionTargetType, string>,
     unknownActor: 'Compte supprimé',
     empty: {
       title: 'Aucune action',
