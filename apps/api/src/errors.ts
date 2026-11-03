@@ -65,6 +65,28 @@ export function placeCreationLimitReached(limit: number) {
   });
 }
 
+/**
+ * 429 `rate_limited` of a photo over the daily limit of the account (wiki Securite-et-RGPD ›
+ * Limitation de débit): `details.limit` is the number said to the creator.
+ */
+export function photoUploadLimitReached(limit: number) {
+  return Object.assign(new Error('Too many photos sent today'), {
+    statusCode: 429,
+    details: { reason: 'photo_upload', limit },
+  });
+}
+
+/**
+ * 503 `media_unavailable` of the photo routes where no photo storage is configured (#47): the
+ * environment lacks it, nothing failed.
+ */
+export function mediaUnavailable() {
+  return Object.assign(new Error('Photo storage is not configured'), {
+    statusCode: 503,
+    apiCode: 'media_unavailable' as const,
+  });
+}
+
 /** 409 `conflict` of a request the current state refuses, that state in `details`. */
 export function conflict(message: string, details: Record<string, unknown>) {
   return Object.assign(new Error(message), { statusCode: 409, details });
@@ -154,12 +176,13 @@ export function registerErrorHandling(app: FastifyInstance): void {
     }
 
     const status = error.statusCode ?? 500;
-    if (status >= 400 && status < 500) {
+    const { details, apiCode } = error as {
+      details?: ApiError['details'];
+      apiCode?: ApiErrorCode;
+    };
+    // A 503 with its code (`media_unavailable`) says what the environment lacks: not a crash.
+    if ((status >= 400 && status < 500) || (status === 503 && apiCode)) {
       // Other client errors raised by Fastify (malformed JSON, body too large...) are validation errors.
-      const { details, apiCode } = error as {
-        details?: ApiError['details'];
-        apiCode?: ApiErrorCode;
-      };
       const body: ApiError = {
         code: apiCode ?? codeByStatus[status] ?? 'validation_error',
         message: error.message,

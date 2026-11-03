@@ -1,17 +1,25 @@
 /**
- * Test data of the photo routes. Shared database, parallel files: the places and photos made
- * here are deleted by `cleanUp`.
+ * Test data of the photo routes: the in-memory storage, and the `PUT` of the app played on it.
+ * Shared database, parallel files: the places and photos made here are deleted by `cleanUp`.
  */
 import { inArray } from 'drizzle-orm';
 import type { buildApp } from '../app';
 import { media, places } from '../db/schema';
+import { MemoryPhotoStorage } from './test-storage';
 
 type App = Awaited<ReturnType<typeof buildApp>>;
 type Headers = Record<string, string>;
 
+/** Public URL of the bucket of the processed photos in the tests. */
+export const testPhotoBase = 'https://storage.googleapis.com/widoo-test-media';
+
 export function mediaFixtures(app: () => App) {
+  const storage = new MemoryPhotoStorage();
   const placeIds: string[] = [];
   const mediaIds: string[] = [];
+
+  const askUploadUrl = (headers: Headers, body: object) =>
+    app().inject({ method: 'POST', url: '/v1/media/upload-url', headers, payload: body });
 
   /** A place of the signed-in account, far from the demo, as E-13 creates it. */
   async function createPlace(headers: Headers, name: string) {
@@ -43,5 +51,5 @@ export function mediaFixtures(app: () => App) {
     }
   }
 
-  return { createPlace, track, cleanUp };
+  return { storage, askUploadUrl, createPlace, track, cleanUp };
 }
