@@ -10,7 +10,7 @@ import { currentUser } from './me';
 
 /**
  * Signed URLs asked per minute and per client IP: a creator adds photos one by one, the quota of
- * the day (50) bounds the photos kept, this bounds the URLs asked without sending anything.
+ * the day (50) bounds the photos confirmed, this bounds the URLs asked without confirming any.
  */
 export const UPLOAD_URL_RATE_LIMIT = 30;
 
