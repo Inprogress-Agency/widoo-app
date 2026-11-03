@@ -1,6 +1,6 @@
 /**
  * Text for the users of the wiki page Politique-de-confidentialite, between its two
- * separators: draft of 2026-09-28 (D-063), revised on 2026-10-20 (D-107) and 2026-11-03 (D-113), to be reviewed by a
+ * separators: draft of 2026-09-28 (D-063), revised on 2026-10-20 (D-107) and 2026-11-03 (D-113, D-123), to be reviewed by a
  * lawyer before the stores; the passages in square brackets are still to complete in the wiki.
  * Changed in the wiki first, then here, with a new version in `../documents.ts`. Links to other
  * wiki pages are kept as their text.
@@ -29,10 +29,10 @@ Pour toute question sur vos données ou pour exercer vos droits : contact@widooa
 | Compte : adresse e-mail, prénom ou pseudo, photo, identifiant de connexion (Apple, Google ou e-mail) | créer votre compte, vous connecter, vous écrire au sujet de votre compte | l'exécution des conditions d'utilisation | tant que le compte existe, puis 30 jours |
 | Profil public : bio, quartier, anecdotes, parcours à la une, badge « Créateur certifié » | afficher votre profil de créateur | l'exécution des conditions d'utilisation | tant que le compte existe ; vous pouvez masquer votre profil |
 | Favoris, sorties programmées et passées, préférences (langue, types de notifications) | faire fonctionner ces fonctions et vous envoyer les rappels choisis | l'exécution des conditions d'utilisation | tant que le compte existe, puis 30 jours |
-| Parcours, photos, avis (note et commentaire), vérifications et signalements | les publier, les relire, informer les autres utilisateurs, garder un contenu fiable | l'exécution des conditions d'utilisation ; notre intérêt légitime à assurer la qualité et la sécurité du contenu | parcours publiés : en ligne après la suppression du compte, sans lien vers vous ; avis : [supprimés ou anonymisés avec le compte, à trancher] ; vérifications : supprimées avec le compte, sinon anonymisées après 24 mois ; journal de modération : [durée] |
+| Parcours, photos, avis (note et commentaire), vérifications et signalements | les publier, les relire, informer les autres utilisateurs, garder un contenu fiable | l'exécution des conditions d'utilisation ; notre intérêt légitime à assurer la qualité et la sécurité du contenu | parcours publiés : en ligne après la suppression du compte, sans lien vers vous ; avis : gardés après la suppression du compte, signés « Membre Widoo », sans lien vers vous ; vérifications : supprimées avec le compte, sinon anonymisées après 24 mois ; journal de modération : 5 ans |
 | Position du téléphone | centrer la carte, trier les parcours par distance, vous guider pendant une sortie | votre autorisation, donnée au téléphone | jamais enregistrée sur nos serveurs : la recherche ne reçoit que la zone de carte affichée |
 | Jeton de notification | vous envoyer les notifications que vous avez choisies | votre autorisation, donnée au téléphone | jusqu'à ce que vous coupiez les notifications ou supprimiez le compte |
-| Abonnement : identifiant d'achat du store, formule, état, dates | vous donner accès à Widoo Premium | l'exécution des conditions d'utilisation | pendant l'abonnement, puis 3 ans ; nous ne recevons aucune donnée bancaire |
+| Achats : parcours débloqués, pass et abonnement (identifiant d'achat du store, formule, état, dates) | vous donner accès à Widoo Premium et aux parcours achetés | l'exécution des conditions d'utilisation | tant que le compte existe, puis 30 jours ; nous ne recevons aucune donnée bancaire |
 | Mesure d'audience : pages vues et actions dans l'app, identifiant aléatoire, modèle et système du téléphone, sans adresse IP conservée | comprendre l'usage de l'app pour l'améliorer | votre consentement, retirable à tout moment | 12 mois |
 | Rapports de plantage : données techniques de l'erreur, sans information sur vous et sans adresse IP conservée | corriger les erreurs | notre intérêt légitime à faire fonctionner l'app | 90 jours |
 | Messages envoyés au support : adresse de réponse, sujet, message, version de l'app, modèle du téléphone | vous répondre | notre intérêt légitime à vous aider ; l'exécution des conditions d'utilisation | 3 ans après le dernier échange |
@@ -48,10 +48,10 @@ Le fichier créé par « Télécharger mes données » est préparé à votre de
   - Google Cloud : hébergement de nos serveurs, de la base de données et des photos, à Paris ;
   - Firebase (Google) : connexion à votre compte et envoi des notifications [lieu de traitement à vérifier] ;
   - Expo : envoi des notifications et mises à jour de l'app [lieu de traitement à vérifier] ;
-  - Mapbox : affichage des cartes et recherche de lieux ; Mapbox reçoit l'adresse IP du téléphone et la zone de carte affichée [lieu de traitement à vérifier] ;
+  - Mapbox : affichage des cartes et recherche de lieux ; Mapbox reçoit l'adresse IP du téléphone et la zone de carte affichée, et, à l'ouverture de l'app, un identifiant aléatoire propre à l'installation qui lui sert à compter les utilisateurs pour sa facturation, sans votre position [lieu de traitement à vérifier] ;
   - PostHog, dans l'Union européenne : mesure d'audience, seulement avec votre accord ;
   - Sentry, dans l'Union européenne : rapports de plantage ;
-  - RevenueCat : suivi des abonnements achetés dans les stores [lieu de traitement à vérifier] ;
+  - RevenueCat : suivi des achats faits dans les stores ; ses données sur vous sont supprimées avec votre compte [lieu de traitement à vérifier] ;
   - Google Cloud Vertex AI (Union européenne) : traduction des parcours publiés et des avis ; il reçoit le texte, pas votre profil ;
   - Brevo (France, Union européenne) : envoi des e-mails de connexion, de confirmation d'adresse et des réponses du support ;
   - Vercel (États-Unis) : hébergement du site widooapp.com ; il reçoit l'adresse IP et les données techniques de connexion des visiteurs du site, qui ne dépose aucun cookie ;
