@@ -36,26 +36,39 @@ overrides:
   # the API image. Drop this line once firebase resolves @grpc/grpc-js 1.13.6 or later without it:
   # check at each upgrade of @react-native-firebase and at the audit exception review (#280).
   '@grpc/grpc-js@<1.13.6': ^1.13.6
+  # node-forge <=1.4.0, five high advisories (GHSA-5x38-2vff-x55p, GHSA-7wch-p9px-956x,
+  # GHSA-8hrf-8g6f-7xwp, GHSA-hqq3-7jhf-c5jx, GHSA-jc66-7q78-782g), and GHSA-86w9-cpqp-85rv, ignored
+  # until 1.4.2 came out (#280). Reached through apps/mobile > expo > @expo/cli only, whose range
+  # takes 1.4.2. Drop this line once @expo/cli resolves node-forge 1.4.1 or later without it.
+  node-forge@<1.4.1: ^1.4.2
+  # re2js 2.2.0 to 2.8.6, high advisory GHSA-gg6h-894w-4m9c (#280). Reached through
+  # @react-native-firebase/app > firebase > @firebase/firestore only, like @grpc/grpc-js above:
+  # neither imported nor bundled by the app. Drop this line once firebase resolves re2js 2.8.7 or
+  # later without it.
+  re2js@<2.8.7: ^2.8.7
 
 # Install scripts stay blocked but for these: Skia copies its prebuilt native libraries there.
 onlyBuiltDependencies:
   - '@shopify/react-native-skia'
 
-# Dated audit exception (#279): two high advisories with no patched version upstream, accepted on
-# 2026-10-05 (D-080): https://github.com/Inprogress-Agency/widoo-app/wiki/Securite-et-RGPD#risques-accept%C3%A9s
-# Neither package reaches what ships: absent from the iOS and Android bundles and from the API image.
-# Review on 2026-11-05, or as soon as a patched version is published: drop the id, rerun
+# Dated audit exceptions (#279, #280): high advisories with no patched version usable here,
+# accepted on 2026-10-05 (D-080) and reviewed on 2026-11-03 (D-112):
+# https://github.com/Inprogress-Agency/widoo-app/wiki/Securite-et-RGPD#risques-accept%C3%A9s
+# zod 3 reaches nothing that ships; decode-uri-component is in the app bundle (see its note). The
+# braces advisory (GHSA-vfj7-8cjw-p6xm) is no longer reported and its exception is gone.
+# Review on 2026-12-05, or as soon as a patched version is published: drop the id, rerun
 # `pnpm audit --audit-level=high`. https://github.com/Inprogress-Agency/widoo-app/issues/280
 # pnpm can neither scope an id to a dependency path nor date it: an ignored id stays ignored
 # wherever the package comes from, so the review checks the paths again.
 # CI runs scripts/check-audit-exceptions.sh: it fails once an id no longer matches any advisory.
 auditConfig:
   ignoreGhsas:
-    # node-forge <=1.4.0, RSA PKCS#1 v1.5 signature check. Only through apps/mobile > expo >
-    # @expo/cli, which signs and checks its own manifests and verifies no external signature
-    # (no expo-updates, no code signing). Dev machines, CI and EAS builds only.
-    - GHSA-86w9-cpqp-85rv
-    # braces <=3.0.3, denial of service on deeply nested patterns. Through micromatch and
-    # chokidar (Metro, Tailwind, ESLint); the patterns come from the configuration of the repo.
-    # Dev machines, CI and EAS builds only; build stage of the API image, not its runtime.
-    - GHSA-vfj7-8cjw-p6xm
+    # zod <4.6.6, memory exhaustion on oversized constrained collections. The workspace runs zod
+    # 4.6.7; the advisory hits the zod 3.25.76 of apps/mobile > expo > @expo/cli, for which no 3.x is
+    # patched and which zod 4 cannot replace. Dev machines, CI and EAS builds only.
+    - GHSA-mrhx-c7xc-m3w5
+    # decode-uri-component <=0.5.0, quadratic denial of service on a crafted URI component. Through
+    # apps/mobile > expo-router > query-string 7, which requires the CommonJS 0.2.x; only 0.5.1, an
+    # ES module, is patched. In the app bundle: a crafted link opened on the phone can freeze the
+    # app, on that phone only, with no data reached. Accepted until expo-router moves on (D-112).
+    - GHSA-qr28-fpjm-wq7f
