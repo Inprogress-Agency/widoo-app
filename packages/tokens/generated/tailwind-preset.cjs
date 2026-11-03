@@ -1,4 +1,4 @@
-// Généré depuis tokens.json (version 38), ne pas modifier : pnpm --filter @widoo/tokens generate.
+// Généré depuis tokens.json (version 39), ne pas modifier : pnpm --filter @widoo/tokens generate.
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [],
@@ -96,6 +96,7 @@ module.exports = {
       "card": "18px",
       "section": "20px",
       "sheet": "24px",
+      "toast": "30px",
       "pill": "999px"
     },
     "width": {
@@ -128,6 +129,7 @@ module.exports = {
       "route-stroke": "5px",
       "route-casing": "9px",
       "thumb": "48px",
+      "thumb-row": "64px",
       "tooltip-min-w": "260px",
       "card-w": "270px",
       "card-h": "348px",
@@ -142,6 +144,8 @@ module.exports = {
       "icon-s": "16px",
       "icon-m": "20px",
       "icon-l": "24px",
+      "rating-star": "40px",
+      "scroll-fade-h": "32px",
       "full": "100%",
       "auto": "auto"
     },
@@ -175,6 +179,7 @@ module.exports = {
       "route-stroke": "5px",
       "route-casing": "9px",
       "thumb": "48px",
+      "thumb-row": "64px",
       "tooltip-min-w": "260px",
       "card-w": "270px",
       "card-h": "348px",
@@ -189,6 +194,8 @@ module.exports = {
       "icon-s": "16px",
       "icon-m": "20px",
       "icon-l": "24px",
+      "rating-star": "40px",
+      "scroll-fade-h": "32px",
       "full": "100%",
       "auto": "auto"
     },
@@ -222,6 +229,7 @@ module.exports = {
       "route-stroke": "5px",
       "route-casing": "9px",
       "thumb": "48px",
+      "thumb-row": "64px",
       "tooltip-min-w": "260px",
       "card-w": "270px",
       "card-h": "348px",
@@ -236,6 +244,8 @@ module.exports = {
       "icon-s": "16px",
       "icon-m": "20px",
       "icon-l": "24px",
+      "rating-star": "40px",
+      "scroll-fade-h": "32px",
       "full": "100%",
       "auto": "auto"
     },
@@ -269,6 +279,7 @@ module.exports = {
       "route-stroke": "5px",
       "route-casing": "9px",
       "thumb": "48px",
+      "thumb-row": "64px",
       "tooltip-min-w": "260px",
       "card-w": "270px",
       "card-h": "348px",
@@ -283,6 +294,8 @@ module.exports = {
       "icon-s": "16px",
       "icon-m": "20px",
       "icon-l": "24px",
+      "rating-star": "40px",
+      "scroll-fade-h": "32px",
       "full": "100%",
       "auto": "auto"
     },
@@ -316,6 +329,7 @@ module.exports = {
       "route-stroke": "5px",
       "route-casing": "9px",
       "thumb": "48px",
+      "thumb-row": "64px",
       "tooltip-min-w": "260px",
       "card-w": "270px",
       "card-h": "348px",
@@ -330,6 +344,8 @@ module.exports = {
       "icon-s": "16px",
       "icon-m": "20px",
       "icon-l": "24px",
+      "rating-star": "40px",
+      "scroll-fade-h": "32px",
       "full": "100%",
       "auto": "auto"
     },
@@ -363,6 +379,7 @@ module.exports = {
       "route-stroke": "5px",
       "route-casing": "9px",
       "thumb": "48px",
+      "thumb-row": "64px",
       "tooltip-min-w": "260px",
       "card-w": "270px",
       "card-h": "348px",
@@ -377,6 +394,8 @@ module.exports = {
       "icon-s": "16px",
       "icon-m": "20px",
       "icon-l": "24px",
+      "rating-star": "40px",
+      "scroll-fade-h": "32px",
       "full": "100%",
       "auto": "auto"
     },
@@ -410,6 +429,7 @@ module.exports = {
       "route-stroke": "5px",
       "route-casing": "9px",
       "thumb": "48px",
+      "thumb-row": "64px",
       "tooltip-min-w": "260px",
       "card-w": "270px",
       "card-h": "348px",
@@ -424,6 +444,8 @@ module.exports = {
       "icon-s": "16px",
       "icon-m": "20px",
       "icon-l": "24px",
+      "rating-star": "40px",
+      "scroll-fade-h": "32px",
       "full": "100%",
       "auto": "auto"
     },
