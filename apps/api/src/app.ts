@@ -17,6 +17,7 @@ import type { Geocoder } from './geocode/geocoder';
 import { localGeocoder } from './geocode/local';
 import { createMapboxGeocoder } from './geocode/mapbox';
 import { loggerOptions, requestIdOf, type LogStream } from './logger';
+import { photoUrlsFrom } from './media/urls';
 import { parseQueryString } from './query-string';
 import { adminRoutes } from './routes/admin';
 import { adminCatalogRoutes } from './routes/admin-catalog';
@@ -143,6 +144,7 @@ export async function buildApp(config: Config, options: BuildAppOptions = {}) {
   const sql = createSql(config.databaseUrl);
   app.decorate('sql', sql);
   app.decorate('db', createDb(sql));
+  app.decorate('photoUrls', photoUrlsFrom(config.mediaPublicBaseUrl));
   app.addHook('onClose', async () => {
     await sql.end({ timeout: 5 });
   });
