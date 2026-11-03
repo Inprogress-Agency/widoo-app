@@ -29,4 +29,4 @@ export { Textarea } from './components/Textarea';
 export { Toaster } from './components/Toaster';
 export { Tooltip, TooltipProvider } from './components/Tooltip';
 export { cn } from './lib/cn';
-export { showToast, toastDurations, type ToastAction } from './lib/toast';
+export { dismissErrorToast, showToast, toastDurations, type ToastAction } from './lib/toast';
