@@ -12,7 +12,7 @@ import {
 } from '@widoo/shared';
 import { and, count, eq, gt } from 'drizzle-orm';
 import type { Db, Tx } from '../db/client';
-import { media, users } from '../db/schema';
+import { photoUploads, users } from '../db/schema';
 import { uuidv7 } from '../db/uuid';
 import { photoUploadLimitReached } from '../errors';
 import type { PlaceEditor } from '../places/update';
@@ -35,14 +35,20 @@ export async function lockSender(tx: Tx, userId: string) {
 }
 
 /**
- * 429 once the account kept the photos of a day (wiki Securite-et-RGPD › Limitation de débit),
- * counted in the base like the other daily limits (risk accepted by D-115).
+ * 429 once the account confirmed the photos of a day (wiki Securite-et-RGPD › Limitation de
+ * débit), kept or deleted since (`photo_uploads`), counted in the base like the other daily
+ * limits (risk accepted by D-115).
  */
-export async function assertUploadRoom(tx: Tx, userId: string, now: Date) {
+export async function assertUploadRoom(tx: Db | Tx, userId: string, now: Date) {
   const [sent] = await tx
     .select({ count: count() })
-    .from(media)
-    .where(and(eq(media.uploadedBy, userId), gt(media.createdAt, new Date(now.getTime() - dayMs))));
+    .from(photoUploads)
+    .where(
+      and(
+        eq(photoUploads.userId, userId),
+        gt(photoUploads.createdAt, new Date(now.getTime() - dayMs)),
+      ),
+    );
   if ((sent?.count ?? 0) >= photoUploadDailyLimit) {
     throw photoUploadLimitReached(photoUploadDailyLimit);
   }

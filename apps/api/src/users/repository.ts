@@ -6,6 +6,7 @@ import {
   devices,
   media,
   notifications,
+  photoUploads,
   plannedRoutes,
   routeReports,
   routeRevisions,
@@ -174,6 +175,8 @@ async function eraseAccountRows(tx: Tx, userId: string): Promise<void> {
   // Its ratings and reviews leave the routes they counted in, recomputed (D-029).
   await eraseRatingsOf(tx, userId);
   await tx.delete(notifications).where(eq(notifications.userId, userId));
+  // The count of its photos confirmed, for the daily quota (#47): nothing of the person.
+  await tx.delete(photoUploads).where(eq(photoUploads.userId, userId));
 }
 
 /**

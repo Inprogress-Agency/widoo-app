@@ -541,6 +541,25 @@ export const media = pgTable(
 );
 
 /**
+ * One row per photo an account confirmed (#47), kept when the photo is deleted: the quota of 50 a
+ * day counts them, so that sending then deleting does not go round it, and a photo confirmed once
+ * is never confirmed again. Rows older than a week serve nothing: deleted at the next
+ * confirmation of the account, and with the account.
+ */
+export const photoUploads = pgTable(
+  'photo_uploads',
+  {
+    /** `media.id` of the photo confirmed; no foreign key, the row outlives the photo. */
+    id: uuid('id').primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    createdAt: createdAt(),
+  },
+  (t) => [index('photo_uploads_user_idx').on(t.userId, t.createdAt)],
+);
+
+/**
  * The working copy of a published route its author edits (wiki Creation-et-Moderation): the
  * information and steps in `snapshot` (`RouteContent` of the API), while the published version
  * stays in `routes` and `steps` until the revision is validated. One open revision per route.

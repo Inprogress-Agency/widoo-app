@@ -205,6 +205,9 @@ describe('exportUserData', () => {
       'admin_actions.actor_id',
       // Decisions of a member of the team on a route: their work, not data of the person.
       'moderation_actions.actor_id',
+      // Confirmations counted by the daily quota of photos (#47): a count, not data of the
+      // person; the photos themselves are exported, and the rows go with the account.
+      'photo_uploads.user_id',
       // Places belong to the shared catalog, not to the person who added them.
       'places.created_by',
       // Decisions of a member of the team, part of their work.

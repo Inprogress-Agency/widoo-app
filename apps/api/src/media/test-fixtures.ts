@@ -5,7 +5,8 @@
 import { PhotoUploadTicket, type PhotoUploadRequest } from '@widoo/shared';
 import { inArray } from 'drizzle-orm';
 import type { buildApp } from '../app';
-import { media, places } from '../db/schema';
+import { media, photoUploads, places } from '../db/schema';
+import { uuidv7 } from '../db/uuid';
 import { jpegWithMetadata } from './test-photos';
 import { MemoryPhotoStorage } from './test-storage';
 
@@ -77,6 +78,12 @@ export function mediaFixtures(app: () => App) {
   /** Rows of `media` written by a test itself, deleted by `cleanUp`. */
   const track = (ids: string[]) => mediaIds.push(...ids);
 
+  /** `count` photos confirmed by the account at `at`, for the quota; they go with the account. */
+  const confirmedBefore = (userId: string, count: number, at = new Date()) =>
+    app()
+      .db.insert(photoUploads)
+      .values(Array.from({ length: count }, () => ({ id: uuidv7(), userId, createdAt: at })));
+
   async function cleanUp() {
     if (mediaIds.length > 0) await app().db.delete(media).where(inArray(media.id, mediaIds));
     if (placeIds.length > 0) {
@@ -85,5 +92,15 @@ export function mediaFixtures(app: () => App) {
     }
   }
 
-  return { storage, askUploadUrl, confirm, upload, sendPhoto, createPlace, track, cleanUp };
+  return {
+    storage,
+    askUploadUrl,
+    confirm,
+    upload,
+    sendPhoto,
+    createPlace,
+    track,
+    confirmedBefore,
+    cleanUp,
+  };
 }

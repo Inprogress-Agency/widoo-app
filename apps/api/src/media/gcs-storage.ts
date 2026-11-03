@@ -4,7 +4,7 @@
  * (infra/gcp/5-media.sh grants it), the library choosing that way when it holds no private key.
  */
 import { Storage } from '@google-cloud/storage';
-import { metadataHeaders, UploadTooLarge, type PhotoStorage, type ReceivedUpload } from './storage';
+import { metadataHeaders, type PhotoStorage, type UploadHead } from './storage';
 
 /**
  * An hour in the caches, never more: Cloud Storage cannot expire a cached object, so a photo
@@ -55,13 +55,20 @@ export function gcsPhotoStorage({
       return { url, headers: { 'content-type': contentType, ...extensionHeaders } };
     },
 
-    async readUpload(objectName, maxBytes): Promise<ReceivedUpload | null> {
-      const file = uploads.file(objectName);
+    async statUpload(objectName): Promise<UploadHead | null> {
       try {
-        const [metadata] = await file.getMetadata();
-        if (Number(metadata.size) > maxBytes) throw new UploadTooLarge();
-        const [data] = await file.download();
-        return { data, metadata: stringsOf(metadata.metadata) };
+        const [metadata] = await uploads.file(objectName).getMetadata();
+        return { size: Number(metadata.size), metadata: stringsOf(metadata.metadata) };
+      } catch (error) {
+        if (isNotFound(error)) return null;
+        throw error;
+      }
+    },
+
+    async downloadUpload(objectName) {
+      try {
+        const [data] = await uploads.file(objectName).download();
+        return data;
       } catch (error) {
         if (isNotFound(error)) return null;
         throw error;

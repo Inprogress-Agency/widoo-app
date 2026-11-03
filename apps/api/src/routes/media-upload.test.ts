@@ -113,39 +113,26 @@ describe('POST /media/upload-url', () => {
     const headers = await fixtures.signIn();
     const userId = await accountOf(headers);
     const placeId = await photos.createPlace(headers, `Café quota ${uuidv7().slice(-8)}`);
-    const sent = await app.db
-      .insert(media)
-      .values(
-        Array.from({ length: photoUploadDailyLimit }, (_, position) => ({
-          ownerType: 'place' as const,
-          ownerId: placeId,
-          storagePath: `photos/${uuidv7()}`,
-          width: 1600,
-          height: 1067,
-          position,
-          uploadedBy: userId,
-        })),
-      )
-      .returning({ id: media.id });
-    photos.track(sent.map((row) => row.id));
     const ask = () =>
       photos.askUploadUrl(headers, {
         ownerType: 'place',
         ownerId: placeId,
         contentType: 'image/jpeg',
       });
+    // Confirmed more than a day ago: they no longer count.
+    await photos.confirmedBefore(
+      userId,
+      photoUploadDailyLimit,
+      new Date(Date.now() - 25 * 3600_000),
+    );
+    expect((await ask()).statusCode).toBe(200);
+    await photos.confirmedBefore(userId, photoUploadDailyLimit);
     const refused = await ask();
     expect(refused.statusCode).toBe(429);
     expect(refused.json()).toMatchObject({
       code: 'rate_limited',
       details: { reason: 'photo_upload', limit: 50 },
     });
-    // Sent more than a day ago, they no longer count.
-    await app.db
-      .update(media)
-      .set({ createdAt: new Date(Date.now() - 25 * 60 * 60 * 1000) })
-      .where(eq(media.uploadedBy, userId));
-    expect((await ask()).statusCode).toBe(200);
   });
 });
 

@@ -4,19 +4,25 @@
  */
 import {
   metadataHeaders,
-  UploadTooLarge,
   type PhotoStorage,
-  type ReceivedUpload,
   type SignedUpload,
+  type UploadHead,
   type UploadToSign,
 } from './storage';
 
 const origin = 'https://storage.test';
 
+/** An original as the app sent it. */
+export type StoredUpload = { data: Buffer; metadata: Record<string, string> };
+
 export class MemoryPhotoStorage implements PhotoStorage {
-  readonly uploads = new Map<string, ReceivedUpload>();
+  readonly uploads = new Map<string, StoredUpload>();
   readonly photos = new Map<string, Buffer>();
   readonly signed = new Map<string, UploadToSign & { headers: Record<string, string> }>();
+  /** Originals read so far: a check that refuses must come before any. */
+  downloads = 0;
+  /** A test sets it to fail the writing of the widths it names. */
+  failWrite: (objectName: string) => boolean = () => false;
 
   async signUpload(upload: UploadToSign): Promise<SignedUpload> {
     const headers = {
@@ -54,10 +60,14 @@ export class MemoryPhotoStorage implements PhotoStorage {
     return 200;
   }
 
-  async readUpload(objectName: string, maxBytes: number): Promise<ReceivedUpload | null> {
+  async statUpload(objectName: string): Promise<UploadHead | null> {
     const upload = this.uploads.get(objectName);
-    if (upload && upload.data.length > maxBytes) throw new UploadTooLarge();
-    return upload ?? null;
+    return upload ? { size: upload.data.length, metadata: upload.metadata } : null;
+  }
+
+  async downloadUpload(objectName: string): Promise<Buffer | null> {
+    this.downloads += 1;
+    return this.uploads.get(objectName)?.data ?? null;
   }
 
   async deleteUpload(objectName: string): Promise<void> {
@@ -65,6 +75,7 @@ export class MemoryPhotoStorage implements PhotoStorage {
   }
 
   async writePhoto(objectName: string, data: Buffer): Promise<void> {
+    if (this.failWrite(objectName)) throw new Error(`Writing ${objectName} failed`);
     this.photos.set(objectName, data);
   }
 

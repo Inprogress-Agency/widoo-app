@@ -4,9 +4,9 @@
  * Google. The originals land in a private bucket; the processed photos go to a public one.
  */
 
-/** An original as the app sent it, read back from the upload bucket. */
-export type ReceivedUpload = {
-  data: Buffer;
+/** What the upload bucket says of an original without reading it: its size and metadata. */
+export type UploadHead = {
+  size: number;
   /** Custom metadata of the object, signed with the URL: `x-goog-meta-<key>` on the `PUT`. */
   metadata: Record<string, string>;
 };
@@ -23,13 +23,6 @@ export type UploadToSign = {
 /** The URL of one `PUT` and the headers that `PUT` must send exactly. */
 export type SignedUpload = { url: string; headers: Record<string, string> };
 
-/** An original over the size allowed: the signed URL makes it impossible, it is refused anyway. */
-export class UploadTooLarge extends Error {
-  constructor() {
-    super('The original sent exceeds the size allowed');
-  }
-}
-
 export interface PhotoStorage {
   /**
    * A URL signed for one `PUT` of an original into the upload bucket, valid until `expiresAt`.
@@ -37,11 +30,13 @@ export interface PhotoStorage {
    * other value, as it refuses the request after the deadline.
    */
   signUpload(upload: UploadToSign): Promise<SignedUpload>;
-  /** The original under `objectName`, or null when none is there; throws `UploadTooLarge`. */
-  readUpload(objectName: string, maxBytes: number): Promise<ReceivedUpload | null>;
+  /** The size and metadata of the original under `objectName`, or null when none is there. */
+  statUpload(objectName: string): Promise<UploadHead | null>;
+  /** The content of the original under `objectName`, or null when none is there any more. */
+  downloadUpload(objectName: string): Promise<Buffer | null>;
   /** Deletes an original; a missing one is no error. */
   deleteUpload(objectName: string): Promise<void>;
-  /** Writes one processed JPEG into the public bucket: its name never changes its content. */
+  /** Writes one processed JPEG into the public bucket. */
   writePhoto(objectName: string, data: Buffer): Promise<void>;
   /** Deletes processed photos; a missing one is no error. */
   deletePhotos(objectNames: readonly string[]): Promise<void>;

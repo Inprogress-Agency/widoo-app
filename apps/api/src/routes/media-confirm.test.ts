@@ -1,10 +1,16 @@
-import { ApiError, MyDataExport, StoredPhoto, photoUploadDailyLimit } from '@widoo/shared';
+import {
+  ApiError,
+  MyDataExport,
+  StoredPhoto,
+  photoUploadDailyLimit,
+  photoUploadMaxBytes,
+} from '@widoo/shared';
 import { eq } from 'drizzle-orm';
 import sharp from 'sharp';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
-import { media } from '../db/schema';
+import { media, routes } from '../db/schema';
 import { uuidv7 } from '../db/uuid';
 import { editorFixtures } from '../editor/test-fixtures';
 import { mediaFixtures, testPhotoBase } from '../media/test-fixtures';
@@ -121,35 +127,115 @@ describe('POST /media/:id/confirm', () => {
     expect((await photos.confirm(await fixtures.signIn(), ticket.mediaId)).statusCode).toBe(404);
   });
 
-  it('checks the quota again, and leaves nothing public of a photo refused', async () => {
+  it('checks the quota again, before reading the original', async () => {
     const headers = await fixtures.signIn();
     const userId = await accountOf(headers);
-    const placeId = await photos.createPlace(headers, `Café dernier ${uuidv7().slice(-8)}`);
-    const sent = await app.db
-      .insert(media)
-      .values(
-        Array.from({ length: photoUploadDailyLimit - 1 }, (_, position) => ({
-          ownerType: 'place' as const,
-          ownerId: placeId,
-          storagePath: `photos/${uuidv7()}`,
-          width: 1600,
-          height: 1067,
-          position,
-          uploadedBy: userId,
-        })),
-      )
-      .returning({ id: media.id });
-    photos.track(sent.map((row) => row.id));
+    await photos.confirmedBefore(userId, photoUploadDailyLimit - 1);
     const { stepId } = await draftOf(headers);
     // Two URLs asked at the 49th photo: the second confirmation would take the 51st place.
     const first = await photos.upload(headers, { ownerType: 'step', ownerId: stepId });
-    const second = await photos.upload(headers, { ownerType: 'place', ownerId: placeId });
+    const second = await photos.upload(headers, { ownerType: 'step', ownerId: stepId });
     expect((await photos.confirm(headers, first.mediaId)).statusCode).toBe(201);
+    const downloads = photos.storage.downloads;
     const refused = await photos.confirm(headers, second.mediaId);
     expect(refused.statusCode).toBe(429);
     expect(refused.json()).toMatchObject({ details: { reason: 'photo_upload', limit: 50 } });
+    expect(photos.storage.downloads).toBe(downloads);
     expect(widthsOf(second.mediaId)).toEqual([undefined, undefined, undefined]);
     expect(await app.db.select().from(media).where(eq(media.id, second.mediaId))).toEqual([]);
+  });
+
+  it('counts a photo sent then deleted: deleting does not go round the quota', async () => {
+    const headers = await fixtures.signIn();
+    const userId = await accountOf(headers);
+    await photos.confirmedBefore(userId, photoUploadDailyLimit - 1);
+    const { stepId } = await draftOf(headers);
+    const { confirmed } = await photos.sendPhoto(headers, { ownerType: 'step', ownerId: stepId });
+    const photo = StoredPhoto.parse(confirmed.json());
+    const deleted = await app.inject({ method: 'DELETE', url: `/v1/media/${photo.id}`, headers });
+    expect(deleted.statusCode).toBe(204);
+    const asked = await photos.askUploadUrl(headers, {
+      ownerType: 'step',
+      ownerId: stepId,
+      contentType: 'image/jpeg',
+    });
+    expect(asked.statusCode).toBe(429);
+  });
+
+  it('never stores a photo deleted again, from its original or a new PUT on its URL', async () => {
+    const headers = await fixtures.signIn();
+    const userId = await accountOf(headers);
+    const { stepId } = await draftOf(headers);
+    const ticket = await photos.upload(headers, { ownerType: 'step', ownerId: stepId });
+    expect((await photos.confirm(headers, ticket.mediaId)).statusCode).toBe(201);
+    await app.inject({ method: 'DELETE', url: `/v1/media/${ticket.mediaId}`, headers });
+    // The URL still valid: the app, or anyone holding it, sends the file again.
+    const original = await jpegWithMetadata(800, 600);
+    expect(photos.storage.put(ticket.uploadUrl, ticket.headers, original)).toBe(200);
+
+    expect((await photos.confirm(headers, ticket.mediaId)).statusCode).toBe(404);
+    expect(await app.db.select().from(media).where(eq(media.id, ticket.mediaId))).toEqual([]);
+    expect(photos.storage.uploads.has(`uploads/${userId}/${ticket.mediaId}`)).toBe(false);
+  });
+
+  it('stores one photo of two confirmations at the same moment', async () => {
+    const headers = await fixtures.signIn();
+    const { stepId } = await draftOf(headers);
+    const ticket = await photos.upload(headers, { ownerType: 'step', ownerId: stepId });
+    const answers = await Promise.all([
+      photos.confirm(headers, ticket.mediaId),
+      photos.confirm(headers, ticket.mediaId),
+    ]);
+    expect(answers.map((answer) => answer.statusCode).toSorted()).toEqual([200, 201]);
+    expect(answers[0]?.json()).toEqual(answers[1]?.json());
+    expect(await app.db.select().from(media).where(eq(media.id, ticket.mediaId))).toHaveLength(1);
+    expect(widthsOf(ticket.mediaId).every(Boolean)).toBe(true);
+  });
+
+  it('checks the rights before reading the original, and keeps no photo of a route online', async () => {
+    const headers = await fixtures.signIn();
+    const { routeId, stepId } = await draftOf(headers);
+    const ticket = await photos.upload(headers, { ownerType: 'step', ownerId: stepId });
+    await app.db.update(routes).set({ status: 'needs_fix' }).where(eq(routes.id, routeId));
+    const downloads = photos.storage.downloads;
+    const refused = await photos.confirm(headers, ticket.mediaId);
+    expect(refused.statusCode).toBe(409);
+    expect(photos.storage.downloads).toBe(downloads);
+    expect(widthsOf(ticket.mediaId)).toEqual([undefined, undefined, undefined]);
+  });
+
+  it('refuses an original over 10 MiB on its head, without reading it, and deletes it', async () => {
+    const headers = await fixtures.signIn();
+    const userId = await accountOf(headers);
+    const { stepId } = await draftOf(headers);
+    const ticket = await photos.upload(headers, { ownerType: 'step', ownerId: stepId });
+    // What the signed size range keeps out of Cloud Storage, put there anyway.
+    const objectName = `uploads/${userId}/${ticket.mediaId}`;
+    const signed = photos.storage.uploads.get(objectName);
+    photos.storage.uploads.set(objectName, {
+      data: Buffer.alloc(photoUploadMaxBytes + 1),
+      metadata: signed?.metadata ?? {},
+    });
+    const downloads = photos.storage.downloads;
+    const refused = await photos.confirm(headers, ticket.mediaId);
+    expect(refused.statusCode).toBe(422);
+    expect(photos.storage.downloads).toBe(downloads);
+    expect(photos.storage.uploads.has(objectName)).toBe(false);
+  });
+
+  it('deletes the widths already written when one of them fails', async () => {
+    const headers = await fixtures.signIn();
+    const { stepId } = await draftOf(headers);
+    const ticket = await photos.upload(headers, { ownerType: 'step', ownerId: stepId });
+    photos.storage.failWrite = (name) => name.endsWith('/800.jpg');
+    try {
+      const failed = await photos.confirm(headers, ticket.mediaId);
+      expect(failed.statusCode).toBe(500);
+    } finally {
+      photos.storage.failWrite = () => false;
+    }
+    expect(widthsOf(ticket.mediaId)).toEqual([undefined, undefined, undefined]);
+    expect(await app.db.select().from(media).where(eq(media.id, ticket.mediaId))).toEqual([]);
   });
 
   it('lists the photo sent in the export, by its public URL, never its path', async () => {
