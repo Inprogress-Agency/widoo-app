@@ -157,9 +157,11 @@ async function confirmPlace(
 }
 
 /**
- * Records a signal whose outing the caller checked, in its transaction: the account is locked
- * first, so that two signals sent at once (the offline queue of the app sending again) wait for
- * each other, then the place, whose counters change.
+ * Records a signal whose outing the caller checked and locked, in its transaction. The locks
+ * follow the order of every path that takes more than one of them: the outing, then the account,
+ * so that two signals sent at once (the offline queue of the app sending again) wait for each
+ * other, then the place, whose counters change. Another order would deadlock with « Étape
+ * suivante » or the deletion of the account.
  */
 export async function recordPlaceSignal(
   tx: Tx,
@@ -216,10 +218,10 @@ const invalidOuting = (message: string) =>
   bodyValidationError([{ path: 'plannedRouteId', code: 'invalid_value', message }]);
 
 /**
- * Where the caller was, from their outing (D-056): after a completed Go (E-15), or at the step of
- * the place during the Go, once arrived (E-07). 422 for an outing of another account or that does
- * not go through the place, 409 for an outing neither under way nor completed, or a step not
- * reached yet.
+ * Where the caller was, from their outing (D-056), locked first like in « Étape suivante »
+ * (`recordPlaceSignal`): after a completed Go (E-15), or at the step of the place during the Go,
+ * once arrived (E-07). 422 for an outing of another account or that does not go through the
+ * place, 409 for an outing neither under way nor completed, or a step not reached yet.
  */
 async function contextOf(
   tx: Tx,
@@ -230,7 +232,8 @@ async function contextOf(
   const [outing] = await tx
     .select()
     .from(plannedRoutes)
-    .where(and(eq(plannedRoutes.id, plannedRouteId), eq(plannedRoutes.userId, userId)));
+    .where(and(eq(plannedRoutes.id, plannedRouteId), eq(plannedRoutes.userId, userId)))
+    .for('update');
   if (!outing) throw invalidOuting('Not an outing of the caller');
   const snapshot = PlannedRouteSnapshot.safeParse(outing.routeRevisionSnapshot).data;
   const stepIds = (snapshot?.steps ?? [])
