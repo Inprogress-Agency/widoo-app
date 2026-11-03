@@ -17,7 +17,9 @@ import {
   userAnecdotes,
   users,
 } from '../db/schema';
+import { uuidv7 } from '../db/uuid';
 import { demoPlaceIds, editorFixtures } from '../editor/test-fixtures';
+import { testPhotoBase } from '../media/test-fixtures';
 import { testConfig } from '../test-config';
 import { exportUserData } from './export';
 
@@ -62,18 +64,18 @@ async function fillAccount(headers: Record<string, string>, marker: string) {
     })
     .returning({ id: media.id });
   if (photo) photoIds.push(photo.id);
-  const [placePhoto] = await db
-    .insert(media)
-    .values({
-      ownerType: 'place',
-      ownerId: demoPlaceIds[0] ?? '',
-      storagePath: `https://images.example.com/lieu-${marker}.jpg`,
-      width: 1200,
-      height: 800,
-      uploadedBy: userId,
-    })
-    .returning({ id: media.id });
-  if (placePhoto) photoIds.push(placePhoto.id);
+  // Sent for a place and stored in the bucket (#47): exported by its public URL.
+  const placePhotoId = uuidv7();
+  photoIds.push(placePhotoId);
+  await db.insert(media).values({
+    id: placePhotoId,
+    ownerType: 'place',
+    ownerId: demoPlaceIds[0] ?? '',
+    storagePath: `photos/${placePhotoId}`,
+    width: 1600,
+    height: 1067,
+    uploadedBy: userId,
+  });
   const [planned] = await db
     .insert(plannedRoutes)
     .values({
@@ -112,7 +114,7 @@ async function fillAccount(headers: Record<string, string>, marker: string) {
     .insert(devices)
     .values({ userId, pushToken: `ExponentPushToken[fictitious-${marker}]`, locale: 'en' });
   await db.insert(notifications).values({ userId, kind: 'go_closed' });
-  return { userId, route };
+  return { userId, route, placePhotoId };
 }
 
 // One account filled once for the file: building it runs the seed and the editor.
@@ -120,7 +122,9 @@ const marker = randomUUID();
 let filled: Awaited<ReturnType<typeof fillAccount>>;
 
 beforeAll(async () => {
-  app = await buildApp(testConfig(), { tokenVerifier: verifier });
+  app = await buildApp(testConfig({ MEDIA_PUBLIC_BASE_URL: testPhotoBase }), {
+    tokenVerifier: verifier,
+  });
   filled = await fillAccount(await fixtures.signIn(), marker);
 }, 30_000);
 afterAll(async () => {
@@ -132,7 +136,7 @@ afterAll(async () => {
 
 describe('exportUserData', () => {
   it('exports every personal data of the account', async () => {
-    const { userId, route } = filled;
+    const { userId, route, placePhotoId } = filled;
 
     const exported = MyDataExport.parse(await exportUserData(app.db, userId, app.photoUrls));
     expect(exported.account).toMatchObject({ id: userId, bio: `Bio ${marker}` });
@@ -154,7 +158,7 @@ describe('exportUserData', () => {
     expect(exported.devices).toMatchObject([{ locale: 'en' }]);
     expect(exported.notifications).toMatchObject([{ kind: 'go_closed' }]);
     expect(exported.placePhotos).toMatchObject([
-      { placeId: demoPlaceIds[0], url: `https://images.example.com/lieu-${marker}.jpg` },
+      { placeId: demoPlaceIds[0], url: `${testPhotoBase}/photos/${placePhotoId}/1600.jpg` },
     ]);
     // The push token is a credential of the push service, never returned.
     expect(JSON.stringify(exported)).not.toContain('ExponentPushToken');

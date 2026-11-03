@@ -138,7 +138,8 @@ describe('POST /media/upload-url', () => {
 
 describe('without photo storage', () => {
   it('answers 503 media_unavailable on every photo route, the rest of the API working', async () => {
-    const bare = await buildApp(testConfig(), { tokenVerifier: verifier, photoStorage: null });
+    // The configuration of staging today: no bucket, nothing injected.
+    const bare = await buildApp(testConfig(), { tokenVerifier: verifier });
     try {
       const headers = await fixtures.signIn();
       const id = uuidv7();
