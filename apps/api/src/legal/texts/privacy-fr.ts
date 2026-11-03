@@ -1,6 +1,6 @@
 /**
  * Text for the users of the wiki page Politique-de-confidentialite, between its two
- * separators: draft of 2026-09-28 (D-063), revised on 2026-10-20 (D-107), to be reviewed by a
+ * separators: draft of 2026-09-28 (D-063), revised on 2026-10-20 (D-107) and 2026-11-03 (D-113), to be reviewed by a
  * lawyer before the stores; the passages in square brackets are still to complete in the wiki.
  * Changed in the wiki first, then here, with a new version in `../documents.ts`. Links to other
  * wiki pages are kept as their text.
@@ -54,7 +54,8 @@ Le fichier créé par « Télécharger mes données » est préparé à votre de
   - RevenueCat : suivi des abonnements achetés dans les stores [lieu de traitement à vérifier] ;
   - Google Cloud Vertex AI (Union européenne) : traduction des parcours publiés et des avis ; il reçoit le texte, pas votre profil ;
   - Brevo (France, Union européenne) : envoi des e-mails de connexion, de confirmation d'adresse et des réponses du support ;
-  - Vercel (États-Unis) : hébergement du site widooapp.com ; il reçoit l'adresse IP et les données techniques de connexion des visiteurs du site, qui ne dépose aucun cookie.
+  - Vercel (États-Unis) : hébergement du site widooapp.com ; il reçoit l'adresse IP et les données techniques de connexion des visiteurs du site, qui ne dépose aucun cookie ;
+  - Google Workspace (Google) : messagerie de notre adresse contact@widooapp.com ; il reçoit votre adresse e-mail et le contenu des messages que vous nous écrivez, en réponse à nos e-mails ou par « Nous écrire » [lieu de traitement et garanties de transfert à vérifier].
 - Apple et Google, quand vous vous connectez avec leur compte ou achetez Premium par leur store : ils agissent alors selon leurs propres politiques.
 - Google Maps, quand vous touchez « Itinéraire » pendant une sortie : l'adresse de l'étape suivante lui est transmise et Google Maps s'ouvre, selon la politique de Google.
 - Les autorités, si la loi nous y oblige.
