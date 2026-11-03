@@ -19,7 +19,7 @@ afterAll(async () => {
   await app.close();
 });
 
-const { visitor, route, outing, signal, placeOf } = fixtures;
+const { visitor, route, outing, patch, signal, placeOf } = fixtures;
 const daysAgo = (days: number) => new Date(Date.now() - days * 24 * 3_600_000);
 const confirm = (plannedRouteId: string) => ({ kind: 'confirm', plannedRouteId });
 const report = (plannedRouteId: string, reason: string) => ({
@@ -28,7 +28,7 @@ const report = (plannedRouteId: string, reason: string) => ({
   plannedRouteId,
 });
 
-/** A visitor who completed an outing on the route: their headers and the outing. */
+/** A visitor who completed an outing on the route, every step done: their headers and the outing. */
 async function returned(routeId: string) {
   const { headers } = await visitor();
   return { headers, outingId: (await outing(headers, routeId, 'completed')).id };
@@ -115,17 +115,34 @@ describe('the effect of a report on its place', () => {
     expect((await placeOf(placeIds[1])).verificationStatus).toBe('verified');
   });
 
-  it('flags it at one « closed_permanently » from an account that completed a Go there', async () => {
+  it('flags it at one « closed_permanently » from an account that did the step in a completed Go', async () => {
     const { routeId, placeIds } = await route();
-    await placeOf(placeIds[0], { verificationStatus: 'verified', verifiedAt: daysAgo(10) });
+    for (const placeId of placeIds) {
+      await placeOf(placeId, { verificationStatus: 'verified', verifiedAt: daysAgo(10) });
+    }
+    const closed = (outingId: string) => report(outingId, 'closed_permanently');
+    // At the step, the Go under way.
     const onSite = await visitor();
     const go = await outing(onSite.headers, routeId, 'on_site');
-    await signal(onSite.headers, placeIds[0], report(go.id, 'closed_permanently'));
-    expect((await placeOf(placeIds[0])).verificationStatus).toBe('verified');
+    expect((await signal(onSite.headers, placeIds[0], closed(go.id))).statusCode).toBe(201);
+    // After the Go, the step reached (« J'y suis ») but not done.
+    const arrived = await visitor();
+    const arrivedGo = await outing(arrived.headers, routeId, 'on_site');
+    const atSecondStep = `/v1/me/planned/${arrivedGo.id}/steps/${arrivedGo.stepIds[1]}/arrived`;
+    await app.inject({ method: 'POST', url: atSecondStep, headers: arrived.headers });
+    await patch(arrived.headers, arrivedGo.id, 'completed');
+    expect((await signal(arrived.headers, placeIds[1], closed(arrivedGo.id))).statusCode).toBe(201);
+    // The step done, from an account whose signals weigh nothing.
+    const distrusted = await visitor({ trustScore: 0 });
+    const distrustedGo = await outing(distrusted.headers, routeId, 'completed');
+    const weightless = await signal(distrusted.headers, placeIds[2], closed(distrustedGo.id));
+    expect(weightless.statusCode).toBe(201);
+    for (const placeId of placeIds.slice(0, 3)) {
+      expect((await placeOf(placeId)).verificationStatus).toBe('verified');
+    }
 
-    await placeOf(placeIds[1], { verificationStatus: 'verified', verifiedAt: daysAgo(10) });
     const after = await returned(routeId);
-    await signal(after.headers, placeIds[1], report(after.outingId, 'closed_permanently'));
-    expect((await placeOf(placeIds[1])).verificationStatus).toBe('flagged');
+    await signal(after.headers, placeIds[3], closed(after.outingId));
+    expect((await placeOf(placeIds[3])).verificationStatus).toBe('flagged');
   });
 });

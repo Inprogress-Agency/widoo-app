@@ -171,18 +171,26 @@ export const countsTowardFlag = (reason: SignalReason) =>
   !(fieldAlertReasons as readonly SignalReason[]).includes(reason);
 
 /**
- * Whether a counted report flags its place: distinct accounts reporting the same reason since the
- * window and the last verification (`concordantAccounts`, this one included) reach the threshold,
- * or `closed_permanently` comes from an account that completed a Go through the place.
+ * Whether a counted report flags its place, never with a weight of zero: distinct accounts
+ * reporting the same reason with a weight since the window and the last verification
+ * (`concordantAccounts`, this one included) reach the threshold, or `closed_permanently` comes
+ * from an account that did the step of the place in a Go it completed (D-056, E-15).
  */
 export function flagsPlace(
-  report: { reason: SignalReason; concordantAccounts: number; hasCompletedGoThere: boolean },
+  report: {
+    reason: SignalReason;
+    weight: number;
+    concordantAccounts: number;
+    hasDoneStepInCompletedGo: boolean;
+  },
   status: VerificationStatus,
   rules: VerificationRules,
 ): boolean {
-  if (decidedByTeam.includes(status) || !countsTowardFlag(report.reason)) return false;
+  if (decidedByTeam.includes(status) || !countsTowardFlag(report.reason) || report.weight <= 0) {
+    return false;
+  }
   return (
     report.concordantAccounts >= rules.reportsToFlag ||
-    (report.reason === 'closed_permanently' && report.hasCompletedGoThere)
+    (report.reason === 'closed_permanently' && report.hasDoneStepInCompletedGo)
   );
 }

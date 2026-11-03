@@ -96,7 +96,11 @@ describe('afterConfirmation', () => {
 });
 
 describe('flagsPlace', () => {
-  const report = { reason: 'closed_temporarily' as const, hasCompletedGoThere: false };
+  const report = {
+    reason: 'closed_temporarily' as const,
+    weight: 1.5,
+    hasDoneStepInCompletedGo: false,
+  };
 
   it('flags at 2 accounts reporting the same reason', () => {
     expect(flagsPlace({ ...report, concordantAccounts: 1 }, 'verified', rules)).toBe(false);
@@ -104,13 +108,31 @@ describe('flagsPlace', () => {
     expect(flagsPlace({ ...report, concordantAccounts: 2 }, 'unverified', rules)).toBe(true);
   });
 
-  it('flags at one « closed_permanently » from an account that completed a Go there', () => {
-    const closed = { reason: 'closed_permanently' as const, concordantAccounts: 1 };
-    expect(flagsPlace({ ...closed, hasCompletedGoThere: true }, 'stale', rules)).toBe(true);
-    expect(flagsPlace({ ...closed, hasCompletedGoThere: false }, 'stale', rules)).toBe(false);
+  it('flags at one « closed_permanently » from an account that did the step in a completed Go', () => {
+    const closed = { ...report, reason: 'closed_permanently' as const, concordantAccounts: 1 };
+    expect(flagsPlace({ ...closed, hasDoneStepInCompletedGo: true }, 'stale', rules)).toBe(true);
+    expect(flagsPlace({ ...closed, hasDoneStepInCompletedGo: false }, 'stale', rules)).toBe(false);
     expect(
-      flagsPlace({ ...report, concordantAccounts: 1, hasCompletedGoThere: true }, 'stale', rules),
+      flagsPlace(
+        { ...report, concordantAccounts: 1, hasDoneStepInCompletedGo: true },
+        'stale',
+        rules,
+      ),
     ).toBe(false);
+  });
+
+  it('never flags on a report of no weight', () => {
+    const closed = { ...report, reason: 'closed_permanently' as const, weight: 0 };
+    expect(
+      flagsPlace(
+        { ...closed, concordantAccounts: 1, hasDoneStepInCompletedGo: true },
+        'stale',
+        rules,
+      ),
+    ).toBe(false);
+    expect(flagsPlace({ ...report, weight: 0, concordantAccounts: 2 }, 'verified', rules)).toBe(
+      false,
+    );
   });
 
   it('never flags on a field alert, nor a place that waits for the team', () => {

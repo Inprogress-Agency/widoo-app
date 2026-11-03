@@ -2,7 +2,7 @@ import { PlannedRoute } from '@widoo/shared';
 import { asc, eq } from 'drizzle-orm';
 import type { buildApp } from '../app';
 import type { TestTokenVerifier } from '../auth/test-verifier';
-import { placeSignals, places } from '../db/schema';
+import { placeSignals, places, plannedSteps } from '../db/schema';
 import { plannedFixtures, saturdayTen } from '../planned/test-fixtures';
 
 type App = Awaited<ReturnType<typeof buildApp>>;
@@ -18,9 +18,12 @@ const dayMs = 24 * 60 * 60 * 1000;
 export function signalFixtures(app: () => App, verifier: TestTokenVerifier) {
   const planned = plannedFixtures(app, verifier);
 
-  /** A signed-in account two days old (a younger one weighs less), and its id. */
-  async function visitor(createdAt = new Date(Date.now() - 2 * dayMs)) {
-    const headers = await planned.signIn({ createdAt });
+  /**
+   * A signed-in account, two days old by default (a younger one weighs less) and of the default
+   * trust score, and its id.
+   */
+  async function visitor({ createdAt = new Date(Date.now() - 2 * dayMs), trustScore = 1 } = {}) {
+    const headers = await planned.signIn({ createdAt, trustScore });
     const me = await app().inject({ url: '/v1/me', headers });
     return { headers, id: me.json<{ id: string }>().id };
   }
@@ -47,12 +50,13 @@ export function signalFixtures(app: () => App, verifier: TestTokenVerifier) {
 
   /**
    * An outing of the visitor on the route: only planned, under way at its first step (« J'y
-   * suis »), or completed. Its id and the ids of its steps.
+   * suis »), completed with every step done, or completed at once, no step reached. Its id and
+   * the ids of its steps.
    */
   async function outing(
     headers: Headers,
     routeId: string,
-    state: 'planned' | 'on_site' | 'completed',
+    state: 'planned' | 'on_site' | 'completed' | 'completed_unvisited',
   ) {
     const response = await app().inject({
       method: 'POST',
@@ -67,7 +71,13 @@ export function signalFixtures(app: () => App, verifier: TestTokenVerifier) {
       const url = `/v1/me/planned/${id}/steps/${stepIds[0]}/arrived`;
       await app().inject({ method: 'POST', url, headers });
     }
-    if (state === 'completed') await patch(headers, id, 'completed');
+    if (state === 'completed') {
+      const ofOuting = eq(plannedSteps.plannedRouteId, id);
+      await app().db.update(plannedSteps).set({ doneAt: new Date() }).where(ofOuting);
+    }
+    if (state === 'completed' || state === 'completed_unvisited') {
+      await patch(headers, id, 'completed');
+    }
     return { id, stepIds };
   }
 

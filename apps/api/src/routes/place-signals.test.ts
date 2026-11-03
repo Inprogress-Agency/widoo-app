@@ -21,7 +21,7 @@ afterAll(async () => {
   await app.close();
 });
 
-const { visitor, route, outing, patch, signal, signalsOn } = fixtures;
+const { visitor, route, outing, patch, signal, placeOf, signalsOn } = fixtures;
 const confirm = (plannedRouteId: string) => ({ kind: 'confirm', plannedRouteId });
 const report = (plannedRouteId: string, reason: string, comment?: string) => ({
   kind: 'report',
@@ -90,6 +90,36 @@ describe('POST /v1/places/:id/signals', () => {
     expect((await signal({}, placeIds[0], confirm(done.id))).statusCode).toBe(401);
     expect(await signalsOn(placeIds[0])).toEqual([]);
   });
+
+  it('refuses a signal after an outing that never reached the place, as from elsewhere (D-056)', async () => {
+    const { routeId, placeIds } = await route();
+    const elsewhere = await route();
+    // An account created a minute ago, an outing started then completed at once.
+    const { headers } = await visitor({ createdAt: new Date(Date.now() - 60_000) });
+    const passing = await outing(headers, routeId, 'completed_unvisited');
+    const closed = report(passing.id, 'closed_permanently');
+
+    const notReached = await signal(headers, placeIds[0], closed);
+
+    expect(notReached.statusCode).toBe(422);
+    expect(notReached.json()).toEqual(
+      (await signal(headers, elsewhere.placeIds[0], closed)).json(),
+    );
+    expect(await signalsOn(placeIds[0])).toEqual([]);
+    expect((await placeOf(placeIds[0])).verificationStatus).toBe('unverified');
+  });
+
+  it('accepts a signal after an outing for the place whose step it reached only', async () => {
+    const { routeId, placeIds } = await route();
+    const { headers } = await visitor();
+    // « J'y suis » at the first step, then « Terminer la sortie ».
+    const go = await outing(headers, routeId, 'on_site');
+    await patch(headers, go.id, 'completed');
+
+    expect((await signal(headers, placeIds[0], confirm(go.id))).statusCode).toBe(201);
+    expect((await signal(headers, placeIds[1], confirm(go.id))).statusCode).toBe(422);
+    expect(await signalsOn(placeIds[0])).toMatchObject([{ weight: 1.5 }]);
+  });
 });
 
 describe('POST /v1/places/:id/signals against abuse (Creation-et-Moderation › Anti-abus)', () => {
@@ -97,7 +127,7 @@ describe('POST /v1/places/:id/signals against abuse (Creation-et-Moderation › 
     const { routeId, placeIds } = await route();
     const reader = await visitor();
     const done = await outing(reader.headers, routeId, 'completed');
-    const young = await visitor(new Date());
+    const young = await visitor({ createdAt: new Date() });
     const youngDone = await outing(young.headers, routeId, 'completed');
 
     const reported = await signal(reader.headers, placeIds[1], report(done.id, 'other', 'Autre'));

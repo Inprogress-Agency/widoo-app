@@ -24,6 +24,7 @@ import { and, count, eq, gt, inArray, isNotNull, max, or, sql } from 'drizzle-or
 import type { Db, Tx } from '../db/client';
 import { placeSignals, places, plannedRoutes, plannedSteps, users } from '../db/schema';
 import { bodyValidationError, httpError } from '../errors';
+import { didStepInCompletedGo } from './visits';
 
 /**
  * `counted`: written. Accepted without counting: `repeated` within 7 days (D-057), `ignored` after
@@ -90,21 +91,13 @@ async function concordantAccounts(tx: Tx, placeId: string, reason: SignalReason,
   return row?.accounts ?? 0;
 }
 
-/** Whether the account completed a Go whose snapshot goes through the place. */
-async function hasCompletedGoThere(tx: Tx, userId: string, placeId: string) {
-  const throughPlace = JSON.stringify({ steps: [{ place: { id: placeId } }] });
-  const [found] = await tx
-    .select({ id: plannedRoutes.id })
-    .from(plannedRoutes)
-    .where(
-      and(
-        eq(plannedRoutes.userId, userId),
-        eq(plannedRoutes.status, 'completed'),
-        sql`${plannedRoutes.routeRevisionSnapshot} @> ${throughPlace}::jsonb`,
-      ),
-    )
-    .limit(1);
-  return found !== undefined;
+/** Whether the account did the step of the place in a Go it completed (`didStepInCompletedGo`). */
+async function hasDoneStepInCompletedGo(tx: Tx, userId: string, placeId: string, now: Date) {
+  const at = sql`${now.toISOString()}::timestamptz`;
+  const [row] = await tx.execute<{ found: boolean }>(
+    sql`select ${didStepInCompletedGo(userId, placeId, at)} as found`,
+  );
+  return row?.found === true;
 }
 
 /** A counted report: `flagged` at the threshold of Creation-et-Moderation › État d'un lieu. */
@@ -112,6 +105,7 @@ async function reportPlace(
   tx: Tx,
   { userId, placeId, signal }: NewPlaceSignal,
   place: LockedPlace,
+  weight: number,
   rules: VerificationRules,
   now: Date,
 ) {
@@ -122,9 +116,10 @@ async function reportPlace(
   const since = place.verifiedAt && place.verifiedAt > windowStart ? place.verifiedAt : windowStart;
   const report = {
     reason,
+    weight,
     concordantAccounts: await concordantAccounts(tx, placeId, reason, since),
-    hasCompletedGoThere:
-      reason === 'closed_permanently' && (await hasCompletedGoThere(tx, userId, placeId)),
+    hasDoneStepInCompletedGo:
+      reason === 'closed_permanently' && (await hasDoneStepInCompletedGo(tx, userId, placeId, now)),
   };
   if (flagsPlace(report, place.status, rules)) {
     await tx.update(places).set({ verificationStatus: 'flagged' }).where(eq(places.id, placeId));
@@ -209,7 +204,7 @@ export async function recordPlaceSignal(
   if (input.signal.kind === 'confirm') {
     await confirmPlace(tx, input.placeId, place, weight, rules, now);
   } else {
-    await reportPlace(tx, input, place, rules, now);
+    await reportPlace(tx, input, place, weight, rules, now);
   }
   return 'counted';
 }
@@ -217,11 +212,14 @@ export async function recordPlaceSignal(
 const invalidOuting = (message: string) =>
   bodyValidationError([{ path: 'plannedRouteId', code: 'invalid_value', message }]);
 
+const notThroughPlace = 'The outing does not go through this place';
+
 /**
  * Where the caller was, from their outing (D-056), locked first like in « Étape suivante »
- * (`recordPlaceSignal`): after a completed Go (E-15), or at the step of the place during the Go,
- * once arrived (E-07). 422 for an outing of another account or that does not go through the
- * place, 409 for an outing neither under way nor completed, or a step not reached yet.
+ * (`recordPlaceSignal`): at the step of the place, reached (« J'y suis » or done), during the Go
+ * (E-07) or after it (E-15). 422 for an outing of another account, that does not go through the
+ * place, or completed without reaching it; 409 for an outing neither under way nor completed, or
+ * a step not reached yet.
  */
 async function contextOf(
   tx: Tx,
@@ -239,9 +237,8 @@ async function contextOf(
   const stepIds = (snapshot?.steps ?? [])
     .filter((step) => step.place.id === placeId)
     .map((step) => step.id);
-  if (stepIds.length === 0) throw invalidOuting('The outing does not go through this place');
-  if (outing.status === 'completed') return 'after_outing';
-  if (outing.status !== 'in_progress') {
+  if (stepIds.length === 0) throw invalidOuting(notThroughPlace);
+  if (outing.status !== 'in_progress' && outing.status !== 'completed') {
     throw httpError(409, 'The outing is neither in progress nor completed');
   }
   const [reached] = await tx
@@ -255,6 +252,11 @@ async function contextOf(
       ),
     )
     .limit(1);
+  // Completed without reaching the place: the visitor was never there, as for a place elsewhere.
+  if (outing.status === 'completed') {
+    if (!reached) throw invalidOuting(notThroughPlace);
+    return 'after_outing';
+  }
   if (!reached) throw httpError(409, 'The step of this place is not reached yet');
   return 'on_site';
 }
