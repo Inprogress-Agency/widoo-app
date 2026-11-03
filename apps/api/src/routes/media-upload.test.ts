@@ -162,6 +162,7 @@ describe('without photo storage', () => {
           headers,
           payload: { ownerType: 'route', ownerId: id, contentType: 'image/jpeg' },
         }),
+        bare.inject({ method: 'POST', url: `/v1/media/${id}/confirm`, headers }),
       ]);
       for (const answer of answers) {
         expect(answer.statusCode).toBe(503);

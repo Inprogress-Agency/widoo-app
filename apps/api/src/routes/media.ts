@@ -1,6 +1,8 @@
-import { ApiError, PhotoUploadRequest, PhotoUploadTicket } from '@widoo/shared';
+import { ApiError, PhotoUploadRequest, PhotoUploadTicket, StoredPhoto } from '@widoo/shared';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
+import { z } from 'zod';
 import { mediaUnavailable } from '../errors';
+import { confirmUpload } from '../media/confirm';
 import type { PhotoStorage } from '../media/storage';
 import { issueUpload } from '../media/upload';
 import { currentUser } from './me';
@@ -13,6 +15,7 @@ export const UPLOAD_URL_RATE_LIMIT = 30;
 
 const security = [{ firebaseIdToken: [] }];
 const tags = ['creation'];
+const MediaParams = z.strictObject({ id: z.uuid() });
 const errors = { 403: ApiError, 404: ApiError, 409: ApiError, 503: ApiError };
 
 export type MediaRoutesOptions = {
@@ -21,8 +24,8 @@ export type MediaRoutesOptions = {
 };
 
 /**
- * The photos of the creators (#47, wiki API › Création): a signed URL to send the original.
- * Signed in, never cached.
+ * The photos of the creators (#47, wiki API › Création): a signed URL to send the original, then
+ * its confirmation. Signed in, never cached.
  */
 export const mediaRoutes: FastifyPluginAsyncZod<MediaRoutesOptions> = async (app, { storage }) => {
   app.addHook('onRequest', app.requireAuth);
@@ -52,5 +55,29 @@ export const mediaRoutes: FastifyPluginAsyncZod<MediaRoutesOptions> = async (app
     },
     async (request) =>
       issueUpload(app.db, storageOrUnavailable(), currentUser(request), request.body, new Date()),
+  );
+
+  app.post(
+    '/media/:id/confirm',
+    {
+      schema: {
+        tags,
+        summary: 'Confirm a photo sent: stored in three widths without metadata',
+        security,
+        params: MediaParams,
+        response: { 200: StoredPhoto, 201: StoredPhoto, 422: ApiError, 429: ApiError, ...errors },
+      },
+    },
+    async (request, reply) => {
+      const { photo, created } = await confirmUpload(
+        app.db,
+        storageOrUnavailable(),
+        app.photoUrls,
+        currentUser(request),
+        request.params.id,
+        { now: new Date(), log: request.log },
+      );
+      return reply.status(created ? 201 : 200).send(photo);
+    },
   );
 };
