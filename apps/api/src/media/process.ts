@@ -12,8 +12,9 @@ const decodedFormats: ReadonlySet<string> = new Set(['jpeg', 'png', 'webp']);
 
 /**
  * Longest side of an original, in pixels. The app sends 1600 px; 4096 leaves room for a photo it
- * could not compress. With 8 bits and 4 channels at most, an original decodes into 64 MiB at
- * most, one at a time on an instance (`inPhotoSlot`).
+ * could not compress. With 8 bits and 4 channels at most, processing an original takes about
+ * 175 MiB at worst, measured (a progressive CMYK JPEG of 4096 px), one at a time on an instance
+ * (`inPhotoSlot`), within its 512 MiB.
  */
 export const maxOriginalSide = 4096;
 const maxChannels = 4;

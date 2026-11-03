@@ -56,6 +56,24 @@ describe('processPhoto', () => {
     expect(channels.map((channel) => Math.round(channel.mean))).toEqual([255, 255, 255]);
   });
 
+  it('takes a CMYK JPEG and serves it in sRGB', async () => {
+    const cmyk = await sharp({
+      create: { width: 300, height: 200, channels: 3, background: '#3a4fa8' },
+    })
+      .toColourspace('cmyk')
+      .jpeg({ progressive: true })
+      .toBuffer();
+    expect(await sharp(cmyk).metadata()).toMatchObject({ space: 'cmyk', channels: 4 });
+    const processed = await processPhoto(cmyk);
+    for (const { data } of processed.variants) {
+      expect(await sharp(data).metadata()).toMatchObject({
+        format: 'jpeg',
+        space: 'srgb',
+        channels: 3,
+      });
+    }
+  });
+
   it('takes 4096 px on a side, the most an original may have', async () => {
     const processed = await processPhoto(await png(maxOriginalSide, 1));
     expect(processed.width).toBe(1600);
@@ -78,6 +96,18 @@ describe('processPhoto', () => {
           .toColourspace('rgb16')
           .png()
           .toBuffer(),
+    ],
+    [
+      'two frames, an animated WebP',
+      async () => {
+        const frame = (colour: string) =>
+          sharp({ create: { width: 64, height: 64, channels: 3, background: colour } })
+            .png()
+            .toBuffer();
+        return sharp([await frame('#f00'), await frame('#00f')], { join: { animated: true } })
+          .webp()
+          .toBuffer();
+      },
     ],
   ])('refuses an original of %s before decoding it', async (_, file) => {
     await expect(processPhoto(await file())).rejects.toBeInstanceOf(InvalidPhoto);
