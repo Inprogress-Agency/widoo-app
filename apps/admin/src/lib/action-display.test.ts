@@ -1,7 +1,9 @@
+import { adminActionNames, adminActionTargetTypes } from '@widoo/shared';
 import { describe, expect, it } from 'vitest';
 import {
   actionLabelOf,
   isTargetGone,
+  reasonOf,
   targetNameOf,
   targetPathOf,
   targetTypeLabelOf,
@@ -11,8 +13,47 @@ describe('actionLabelOf and targetTypeLabelOf', () => {
   it('translate what is known and show the rest as it is', () => {
     expect(actionLabelOf('user.suspend')).toBe('Compte suspendu');
     expect(actionLabelOf('thing.done')).toBe('thing.done');
+    expect(actionLabelOf('constructor')).toBe('constructor');
     expect(targetTypeLabelOf('route')).toBe('Parcours');
     expect(targetTypeLabelOf('thing')).toBe('thing');
+  });
+
+  // The names the API may write (`recordAdminAction` accepts no other): one without a label would
+  // show as a key in A-12.
+  it.each(adminActionNames)('labels the action %s that the API writes', (action) => {
+    expect(actionLabelOf(action)).not.toBe(action);
+  });
+
+  it.each(adminActionTargetTypes)('labels the kind of target %s that the API writes', (type) => {
+    expect(targetTypeLabelOf(type)).not.toBe(type);
+  });
+
+  it('labels the actions of the recette that showed as keys', () => {
+    expect(actionLabelOf('place.import')).toBe('Lieu importé');
+    expect(actionLabelOf('rating.hide')).toBe('Avis masqué');
+    expect(targetTypeLabelOf('rating')).toBe('Avis');
+  });
+});
+
+describe('reasonOf', () => {
+  it('reads the codified reason of a refusal or a withdrawal by its label', () => {
+    expect(reasonOf({ action: 'route.unpublish', reason: 'not_a_route' })).toBe(
+      'Pas un vrai parcours',
+    );
+    expect(
+      reasonOf({ action: 'route.reject', reason: 'duplicate — Le même que « Le Marais » — v2' }),
+    ).toBe('Doublon — Le même que « Le Marais » — v2');
+  });
+
+  it('keeps a reason written by hand as it is', () => {
+    expect(reasonOf({ action: 'route.request_changes', reason: 'Ajoutez une étape' })).toBe(
+      'Ajoutez une étape',
+    );
+    expect(reasonOf({ action: 'route.reject', reason: 'not a code — message' })).toBe(
+      'not a code — message',
+    );
+    expect(reasonOf({ action: 'place.close', reason: 'not_a_route' })).toBe('not_a_route');
+    expect(reasonOf({ action: 'route.unpublish', reason: null })).toBeNull();
   });
 });
 
@@ -38,8 +79,17 @@ describe('targetNameOf', () => {
       'Camille',
     );
     expect(
+      targetNameOf({ targetType: 'rating', targetId: 'r1', targetLabel: 'Le Marais gourmand' }),
+    ).toBe('Le Marais gourmand');
+    expect(
       targetNameOf({ targetType: 'setting', targetId: 'premium.min_steps', targetLabel: null }),
     ).toBe("Étapes d'un parcours Premium");
+  });
+
+  it('names a support message by the label of its topic', () => {
+    expect(
+      targetNameOf({ targetType: 'support_message', targetId: 'm1', targetLabel: 'problem' }),
+    ).toBe('Problème');
   });
 
   it('has none for an object that is gone or a kind without a name', () => {
@@ -51,14 +101,15 @@ describe('targetNameOf', () => {
 });
 
 describe('isTargetGone', () => {
-  it('is true for an account, route or place the API no longer names', () => {
+  it('is true for an object the API no longer names', () => {
     expect(isTargetGone({ targetType: 'user', targetLabel: null })).toBe(true);
     expect(isTargetGone({ targetType: 'route', targetLabel: null })).toBe(true);
+    expect(isTargetGone({ targetType: 'route_report', targetLabel: null })).toBe(true);
     expect(isTargetGone({ targetType: 'user', targetLabel: 'Camille' })).toBe(false);
   });
 
   it('is false for a kind that has no name to lose', () => {
     expect(isTargetGone({ targetType: 'setting', targetLabel: null })).toBe(false);
-    expect(isTargetGone({ targetType: 'route_report', targetLabel: null })).toBe(false);
+    expect(isTargetGone({ targetType: 'thing', targetLabel: null })).toBe(false);
   });
 });

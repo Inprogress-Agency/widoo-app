@@ -1,6 +1,7 @@
 import {
   actionLabelOf,
   isTargetGone,
+  reasonOf,
   targetNameOf,
   targetPathOf,
   targetTypeLabelOf,
@@ -66,7 +67,7 @@ export function ActionPanelContent({ action }: { action: AdminActionItem }) {
           </span>
         </Line>
         <Line label={texts.reason}>
-          {action.reason ?? <span className="text-muted-foreground">{texts.noReason}</span>}
+          {reasonOf(action) ?? <span className="text-muted-foreground">{texts.noReason}</span>}
         </Line>
       </dl>
       <State title={texts.before} state={action.before} />
