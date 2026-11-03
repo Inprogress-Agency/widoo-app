@@ -49,11 +49,16 @@ export const taxonomies = {
   priceRanges: ['free', 'low', 'medium', 'high'],
   /** `unverified`: a place created by a user, until moderation or a first verification (D-049). */
   verificationStatuses: ['unverified', 'verified', 'stale', 'flagged', 'closed'],
+  /** Reasons of a report of a place (`place_signals.reason`), in the order of the wiki (D-036). */
   signalReasons: [
-    'closed_permanently',
+    'closed_today',
     'closed_temporarily',
+    'closed_permanently',
     'wrong_hours',
     'wrong_address',
+    'works',
+    'crowded',
+    'not_as_described',
     'other',
   ],
   userRoles: ['user', 'editor', 'moderator', 'admin'],

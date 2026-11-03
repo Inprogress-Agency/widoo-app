@@ -12,6 +12,7 @@ export * from './locale';
 export * from './media';
 export * from './moderation';
 export * from './notifications';
+export * from './place-signals';
 export * from './ratings';
 export * from './reports';
 export * from './route-lifecycle';
