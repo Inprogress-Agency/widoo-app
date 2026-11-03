@@ -5,10 +5,12 @@ import {
   PlaceSearchResult,
   PlaceSignalBody,
   PlaceSignalReceipt,
+  placeSignalDailyLimit,
   UpdatePlace,
 } from '@widoo/shared';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
+import { placeSignalLimitReached } from '../errors';
 import { createPlace } from '../places/create';
 import { searchPlaces } from '../places/search';
 import { updatePlace } from '../places/update';
@@ -85,22 +87,26 @@ export const placesRoutes: FastifyPluginAsyncZod = async (app) => {
         security,
         params: z.strictObject({ id: z.uuid() }),
         body: PlaceSignalBody,
-        response: { 201: PlaceSignalReceipt },
+        response: { 200: PlaceSignalReceipt, 201: PlaceSignalReceipt },
       },
     },
     async (request, reply) => {
+      const userId = currentUser(request).id;
       const placeId = request.params.id;
       const now = new Date();
       const rules = await verificationRules();
-      await submitPlaceSignal(app.db, currentUser(request).id, placeId, request.body, rules, now);
+      const outcome = await submitPlaceSignal(app.db, userId, placeId, request.body, rules, now);
+      if (outcome === 'limited') throw placeSignalLimitReached(placeSignalDailyLimit);
+      // Journalised, never told to the account (wiki Creation-et-Moderation › Anti-abus).
+      if (outcome === 'ignored') request.log.info({ userId, placeId }, 'place signal ignored');
       const receipt: PlaceSignalReceipt = {
         placeId,
         kind: request.body.kind,
         reason: request.body.reason ?? null,
-        isCounted: true,
+        isCounted: outcome === 'counted',
         receivedAt: now.toISOString(),
       };
-      return reply.status(201).send(receipt);
+      return reply.status(receipt.isCounted ? 201 : 200).send(receipt);
     },
   );
 };

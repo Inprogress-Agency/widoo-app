@@ -1,9 +1,12 @@
 /**
  * A confirmation or a report of a place by a visitor (wiki Creation-et-Moderation › Vérification
- * communautaire, API › Lieux, D-036, D-056): from an outing of their own, weighted by where they
- * were.
+ * communautaire, API › Lieux, D-036, D-056, D-057): from an outing of their own, weighted by where
+ * they were, counted once per place over 7 days, ignored after rejected reports.
  */
 import {
+  areSignalsIgnored,
+  daysBefore,
+  placeSignalDailyLimit,
   placeSignalWeightOf,
   PlannedRouteSnapshot,
   type PlaceSignalBody,
@@ -11,10 +14,16 @@ import {
   type StepPlaceSignal,
   type VerificationRules,
 } from '@widoo/shared';
-import { and, eq, inArray, isNotNull, or } from 'drizzle-orm';
+import { and, count, eq, gt, inArray, isNotNull, max, or } from 'drizzle-orm';
 import type { Db, Tx } from '../db/client';
 import { placeSignals, places, plannedRoutes, plannedSteps, users } from '../db/schema';
 import { bodyValidationError, httpError } from '../errors';
+
+/**
+ * `counted`: written. Accepted without counting: `repeated` within 7 days (D-057), `ignored` after
+ * rejected reports (never told), `limited` past the daily limit of the account.
+ */
+export type SignalOutcome = 'counted' | 'repeated' | 'ignored' | 'limited';
 
 export interface NewPlaceSignal {
   userId: string;
@@ -23,6 +32,37 @@ export interface NewPlaceSignal {
   plannedRouteId: string;
   context: PlaceSignalContext;
   signal: StepPlaceSignal;
+}
+
+async function hasSignalSince(tx: Tx, { userId, placeId }: NewPlaceSignal, since: Date) {
+  const [found] = await tx
+    .select({ id: placeSignals.id })
+    .from(placeSignals)
+    .where(
+      and(
+        eq(placeSignals.userId, userId),
+        eq(placeSignals.placeId, placeId),
+        gt(placeSignals.createdAt, since),
+      ),
+    )
+    .limit(1);
+  return found !== undefined;
+}
+
+async function rejectionsOf(tx: Tx, userId: string) {
+  const [row] = await tx
+    .select({ count: count(), lastAt: max(placeSignals.reviewedAt) })
+    .from(placeSignals)
+    .where(and(eq(placeSignals.userId, userId), eq(placeSignals.status, 'rejected')));
+  return { count: row?.count ?? 0, lastAt: row?.lastAt ?? null };
+}
+
+async function signalsSince(tx: Tx, userId: string, since: Date) {
+  const [row] = await tx
+    .select({ count: count() })
+    .from(placeSignals)
+    .where(and(eq(placeSignals.userId, userId), gt(placeSignals.createdAt, since)));
+  return row?.count ?? 0;
 }
 
 /**
@@ -35,7 +75,7 @@ export async function recordPlaceSignal(
   input: NewPlaceSignal,
   rules: VerificationRules,
   now: Date,
-): Promise<void> {
+): Promise<SignalOutcome> {
   const [user] = await tx
     .select({ createdAt: users.createdAt, trustScore: users.trustScore })
     .from(users)
@@ -47,6 +87,13 @@ export async function recordPlaceSignal(
     .where(eq(places.id, input.placeId))
     .for('update');
   if (!user || !place) throw httpError(404, 'Place not found');
+  if (await hasSignalSince(tx, input, daysBefore(now, rules.signalIntervalDays))) {
+    return 'repeated';
+  }
+  if (areSignalsIgnored(await rejectionsOf(tx, input.userId), now, rules)) return 'ignored';
+  if ((await signalsSince(tx, input.userId, daysBefore(now, 1))) >= placeSignalDailyLimit) {
+    return 'limited';
+  }
   const weight = placeSignalWeightOf(
     { context: input.context, accountCreatedAt: user.createdAt, trustScore: user.trustScore },
     now,
@@ -62,6 +109,7 @@ export async function recordPlaceSignal(
     contextPlannedRouteId: input.plannedRouteId,
     createdAt: now,
   });
+  return 'counted';
 }
 
 const invalidOuting = (message: string) =>
@@ -116,11 +164,11 @@ export async function submitPlaceSignal(
   { plannedRouteId, ...signal }: PlaceSignalBody,
   rules: VerificationRules,
   now: Date,
-): Promise<void> {
-  await db.transaction(async (tx) => {
+): Promise<SignalOutcome> {
+  return db.transaction(async (tx) => {
     const [place] = await tx.select({ id: places.id }).from(places).where(eq(places.id, placeId));
     if (!place) throw httpError(404, 'Place not found');
     const context = await contextOf(tx, userId, placeId, plannedRouteId);
-    await recordPlaceSignal(tx, { userId, placeId, plannedRouteId, context, signal }, rules, now);
+    return recordPlaceSignal(tx, { userId, placeId, plannedRouteId, context, signal }, rules, now);
   });
 }
