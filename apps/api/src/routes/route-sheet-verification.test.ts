@@ -1,9 +1,7 @@
 import { RouteDetail, type RouteDetailStep } from '@widoo/shared';
-import { and, eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app';
 import { TestTokenVerifier } from '../auth/test-verifier';
-import { placeSignals } from '../db/schema';
 import { testConfig } from '../test-config';
 import { signalFixtures } from '../verification/test-fixtures';
 
@@ -23,13 +21,12 @@ afterAll(async () => {
 const { visitor, route, outing, signal, placeOf } = fixtures;
 const hoursAgo = (hours: number) => new Date(Date.now() - hours * 3_600_000);
 
-/** A visitor back from an outing on the route sends one signal on the place. */
+/** A visitor back from an outing on the route, every step done, sends one signal on the place. */
 async function signals(routeId: string, placeId: string | undefined, body: object) {
-  const { headers, id } = await visitor();
+  const { headers } = await visitor();
   const plannedRouteId = (await outing(headers, routeId, 'completed')).id;
   const response = await signal(headers, placeId, { ...body, plannedRouteId });
   expect(response.statusCode, response.body).toBe(201);
-  return id;
 }
 
 const fullSteps = async (routeId: string) => {
@@ -47,16 +44,8 @@ describe('GET /v1/routes/:id and the signals of the visitors', () => {
     }
     await signals(routeId, confirmed, { kind: 'confirm' });
     await signals(routeId, confirmed, { kind: 'confirm' });
+    // Midnight in the city of the place: `verification/summary.test.ts`.
     await signals(routeId, closedToday, { kind: 'report', reason: 'closed_today' });
-    // Closed yesterday: over at midnight.
-    const yesterday = await signals(routeId, closedToday, {
-      kind: 'report',
-      reason: 'closed_today',
-    });
-    await app.db
-      .update(placeSignals)
-      .set({ createdAt: hoursAgo(30) })
-      .where(and(eq(placeSignals.userId, yesterday), eq(placeSignals.placeId, closedToday ?? '')));
     await signals(routeId, flagged, { kind: 'report', reason: 'closed_temporarily' });
     await signals(routeId, flagged, { kind: 'report', reason: 'closed_permanently' });
     await signals(routeId, flagged, { kind: 'report', reason: 'closed_permanently' });
@@ -72,7 +61,8 @@ describe('GET /v1/routes/:id and the signals of the visitors', () => {
     });
     expect(steps[1]?.verification.reports).toEqual({ count: 1, lastAt: expect.any(String) });
     expect(steps[2]?.place.verificationStatus).toBe('flagged');
-    expect(steps[2]?.verification.reports?.count).toBe(3);
+    // « Fermé temporairement » once only, under the threshold: not counted.
+    expect(steps[2]?.verification.reports?.count).toBe(2);
     // One report alone does not flag the place: nothing said on the sheet.
     expect(steps[3]?.place.verificationStatus).toBe('verified');
     expect(steps[3]?.verification).toMatchObject({ confirmations: 0, reports: null });
