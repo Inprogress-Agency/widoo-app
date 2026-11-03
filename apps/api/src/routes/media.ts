@@ -3,6 +3,7 @@ import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { mediaUnavailable } from '../errors';
 import { confirmUpload } from '../media/confirm';
+import { deletePhoto } from '../media/delete';
 import type { PhotoStorage } from '../media/storage';
 import { issueUpload } from '../media/upload';
 import { currentUser } from './me';
@@ -24,8 +25,8 @@ export type MediaRoutesOptions = {
 };
 
 /**
- * The photos of the creators (#47, wiki API › Création): a signed URL to send the original, then
- * its confirmation. Signed in, never cached.
+ * The photos of the creators (#47, wiki API › Création): a signed URL to send the original, its
+ * confirmation, the deletion. Signed in, never cached.
  */
 export const mediaRoutes: FastifyPluginAsyncZod<MediaRoutesOptions> = async (app, { storage }) => {
   app.addHook('onRequest', app.requireAuth);
@@ -78,6 +79,29 @@ export const mediaRoutes: FastifyPluginAsyncZod<MediaRoutesOptions> = async (app
         { now: new Date(), log: request.log },
       );
       return reply.status(created ? 201 : 200).send(photo);
+    },
+  );
+
+  app.delete(
+    '/media/:id',
+    {
+      schema: {
+        tags,
+        summary: 'Delete a photo of a route, a step or a place',
+        security,
+        params: MediaParams,
+        response: { 204: z.null(), ...errors },
+      },
+    },
+    async (request, reply) => {
+      await deletePhoto(
+        app.db,
+        storageOrUnavailable(),
+        currentUser(request),
+        request.params.id,
+        request.log,
+      );
+      return reply.status(204).send(null);
     },
   );
 };
