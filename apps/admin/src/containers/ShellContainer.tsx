@@ -20,7 +20,7 @@ import {
   type AdminSection,
   type CountedAdminSection,
 } from '@widoo/shared';
-import { TooltipProvider } from '@widoo/ui';
+import { dismissErrorToast, TooltipProvider } from '@widoo/ui';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 
@@ -70,6 +70,10 @@ export function ShellContainer({ children }: { children: ReactNode }) {
       router.replace(signInPathFor(`${window.location.pathname}${window.location.search}`));
     }
   }, [session.status, router]);
+
+  // An error toast belongs to the page whose action failed: it goes when the person leaves the
+  // page, for another one or for the sign-in page. A success may follow them.
+  useEffect(() => () => dismissErrorToast(), [pathname]);
 
   if (session.status === 'unavailable') {
     return <UnavailableMessage onRetry={retry} onOtherAccount={() => void signOut()} />;

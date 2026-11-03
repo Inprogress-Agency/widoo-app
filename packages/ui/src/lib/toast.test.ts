@@ -1,8 +1,16 @@
 import { toast } from 'sonner';
-import { afterEach, describe, expect, it } from 'vitest';
-import { showToast } from './toast';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { dismissErrorToast, showToast } from './toast';
 
 // The store of Sonner itself, without its Toaster: the toasts it holds are the ones on screen.
+// It tells the Toaster of a dismissal at the next frame, which Node does not have.
+beforeAll(() => {
+  vi.stubGlobal('requestAnimationFrame', (callback: () => void) => setTimeout(callback, 0));
+  vi.stubGlobal('cancelAnimationFrame', (frame: ReturnType<typeof setTimeout>) =>
+    clearTimeout(frame),
+  );
+});
+
 afterEach(() => {
   toast.dismiss();
 });
@@ -53,5 +61,19 @@ describe('showToast', () => {
     expect(toast.getToasts()).toEqual([
       expect.objectContaining({ type: 'error', title: 'Publication impossible' }),
     ]);
+  });
+});
+
+describe('dismissErrorToast', () => {
+  it('takes away the error of the page left', () => {
+    showToast('error', { title: 'Publication impossible' });
+    dismissErrorToast();
+    expect(toast.getToasts()).toEqual([]);
+  });
+
+  it.each(['success', 'info', 'warning'] as const)('leaves a %s toast on screen', (kind) => {
+    showToast(kind, { title: 'Parcours publié' });
+    dismissErrorToast();
+    expect(toast.getToasts()).toEqual([expect.objectContaining({ type: kind })]);
   });
 });
