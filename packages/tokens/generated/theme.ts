@@ -1,7 +1,7 @@
-// Généré depuis tokens.json (version 38), ne pas modifier : pnpm --filter @widoo/tokens generate.
+// Généré depuis tokens.json (version 39), ne pas modifier : pnpm --filter @widoo/tokens generate.
 import type { Audience, BudgetBucket, Condition, Mood, PlaceCategory, Transport } from '@widoo/shared';
 
-export const tokensVersion = 38;
+export const tokensVersion = 39;
 
 /** Light theme: the dark values are not validated and not generated. */
 export const colors = {
@@ -227,6 +227,7 @@ export const radius = {
   "radius-card": 18,
   "radius-section": 20,
   "radius-sheet": 24,
+  "radius-toast": 30,
   "radius-pill": 999
 } as const;
 export type RadiusToken = keyof typeof radius;
@@ -251,6 +252,7 @@ export const size = {
   "route-stroke": 5,
   "route-casing": 9,
   "thumb": 48,
+  "thumb-row": 64,
   "tooltip-min-w": 260,
   "card-w": 270,
   "card-h": 348,
@@ -264,7 +266,9 @@ export const size = {
   "hero-h": 380,
   "icon-s": 16,
   "icon-m": 20,
-  "icon-l": 24
+  "icon-l": 24,
+  "rating-star": 40,
+  "scroll-fade-h": 32
 } as const;
 export type SizeToken = keyof typeof size;
 
@@ -983,6 +987,21 @@ export const uiIcons = {
   "step-skipped": {
     "name": "skip-forward",
     "weight": "fill"
+  },
+  "recent-search": {
+    "name": "clock"
+  },
+  "around-me": {
+    "name": "navigation-arrow"
+  },
+  "effort": {
+    "name": "lightning"
+  },
+  "booking": {
+    "name": "ticket"
+  },
+  "transit-access": {
+    "name": "subway"
   }
 } as const satisfies Record<string, { name: IconName; weight?: 'fill' | 'bold'; activeWeight?: 'fill'; color?: ColorToken }>;
 export type UiIconKey = keyof typeof uiIcons;
@@ -1003,7 +1022,8 @@ export const badges = {
     "bg": "badge-premium-bg",
     "ink": "on-strong",
     "icon": "crown-simple",
-    "iconColor": "amber"
+    "iconColor": "amber",
+    "iconWeight": "fill"
   },
   "private": {
     "bg": "bg",
@@ -1058,7 +1078,9 @@ export const accessibility = {
     "barre du haut des pages secondaires",
     "toast entier (titre, sous-titre, action, D-046)",
     "bouton « Continuer avec un e-mail »",
+    "bouton « Continuer avec Google » (D-119)",
     "barre du haut et en-tête compact de E-07",
+    "alerte d'étape de E-07 (titre, texte, « Passer cette étape », D-118)",
     "mini-lecteur (nom sur une ligne, nom complet dans le libellé)",
     "tuiles et barre collée de E-15",
     "segments de l'onglet Parcours",
@@ -1148,6 +1170,7 @@ export const mapTooltip = {
 /** Durations (ms), cubic-bezier curves, gesture spring, press feedback and haptics (D-030). */
 export const motion = {
   "durations": {
+    "stagger": 50,
     "press": 100,
     "pressRelease": 200,
     "fade": 200,
