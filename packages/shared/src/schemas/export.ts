@@ -4,6 +4,7 @@ import { notificationKinds, reportStatuses, routeReportReasons } from '../report
 import { taxonomies } from '../taxonomies';
 import { AppLocale, NotificationPrefs } from './me';
 import { plannedRouteClosers, plannedRouteStatuses } from './planned';
+import { PlanProduct } from './profile';
 import { SupportTopic } from './support';
 
 /**
@@ -20,6 +21,8 @@ const ExportedAccount = z.object({
   avatarUrl: z.string().nullable(),
   role: z.enum(taxonomies.userRoles),
   plan: z.enum(taxonomies.plans),
+  planProduct: PlanProduct.nullable(),
+  planWillRenew: z.boolean(),
   planExpiresAt: DateTime.nullable(),
   isPublic: z.boolean(),
   bio: z.string().nullable(),

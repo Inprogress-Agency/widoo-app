@@ -66,6 +66,17 @@ export const planSources = ['store', 'gift'] as const;
 export const PlanSource = z.enum(planSources);
 export type PlanSource = z.infer<typeof PlanSource>;
 
+/**
+ * Store product of a Premium plan (D-116): the monthly or the annual subscription, or the 7-day
+ * pass. None for a gift of the team. Technical only: the app and the admin name each one.
+ */
+export const planProducts = ['monthly', 'annual', 'pass_7d'] as const;
+export const PlanProduct = z.enum(planProducts);
+export type PlanProduct = z.infer<typeof PlanProduct>;
+
+/** The products that renew, the subscriptions: the 7-day pass never does (D-116). */
+export const renewablePlanProducts: readonly PlanProduct[] = ['monthly', 'annual'];
+
 /** Key of the `settings` row of each criterion of the badge; a value is a JSON number. */
 export const certificationSettingKeys = {
   minVerifiedRoutes: 'certification.min_verified_routes',

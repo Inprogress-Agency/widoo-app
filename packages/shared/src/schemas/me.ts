@@ -9,6 +9,7 @@ import {
   FeaturedRoute,
   FeaturedRouteIds,
   Neighborhood,
+  PlanProduct,
   ProfileAnecdote,
 } from './profile';
 
@@ -48,6 +49,11 @@ export const Me = z.object({
   avatarUrl: HttpsUrl.nullable(),
   role: z.enum(taxonomies.userRoles),
   plan: z.enum(taxonomies.plans),
+  /** Subscription or pass bought in the store (D-116); null while free and for a gifted Premium. */
+  planProduct: PlanProduct.nullable(),
+  /** The subscription renews at `planExpiresAt`; false once cancelled in the store, or a pass. */
+  planWillRenew: z.boolean(),
+  /** Renewal of the subscription, or end of the pass or of the gift; null without an end. */
   planExpiresAt: z.iso.datetime().nullable(),
   isPublic: z.boolean(),
   /** Language chosen in Réglages › Langue; null follows the phone (D-062). */

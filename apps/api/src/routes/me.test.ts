@@ -50,11 +50,38 @@ describe('GET /v1/me', () => {
     expect(response.headers['cache-control']).toBe('no-store');
     const me = Me.parse(response.json());
     expect(me).toMatchObject({ email, firstName: 'Camille', role: 'user', plan: 'free' });
+    expect(me).toMatchObject({ planProduct: null, planWillRenew: false, planExpiresAt: null });
     expect(me.notificationPrefs).toEqual(defaultNotificationPrefs);
     expect(me.locale).toBeNull();
     expect(me.id).toBe((await userOf(uid))?.id);
     expect(response.body).not.toContain(uid);
   });
+
+  it.each([
+    ['an annual subscription that renews', 'store', 'annual', true],
+    ['a monthly subscription cancelled in the store', 'store', 'monthly', false],
+    ['a 7-day pass', 'store', 'pass_7d', false],
+    ['a Premium offered by the team, without a product', 'gift', null, false],
+  ] as const)(
+    'tells %s, with its renewal or its end',
+    async (_, planSource, planProduct, planWillRenew) => {
+      const { uid, headers } = signIn();
+      await app.inject({ url: '/v1/me', headers });
+      const planExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      await app.db
+        .update(users)
+        .set({ plan: 'premium', planSource, planProduct, planWillRenew, planExpiresAt })
+        .where(eq(users.firebaseUid, uid));
+
+      const me = Me.parse((await app.inject({ url: '/v1/me', headers })).json());
+      expect(me).toMatchObject({
+        plan: 'premium',
+        planProduct,
+        planWillRenew,
+        planExpiresAt: planExpiresAt.toISOString(),
+      });
+    },
+  );
 });
 
 describe('PATCH /v1/me', () => {
@@ -116,6 +143,8 @@ describe('PATCH /v1/me', () => {
     ['an empty update', {}],
     ['a role', { role: 'admin' }],
     ['a plan', { plan: 'premium' }],
+    ['a product of the store', { planProduct: 'annual' }],
+    ['a renewal', { planWillRenew: true }],
     ['an e-mail', { email: 'other.me@example.com' }],
     ['a first name with markup', { firstName: '<script>x</script>' }],
     ['an avatar URL', { avatarUrl: 'https://example.com/avatar.jpg' }],

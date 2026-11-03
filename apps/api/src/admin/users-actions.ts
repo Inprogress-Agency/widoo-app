@@ -149,7 +149,8 @@ const hasActiveStorePremium = (target: Target, now: Date) =>
 /**
  * Offers Premium until a date, or one Premium route (support, `source = gift`, without the
  * store). An account whose store plan runs keeps it: the gift would shorten what it paid for (409).
- * Past the date, the plan ends by itself (`canAccessRoute`).
+ * The product of an ended store plan goes: a gift has none (D-116). Past the date, the plan ends
+ * by itself (`canAccessRoute`).
  */
 export async function giftUser(
   db: Db,
@@ -172,15 +173,33 @@ export async function giftUser(
       }
       await tx
         .update(users)
-        .set({ plan: 'premium', planSource: 'gift', planExpiresAt: until })
+        .set({
+          plan: 'premium',
+          planSource: 'gift',
+          planProduct: null,
+          planWillRenew: false,
+          planExpiresAt: until,
+        })
         .where(eq(users.id, targetId));
       await recordAdminAction(tx, {
         actorId: actor.id,
         action: 'user.gift_premium',
         targetType: 'user',
         targetId,
-        before: { plan: target.plan, source: target.planSource, expiresAt: target.planExpiresAt },
-        after: { plan: 'premium', source: 'gift', expiresAt: until },
+        before: {
+          plan: target.plan,
+          source: target.planSource,
+          product: target.planProduct,
+          willRenew: target.planWillRenew,
+          expiresAt: target.planExpiresAt,
+        },
+        after: {
+          plan: 'premium',
+          source: 'gift',
+          product: null,
+          willRenew: false,
+          expiresAt: until,
+        },
       });
       return;
     }

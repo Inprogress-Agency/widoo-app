@@ -33,6 +33,8 @@ const me: Me = {
   avatarUrl: null,
   role: 'user',
   plan: 'free',
+  planProduct: null,
+  planWillRenew: false,
   planExpiresAt: null,
   isPublic: true,
   locale: null,

@@ -1,4 +1,11 @@
-import { AdminUserDetail, AdminUsers, ApiError, MyDataExport, type UserRole } from '@widoo/shared';
+import {
+  AdminUserDetail,
+  AdminUsers,
+  ApiError,
+  Me,
+  MyDataExport,
+  type UserRole,
+} from '@widoo/shared';
 import { asc, eq, inArray } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { canAccessRoute } from '../access/route-access';
@@ -108,7 +115,34 @@ describe('GET /v1/admin/users', () => {
     expect(byName.items.map((item) => item.id)).toContain(target.id);
     const byId = AdminUsers.parse((await get(moderator.headers, `/users?q=${target.id}`)).json());
     expect(byId.items.map((item) => item.id)).toEqual([target.id]);
-    expect(byId.items[0]).toMatchObject({ role: 'user', plan: { plan: 'free', source: 'store' } });
+    expect(byId.items[0]).toMatchObject({
+      role: 'user',
+      plan: { plan: 'free', source: 'store', product: null, willRenew: false },
+    });
+  });
+
+  it('names the product of a store plan and its renewal, in the list and on the card', async () => {
+    const moderator = await signIn('moderator');
+    const target = await signIn('user');
+    const renewal = new Date(Date.now() + 365 * day);
+    await app.db
+      .update(users)
+      .set({ plan: 'premium', planProduct: 'annual', planWillRenew: true, planExpiresAt: renewal })
+      .where(eq(users.id, target.id));
+    const plan = {
+      plan: 'premium',
+      source: 'store',
+      product: 'annual',
+      willRenew: true,
+      expiresAt: renewal.toISOString(),
+    };
+
+    const list = AdminUsers.parse((await get(moderator.headers, `/users?q=${target.id}`)).json());
+    expect(list.items[0]?.plan).toEqual(plan);
+    const card = AdminUserDetail.parse(
+      (await get(moderator.headers, `/users/${target.id}`)).json(),
+    );
+    expect(card.plan).toEqual(plan);
   });
 
   it('does not take % or _ as jokers', async () => {
@@ -276,6 +310,8 @@ describe('offering Premium', () => {
     expect(AdminUserDetail.parse(response.json()).plan).toEqual({
       plan: 'premium',
       source: 'gift',
+      product: null,
+      willRenew: false,
       expiresAt: until.toISOString(),
     });
     const [row] = await app.db.select().from(users).where(eq(users.id, target.id));
@@ -317,17 +353,37 @@ describe('offering Premium', () => {
     expect(ApiError.parse(running.json()).details).toEqual({ reason: 'active_store_plan' });
   });
 
-  it('replaces a store plan that has ended', async () => {
+  it('replaces a store plan that has ended, and drops its product', async () => {
     const admin = await signIn('admin');
     const target = await signIn('user');
     await app.db
       .update(users)
-      .set({ plan: 'premium', planExpiresAt: new Date(Date.now() - day) })
+      .set({ plan: 'premium', planProduct: 'pass_7d', planExpiresAt: new Date(Date.now() - day) })
       .where(eq(users.id, target.id));
+    const until = new Date(Date.now() + day);
     const response = await send('POST', admin.headers, `/users/${target.id}/gift`, {
-      until: new Date(Date.now() + day).toISOString(),
+      until: until.toISOString(),
     });
     expect(response.statusCode).toBe(200);
+    expect(AdminUserDetail.parse(response.json()).plan).toMatchObject({
+      source: 'gift',
+      product: null,
+      willRenew: false,
+    });
+    // The app reads a Premium without a product as offered (D-116).
+    const me = Me.parse((await app.inject({ url: '/v1/me', headers: target.headers })).json());
+    expect(me).toMatchObject({
+      plan: 'premium',
+      planProduct: null,
+      planWillRenew: false,
+      planExpiresAt: until.toISOString(),
+    });
+    const [entry] = await app.db
+      .select()
+      .from(adminActions)
+      .where(eq(adminActions.targetId, target.id));
+    expect(entry?.before).toMatchObject({ source: 'store', product: 'pass_7d', willRenew: false });
+    expect(entry?.after).toMatchObject({ source: 'gift', product: null, willRenew: false });
   });
 
   it('offers one Premium route, once', async () => {
