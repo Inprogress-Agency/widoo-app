@@ -1,20 +1,26 @@
 /**
  * A confirmation or a report of a place by a visitor (wiki Creation-et-Moderation › Vérification
  * communautaire, API › Lieux, D-036, D-056, D-057): from an outing of their own, weighted by where
- * they were, counted once per place over 7 days, ignored after rejected reports.
+ * they were, counted once per place over 7 days, ignored after rejected reports; and its effect on
+ * the place in the same transaction: verified again at the threshold of confirmations, flagged at
+ * that of reports.
  */
 import {
+  afterConfirmation,
   areSignalsIgnored,
   daysBefore,
+  flagsPlace,
   placeSignalDailyLimit,
   placeSignalWeightOf,
   PlannedRouteSnapshot,
   type PlaceSignalBody,
   type PlaceSignalContext,
+  type SignalReason,
   type StepPlaceSignal,
   type VerificationRules,
+  type VerificationStatus,
 } from '@widoo/shared';
-import { and, count, eq, gt, inArray, isNotNull, max, or } from 'drizzle-orm';
+import { and, count, eq, gt, inArray, isNotNull, max, or, sql } from 'drizzle-orm';
 import type { Db, Tx } from '../db/client';
 import { placeSignals, places, plannedRoutes, plannedSteps, users } from '../db/schema';
 import { bodyValidationError, httpError } from '../errors';
@@ -33,6 +39,8 @@ export interface NewPlaceSignal {
   context: PlaceSignalContext;
   signal: StepPlaceSignal;
 }
+
+type LockedPlace = { status: VerificationStatus; verifiedAt: Date | null; confirmations: number };
 
 async function hasSignalSince(tx: Tx, { userId, placeId }: NewPlaceSignal, since: Date) {
   const [found] = await tx
@@ -65,10 +73,93 @@ async function signalsSince(tx: Tx, userId: string, since: Date) {
   return row?.count ?? 0;
 }
 
+/** Distinct accounts with an open report of `reason` since `since`, of a weight above zero. */
+async function concordantAccounts(tx: Tx, placeId: string, reason: SignalReason, since: Date) {
+  const [row] = await tx
+    .select({ accounts: sql<number>`count(distinct ${placeSignals.userId})::int` })
+    .from(placeSignals)
+    .where(
+      and(
+        eq(placeSignals.placeId, placeId),
+        eq(placeSignals.reason, reason),
+        eq(placeSignals.status, 'open'),
+        gt(placeSignals.weight, 0),
+        gt(placeSignals.createdAt, since),
+      ),
+    );
+  return row?.accounts ?? 0;
+}
+
+/** Whether the account completed a Go whose snapshot goes through the place. */
+async function hasCompletedGoThere(tx: Tx, userId: string, placeId: string) {
+  const throughPlace = JSON.stringify({ steps: [{ place: { id: placeId } }] });
+  const [found] = await tx
+    .select({ id: plannedRoutes.id })
+    .from(plannedRoutes)
+    .where(
+      and(
+        eq(plannedRoutes.userId, userId),
+        eq(plannedRoutes.status, 'completed'),
+        sql`${plannedRoutes.routeRevisionSnapshot} @> ${throughPlace}::jsonb`,
+      ),
+    )
+    .limit(1);
+  return found !== undefined;
+}
+
+/** A counted report: `flagged` at the threshold of Creation-et-Moderation › État d'un lieu. */
+async function reportPlace(
+  tx: Tx,
+  { userId, placeId, signal }: NewPlaceSignal,
+  place: LockedPlace,
+  rules: VerificationRules,
+  now: Date,
+) {
+  const reason = signal.reason;
+  if (!reason) throw new Error('A report without reason');
+  // A verification after a report answers it: only the later reports agree with each other.
+  const windowStart = daysBefore(now, rules.reportWindowDays);
+  const since = place.verifiedAt && place.verifiedAt > windowStart ? place.verifiedAt : windowStart;
+  const report = {
+    reason,
+    concordantAccounts: await concordantAccounts(tx, placeId, reason, since),
+    hasCompletedGoThere:
+      reason === 'closed_permanently' && (await hasCompletedGoThere(tx, userId, placeId)),
+  };
+  if (flagsPlace(report, place.status, rules)) {
+    await tx.update(places).set({ verificationStatus: 'flagged' }).where(eq(places.id, placeId));
+  }
+}
+
+/** A counted confirmation: verified again at the threshold, `verified_at` now. */
+async function confirmPlace(
+  tx: Tx,
+  placeId: string,
+  place: LockedPlace,
+  weight: number,
+  rules: VerificationRules,
+  now: Date,
+) {
+  const next = afterConfirmation(
+    { status: place.status, confirmationsSinceVerified: place.confirmations },
+    weight,
+    rules,
+  );
+  if (!next) return;
+  await tx
+    .update(places)
+    .set({
+      verificationStatus: next.status,
+      confirmationsSinceVerified: next.confirmationsSinceVerified,
+      ...(next.isVerified && { verifiedAt: now }),
+    })
+    .where(eq(places.id, placeId));
+}
+
 /**
  * Records a signal whose outing the caller checked, in its transaction: the account is locked
  * first, so that two signals sent at once (the offline queue of the app sending again) wait for
- * each other, then the place.
+ * each other, then the place, whose counters change.
  */
 export async function recordPlaceSignal(
   tx: Tx,
@@ -82,7 +173,11 @@ export async function recordPlaceSignal(
     .where(eq(users.id, input.userId))
     .for('no key update');
   const [place] = await tx
-    .select({ status: places.verificationStatus })
+    .select({
+      status: places.verificationStatus,
+      verifiedAt: places.verifiedAt,
+      confirmations: places.confirmationsSinceVerified,
+    })
     .from(places)
     .where(eq(places.id, input.placeId))
     .for('update');
@@ -109,6 +204,11 @@ export async function recordPlaceSignal(
     contextPlannedRouteId: input.plannedRouteId,
     createdAt: now,
   });
+  if (input.signal.kind === 'confirm') {
+    await confirmPlace(tx, input.placeId, place, weight, rules, now);
+  } else {
+    await reportPlace(tx, input, place, rules, now);
+  }
   return 'counted';
 }
 

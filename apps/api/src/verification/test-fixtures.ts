@@ -2,7 +2,7 @@ import { PlannedRoute } from '@widoo/shared';
 import { asc, eq } from 'drizzle-orm';
 import type { buildApp } from '../app';
 import type { TestTokenVerifier } from '../auth/test-verifier';
-import { placeSignals } from '../db/schema';
+import { placeSignals, places } from '../db/schema';
 import { plannedFixtures, saturdayTen } from '../planned/test-fixtures';
 
 type App = Awaited<ReturnType<typeof buildApp>>;
@@ -68,6 +68,18 @@ export function signalFixtures(app: () => App, verifier: TestTokenVerifier) {
   const signal = (headers: Headers, placeId: string | undefined, payload: object) =>
     app().inject({ method: 'POST', url: `/v1/places/${placeId}/signals`, headers, payload });
 
+  /** The place as stored, after `values` when given. */
+  async function placeOf(
+    placeId: string | undefined,
+    values?: Partial<typeof places.$inferInsert>,
+  ) {
+    const ofPlace = eq(places.id, placeId ?? '');
+    if (values) await app().db.update(places).set(values).where(ofPlace);
+    const [place] = await app().db.select().from(places).where(ofPlace);
+    if (!place) throw new Error('Place missing');
+    return place;
+  }
+
   const signalsOn = (placeId: string | undefined) =>
     app()
       .db.select()
@@ -75,5 +87,14 @@ export function signalFixtures(app: () => App, verifier: TestTokenVerifier) {
       .where(eq(placeSignals.placeId, placeId ?? ''))
       .orderBy(asc(placeSignals.createdAt));
 
-  return { visitor, route, outing, patch, signal, signalsOn, cleanUp: planned.cleanUp };
+  return {
+    visitor,
+    route,
+    outing,
+    patch,
+    signal,
+    placeOf,
+    signalsOn,
+    cleanUp: planned.cleanUp,
+  };
 }
