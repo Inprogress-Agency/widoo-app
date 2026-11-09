@@ -12,14 +12,14 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@firebase/app": "^0.16.4",
-    "@firebase/auth": "^1.13.8",
+    "@firebase/app": "^0.16.5",
+    "@firebase/auth": "^1.13.9",
     "@phosphor-icons/react": "^2.1.10",
     "@widoo/api-client": "workspace:*",
     "@widoo/shared": "workspace:*",
     "@widoo/ui": "workspace:*",
-    "mapbox-gl": "^3.34.1",
-    "next": "16.4.3",
+    "mapbox-gl": "^3.34.2",
+    "next": "16.4.5",
     "qrcode": "^1.5.4",
     "react": "19.2.3",
     "react-dom": "19.2.3",
